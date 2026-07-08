@@ -1,0 +1,368 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>UniManage — Rapports & Analytics</title>
+  <link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=Inter:wght@300;400;500;600&display=swap" rel="stylesheet"/>
+  <style>
+    :root{--navy:#0D1B2A;--blue:#1A56DB;--sky:#3B82F6;--gold:#F59E0B;--light:#F0F4FF;--white:#FFFFFF;--gray:#64748B;--border:#E2E8F0;--success:#10B981;--danger:#EF4444;--purple:#8B5CF6;--sidebar-w:240px;--topbar-h:64px;}
+    *{margin:0;padding:0;box-sizing:border-box;}
+    body{font-family:'Inter',sans-serif;background:#F8FAFC;color:var(--navy);display:flex;min-height:100vh;}
+    .sidebar{width:var(--sidebar-w);background:var(--navy);display:flex;flex-direction:column;position:fixed;top:0;left:0;bottom:0;z-index:100;overflow-y:auto;}
+    .sidebar-brand{padding:1.25rem;border-bottom:1px solid rgba(255,255,255,0.08);}
+    .brand-name{font-family:'Syne',sans-serif;font-weight:800;font-size:1.2rem;color:white;}
+    .brand-name span{color:var(--sky);}
+    .brand-sub{font-size:.72rem;color:rgba(255,255,255,0.35);margin-top:.2rem;}
+    .sidebar-nav{padding:.75rem 0;flex:1;}
+    .nav-group{font-size:.62rem;font-weight:700;letter-spacing:.1em;text-transform:uppercase;color:rgba(255,255,255,0.25);padding:.6rem 1.1rem .3rem;}
+    .nav-it{display:flex;align-items:center;gap:.65rem;padding:.6rem 1.1rem;cursor:pointer;color:rgba(255,255,255,0.5);font-size:.83rem;font-weight:500;transition:all .2s;border-left:2px solid transparent;}
+    .nav-it:hover{color:white;background:rgba(255,255,255,0.05);}
+    .nav-it.active{color:white;background:rgba(26,86,219,0.2);border-left-color:var(--sky);}
+    .sidebar-footer{padding:1rem 1.1rem;border-top:1px solid rgba(255,255,255,0.07);}
+    .btn-back-dash{width:100%;padding:.6rem;border-radius:8px;background:rgba(255,255,255,0.07);color:rgba(255,255,255,0.6);border:none;font-size:.8rem;font-weight:600;cursor:pointer;}
+    .btn-back-dash:hover{background:rgba(255,255,255,0.12);color:white;}
+    .topbar{position:fixed;top:0;left:var(--sidebar-w);right:0;height:var(--topbar-h);background:white;border-bottom:1px solid var(--border);display:flex;align-items:center;justify-content:space-between;padding:0 1.75rem;z-index:50;}
+    .page-title{font-family:'Syne',sans-serif;font-weight:700;font-size:1.05rem;}
+    .breadcrumb{font-size:.78rem;color:var(--gray);}
+    .topbar-right{display:flex;align-items:center;gap:.75rem;}
+    .btn-primary{display:flex;align-items:center;gap:.4rem;padding:.55rem 1.1rem;border-radius:9px;background:var(--blue);color:white;font-size:.83rem;font-weight:600;cursor:pointer;border:none;transition:all .2s;}
+    .btn-primary:hover{background:#1344b8;}
+    .btn-outline{padding:.55rem 1.1rem;border-radius:9px;border:1.5px solid var(--border);background:white;color:var(--navy);font-size:.83rem;font-weight:600;cursor:pointer;transition:all .2s;}
+    .btn-outline:hover{border-color:var(--blue);color:var(--blue);}
+    .main{margin-left:var(--sidebar-w);padding-top:var(--topbar-h);flex:1;}
+    .content{padding:1.75rem;}
+    .page{display:none;}
+    .page.active{display:block;animation:fadeIn .3s ease;}
+    @keyframes fadeIn{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:translateY(0)}}
+    .kpi-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:1.1rem;margin-bottom:1.5rem;}
+    .kpi-card{background:white;border:1px solid var(--border);border-radius:12px;padding:1.1rem 1.25rem;transition:all .2s;}
+    .kpi-card:hover{box-shadow:0 4px 16px rgba(0,0,0,0.07);transform:translateY(-2px);}
+    .kpi-icon{width:42px;height:42px;border-radius:10px;display:flex;align-items:center;justify-content:center;font-size:1.1rem;margin-bottom:.65rem;}
+    .kpi-value{font-family:'Syne',sans-serif;font-size:1.6rem;font-weight:800;line-height:1;}
+    .kpi-label{font-size:.75rem;color:var(--gray);margin-top:.25rem;}
+    .kpi-trend{font-size:.72rem;font-weight:600;margin-top:.25rem;}
+    .trend-up{color:var(--success);}
+    .trend-down{color:var(--danger);}
+    .dash-grid{display:grid;grid-template-columns:1fr 1fr;gap:1.25rem;margin-bottom:1.5rem;}
+    .dash-grid-3{display:grid;grid-template-columns:2fr 1fr;gap:1.25rem;margin-bottom:1.5rem;}
+    .card{background:white;border:1px solid var(--border);border-radius:14px;overflow:hidden;margin-bottom:1.25rem;}
+    .card-header{display:flex;align-items:center;justify-content:space-between;padding:1rem 1.25rem;border-bottom:1px solid var(--border);}
+    .card-title{font-family:'Syne',sans-serif;font-weight:700;font-size:.92rem;}
+    .card-body{padding:1.1rem 1.25rem;}
+    .card-action{font-size:.8rem;color:var(--blue);font-weight:600;cursor:pointer;background:none;border:none;}
+    .badge{display:inline-block;padding:.22rem .7rem;border-radius:100px;font-size:.7rem;font-weight:600;}
+    .badge-success{background:rgba(16,185,129,0.1);color:var(--success);}
+    .badge-blue{background:rgba(26,86,219,0.1);color:var(--blue);}
+    .badge-gold{background:rgba(245,158,11,0.1);color:var(--gold);}
+    .badge-danger{background:rgba(239,68,68,0.1);color:var(--danger);}
+    .data-table{width:100%;border-collapse:collapse;}
+    .data-table th{text-align:left;padding:.65rem 1rem;font-size:.72rem;font-weight:600;color:var(--gray);text-transform:uppercase;letter-spacing:.05em;background:#F8FAFC;border-bottom:1px solid var(--border);}
+    .data-table td{padding:.72rem 1rem;font-size:.83rem;border-bottom:1px solid var(--border);}
+    .data-table tr:last-child td{border:none;}
+    .data-table tr:hover td{background:#F8FAFC;}
+    .progress-bar{height:7px;background:var(--border);border-radius:100px;overflow:hidden;}
+    .progress-fill{height:100%;border-radius:100px;transition:width .8s ease;}
+    /* Bar chart */
+    .bar-chart{display:flex;align-items:flex-end;gap:.6rem;height:150px;padding-bottom:.5rem;}
+    .bar-col{display:flex;flex-direction:column;align-items:center;gap:.35rem;flex:1;}
+    .bar-fill{width:100%;border-radius:6px 6px 0 0;min-height:4px;transition:height .6s;}
+    .bar-label{font-size:.68rem;color:var(--gray);text-align:center;}
+    .bar-val{font-size:.68rem;font-weight:600;color:var(--navy);}
+    /* Line chart SVG */
+    .line-chart-wrap{width:100%;overflow:hidden;position:relative;}
+    /* Donut */
+    .donut-wrap{display:flex;align-items:center;gap:1.5rem;}
+    .donut-legend{display:flex;flex-direction:column;gap:.55rem;}
+    .legend-item{display:flex;align-items:center;gap:.5rem;font-size:.8rem;}
+    .legend-dot{width:10px;height:10px;border-radius:50%;flex-shrink:0;}
+    /* Report cards */
+    .report-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(260px,1fr));gap:1rem;}
+    .report-card{background:white;border:1px solid var(--border);border-radius:12px;padding:1.25rem;cursor:pointer;transition:all .2s;}
+    .report-card:hover{border-color:var(--blue);box-shadow:0 4px 16px rgba(26,86,219,0.1);transform:translateY(-2px);}
+    .report-icon{font-size:2rem;margin-bottom:.75rem;}
+    .report-name{font-family:'Syne',sans-serif;font-weight:700;font-size:.9rem;margin-bottom:.25rem;}
+    .report-desc{font-size:.78rem;color:var(--gray);line-height:1.6;margin-bottom:.85rem;}
+    .report-actions{display:flex;gap:.5rem;}
+    .btn-sm{padding:.35rem .85rem;border-radius:7px;font-size:.75rem;font-weight:600;cursor:pointer;transition:all .2s;}
+    .btn-sm-blue{background:var(--blue);color:white;border:none;}
+    .btn-sm-blue:hover{background:#1344b8;}
+    .btn-sm-outline{background:white;color:var(--navy);border:1px solid var(--border);}
+    .btn-sm-outline:hover{border-color:var(--blue);color:var(--blue);}
+    /* Filters */
+    .filter-bar{display:flex;gap:.75rem;flex-wrap:wrap;margin-bottom:1.25rem;align-items:center;}
+    .filter-select{padding:.5rem .85rem;border:1.5px solid var(--border);border-radius:8px;font-size:.83rem;font-family:'Inter',sans-serif;outline:none;cursor:pointer;background:white;}
+    .filter-select:focus{border-color:var(--blue);}
+    /* Metric highlight */
+    .metric-highlight{background:linear-gradient(135deg,var(--navy),#1a2d42);border-radius:14px;padding:1.5rem;color:white;margin-bottom:1.5rem;}
+    .metric-highlight-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:1.25rem;}
+    .metric-item{text-align:center;}
+    .metric-val{font-family:'Syne',sans-serif;font-weight:800;font-size:1.6rem;}
+    .metric-label{font-size:.72rem;color:rgba(255,255,255,0.45);margin-top:.25rem;}
+    .metric-change{font-size:.72rem;font-weight:600;margin-top:.2rem;}
+    .metric-up{color:var(--success);}
+    .metric-down{color:var(--danger);}
+    /* Toast */
+    .toast{position:fixed;bottom:1.5rem;right:1.5rem;background:var(--navy);color:white;padding:.75rem 1.25rem;border-radius:10px;font-size:.83rem;font-weight:500;box-shadow:0 8px 24px rgba(0,0,0,0.2);z-index:9999;opacity:0;transform:translateY(16px);transition:all .3s;pointer-events:none;}
+    .toast.show{opacity:1;transform:translateY(0);}
+    @media(max-width:1100px){.kpi-grid{grid-template-columns:repeat(2,1fr);}.dash-grid,.dash-grid-3{grid-template-columns:1fr;}.metric-highlight-grid{grid-template-columns:repeat(2,1fr);}}
+  </style>
+</head>
+<body>
+
+<aside class="sidebar">
+  <div class="sidebar-brand">
+    <div class="brand-name">Uni<span>Manage</span></div>
+    <div class="brand-sub">📊 Rapports & Analytics</div>
+  </div>
+  <nav class="sidebar-nav">
+    <div class="nav-group">Tableaux de bord</div>
+    <div class="nav-it active" onclick="showPage('overview')">📊 Vue générale</div>
+    <div class="nav-it" onclick="showPage('academique')">🎓 Académique</div>
+    <div class="nav-it" onclick="showPage('financier')">💰 Financier</div>
+    <div class="nav-it" onclick="showPage('rh')">👥 Ressources humaines</div>
+    <div class="nav-group">Rapports</div>
+    <div class="nav-it" onclick="showPage('rapports')">📄 Bibliothèque rapports</div>
+    <div class="nav-it" onclick="showPage('exports')">⬇️ Exports PDF/Excel</div>
+    <div class="nav-group">Analyse</div>
+    <div class="nav-it" onclick="showPage('comparatif')">📈 Comparatif annuel</div>
+    <div class="nav-it" onclick="showPage('predictions')">🔮 Prédictions</div>
+  </nav>
+  <div class="sidebar-footer">
+    <button class="btn-back-dash" onclick="window.location.href='dashboard.html'">← Tableau de bord</button>
+  </div>
+</aside>
+
+<header class="topbar">
+  <div>
+    <div class="page-title" id="pageTitle">Vue générale</div>
+    <div class="breadcrumb">Université de Lomé · Année 2024–2025</div>
+  </div>
+  <div class="topbar-right">
+    <select class="filter-select" style="font-size:.82rem">
+      <option>Année 2024–2025</option>
+      <option>Année 2023–2024</option>
+      <option>Année 2022–2023</option>
+    </select>
+    <button class="btn-outline" onclick="showToast('📊 Rapport PDF exporté !')">⬇ PDF</button>
+    <button class="btn-outline" onclick="showToast('📊 Export Excel généré !')">⬇ Excel</button>
+    <button class="btn-primary" onclick="showPage('rapports')">+ Nouveau rapport</button>
+  </div>
+</header>
+
+<main class="main"><div class="content">
+
+  <!-- ══ VUE GÉNÉRALE ══ -->
+  <div class="page active" id="page-overview">
+    <!-- Metric highlight -->
+    <div class="metric-highlight">
+      <div style="font-size:.78rem;color:rgba(255,255,255,0.4);margin-bottom:.75rem;font-weight:600;text-transform:uppercase;letter-spacing:.06em">Indicateurs clés — Année académique 2024–2025</div>
+      <div class="metric-highlight-grid">
+        <div class="metric-item"><div class="metric-val">1 248</div><div class="metric-label">Étudiants inscrits</div><div class="metric-change metric-up">▲ +8% vs 2024</div></div>
+        <div class="metric-item"><div class="metric-val">94%</div><div class="metric-label">Taux de réussite</div><div class="metric-change metric-up">▲ +2pts</div></div>
+        <div class="metric-item"><div class="metric-val">48.2M</div><div class="metric-label">FCFA encaissés</div><div class="metric-change metric-up">▲ +12%</div></div>
+        <div class="metric-item"><div class="metric-val">87</div><div class="metric-label">Enseignants actifs</div><div class="metric-change metric-up">▲ +5 nouveaux</div></div>
+      </div>
+    </div>
+
+    <div class="kpi-grid">
+      <div class="kpi-card"><div class="kpi-icon" style="background:rgba(26,86,219,0.1)">📚</div><div class="kpi-value" style="color:var(--blue)">4</div><div class="kpi-label">Départements actifs</div><div class="kpi-trend trend-up">12 filières · 186 matières</div></div>
+      <div class="kpi-card"><div class="kpi-icon" style="background:rgba(16,185,129,0.1)">🎓</div><div class="kpi-value" style="color:var(--success)">1 046</div><div class="kpi-label">Étudiants admis S1</div><div class="kpi-trend trend-up">▲ 84% de réussite</div></div>
+      <div class="kpi-card"><div class="kpi-icon" style="background:rgba(245,158,11,0.1)">⏱️</div><div class="kpi-value" style="color:var(--gold)">3 744h</div><div class="kpi-label">Heures cours dispensées</div><div class="kpi-trend trend-up">▲ +320h vs 2024</div></div>
+      <div class="kpi-card"><div class="kpi-icon" style="background:rgba(139,92,246,0.1)">📄</div><div class="kpi-value" style="color:var(--purple)">2 847</div><div class="kpi-label">Documents générés</div><div class="kpi-trend trend-up">Relevés + Convocations</div></div>
+    </div>
+
+    <div class="dash-grid-3">
+      <!-- Inscriptions par mois -->
+      <div class="card">
+        <div class="card-header"><div class="card-title">📈 Évolution des inscriptions</div><button class="card-action" onclick="showToast('📊 Graphique exporté')">Export</button></div>
+        <div class="card-body">
+          <div class="bar-chart">
+            <div class="bar-col"><div class="bar-fill" style="height:45%;background:linear-gradient(180deg,var(--blue),var(--sky))"></div><div class="bar-label">Oct</div><div class="bar-val">180</div></div>
+            <div class="bar-col"><div class="bar-fill" style="height:65%;background:linear-gradient(180deg,var(--blue),var(--sky))"></div><div class="bar-label">Nov</div><div class="bar-val">256</div></div>
+            <div class="bar-col"><div class="bar-fill" style="height:100%;background:linear-gradient(180deg,var(--blue),var(--sky))"></div><div class="bar-label">Déc</div><div class="bar-val">398</div></div>
+            <div class="bar-col"><div class="bar-fill" style="height:80%;background:linear-gradient(180deg,var(--gold),#fbbf24)"></div><div class="bar-label">Jan</div><div class="bar-val">248</div></div>
+            <div class="bar-col"><div class="bar-fill" style="height:55%;background:linear-gradient(180deg,var(--gold),#fbbf24)"></div><div class="bar-label">Fév</div><div class="bar-val">104</div></div>
+            <div class="bar-col"><div class="bar-fill" style="height:30%;background:linear-gradient(180deg,var(--success),#34d399)"></div><div class="bar-label">Mar</div><div class="bar-val">62</div></div>
+          </div>
+          <div style="display:flex;gap:1rem;margin-top:.85rem;font-size:.75rem">
+            <span style="display:flex;align-items:center;gap:.35rem"><span style="width:10px;height:10px;border-radius:2px;background:var(--blue);display:inline-block"></span>Sem. 1</span>
+            <span style="display:flex;align-items:center;gap:.35rem"><span style="width:10px;height:10px;border-radius:2px;background:var(--gold);display:inline-block"></span>Sem. 2</span>
+            <span style="display:flex;align-items:center;gap:.35rem"><span style="width:10px;height:10px;border-radius:2px;background:var(--success);display:inline-block"></span>Inscription tardive</span>
+          </div>
+        </div>
+      </div>
+      <!-- Répartition depts -->
+      <div class="card">
+        <div class="card-header"><div class="card-title">Répartition départements</div></div>
+        <div class="card-body">
+          <div class="donut-wrap">
+            <svg width="110" height="110" viewBox="0 0 100 100">
+              <circle cx="50" cy="50" r="38" fill="none" stroke="#E2E8F0" stroke-width="16"/>
+              <circle cx="50" cy="50" r="38" fill="none" stroke="#1A56DB" stroke-width="16" stroke-dasharray="96 143" stroke-dashoffset="0" stroke-linecap="round" transform="rotate(-90 50 50)"/>
+              <circle cx="50" cy="50" r="38" fill="none" stroke="#F59E0B" stroke-width="16" stroke-dasharray="72 143" stroke-dashoffset="-96" stroke-linecap="round" transform="rotate(-90 50 50)"/>
+              <circle cx="50" cy="50" r="38" fill="none" stroke="#10B981" stroke-width="16" stroke-dasharray="56 143" stroke-dashoffset="-168" stroke-linecap="round" transform="rotate(-90 50 50)"/>
+              <circle cx="50" cy="50" r="38" fill="none" stroke="#8B5CF6" stroke-width="16" stroke-dasharray="39 143" stroke-dashoffset="-224" stroke-linecap="round" transform="rotate(-90 50 50)"/>
+              <text x="50" y="54" text-anchor="middle" font-size="11" font-weight="800" fill="#0D1B2A" font-family="Syne">1248</text>
+            </svg>
+            <div class="donut-legend">
+              <div class="legend-item"><div class="legend-dot" style="background:var(--blue)"></div>Gestion & Finance <strong>401</strong></div>
+              <div class="legend-item"><div class="legend-dot" style="background:var(--gold)"></div>Informatique <strong>312</strong></div>
+              <div class="legend-item"><div class="legend-dot" style="background:var(--success)"></div>Droit <strong>287</strong></div>
+              <div class="legend-item"><div class="legend-dot" style="background:var(--purple)"></div>Sciences <strong>248</strong></div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Taux réussite + finances -->
+    <div class="dash-grid">
+      <div class="card">
+        <div class="card-header"><div class="card-title">🎓 Taux de réussite par département</div></div>
+        <div class="card-body" style="display:flex;flex-direction:column;gap:1rem">
+          <div><div style="display:flex;justify-content:space-between;font-size:.83rem;margin-bottom:.35rem"><span>💻 Informatique</span><span style="font-weight:700;color:var(--success)">94%</span></div><div class="progress-bar"><div class="progress-fill" style="width:94%;background:linear-gradient(90deg,var(--success),#34d399)"></div></div></div>
+          <div><div style="display:flex;justify-content:space-between;font-size:.83rem;margin-bottom:.35rem"><span>⚖️ Droit</span><span style="font-weight:700;color:var(--blue)">91%</span></div><div class="progress-bar"><div class="progress-fill" style="width:91%;background:linear-gradient(90deg,var(--blue),var(--sky))"></div></div></div>
+          <div><div style="display:flex;justify-content:space-between;font-size:.83rem;margin-bottom:.35rem"><span>📊 Gestion</span><span style="font-weight:700;color:var(--gold)">88%</span></div><div class="progress-bar"><div class="progress-fill" style="width:88%;background:linear-gradient(90deg,var(--gold),#fbbf24)"></div></div></div>
+          <div><div style="display:flex;justify-content:space-between;font-size:.83rem;margin-bottom:.35rem"><span>🔬 Sciences</span><span style="font-weight:700;color:var(--danger)">82%</span></div><div class="progress-bar"><div class="progress-fill" style="width:82%;background:linear-gradient(90deg,var(--danger),#f87171)"></div></div></div>
+          <div style="padding:.75rem;background:var(--light);border-radius:9px;font-size:.82rem;text-align:center"><strong>Moyenne globale : 89%</strong> · Objectif 2025 : 92%</div>
+        </div>
+      </div>
+      <div class="card">
+        <div class="card-header"><div class="card-title">💰 Performance financière</div></div>
+        <div class="card-body">
+          <div class="bar-chart">
+            <div class="bar-col"><div class="bar-fill" style="height:60%;background:linear-gradient(180deg,var(--success),#34d399)"></div><div class="bar-label">Oct</div><div class="bar-val">8.2M</div></div>
+            <div class="bar-col"><div class="bar-fill" style="height:80%;background:linear-gradient(180deg,var(--success),#34d399)"></div><div class="bar-label">Nov</div><div class="bar-val">12.1M</div></div>
+            <div class="bar-col"><div class="bar-fill" style="height:100%;background:linear-gradient(180deg,var(--gold),#fbbf24)"></div><div class="bar-label">Déc</div><div class="bar-val">14.8M</div></div>
+            <div class="bar-col"><div class="bar-fill" style="height:88%;background:linear-gradient(180deg,var(--success),#34d399)"></div><div class="bar-label">Jan</div><div class="bar-val">13.1M</div></div>
+          </div>
+          <div style="margin-top:.85rem;padding:.75rem;background:rgba(16,185,129,0.07);border-radius:9px;display:flex;justify-content:space-between;align-items:center">
+            <div><div style="font-size:.72rem;color:var(--gray)">Total encaissé</div><div style="font-family:'Syne',sans-serif;font-weight:800;font-size:1.1rem;color:var(--success)">48.2M FCFA</div></div>
+            <div style="text-align:right"><div style="font-size:.72rem;color:var(--gray)">Objectif annuel</div><div style="font-family:'Syne',sans-serif;font-weight:800;font-size:1.1rem;color:var(--blue)">60M FCFA</div></div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ══ ACADÉMIQUE ══ -->
+  <div class="page" id="page-academique">
+    <div style="margin-bottom:1.5rem"><h2 style="font-family:'Syne',sans-serif;font-weight:800;font-size:1.3rem">🎓 Rapport Académique</h2></div>
+    <div class="filter-bar">
+      <select class="filter-select"><option>Tous les départements</option><option>Informatique</option><option>Gestion</option><option>Droit</option></select>
+      <select class="filter-select"><option>Tous les niveaux</option><option>L1</option><option>L2</option><option>L3</option><option>M1</option><option>M2</option></select>
+      <select class="filter-select"><option>Semestre 1</option><option>Semestre 2</option><option>Année complète</option></select>
+      <button class="btn-primary" onclick="showToast('🔄 Rapport actualisé')">Actualiser</button>
+    </div>
+    <div class="card">
+      <div class="card-header"><div class="card-title">Résultats par filière</div><button class="card-action" onclick="showToast('📊 Export Excel généré !')">⬇ Excel</button></div>
+      <table class="data-table">
+        <thead><tr><th>Département</th><th>Filière</th><th>Inscrits</th><th>Admis</th><th>Ajournés</th><th>Moy. Générale</th><th>Taux réussite</th><th>Tendance</th></tr></thead>
+        <tbody>
+          <tr><td>Informatique</td><td>Génie Logiciel</td><td>142</td><td>128</td><td>14</td><td><strong>13.4/20</strong></td><td><span style="color:var(--success);font-weight:700">90%</span></td><td style="color:var(--success)">▲ +3%</td></tr>
+          <tr><td>Informatique</td><td>Réseaux & Sécurité</td><td>88</td><td>80</td><td>8</td><td><strong>12.8/20</strong></td><td><span style="color:var(--success);font-weight:700">91%</span></td><td style="color:var(--success)">▲ +1%</td></tr>
+          <tr><td>Gestion</td><td>Finance d'entreprise</td><td>198</td><td>172</td><td>26</td><td><strong>12.1/20</strong></td><td><span style="color:var(--gold);font-weight:700">87%</span></td><td style="color:var(--danger)">▼ -2%</td></tr>
+          <tr><td>Gestion</td><td>Comptabilité</td><td>124</td><td>112</td><td>12</td><td><strong>13.0/20</strong></td><td><span style="color:var(--success);font-weight:700">90%</span></td><td style="color:var(--success)">▲ +4%</td></tr>
+          <tr><td>Droit</td><td>Droit Privé</td><td>156</td><td>140</td><td>16</td><td><strong>12.5/20</strong></td><td><span style="color:var(--gold);font-weight:700">90%</span></td><td style="color:var(--success)">▲ +2%</td></tr>
+          <tr><td>Sciences</td><td>Génie Civil</td><td>86</td><td>68</td><td>18</td><td><strong>11.2/20</strong></td><td><span style="color:var(--danger);font-weight:700">79%</span></td><td style="color:var(--danger)">▼ -4%</td></tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+  <!-- ══ FINANCIER ══ -->
+  <div class="page" id="page-financier">
+    <div style="margin-bottom:1.5rem"><h2 style="font-family:'Syne',sans-serif;font-weight:800;font-size:1.3rem">💰 Rapport Financier</h2></div>
+    <div class="kpi-grid">
+      <div class="kpi-card"><div class="kpi-icon" style="background:rgba(16,185,129,0.1)">💵</div><div class="kpi-value" style="color:var(--success)">48.2M</div><div class="kpi-label">FCFA encaissés</div><div class="kpi-trend trend-up">▲ +12% vs 2024</div></div>
+      <div class="kpi-card"><div class="kpi-icon" style="background:rgba(239,68,68,0.1)">⏳</div><div class="kpi-value" style="color:var(--danger)">8.6M</div><div class="kpi-label">FCFA impayés</div><div class="kpi-trend trend-down">187 étudiants</div></div>
+      <div class="kpi-card"><div class="kpi-icon" style="background:rgba(245,158,11,0.1)">👨‍🏫</div><div class="kpi-value" style="color:var(--gold)">12.1M</div><div class="kpi-label">FCFA salaires payés</div><div class="kpi-trend trend-up">Janvier soldé</div></div>
+      <div class="kpi-card"><div class="kpi-icon" style="background:rgba(26,86,219,0.1)">📈</div><div class="kpi-value" style="color:var(--blue)">36.1M</div><div class="kpi-label">FCFA bénéfice net</div><div class="kpi-trend trend-up">▲ Marge 75%</div></div>
+    </div>
+    <div class="card">
+      <div class="card-header"><div class="card-title">Détail des recettes par département</div><button class="card-action" onclick="showToast('📊 Rapport financier PDF exporté !')">⬇ PDF</button></div>
+      <table class="data-table">
+        <thead><tr><th>Département</th><th>Étudiants</th><th>Frais/étudiant</th><th>Attendu</th><th>Encaissé</th><th>Impayé</th><th>Taux recouvrement</th></tr></thead>
+        <tbody>
+          <tr><td><strong>Informatique</strong></td><td>287</td><td>250 000 FCFA</td><td>71.75M</td><td><span style="color:var(--success);font-weight:700">65.3M</span></td><td style="color:var(--danger)">6.45M</td><td><span class="badge badge-success">91%</span></td></tr>
+          <tr><td><strong>Gestion</strong></td><td>401</td><td>220 000 FCFA</td><td>88.22M</td><td><span style="color:var(--gold);font-weight:700">68.8M</span></td><td style="color:var(--danger)">19.4M</td><td><span class="badge badge-gold">78%</span></td></tr>
+          <tr><td><strong>Droit</strong></td><td>312</td><td>200 000 FCFA</td><td>62.4M</td><td><span style="color:var(--success);font-weight:700">53M</span></td><td style="color:var(--danger)">9.4M</td><td><span class="badge badge-success">85%</span></td></tr>
+          <tr><td><strong>Sciences</strong></td><td>248</td><td>230 000 FCFA</td><td>57.04M</td><td><span style="color:var(--danger);font-weight:700">35.4M</span></td><td style="color:var(--danger)">21.6M</td><td><span class="badge badge-danger">62%</span></td></tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+  <!-- ══ RH ══ -->
+  <div class="page" id="page-rh">
+    <div style="margin-bottom:1.5rem"><h2 style="font-family:'Syne',sans-serif;font-weight:800;font-size:1.3rem">👥 Rapport Ressources Humaines</h2></div>
+    <div class="kpi-grid">
+      <div class="kpi-card"><div class="kpi-icon" style="background:rgba(26,86,219,0.1)">👨‍🏫</div><div class="kpi-value" style="color:var(--blue)">87</div><div class="kpi-label">Enseignants actifs</div></div>
+      <div class="kpi-card"><div class="kpi-icon" style="background:rgba(245,158,11,0.1)">📋</div><div class="kpi-value" style="color:var(--gold)">12</div><div class="kpi-label">Vacataires</div></div>
+      <div class="kpi-card"><div class="kpi-icon" style="background:rgba(16,185,129,0.1)">⏱️</div><div class="kpi-value" style="color:var(--success)">3 744h</div><div class="kpi-label">Heures dispensées</div></div>
+      <div class="kpi-card"><div class="kpi-icon" style="background:rgba(139,92,246,0.1)">💰</div><div class="kpi-value" style="color:var(--purple)">8 450</div><div class="kpi-label">FCFA taux horaire moy.</div></div>
+    </div>
+    <div class="card">
+      <div class="card-header"><div class="card-title">Performance enseignants</div><button class="card-action" onclick="showToast('📊 Rapport RH exporté !')">⬇ Export</button></div>
+      <table class="data-table">
+        <thead><tr><th>Enseignant</th><th>Département</th><th>Heures eff.</th><th>Heures contrat</th><th>Taux</th><th>Évaluation étudiants</th><th>Salaire</th></tr></thead>
+        <tbody>
+          <tr><td><strong>Dr. Kodjo Mensah</strong></td><td>Informatique</td><td>120h</td><td>180h</td><td><span class="badge badge-gold">67%</span></td><td>⭐⭐⭐⭐⭐ 4.8/5</td><td><strong>960K FCFA</strong></td></tr>
+          <tr><td><strong>Prof. Akosua Komi</strong></td><td>Informatique</td><td>64h</td><td>80h</td><td><span class="badge badge-success">80%</span></td><td>⭐⭐⭐⭐ 4.5/5</td><td><strong>640K FCFA</strong></td></tr>
+          <tr><td><strong>Dr. Yawa Agbo</strong></td><td>Sciences</td><td>145h</td><td>180h</td><td><span class="badge badge-success">81%</span></td><td>⭐⭐⭐⭐ 4.2/5</td><td><strong>1.09M FCFA</strong></td></tr>
+          <tr><td><strong>Dr. Nana Dodzi</strong></td><td>Gestion</td><td>160h</td><td>180h</td><td><span class="badge badge-success">89%</span></td><td>⭐⭐⭐⭐⭐ 4.7/5</td><td><strong>1.36M FCFA</strong></td></tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+  <!-- ══ RAPPORTS ══ -->
+  <div class="page" id="page-rapports">
+    <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:1.5rem">
+      <div><h2 style="font-family:'Syne',sans-serif;font-weight:800;font-size:1.3rem">📄 Bibliothèque de rapports</h2></div>
+    </div>
+    <div class="report-grid">
+      <div class="report-card"><div class="report-icon">📊</div><div class="report-name">Rapport annuel d'activité</div><div class="report-desc">Synthèse complète de l'année académique — inscriptions, résultats, finances, RH.</div><div class="report-actions"><button class="btn-sm btn-sm-blue" onclick="showToast('📥 Rapport annuel PDF généré !')">📥 PDF</button><button class="btn-sm btn-sm-outline" onclick="showToast('📊 Export Excel généré !')">⬇ Excel</button></div></div>
+      <div class="report-card"><div class="report-icon">🎓</div><div class="report-name">Rapport de résultats S1</div><div class="report-desc">Taux de réussite, moyennes, mentions et statistiques de la session 1.</div><div class="report-actions"><button class="btn-sm btn-sm-blue" onclick="showToast('📥 Rapport S1 PDF généré !')">📥 PDF</button><button class="btn-sm btn-sm-outline" onclick="showToast('📊 Export Excel généré !')">⬇ Excel</button></div></div>
+      <div class="report-card"><div class="report-icon">💰</div><div class="report-name">Rapport financier mensuel</div><div class="report-desc">Encaissements, impayés, dépenses et balance financière de janvier 2025.</div><div class="report-actions"><button class="btn-sm btn-sm-blue" onclick="showToast('📥 Rapport financier PDF généré !')">📥 PDF</button><button class="btn-sm btn-sm-outline" onclick="showToast('📊 Export Excel généré !')">⬇ Excel</button></div></div>
+      <div class="report-card"><div class="report-icon">👨‍🏫</div><div class="report-name">Rapport RH enseignants</div><div class="report-desc">Volume horaire, évaluations, salaires et performance du corps enseignant.</div><div class="report-actions"><button class="btn-sm btn-sm-blue" onclick="showToast('📥 Rapport RH PDF généré !')">📥 PDF</button><button class="btn-sm btn-sm-outline" onclick="showToast('📊 Export Excel généré !')">⬇ Excel</button></div></div>
+      <div class="report-card"><div class="report-icon">📋</div><div class="report-name">Palmarès promotions</div><div class="report-desc">Classement complet par département et filière avec mentions et distinctions.</div><div class="report-actions"><button class="btn-sm btn-sm-blue" onclick="showToast('📥 Palmarès PDF généré !')">📥 PDF</button><button class="btn-sm btn-sm-outline" onclick="showToast('📊 Export Excel généré !')">⬇ Excel</button></div></div>
+      <div class="report-card"><div class="report-icon">📈</div><div class="report-name">Rapport comparatif 3 ans</div><div class="report-desc">Comparaison des indicateurs sur 3 années académiques consécutives.</div><div class="report-actions"><button class="btn-sm btn-sm-blue" onclick="showToast('📥 Comparatif PDF généré !')">📥 PDF</button><button class="btn-sm btn-sm-outline" onclick="showToast('📊 Export Excel généré !')">⬇ Excel</button></div></div>
+      <div class="report-card"><div class="report-icon">🔮</div><div class="report-name">Prévisions S2 2025</div><div class="report-desc">Projections d'inscriptions, taux de réussite estimés et objectifs financiers.</div><div class="report-actions"><button class="btn-sm btn-sm-blue" onclick="showToast('📥 Prévisions PDF générées !')">📥 PDF</button><button class="btn-sm btn-sm-outline" onclick="showToast('📊 Export Excel généré !')">⬇ Excel</button></div></div>
+      <div class="report-card" style="border:2px dashed var(--border);display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center;cursor:pointer" onclick="showToast('✏️ Créateur de rapport personnalisé ouvert')"><div style="font-size:2rem;margin-bottom:.5rem">+</div><div style="font-size:.85rem;font-weight:600;color:var(--gray)">Rapport personnalisé</div><div style="font-size:.75rem;color:var(--gray);margin-top:.25rem">Créer un rapport sur mesure</div></div>
+    </div>
+  </div>
+
+  <!-- ══ EXPORTS ══ -->
+  <div class="page" id="page-exports">
+    <div style="margin-bottom:1.5rem"><h2 style="font-family:'Syne',sans-serif;font-weight:800;font-size:1.3rem">⬇️ Exports PDF / Excel</h2></div>
+    <div class="card">
+      <div class="card-header"><div class="card-title">Exports disponibles</div></div>
+      <table class="data-table">
+        <thead><tr><th>Rapport</th><th>Type</th><th>Dernière génération</th><th>Taille</th><th>Actions</th></tr></thead>
+        <tbody>
+          <tr><td><strong>Rapport annuel 2024–2025</strong></td><td><span class="badge badge-danger">PDF</span></td><td>22 Jan 2025 · 09h32</td><td>2.4 MB</td><td><button class="card-action" onclick="showToast('📥 Téléchargement démarré')">⬇ Télécharger</button></td></tr>
+          <tr><td><strong>Données étudiants S1</strong></td><td><span class="badge badge-success">Excel</span></td><td>22 Jan 2025 · 08h15</td><td>856 KB</td><td><button class="card-action" onclick="showToast('📥 Téléchargement démarré')">⬇ Télécharger</button></td></tr>
+          <tr><td><strong>Rapport financier Jan 2025</strong></td><td><span class="badge badge-danger">PDF</span></td><td>20 Jan 2025 · 17h00</td><td>1.1 MB</td><td><button class="card-action" onclick="showToast('📥 Téléchargement démarré')">⬇ Télécharger</button></td></tr>
+          <tr><td><strong>Liste enseignants + salaires</strong></td><td><span class="badge badge-success">Excel</span></td><td>19 Jan 2025 · 14h22</td><td>412 KB</td><td><button class="card-action" onclick="showToast('📥 Téléchargement démarré')">⬇ Télécharger</button></td></tr>
+          <tr><td><strong>PV délibération Info L2</strong></td><td><span class="badge badge-danger">PDF</span></td><td>22 Jan 2025 · 12h35</td><td>680 KB</td><td><button class="card-action" onclick="showToast('📥 Téléchargement démarré')">⬇ Télécharger</button></td></tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+  <!-- COMPARATIF + PRÉDICTIONS -->
+  <div class="page" id="page-comparatif"><div style="margin-bottom:1.5rem"><h2 style="font-family:'Syne',sans-serif;font-weight:800;font-size:1.3rem">📈 Comparatif annuel</h2></div><div class="card"><div class="card-body" style="padding:2rem;text-align:center"><div style="font-size:3rem;margin-bottom:1rem">📈</div><div style="font-family:'Syne',sans-serif;font-weight:700;font-size:1.1rem">Comparaison 2022 · 2023 · 2024 · 2025</div><div style="color:var(--gray);margin-top:.5rem;font-size:.85rem">Les données comparatives sont disponibles dans le rapport annuel PDF</div><br/><button class="btn-primary" onclick="showToast('📊 Rapport comparatif exporté !')">📥 Télécharger le comparatif</button></div></div></div>
+  <div class="page" id="page-predictions"><div style="margin-bottom:1.5rem"><h2 style="font-family:'Syne',sans-serif;font-weight:800;font-size:1.3rem">🔮 Prédictions & Projections</h2></div><div class="card"><div class="card-body"><div style="padding:1.25rem;background:rgba(139,92,246,0.07);border-radius:12px;border:1px solid rgba(139,92,246,0.15);margin-bottom:1rem"><div style="font-family:'Syne',sans-serif;font-weight:700;margin-bottom:.5rem;color:var(--purple)">🔮 Prévisions Semestre 2 — 2025</div><div style="display:grid;grid-template-columns:repeat(3,1fr);gap:1rem"><div style="text-align:center"><div style="font-family:'Syne',sans-serif;font-weight:800;font-size:1.3rem;color:var(--purple)">1 350</div><div style="font-size:.75rem;color:var(--gray)">Inscrits estimés S2</div></div><div style="text-align:center"><div style="font-family:'Syne',sans-serif;font-weight:800;font-size:1.3rem;color:var(--success)">92%</div><div style="font-size:.75rem;color:var(--gray)">Taux réussite projeté</div></div><div style="text-align:center"><div style="font-family:'Syne',sans-serif;font-weight:800;font-size:1.3rem;color:var(--gold)">55M</div><div style="font-size:.75rem;color:var(--gray)">FCFA revenus projetés</div></div></div></div></div></div></div>
+
+</div></main>
+<div class="toast" id="toast"></div>
+<script>
+  const pages=['overview','academique','financier','rh','rapports','exports','comparatif','predictions'];
+  const titles={'overview':'Vue générale','academique':'Rapport Académique','financier':'Rapport Financier','rh':'Rapport RH','rapports':'Bibliothèque de rapports','exports':'Exports PDF/Excel','comparatif':'Comparatif annuel','predictions':'Prédictions'};
+  function showPage(id){pages.forEach(p=>{document.getElementById('page-'+p)?.classList.remove('active');document.querySelectorAll('.nav-it').forEach(n=>{if(n.getAttribute('onclick')?.includes("'"+p+"'"))n.classList.remove('active');});});document.getElementById('page-'+id)?.classList.add('active');document.querySelectorAll('.nav-it').forEach(n=>{if(n.getAttribute('onclick')?.includes("'"+id+"'"))n.classList.add('active');});document.getElementById('pageTitle').textContent=titles[id]||id;}
+  let tt;function showToast(msg){const t=document.getElementById('toast');t.textContent=msg;t.classList.add('show');clearTimeout(tt);tt=setTimeout(()=>t.classList.remove('show'),3000);}
+</script>
+</body>
+</html>

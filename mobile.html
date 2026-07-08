@@ -1,0 +1,764 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no"/>
+  <title>UniManage Mobile</title>
+  <link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=Inter:wght@300;400;500;600&display=swap" rel="stylesheet"/>
+  <style>
+    :root{
+      --navy:#0D1B2A;--blue:#1A56DB;--sky:#3B82F6;
+      --gold:#F59E0B;--light:#F0F4FF;--white:#FFFFFF;
+      --gray:#64748B;--border:#E2E8F0;
+      --success:#10B981;--danger:#EF4444;--purple:#8B5CF6;
+      --bottom-h:70px;--header-h:60px;
+    }
+    *{margin:0;padding:0;box-sizing:border-box;-webkit-tap-highlight-color:transparent;}
+    html,body{height:100%;overflow:hidden;}
+    body{font-family:'Inter',sans-serif;background:#F8FAFC;color:var(--navy);display:flex;flex-direction:column;max-width:430px;margin:0 auto;position:relative;}
+
+    /* ── HEADER ── */
+    .app-header{
+      height:var(--header-h);background:white;
+      border-bottom:1px solid var(--border);
+      display:flex;align-items:center;justify-content:space-between;
+      padding:0 1rem;flex-shrink:0;
+      position:sticky;top:0;z-index:100;
+    }
+    .header-logo{font-family:'Syne',sans-serif;font-weight:800;font-size:1.1rem;color:var(--navy);}
+    .header-logo span{color:var(--blue);}
+    .header-right{display:flex;align-items:center;gap:.6rem;}
+    .header-btn{width:36px;height:36px;border-radius:10px;border:1px solid var(--border);background:white;display:flex;align-items:center;justify-content:center;font-size:1rem;cursor:pointer;position:relative;transition:all .2s;}
+    .header-btn:active{background:var(--light);}
+    .notif-dot{position:absolute;top:5px;right:5px;width:7px;height:7px;border-radius:50%;background:var(--danger);border:1.5px solid white;}
+    .role-badge{padding:.3rem .75rem;border-radius:100px;font-size:.72rem;font-weight:700;}
+
+    /* ── SCROLL AREA ── */
+    .scroll-area{
+      flex:1;overflow-y:auto;overflow-x:hidden;
+      padding-bottom:calc(var(--bottom-h) + 1rem);
+      -webkit-overflow-scrolling:touch;
+    }
+    .scroll-area::-webkit-scrollbar{display:none;}
+
+    /* ── SCREENS ── */
+    .screen{display:none;padding:1rem;}
+    .screen.active{display:block;animation:fadeUp .25s ease;}
+    @keyframes fadeUp{from{opacity:0;transform:translateY(10px)}to{opacity:1;transform:translateY(0)}}
+
+    /* ── BOTTOM NAV ── */
+    .bottom-nav{
+      height:var(--bottom-h);background:white;
+      border-top:1px solid var(--border);
+      display:flex;align-items:center;justify-content:space-around;
+      padding:0 .5rem;flex-shrink:0;
+      position:sticky;bottom:0;
+    }
+    .nav-tab{
+      display:flex;flex-direction:column;align-items:center;gap:.25rem;
+      padding:.5rem .75rem;border-radius:12px;cursor:pointer;
+      transition:all .2s;flex:1;max-width:80px;
+      border:none;background:transparent;
+    }
+    .nav-tab.active{background:var(--light);}
+    .nav-tab:active{background:var(--light);}
+    .nav-icon{font-size:1.3rem;line-height:1;position:relative;}
+    .nav-icon .badge{
+      position:absolute;top:-4px;right:-8px;
+      background:var(--danger);color:white;
+      font-size:.55rem;font-weight:700;
+      padding:.1rem .3rem;border-radius:100px;
+      min-width:14px;text-align:center;
+    }
+    .nav-label{font-size:.62rem;font-weight:600;color:var(--gray);}
+    .nav-tab.active .nav-label{color:var(--blue);}
+
+    /* ── CARDS ── */
+    .card{background:white;border:1px solid var(--border);border-radius:14px;overflow:hidden;margin-bottom:1rem;}
+    .card-header{display:flex;align-items:center;justify-content:space-between;padding:.85rem 1rem;border-bottom:1px solid var(--border);}
+    .card-title{font-family:'Syne',sans-serif;font-weight:700;font-size:.88rem;}
+    .card-body{padding:.85rem 1rem;}
+    .card-action{font-size:.78rem;color:var(--blue);font-weight:600;cursor:pointer;background:none;border:none;}
+
+    /* ── KPI ROW ── */
+    .kpi-row{display:grid;grid-template-columns:repeat(2,1fr);gap:.75rem;margin-bottom:1rem;}
+    .kpi-card{background:white;border:1px solid var(--border);border-radius:12px;padding:.9rem 1rem;}
+    .kpi-icon{font-size:1.3rem;margin-bottom:.4rem;}
+    .kpi-val{font-family:'Syne',sans-serif;font-weight:800;font-size:1.4rem;line-height:1;}
+    .kpi-label{font-size:.7rem;color:var(--gray);margin-top:.2rem;}
+    .kpi-trend{font-size:.68rem;font-weight:600;margin-top:.2rem;}
+    .up{color:var(--success);}
+    .down{color:var(--danger);}
+
+    /* ── WELCOME BANNER ── */
+    .welcome-banner{
+      background:linear-gradient(135deg,var(--navy) 0%,#1a3a5c 100%);
+      border-radius:16px;padding:1.25rem;margin-bottom:1rem;
+      color:white;position:relative;overflow:hidden;
+    }
+    .welcome-banner::before{
+      content:'';position:absolute;top:-40px;right:-40px;
+      width:120px;height:120px;border-radius:50%;
+      background:rgba(255,255,255,0.05);
+    }
+    .welcome-banner::after{
+      content:'';position:absolute;bottom:-30px;right:20px;
+      width:80px;height:80px;border-radius:50%;
+      background:rgba(26,86,219,0.2);
+    }
+    .welcome-time{font-size:.72rem;color:rgba(255,255,255,0.5);margin-bottom:.3rem;}
+    .welcome-name{font-family:'Syne',sans-serif;font-weight:800;font-size:1.2rem;}
+    .welcome-role{font-size:.78rem;color:rgba(255,255,255,0.6);margin-top:.2rem;}
+    .welcome-stats{display:flex;gap:1.5rem;margin-top:1rem;}
+    .welcome-stat-val{font-family:'Syne',sans-serif;font-weight:800;font-size:1.1rem;}
+    .welcome-stat-label{font-size:.65rem;color:rgba(255,255,255,0.45);margin-top:.1rem;}
+
+    /* ── QUICK ACTIONS ── */
+    .quick-actions{display:grid;grid-template-columns:repeat(4,1fr);gap:.6rem;margin-bottom:1rem;}
+    .quick-btn{
+      display:flex;flex-direction:column;align-items:center;gap:.35rem;
+      padding:.75rem .5rem;background:white;border:1px solid var(--border);
+      border-radius:12px;cursor:pointer;transition:all .2s;
+    }
+    .quick-btn:active{background:var(--light);transform:scale(.95);}
+    .quick-btn-icon{font-size:1.4rem;}
+    .quick-btn-label{font-size:.65rem;font-weight:600;color:var(--gray);text-align:center;line-height:1.3;}
+
+    /* ── LIST ITEMS ── */
+    .list-item{
+      display:flex;align-items:center;gap:.85rem;
+      padding:.85rem 0;border-bottom:1px solid var(--border);
+      cursor:pointer;transition:background .15s;
+    }
+    .list-item:last-child{border:none;}
+    .list-item:active{background:var(--light);margin:0 -1rem;padding:.85rem 1rem;}
+    .list-avatar{
+      width:40px;height:40px;border-radius:11px;
+      display:flex;align-items:center;justify-content:center;
+      font-size:.85rem;font-weight:700;color:white;flex-shrink:0;
+    }
+    .list-body{flex:1;min-width:0;}
+    .list-title{font-size:.85rem;font-weight:600;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+    .list-sub{font-size:.72rem;color:var(--gray);margin-top:.15rem;}
+    .list-right{display:flex;flex-direction:column;align-items:flex-end;gap:.25rem;flex-shrink:0;}
+    .list-time{font-size:.68rem;color:var(--gray);}
+
+    /* ── BADGE ── */
+    .badge{display:inline-block;padding:.2rem .6rem;border-radius:100px;font-size:.68rem;font-weight:600;}
+    .badge-success{background:rgba(16,185,129,0.1);color:var(--success);}
+    .badge-blue{background:rgba(26,86,219,0.1);color:var(--blue);}
+    .badge-gold{background:rgba(245,158,11,0.1);color:var(--gold);}
+    .badge-danger{background:rgba(239,68,68,0.1);color:var(--danger);}
+    .badge-gray{background:rgba(100,116,139,0.1);color:var(--gray);}
+
+    /* ── PROGRESS ── */
+    .progress-bar{height:6px;background:var(--border);border-radius:100px;overflow:hidden;}
+    .progress-fill{height:100%;border-radius:100px;}
+
+    /* ── SCHEDULE ITEM ── */
+    .schedule-item{
+      display:flex;gap:.75rem;padding:.75rem;
+      border-radius:11px;margin-bottom:.6rem;cursor:pointer;
+      transition:all .2s;
+    }
+    .schedule-item:active{transform:scale(.98);}
+    .schedule-time{font-size:.7rem;font-weight:700;color:var(--gray);min-width:42px;padding-top:.15rem;}
+    .schedule-bar{width:3px;border-radius:2px;flex-shrink:0;}
+    .schedule-body{flex:1;}
+    .schedule-name{font-size:.83rem;font-weight:700;}
+    .schedule-sub{font-size:.7rem;color:var(--gray);margin-top:.15rem;}
+
+    /* ── NOTE CARD ── */
+    .note-card{
+      display:flex;align-items:center;justify-content:space-between;
+      padding:.7rem .85rem;background:#F8FAFC;border-radius:10px;
+      margin-bottom:.5rem;cursor:pointer;transition:all .2s;
+    }
+    .note-card:active{background:var(--light);}
+    .note-matiere{font-size:.83rem;font-weight:600;}
+    .note-val{font-family:'Syne',sans-serif;font-weight:800;font-size:1rem;}
+
+    /* ── PAYMENT ITEM ── */
+    .pay-card{
+      display:flex;align-items:center;justify-content:space-between;
+      padding:.85rem;background:white;border:1px solid var(--border);
+      border-radius:11px;margin-bottom:.6rem;
+    }
+    .pay-left{}
+    .pay-label{font-size:.83rem;font-weight:600;}
+    .pay-sub{font-size:.7rem;color:var(--gray);margin-top:.15rem;}
+    .pay-amount{font-family:'Syne',sans-serif;font-weight:800;font-size:1rem;}
+
+    /* ── BTN ── */
+    .btn-full{
+      width:100%;padding:.85rem;border-radius:12px;
+      font-size:.9rem;font-weight:700;cursor:pointer;
+      border:none;transition:all .2s;display:flex;
+      align-items:center;justify-content:center;gap:.5rem;
+    }
+    .btn-blue{background:var(--blue);color:white;}
+    .btn-blue:active{background:#1344b8;transform:scale(.98);}
+    .btn-gold{background:var(--gold);color:white;}
+    .btn-gold:active{background:#d97706;transform:scale(.98);}
+    .btn-outline-mobile{background:white;color:var(--navy);border:1.5px solid var(--border);}
+    .btn-outline-mobile:active{background:var(--light);}
+
+    /* ── SECTION TITLE ── */
+    .section-title{
+      font-family:'Syne',sans-serif;font-weight:700;font-size:.85rem;
+      color:var(--navy);margin-bottom:.75rem;
+      display:flex;align-items:center;justify-content:space-between;
+    }
+    .section-more{font-size:.72rem;color:var(--blue);font-weight:600;cursor:pointer;}
+
+    /* ── ROLE SWITCHER ── */
+    .role-switcher{
+      display:flex;gap:.5rem;margin-bottom:1rem;overflow-x:auto;
+      padding-bottom:.25rem;
+    }
+    .role-switcher::-webkit-scrollbar{display:none;}
+    .role-pill{
+      flex-shrink:0;padding:.4rem 1rem;border-radius:100px;
+      font-size:.75rem;font-weight:700;cursor:pointer;
+      border:1.5px solid var(--border);background:white;
+      color:var(--gray);transition:all .2s;white-space:nowrap;
+    }
+    .role-pill.active{background:var(--blue);color:white;border-color:var(--blue);}
+    .role-pill:active{transform:scale(.95);}
+
+    /* ── NOTIFICATION ITEM ── */
+    .notif-item{
+      display:flex;gap:.75rem;padding:.85rem;
+      border-radius:11px;margin-bottom:.6rem;cursor:pointer;
+      transition:all .2s;
+    }
+    .notif-item:active{transform:scale(.98);}
+    .notif-icon{width:40px;height:40px;border-radius:11px;display:flex;align-items:center;justify-content:center;font-size:1rem;flex-shrink:0;}
+    .notif-title{font-size:.83rem;font-weight:600;line-height:1.4;}
+    .notif-sub{font-size:.72rem;color:var(--gray);margin-top:.2rem;line-height:1.4;}
+    .notif-time{font-size:.65rem;color:var(--gray);margin-top:.3rem;}
+
+    /* ── PROFILE ── */
+    .profile-header{
+      background:linear-gradient(135deg,var(--navy),#1a3a5c);
+      border-radius:16px;padding:1.5rem;text-align:center;
+      margin-bottom:1rem;position:relative;overflow:hidden;
+    }
+    .profile-avatar{
+      width:72px;height:72px;border-radius:20px;
+      background:linear-gradient(135deg,var(--blue),var(--sky));
+      display:flex;align-items:center;justify-content:center;
+      font-size:1.6rem;font-weight:800;color:white;
+      margin:0 auto .75rem;border:3px solid rgba(255,255,255,0.2);
+    }
+    .profile-name{font-family:'Syne',sans-serif;font-weight:800;font-size:1.1rem;color:white;}
+    .profile-meta{font-size:.75rem;color:rgba(255,255,255,0.5);margin-top:.25rem;}
+    .profile-badges{display:flex;gap:.4rem;justify-content:center;margin-top:.75rem;flex-wrap:wrap;}
+    .profile-item{
+      display:flex;align-items:center;justify-content:space-between;
+      padding:.85rem .75rem;background:white;border-radius:11px;
+      margin-bottom:.5rem;cursor:pointer;transition:all .2s;
+    }
+    .profile-item:active{background:var(--light);}
+    .profile-item-left{display:flex;align-items:center;gap:.75rem;}
+    .profile-item-icon{width:36px;height:36px;border-radius:9px;display:flex;align-items:center;justify-content:center;font-size:.95rem;}
+    .profile-item-label{font-size:.85rem;font-weight:500;}
+    .profile-item-arrow{color:var(--gray);font-size:.85rem;}
+
+    /* ── CHAT MOBILE ── */
+    .chat-list-item{
+      display:flex;align-items:center;gap:.85rem;
+      padding:.85rem 0;border-bottom:1px solid var(--border);
+      cursor:pointer;
+    }
+    .chat-list-item:last-child{border:none;}
+    .chat-list-item:active{background:var(--light);margin:0 -1rem;padding:.85rem 1rem;}
+    .chat-av{width:44px;height:44px;border-radius:13px;display:flex;align-items:center;justify-content:center;font-size:.9rem;font-weight:700;color:white;flex-shrink:0;position:relative;}
+    .chat-online{position:absolute;bottom:-1px;right:-1px;width:11px;height:11px;border-radius:50%;background:var(--success);border:2px solid white;}
+    .chat-body{flex:1;min-width:0;}
+    .chat-name{font-size:.85rem;font-weight:600;}
+    .chat-preview{font-size:.72rem;color:var(--gray);margin-top:.15rem;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+    .chat-right{flex-shrink:0;text-align:right;}
+    .chat-time{font-size:.65rem;color:var(--gray);}
+    .chat-unread{width:18px;height:18px;border-radius:50%;background:var(--blue);color:white;font-size:.62rem;font-weight:700;display:flex;align-items:center;justify-content:center;margin-top:.3rem;margin-left:auto;}
+
+    /* ── PULL TO REFRESH ── */
+    .ptr-indicator{text-align:center;padding:.5rem;font-size:.75rem;color:var(--gray);display:none;}
+
+    /* ── TOAST ── */
+    .toast{
+      position:fixed;bottom:calc(var(--bottom-h) + 1rem);left:50%;
+      transform:translateX(-50%) translateY(20px);
+      background:var(--navy);color:white;
+      padding:.7rem 1.25rem;border-radius:100px;
+      font-size:.8rem;font-weight:500;
+      box-shadow:0 8px 24px rgba(0,0,0,0.2);
+      z-index:9999;opacity:0;transition:all .3s;
+      pointer-events:none;white-space:nowrap;
+    }
+    .toast.show{opacity:1;transform:translateX(-50%) translateY(0);}
+
+    /* ── FLOATING ACTION ── */
+    .fab{
+      position:fixed;bottom:calc(var(--bottom-h) + 1rem);right:1rem;
+      width:52px;height:52px;border-radius:50%;
+      background:var(--blue);color:white;
+      border:none;font-size:1.4rem;cursor:pointer;
+      display:flex;align-items:center;justify-content:center;
+      box-shadow:0 6px 20px rgba(26,86,219,0.4);
+      transition:all .2s;z-index:90;
+    }
+    .fab:active{transform:scale(.9);}
+
+    /* ── MODAL ── */
+    .modal-overlay{
+      position:fixed;inset:0;z-index:2000;
+      background:rgba(13,27,42,0.6);
+      display:none;align-items:flex-end;justify-content:center;
+    }
+    .modal-overlay.active{display:flex;}
+    .modal-sheet{
+      background:white;border-radius:20px 20px 0 0;
+      width:100%;max-height:85vh;overflow-y:auto;
+      padding:1.25rem;
+      animation:slideUp .3s ease;
+    }
+    @keyframes slideUp{from{transform:translateY(100%)}to{transform:translateY(0)}}
+    .modal-handle{width:40px;height:4px;border-radius:2px;background:var(--border);margin:0 auto 1rem;}
+    .modal-title{font-family:'Syne',sans-serif;font-weight:800;font-size:1rem;margin-bottom:1rem;}
+    .form-group{margin-bottom:.85rem;}
+    .form-group label{display:block;font-size:.78rem;font-weight:600;color:var(--navy);margin-bottom:.35rem;}
+    .form-input{width:100%;padding:.7rem .9rem;border-radius:10px;border:1.5px solid var(--border);font-size:.9rem;font-family:'Inter',sans-serif;color:var(--navy);outline:none;}
+    .form-input:focus{border-color:var(--blue);}
+    .form-select{width:100%;padding:.7rem .9rem;border-radius:10px;border:1.5px solid var(--border);font-size:.9rem;font-family:'Inter',sans-serif;outline:none;cursor:pointer;background:white;}
+  </style>
+</head>
+<body>
+
+<!-- HEADER -->
+<header class="app-header">
+  <div class="header-logo">Uni<span>Manage</span></div>
+  <div class="header-right">
+    <div id="currentRoleBadge" class="role-badge" style="background:rgba(26,86,219,0.1);color:var(--blue)">Admin</div>
+    <div class="header-btn" onclick="showToast('🔍 Recherche')">🔍</div>
+    <div class="header-btn" onclick="switchScreen('notifs')">
+      🔔<div class="notif-dot"></div>
+    </div>
+  </div>
+</header>
+
+<!-- SCROLL AREA -->
+<div class="scroll-area" id="scrollArea">
+
+  <!-- ══ SCREEN : ACCUEIL ══ -->
+  <div class="screen active" id="screen-home">
+    <!-- Role switcher -->
+    <div class="role-switcher">
+      <div class="role-pill active" id="role-admin" onclick="switchRole('admin')">🏛️ Admin</div>
+      <div class="role-pill" id="role-etudiant" onclick="switchRole('etudiant')">🎓 Étudiant</div>
+      <div class="role-pill" id="role-enseignant" onclick="switchRole('enseignant')">👨‍🏫 Enseignant</div>
+      <div class="role-pill" id="role-parent" onclick="switchRole('parent')">👨‍👩‍👧 Parent</div>
+    </div>
+
+    <!-- ADMIN VIEW -->
+    <div id="view-admin">
+      <!-- Welcome banner -->
+      <div class="welcome-banner">
+        <div class="welcome-time" id="welcomeTime">Bonsoir</div>
+        <div class="welcome-name">Dr. Amavi Kokou 👋</div>
+        <div class="welcome-role">Directeur Académique · Université de Lomé</div>
+        <div class="welcome-stats">
+          <div><div class="welcome-stat-val">1 248</div><div class="welcome-stat-label">Étudiants</div></div>
+          <div><div class="welcome-stat-val">94%</div><div class="welcome-stat-label">Réussite</div></div>
+          <div><div class="welcome-stat-val">48.2M</div><div class="welcome-stat-label">FCFA</div></div>
+        </div>
+      </div>
+
+      <!-- Quick actions -->
+      <div class="section-title">Actions rapides</div>
+      <div class="quick-actions">
+        <div class="quick-btn" onclick="switchScreen('etudiantsList')"><div class="quick-btn-icon">🎓</div><div class="quick-btn-label">Étudiants</div></div>
+        <div class="quick-btn" onclick="switchScreen('notes')"><div class="quick-btn-icon">📊</div><div class="quick-btn-label">Notes</div></div>
+        <div class="quick-btn" onclick="showToast('📅 Calendrier')"><div class="quick-btn-icon">📅</div><div class="quick-btn-label">Calendrier</div></div>
+        <div class="quick-btn" onclick="switchScreen('paiements')"><div class="quick-btn-icon">💳</div><div class="quick-btn-label">Paiements</div></div>
+        <div class="quick-btn" onclick="switchScreen('chat')"><div class="quick-btn-icon">💬</div><div class="quick-btn-label">Messages</div></div>
+        <div class="quick-btn" onclick="showToast('📢 Notifications')"><div class="quick-btn-icon">🔔</div><div class="quick-btn-label">Notifier</div></div>
+        <div class="quick-btn" onclick="showToast('📄 Rapports')"><div class="quick-btn-icon">📄</div><div class="quick-btn-label">Rapports</div></div>
+        <div class="quick-btn" onclick="showToast('⚙️ Paramètres')"><div class="quick-btn-icon">⚙️</div><div class="quick-btn-label">Paramètres</div></div>
+      </div>
+
+      <!-- KPIs -->
+      <div class="kpi-row">
+        <div class="kpi-card"><div class="kpi-icon">🎓</div><div class="kpi-val" style="color:var(--blue)">1 248</div><div class="kpi-label">Inscrits</div><div class="kpi-trend up">▲ +8%</div></div>
+        <div class="kpi-card"><div class="kpi-icon">✅</div><div class="kpi-val" style="color:var(--success)">94%</div><div class="kpi-label">Réussite</div><div class="kpi-trend up">▲ +2pts</div></div>
+        <div class="kpi-card"><div class="kpi-icon">💰</div><div class="kpi-val" style="color:var(--gold)">48.2M</div><div class="kpi-label">FCFA encaissés</div><div class="kpi-trend up">▲ +12%</div></div>
+        <div class="kpi-card"><div class="kpi-icon">⚠️</div><div class="kpi-val" style="color:var(--danger)">187</div><div class="kpi-label">Impayés</div><div class="kpi-trend down">▼ À relancer</div></div>
+      </div>
+
+      <!-- Activité récente -->
+      <div class="card">
+        <div class="card-header"><div class="card-title">🔔 Activité récente</div><button class="card-action">Tout voir</button></div>
+        <div class="card-body">
+          <div class="list-item" onclick="showToast('📊 Résultats S1 — Détails')">
+            <div class="list-avatar" style="background:rgba(16,185,129,0.15);color:var(--success)">✅</div>
+            <div class="list-body"><div class="list-title">Résultats S1 publiés</div><div class="list-sub">1 248 étudiants notifiés</div></div>
+            <div class="list-right"><div class="list-time">09h32</div></div>
+          </div>
+          <div class="list-item" onclick="showToast('💰 Paiement reçu')">
+            <div class="list-avatar" style="background:rgba(245,158,11,0.15);color:var(--gold)">💰</div>
+            <div class="list-body"><div class="list-title">Paiement reçu — Wave</div><div class="list-sub">250 000 FCFA · Kofi Adzoa</div></div>
+            <div class="list-right"><div class="list-time">08h15</div></div>
+          </div>
+          <div class="list-item" onclick="showToast('📝 Examen reporté')">
+            <div class="list-avatar" style="background:rgba(239,68,68,0.12);color:var(--danger)">📅</div>
+            <div class="list-body"><div class="list-title">Examen Réseaux reporté</div><div class="list-sub">04 Fév · Amph. A · 287 ét.</div></div>
+            <div class="list-right"><div class="list-time">Hier</div></div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Recouvrement -->
+      <div class="card">
+        <div class="card-header"><div class="card-title">💳 Recouvrement scolarité</div></div>
+        <div class="card-body">
+          <div style="margin-bottom:.85rem">
+            <div style="display:flex;justify-content:space-between;font-size:.83rem;margin-bottom:.35rem"><span>Informatique</span><span style="font-weight:700;color:var(--success)">91%</span></div>
+            <div class="progress-bar"><div class="progress-fill" style="width:91%;background:var(--success)"></div></div>
+          </div>
+          <div style="margin-bottom:.85rem">
+            <div style="display:flex;justify-content:space-between;font-size:.83rem;margin-bottom:.35rem"><span>Gestion</span><span style="font-weight:700;color:var(--gold)">78%</span></div>
+            <div class="progress-bar"><div class="progress-fill" style="width:78%;background:var(--gold)"></div></div>
+          </div>
+          <div>
+            <div style="display:flex;justify-content:space-between;font-size:.83rem;margin-bottom:.35rem"><span>Sciences</span><span style="font-weight:700;color:var(--danger)">62%</span></div>
+            <div class="progress-bar"><div class="progress-fill" style="width:62%;background:var(--danger)"></div></div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ÉTUDIANT VIEW -->
+    <div id="view-etudiant" style="display:none">
+      <div class="welcome-banner" style="background:linear-gradient(135deg,#1a3a5c,#0d2a45)">
+        <div class="welcome-time">Bonsoir</div>
+        <div class="welcome-name">Kofi Adzoa 🎓</div>
+        <div class="welcome-role">Informatique L2 · UL-2025-001</div>
+        <div class="welcome-stats">
+          <div><div class="welcome-stat-val">13.8</div><div class="welcome-stat-label">Moyenne</div></div>
+          <div><div class="welcome-stat-val">94%</div><div class="welcome-stat-label">Présence</div></div>
+          <div><div class="welcome-stat-val">2ème</div><div class="welcome-stat-label">Rang</div></div>
+        </div>
+      </div>
+      <div class="quick-actions">
+        <div class="quick-btn" onclick="switchScreen('notes')"><div class="quick-btn-icon">📊</div><div class="quick-btn-label">Mes notes</div></div>
+        <div class="quick-btn" onclick="showToast('📅 Emploi du temps')"><div class="quick-btn-icon">📅</div><div class="quick-btn-label">Planning</div></div>
+        <div class="quick-btn" onclick="switchScreen('paiements')"><div class="quick-btn-icon">💳</div><div class="quick-btn-label">Paiements</div></div>
+        <div class="quick-btn" onclick="showToast('📄 Mes documents')"><div class="quick-btn-icon">📄</div><div class="quick-btn-label">Documents</div></div>
+      </div>
+      <div class="card">
+        <div class="card-header"><div class="card-title">📅 Cours aujourd'hui</div></div>
+        <div class="card-body">
+          <div class="schedule-item" style="background:rgba(26,86,219,0.06)" onclick="showToast('📚 Algorithmique — Détails')"><div class="schedule-time">07h–09h</div><div class="schedule-bar" style="background:var(--blue)"></div><div class="schedule-body"><div class="schedule-name">Algorithmique Avancée</div><div class="schedule-sub">Dr. Mensah · Salle A1</div></div></div>
+          <div class="schedule-item" style="background:rgba(239,68,68,0.06)" onclick="showToast('📝 Examen blanc — Détails')"><div class="schedule-time">11h–13h</div><div class="schedule-bar" style="background:var(--danger)"></div><div class="schedule-body"><div class="schedule-name">🔴 Examen blanc</div><div class="schedule-sub">Amphithéâtre · Toutes matières</div></div></div>
+          <div class="schedule-item" style="background:rgba(245,158,11,0.06)" onclick="showToast('🔧 TP Réseaux — Détails')"><div class="schedule-time">14h–16h</div><div class="schedule-bar" style="background:var(--gold)"></div><div class="schedule-body"><div class="schedule-name">TP Réseaux</div><div class="schedule-sub">Prof. Dodzi · Labo Info</div></div></div>
+        </div>
+      </div>
+      <div class="card">
+        <div class="card-header"><div class="card-title">⚠️ Alerte</div></div>
+        <div style="padding:.85rem;background:rgba(239,68,68,0.06);border-left:3px solid var(--danger);font-size:.83rem;color:var(--danger)">
+          <strong>Sécurité Informatique : 8/20</strong><br/>
+          <span style="color:var(--gray)">Rattrapage le 10 Fév 2025 · 14h00 · Salle B2</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- ENSEIGNANT VIEW -->
+    <div id="view-enseignant" style="display:none">
+      <div class="welcome-banner" style="background:linear-gradient(135deg,#2d1a00,#4a2c00)">
+        <div class="welcome-time">Bonsoir</div>
+        <div class="welcome-name">Dr. Kodjo Mensah 👨‍🏫</div>
+        <div class="welcome-role">Algorithmique · Permanent · 120h / 180h</div>
+        <div class="welcome-stats">
+          <div><div class="welcome-stat-val">287</div><div class="welcome-stat-label">Étudiants</div></div>
+          <div><div class="welcome-stat-val">4</div><div class="welcome-stat-label">Matières</div></div>
+          <div><div class="welcome-stat-val">960K</div><div class="welcome-stat-label">FCFA/mois</div></div>
+        </div>
+      </div>
+      <div class="quick-actions">
+        <div class="quick-btn" onclick="showToast('📝 Saisie des notes')"><div class="quick-btn-icon">✏️</div><div class="quick-btn-label">Saisir notes</div></div>
+        <div class="quick-btn" onclick="showToast('📅 Mon planning')"><div class="quick-btn-icon">📅</div><div class="quick-btn-label">Planning</div></div>
+        <div class="quick-btn" onclick="showToast('📤 Déposer un cours')"><div class="quick-btn-icon">📤</div><div class="quick-btn-label">Déposer TD</div></div>
+        <div class="quick-btn" onclick="showToast('💰 Fiche de paie')"><div class="quick-btn-icon">💰</div><div class="quick-btn-label">Salaire</div></div>
+      </div>
+      <div class="card">
+        <div class="card-header"><div class="card-title">⏰ À faire aujourd'hui</div></div>
+        <div class="card-body">
+          <div class="list-item" onclick="showToast('📝 Saisie notes Algo L2')"><div class="list-avatar" style="background:rgba(239,68,68,0.1);color:var(--danger)">📝</div><div class="list-body"><div class="list-title">Saisir notes — Algo L2</div><div class="list-sub">287 étudiants · Deadline 25 Jan</div></div><span class="badge badge-danger">Urgent</span></div>
+          <div class="list-item" onclick="showToast('📤 Déposer TD6')"><div class="list-avatar" style="background:rgba(245,158,11,0.1);color:var(--gold)">📤</div><div class="list-body"><div class="list-title">Déposer TD 6 Algorithmique</div><div class="list-sub">Avant lundi 27 Jan</div></div><span class="badge badge-gold">Demain</span></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- PARENT VIEW -->
+    <div id="view-parent" style="display:none">
+      <div class="welcome-banner" style="background:linear-gradient(135deg,#1a0d2e,#2d1a4a)">
+        <div class="welcome-time">Bonsoir</div>
+        <div class="welcome-name">M. & Mme Adzoa 👨‍👩‍👧</div>
+        <div class="welcome-role">Parent de 2 étudiants</div>
+        <div class="welcome-stats">
+          <div><div class="welcome-stat-val">13.8</div><div class="welcome-stat-label">Moy. Kofi</div></div>
+          <div><div class="welcome-stat-val">94%</div><div class="welcome-stat-label">Présence</div></div>
+          <div><div class="welcome-stat-val">Payé</div><div class="welcome-stat-label">Scolarité</div></div>
+        </div>
+      </div>
+      <div class="quick-actions">
+        <div class="quick-btn" onclick="switchScreen('notes')"><div class="quick-btn-icon">📊</div><div class="quick-btn-label">Notes</div></div>
+        <div class="quick-btn" onclick="showToast('✅ Présences & Absences')"><div class="quick-btn-icon">✅</div><div class="quick-btn-label">Présences</div></div>
+        <div class="quick-btn" onclick="switchScreen('paiements')"><div class="quick-btn-icon">💳</div><div class="quick-btn-label">Paiements</div></div>
+        <div class="quick-btn" onclick="switchScreen('chat')"><div class="quick-btn-icon">💬</div><div class="quick-btn-label">Contact</div></div>
+      </div>
+      <div class="card">
+        <div class="card-header"><div class="card-title">👨‍👩‍👧 Mes enfants</div></div>
+        <div class="card-body">
+          <div class="list-item" onclick="showToast('🎓 Profil Kofi Adzoa')"><div class="list-avatar" style="background:linear-gradient(135deg,var(--blue),var(--sky))">KA</div><div class="list-body"><div class="list-title">Kofi Adzoa</div><div class="list-sub">Informatique L2 · Moy: 13.8/20</div></div><span class="badge badge-success">Admis</span></div>
+          <div class="list-item" onclick="showToast('🎓 Profil Ama Adzoa')"><div class="list-avatar" style="background:linear-gradient(135deg,var(--success),#34d399)">AA</div><div class="list-body"><div class="list-title">Ama Adzoa</div><div class="list-sub">Gestion L1 · Moy: 11.2/20</div></div><span class="badge badge-gold">Passable</span></div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ══ SCREEN : ÉTUDIANTS LIST ══ -->
+  <div class="screen" id="screen-etudiantsList">
+    <div style="display:flex;align-items:center;gap:.75rem;margin-bottom:1rem">
+      <button onclick="switchScreen('home')" style="background:none;border:none;cursor:pointer;font-size:1.2rem">←</button>
+      <div style="font-family:'Syne',sans-serif;font-weight:700;font-size:1rem">Étudiants</div>
+    </div>
+    <input style="width:100%;padding:.7rem 1rem;border:1.5px solid var(--border);border-radius:11px;font-size:.875rem;font-family:'Inter',sans-serif;outline:none;margin-bottom:1rem" placeholder="🔍 Rechercher..."/>
+    <div class="card">
+      <div class="card-body">
+        <div class="list-item" onclick="openModal()"><div class="list-avatar" style="background:linear-gradient(135deg,var(--blue),var(--sky))">KA</div><div class="list-body"><div class="list-title">Kofi Adzoa</div><div class="list-sub">UL-2025-001 · Info L2</div></div><div class="list-right"><span class="badge badge-success">Actif</span></div></div>
+        <div class="list-item" onclick="openModal()"><div class="list-avatar" style="background:linear-gradient(135deg,var(--gold),#f59e0b)">AM</div><div class="list-body"><div class="list-title">Afia Mensah</div><div class="list-sub">UL-2025-002 · Gestion M1</div></div><div class="list-right"><span class="badge badge-gold">Partiel</span></div></div>
+        <div class="list-item" onclick="openModal()"><div class="list-avatar" style="background:linear-gradient(135deg,var(--success),#34d399)">YD</div><div class="list-body"><div class="list-title">Yao Dodzi</div><div class="list-sub">UL-2025-003 · Droit L3</div></div><div class="list-right"><span class="badge badge-success">Actif</span></div></div>
+        <div class="list-item" onclick="openModal()"><div class="list-avatar" style="background:linear-gradient(135deg,var(--danger),#f87171)">SE</div><div class="list-body"><div class="list-title">Selom Edem</div><div class="list-sub">UL-2025-004 · Sciences L1</div></div><div class="list-right"><span class="badge badge-danger">Impayé</span></div></div>
+        <div class="list-item" onclick="openModal()"><div class="list-avatar" style="background:linear-gradient(135deg,var(--purple),#a78bfa)">BK</div><div class="list-body"><div class="list-title">Béatrice Komi</div><div class="list-sub">UL-2025-005 · Info M2</div></div><div class="list-right"><span class="badge badge-success">Actif</span></div></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ══ SCREEN : NOTES ══ -->
+  <div class="screen" id="screen-notes">
+    <div style="display:flex;align-items:center;gap:.75rem;margin-bottom:1rem">
+      <button onclick="switchScreen('home')" style="background:none;border:none;cursor:pointer;font-size:1.2rem">←</button>
+      <div style="font-family:'Syne',sans-serif;font-weight:700;font-size:1rem">Notes & Résultats</div>
+    </div>
+    <!-- Récap -->
+    <div class="kpi-row">
+      <div class="kpi-card"><div class="kpi-icon">📊</div><div class="kpi-val" style="color:var(--blue)">13.8</div><div class="kpi-label">Moyenne générale</div></div>
+      <div class="kpi-card"><div class="kpi-icon">🏅</div><div class="kpi-val" style="color:var(--gold);font-size:1rem">Assez Bien</div><div class="kpi-label">Mention</div></div>
+      <div class="kpi-card"><div class="kpi-icon">✅</div><div class="kpi-val" style="color:var(--success)">44/60</div><div class="kpi-label">Crédits</div></div>
+      <div class="kpi-card"><div class="kpi-icon">🏆</div><div class="kpi-val" style="color:var(--purple)">2ème</div><div class="kpi-label">Rang promo</div></div>
+    </div>
+    <div class="card">
+      <div class="card-header"><div class="card-title">Semestre 1 — Détail</div><button class="card-action" onclick="showToast('📄 Relevé PDF téléchargé !')">PDF</button></div>
+      <div class="card-body">
+        <div class="note-card"><div><div class="note-matiere">Algorithmique</div><div style="font-size:.7rem;color:var(--gray)">Dr. Mensah · Coeff. 4</div></div><span class="note-val" style="color:var(--success)">16.0</span></div>
+        <div class="note-card"><div><div class="note-matiere">POO Java</div><div style="font-size:.7rem;color:var(--gray)">Dr. Atchoe · Coeff. 4</div></div><span class="note-val" style="color:var(--success)">15.0</span></div>
+        <div class="note-card"><div><div class="note-matiere">Bases de données</div><div style="font-size:.7rem;color:var(--gray)">Prof. Komi · Coeff. 3</div></div><span class="note-val" style="color:var(--success)">14.5</span></div>
+        <div class="note-card"><div><div class="note-matiere">Réseaux</div><div style="font-size:.7rem;color:var(--gray)">Prof. Dodzi · Coeff. 3</div></div><span class="note-val" style="color:var(--gold)">12.0</span></div>
+        <div class="note-card"><div><div class="note-matiere">Mathématiques</div><div style="font-size:.7rem;color:var(--gray)">Dr. Agbo · Coeff. 3</div></div><span class="note-val" style="color:var(--gold)">11.5</span></div>
+        <div class="note-card" style="background:rgba(239,68,68,0.06)"><div><div class="note-matiere">Sécurité Info</div><div style="font-size:.7rem;color:var(--danger)">⚠️ Rattrapage requis</div></div><span class="note-val" style="color:var(--danger)">8.0</span></div>
+        <div class="note-card"><div><div class="note-matiere">Projet Tutoré</div><div style="font-size:.7rem;color:var(--gray)">Dr. Mensah · Coeff. 4</div></div><span class="note-val" style="color:var(--success)">15.5</span></div>
+      </div>
+    </div>
+    <button class="btn-full btn-blue" onclick="showToast('📄 Relevé de notes PDF téléchargé !')">📄 Télécharger le relevé de notes</button>
+  </div>
+
+  <!-- ══ SCREEN : PAIEMENTS ══ -->
+  <div class="screen" id="screen-paiements">
+    <div style="display:flex;align-items:center;gap:.75rem;margin-bottom:1rem">
+      <button onclick="switchScreen('home')" style="background:none;border:none;cursor:pointer;font-size:1.2rem">←</button>
+      <div style="font-family:'Syne',sans-serif;font-weight:700;font-size:1rem">Paiements</div>
+    </div>
+    <div style="background:linear-gradient(135deg,var(--success),#059669);border-radius:16px;padding:1.25rem;text-align:center;margin-bottom:1rem;color:white">
+      <div style="font-size:.78rem;opacity:.7;margin-bottom:.3rem">Scolarité 2024–2025</div>
+      <div style="font-family:'Syne',sans-serif;font-weight:800;font-size:1.8rem">250 000 FCFA</div>
+      <div style="font-size:.8rem;opacity:.8;margin-top:.25rem">ENTIÈREMENT SOLDÉE ✓</div>
+    </div>
+    <div class="section-title">Historique</div>
+    <div class="pay-card"><div class="pay-left"><div class="pay-label">Tranche 1 — Inscription</div><div class="pay-sub">02 Oct 2024 · 🌊 Wave</div></div><div><div class="pay-amount" style="color:var(--success)">83 333</div><span class="badge badge-success">✓</span></div></div>
+    <div class="pay-card"><div class="pay-left"><div class="pay-label">Tranche 2 — Milieu S1</div><div class="pay-sub">15 Nov 2024 · 🟠 Orange</div></div><div><div class="pay-amount" style="color:var(--success)">83 333</div><span class="badge badge-success">✓</span></div></div>
+    <div class="pay-card"><div class="pay-left"><div class="pay-label">Tranche 3 — Fin S1</div><div class="pay-sub">20 Jan 2025 · 🌊 Wave</div></div><div><div class="pay-amount" style="color:var(--success)">83 334</div><span class="badge badge-success">✓</span></div></div>
+    <div style="height:.75rem"></div>
+    <button class="btn-full btn-blue" onclick="showToast('🌊 Lien de paiement Wave copié !')">🌊 Payer via Wave</button>
+    <div style="height:.6rem"></div>
+    <button class="btn-full btn-outline-mobile" onclick="showToast('📄 Reçus téléchargés !')">📄 Télécharger les reçus</button>
+  </div>
+
+  <!-- ══ SCREEN : CHAT ══ -->
+  <div class="screen" id="screen-chat">
+    <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:1rem">
+      <div style="display:flex;align-items:center;gap:.75rem">
+        <button onclick="switchScreen('home')" style="background:none;border:none;cursor:pointer;font-size:1.2rem">←</button>
+        <div style="font-family:'Syne',sans-serif;font-weight:700;font-size:1rem">Messages</div>
+      </div>
+      <button onclick="showToast('✏️ Nouveau message')" style="padding:.4rem .85rem;border-radius:8px;background:var(--blue);color:white;border:none;font-size:.78rem;font-weight:600;cursor:pointer">+ Nouveau</button>
+    </div>
+    <input style="width:100%;padding:.65rem 1rem;border:1.5px solid var(--border);border-radius:11px;font-size:.875rem;font-family:'Inter',sans-serif;outline:none;margin-bottom:1rem" placeholder="🔍 Rechercher..."/>
+    <div class="card">
+      <div class="card-body">
+        <div class="chat-list-item" onclick="showToast('💬 Conversation Dr. Mensah')"><div class="chat-av" style="background:linear-gradient(135deg,var(--gold),#f59e0b)">KM<div class="chat-online"></div></div><div class="chat-body"><div class="chat-name">Dr. Kodjo Mensah</div><div class="chat-preview">Les notes du TD3 ont été saisies ✓</div></div><div class="chat-right"><div class="chat-time">09h32</div></div></div>
+        <div class="chat-list-item" onclick="showToast('💬 Conversation Kofi Adzoa')"><div class="chat-av" style="background:linear-gradient(135deg,var(--blue),var(--sky))">KA<div class="chat-online"></div></div><div class="chat-body"><div class="chat-name">Kofi Adzoa</div><div class="chat-preview">Bonjour, ma convocation est disponible ?</div></div><div class="chat-right"><div class="chat-time">08h15</div><div class="chat-unread">2</div></div></div>
+        <div class="chat-list-item" onclick="showToast('💬 Groupe Info L2')"><div class="chat-av" style="background:linear-gradient(135deg,var(--purple),#7c3aed)">IL2</div><div class="chat-body"><div class="chat-name">Info L2 — Groupe</div><div class="chat-preview">📢 Examen reporté au 04 Fév 2025</div></div><div class="chat-right"><div class="chat-time">Hier</div><div class="chat-unread">5</div></div></div>
+        <div class="chat-list-item" onclick="showToast('💬 Conversation Sœur Clémentine')"><div class="chat-av" style="background:linear-gradient(135deg,var(--success),#34d399)">SC</div><div class="chat-body"><div class="chat-name">Sœur Clémentine</div><div class="chat-preview">Le calendrier S2 est prêt pour validation</div></div><div class="chat-right"><div class="chat-time">Hier</div></div></div>
+        <div class="chat-list-item" onclick="showToast('💬 Conversation Direction')"><div class="chat-av" style="background:linear-gradient(135deg,var(--navy),#1a2d42)">DG</div><div class="chat-body"><div class="chat-name">Direction Générale</div><div class="chat-preview">📢 Réunion de direction — 25 Jan</div></div><div class="chat-right"><div class="chat-time">19 Jan</div><div class="chat-unread">1</div></div></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ══ SCREEN : NOTIFS ══ -->
+  <div class="screen" id="screen-notifs">
+    <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:1rem">
+      <div style="display:flex;align-items:center;gap:.75rem">
+        <button onclick="switchScreen('home')" style="background:none;border:none;cursor:pointer;font-size:1.2rem">←</button>
+        <div style="font-family:'Syne',sans-serif;font-weight:700;font-size:1rem">Notifications</div>
+      </div>
+      <button onclick="showToast('✅ Tout marqué comme lu')" style="font-size:.75rem;color:var(--blue);font-weight:600;background:none;border:none;cursor:pointer">Tout lire</button>
+    </div>
+    <div class="notif-item" style="background:rgba(26,86,219,0.05)" onclick="showToast('📊 Résultats — Détails')"><div class="notif-icon" style="background:rgba(26,86,219,0.1)">📊</div><div><div class="notif-title">Résultats S1 publiés</div><div class="notif-sub">Votre moyenne : 13.8/20 · Mention : Assez Bien · Rang : 2ème/287</div><div class="notif-time">Aujourd'hui 09h32</div></div></div>
+    <div class="notif-item" style="background:rgba(239,68,68,0.05)" onclick="showToast('📅 Examen — Détails')"><div class="notif-icon" style="background:rgba(239,68,68,0.1)">📅</div><div><div class="notif-title">Report examen Réseaux</div><div class="notif-sub">Nouvelle date : 04 Fév 2025 · 08h00 · Amphithéâtre A</div><div class="notif-time">Hier 14h00</div></div></div>
+    <div class="notif-item" style="background:rgba(16,185,129,0.05)" onclick="showToast('💳 Paiement — Détails')"><div class="notif-icon" style="background:rgba(16,185,129,0.1)">💳</div><div><div class="notif-title">Paiement confirmé</div><div class="notif-sub">Tranche 3/3 — 83 334 FCFA via Wave · Scolarité soldée</div><div class="notif-time">20 Jan 2025</div></div></div>
+    <div class="notif-item" onclick="showToast('⚠️ Absence — Détails')"><div class="notif-icon" style="background:rgba(245,158,11,0.1)">⚠️</div><div><div class="notif-title">Absence signalée</div><div class="notif-sub">Mathématiques du 29 Jan · Justificatif requis sous 48h</div><div class="notif-time">29 Jan 2025</div></div></div>
+    <div class="notif-item" onclick="showToast('🎓 Diplôme — Détails')"><div class="notif-icon" style="background:rgba(139,92,246,0.1)">🎓</div><div><div class="notif-title">Votre relevé est disponible</div><div class="notif-sub">Semestre 1 · Téléchargez votre relevé officiel avec QR code</div><div class="notif-time">22 Jan 2025</div></div></div>
+  </div>
+
+  <!-- ══ SCREEN : PROFIL ══ -->
+  <div class="screen" id="screen-profile">
+    <div class="profile-header">
+      <div class="profile-avatar">DA</div>
+      <div class="profile-name">Dr. Amavi Kokou</div>
+      <div class="profile-meta">Directeur Académique · Université de Lomé</div>
+      <div class="profile-badges">
+        <span class="badge badge-blue">Admin</span>
+        <span class="badge badge-success">● En ligne</span>
+        <span class="badge badge-gold">Plan Pro</span>
+      </div>
+    </div>
+    <div class="profile-item" onclick="showToast('👤 Modifier le profil')"><div class="profile-item-left"><div class="profile-item-icon" style="background:rgba(26,86,219,0.1)">👤</div><div class="profile-item-label">Mon profil</div></div><span class="profile-item-arrow">›</span></div>
+    <div class="profile-item" onclick="switchScreen('notifs')"><div class="profile-item-left"><div class="profile-item-icon" style="background:rgba(239,68,68,0.1)">🔔</div><div class="profile-item-label">Notifications</div></div><span class="profile-item-arrow">›</span></div>
+    <div class="profile-item" onclick="showToast('🔐 Sécurité & Confidentialité')"><div class="profile-item-left"><div class="profile-item-icon" style="background:rgba(16,185,129,0.1)">🔐</div><div class="profile-item-label">Sécurité</div></div><span class="profile-item-arrow">›</span></div>
+    <div class="profile-item" onclick="showToast('🌍 Langue & Région')"><div class="profile-item-left"><div class="profile-item-icon" style="background:rgba(139,92,246,0.1)">🌍</div><div class="profile-item-label">Langue & Région</div></div><span class="profile-item-arrow">›</span></div>
+    <div class="profile-item" onclick="showToast('📱 Version de l\'app : 2.4.1')"><div class="profile-item-left"><div class="profile-item-icon" style="background:rgba(245,158,11,0.1)">📱</div><div class="profile-item-label">Version app</div></div><span style="font-size:.78rem;color:var(--gray)">v2.4.1</span></div>
+    <div class="profile-item" onclick="showToast('❓ Aide & Support')"><div class="profile-item-left"><div class="profile-item-icon" style="background:rgba(100,116,139,0.1)">❓</div><div class="profile-item-label">Aide & Support</div></div><span class="profile-item-arrow">›</span></div>
+    <div style="height:.75rem"></div>
+    <button class="btn-full" style="background:rgba(239,68,68,0.1);color:var(--danger);border:none;padding:.85rem;border-radius:12px;font-size:.9rem;font-weight:700;cursor:pointer" onclick="showToast('👋 Déconnexion...');setTimeout(()=>window.location.href=\'login.html\',1500)">🚪 Se déconnecter</button>
+  </div>
+
+</div><!-- /scroll-area -->
+
+<!-- BOTTOM NAV -->
+<nav class="bottom-nav">
+  <button class="nav-tab active" id="tab-home" onclick="switchScreen('home')">
+    <div class="nav-icon">🏠</div>
+    <div class="nav-label">Accueil</div>
+  </button>
+  <button class="nav-tab" id="tab-etudiantsList" onclick="switchScreen('etudiantsList')">
+    <div class="nav-icon">🎓<span class="badge">12</span></div>
+    <div class="nav-label">Étudiants</div>
+  </button>
+  <button class="nav-tab" id="tab-chat" onclick="switchScreen('chat')">
+    <div class="nav-icon">💬<span class="badge">8</span></div>
+    <div class="nav-label">Messages</div>
+  </button>
+  <button class="nav-tab" id="tab-notifs" onclick="switchScreen('notifs')">
+    <div class="nav-icon">🔔<span class="badge">5</span></div>
+    <div class="nav-label">Notifs</div>
+  </button>
+  <button class="nav-tab" id="tab-profile" onclick="switchScreen('profile')">
+    <div class="nav-icon">👤</div>
+    <div class="nav-label">Profil</div>
+  </button>
+</nav>
+
+<!-- FAB -->
+<button class="fab" onclick="openModal()">+</button>
+
+<!-- MODAL -->
+<div class="modal-overlay" id="mainModal" onclick="if(event.target===this)closeModal()">
+  <div class="modal-sheet">
+    <div class="modal-handle"></div>
+    <div class="modal-title" id="modalTitle">Actions rapides</div>
+    <div id="modalContent">
+      <button class="btn-full btn-blue" style="margin-bottom:.75rem" onclick="showToast('🎓 Nouvel étudiant ajouté !');closeModal()">🎓 Ajouter un étudiant</button>
+      <button class="btn-full btn-gold" style="margin-bottom:.75rem" onclick="showToast('💳 Paiement enregistré !');closeModal()">💳 Enregistrer un paiement</button>
+      <button class="btn-full btn-outline-mobile" style="margin-bottom:.75rem" onclick="showToast('📢 Notification envoyée !');closeModal()">📢 Envoyer une notification</button>
+      <button class="btn-full btn-outline-mobile" style="margin-bottom:.75rem" onclick="showToast('📅 Examen programmé !');closeModal()">📅 Programmer un examen</button>
+      <button class="btn-full" style="background:rgba(239,68,68,0.08);color:var(--danger);border:none;padding:.85rem;border-radius:12px;font-size:.9rem;font-weight:700;cursor:pointer" onclick="closeModal()">Annuler</button>
+    </div>
+  </div>
+</div>
+
+<!-- TOAST -->
+<div class="toast" id="toast"></div>
+
+<script>
+  // ── Heure de salutation ──
+  const h = new Date().getHours();
+  document.getElementById('welcomeTime').textContent = h < 12 ? 'Bonjour' : h < 18 ? 'Bon après-midi' : 'Bonsoir';
+
+  // ── Navigation screens ──
+  const screens = ['home','etudiantsList','notes','paiements','chat','notifs','profile'];
+  const tabScreens = {'home':'home','etudiantsList':'etudiantsList','chat':'chat','notifs':'notifs','profile':'profile'};
+
+  function switchScreen(id) {
+    screens.forEach(s => document.getElementById('screen-'+s)?.classList.remove('active'));
+    document.getElementById('screen-'+id)?.classList.add('active');
+    document.getElementById('scrollArea').scrollTop = 0;
+
+    // Update bottom tabs
+    Object.keys(tabScreens).forEach(tab => {
+      document.getElementById('tab-'+tab)?.classList.toggle('active', tabScreens[tab] === id);
+    });
+  }
+
+  // ── Role switcher ──
+  const roles = ['admin','etudiant','enseignant','parent'];
+  const roleLabels = {admin:'Admin',etudiant:'Étudiant',enseignant:'Enseignant',parent:'Parent'};
+  const roleColors = {admin:'rgba(26,86,219,0.1);color:#1A56DB',etudiant:'rgba(16,185,129,0.1);color:#10B981',enseignant:'rgba(245,158,11,0.1);color:#F59E0B',parent:'rgba(139,92,246,0.1);color:#8B5CF6'};
+
+  function switchRole(role) {
+    roles.forEach(r => {
+      document.getElementById('role-'+r)?.classList.remove('active');
+      const view = document.getElementById('view-'+r);
+      if(view) view.style.display = 'none';
+    });
+    document.getElementById('role-'+role)?.classList.add('active');
+    const view = document.getElementById('view-'+role);
+    if(view) view.style.display = 'block';
+
+    // Update badge
+    const badge = document.getElementById('currentRoleBadge');
+    badge.textContent = roleLabels[role];
+    badge.style.cssText = `padding:.3rem .75rem;border-radius:100px;font-size:.72rem;font-weight:700;background:${roleColors[role]}`;
+    showToast('👤 Vue : '+roleLabels[role]);
+  }
+
+  // ── Modal ──
+  function openModal() {
+    document.getElementById('mainModal').classList.add('active');
+  }
+  function closeModal() {
+    document.getElementById('mainModal').classList.remove('active');
+  }
+
+  // ── Toast ──
+  let tt;
+  function showToast(msg) {
+    const t = document.getElementById('toast');
+    t.textContent = msg;
+    t.classList.add('show');
+    clearTimeout(tt);
+    tt = setTimeout(() => t.classList.remove('show'), 2500);
+  }
+</script>
+</body>
+</html>

@@ -1,0 +1,417 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>UniManage — Résultats & Relevés</title>
+  <link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=Inter:wght@300;400;500;600&display=swap" rel="stylesheet"/>
+  <style>
+    :root{--navy:#0D1B2A;--blue:#1A56DB;--sky:#3B82F6;--gold:#F59E0B;--light:#F0F4FF;--white:#FFFFFF;--gray:#64748B;--border:#E2E8F0;--success:#10B981;--danger:#EF4444;}
+    *{margin:0;padding:0;box-sizing:border-box;}
+    body{font-family:'Inter',sans-serif;background:#F8FAFC;color:var(--navy);min-height:100vh;}
+
+    /* HEADER */
+    .header{background:var(--navy);padding:1rem 5%;display:flex;align-items:center;justify-content:space-between;}
+    .header-logo{font-family:'Syne',sans-serif;font-weight:800;font-size:1.3rem;color:white;}
+    .header-logo span{color:var(--sky);}
+    .header-univ{font-size:.8rem;color:rgba(255,255,255,0.45);}
+
+    /* HERO RÉSULTATS */
+    .results-hero{background:linear-gradient(135deg,var(--navy) 0%,#1a2d42 100%);padding:2.5rem 5%;color:white;}
+    .results-hero h1{font-family:'Syne',sans-serif;font-weight:800;font-size:clamp(1.4rem,3vw,2rem);margin-bottom:.5rem;}
+    .results-hero p{font-size:.9rem;color:rgba(255,255,255,0.55);margin-bottom:1.5rem;}
+    .search-results{display:flex;gap:1rem;flex-wrap:wrap;}
+    .search-input{flex:1;min-width:240px;padding:.75rem 1.1rem;border-radius:10px;border:1.5px solid rgba(255,255,255,0.15);background:rgba(255,255,255,0.08);color:white;font-size:.9rem;font-family:'Inter',sans-serif;outline:none;}
+    .search-input::placeholder{color:rgba(255,255,255,0.35);}
+    .search-input:focus{border-color:var(--sky);}
+    .btn-search{padding:.75rem 1.75rem;border-radius:10px;background:var(--blue);color:white;font-size:.9rem;font-weight:700;cursor:pointer;border:none;transition:all .2s;}
+    .btn-search:hover{background:#1344b8;}
+
+    /* MAIN */
+    .main-content{max-width:1100px;margin:0 auto;padding:2rem 1.5rem;}
+
+    /* TABS */
+    .tabs-bar{display:flex;gap:0;background:white;border-radius:12px;padding:.3rem;margin-bottom:2rem;border:1px solid var(--border);width:fit-content;}
+    .tab-btn{padding:.6rem 1.4rem;border-radius:9px;border:none;background:transparent;font-size:.875rem;font-weight:600;cursor:pointer;color:var(--gray);transition:all .2s;}
+    .tab-btn.active{background:var(--blue);color:white;}
+
+    /* CARDS */
+    .card{background:white;border:1px solid var(--border);border-radius:14px;overflow:hidden;margin-bottom:1.5rem;}
+    .card-header{display:flex;align-items:center;justify-content:space-between;padding:1.1rem 1.5rem;border-bottom:1px solid var(--border);}
+    .card-title{font-family:'Syne',sans-serif;font-weight:700;font-size:.95rem;}
+    .card-body{padding:1.25rem 1.5rem;}
+
+    /* BADGES */
+    .badge{display:inline-block;padding:.22rem .7rem;border-radius:100px;font-size:.7rem;font-weight:600;}
+    .badge-success{background:rgba(16,185,129,0.1);color:var(--success);}
+    .badge-blue{background:rgba(26,86,219,0.1);color:var(--blue);}
+    .badge-gold{background:rgba(245,158,11,0.1);color:var(--gold);}
+    .badge-danger{background:rgba(239,68,68,0.1);color:var(--danger);}
+
+    /* TABLE */
+    .data-table{width:100%;border-collapse:collapse;}
+    .data-table th{text-align:left;padding:.7rem 1rem;font-size:.73rem;font-weight:600;color:var(--gray);text-transform:uppercase;letter-spacing:.05em;background:#F8FAFC;border-bottom:1px solid var(--border);}
+    .data-table td{padding:.75rem 1rem;font-size:.85rem;border-bottom:1px solid var(--border);}
+    .data-table tr:last-child td{border:none;}
+    .data-table tr:hover td{background:#F8FAFC;}
+    .note-val{font-family:'Syne',sans-serif;font-weight:800;font-size:.95rem;}
+    .note-good{color:var(--success);}
+    .note-avg{color:var(--gold);}
+    .note-bad{color:var(--danger);}
+
+    /* RELEVÉ PDF PREVIEW */
+    .releve-preview{background:white;border:2px solid var(--border);border-radius:12px;padding:2rem;position:relative;font-size:.85rem;}
+    .releve-header{display:flex;align-items:flex-start;justify-content:space-between;margin-bottom:1.5rem;padding-bottom:1.5rem;border-bottom:3px solid var(--navy);}
+    .releve-univ{font-family:'Syne',sans-serif;font-weight:800;font-size:1.1rem;color:var(--navy);}
+    .releve-sub{font-size:.8rem;color:var(--gray);margin-top:.2rem;}
+    .releve-title{text-align:center;font-family:'Syne',sans-serif;font-weight:800;font-size:1.2rem;color:var(--navy);text-transform:uppercase;letter-spacing:.05em;margin-bottom:1.5rem;}
+    .releve-student{display:grid;grid-template-columns:1fr 1fr;gap:.5rem;margin-bottom:1.5rem;padding:1rem;background:#F8FAFC;border-radius:10px;}
+    .releve-field{font-size:.82rem;}
+    .releve-field strong{color:var(--navy);}
+    .releve-field span{color:var(--gray);}
+    .releve-table{width:100%;border-collapse:collapse;margin-bottom:1.5rem;font-size:.82rem;}
+    .releve-table th{background:var(--navy);color:white;padding:.5rem .75rem;text-align:left;font-size:.78rem;}
+    .releve-table td{padding:.5rem .75rem;border-bottom:1px solid var(--border);}
+    .releve-table tr:nth-child(even) td{background:#F8FAFC;}
+    .releve-footer{display:flex;align-items:flex-start;justify-content:space-between;padding-top:1.5rem;border-top:2px solid var(--navy);}
+    .releve-mention{text-align:center;}
+    .releve-mention-val{font-family:'Syne',sans-serif;font-weight:800;font-size:1.5rem;color:var(--success);}
+    .releve-qr{text-align:center;}
+    .qr-box{width:80px;height:80px;background:var(--navy);border-radius:8px;display:flex;align-items:center;justify-content:center;margin:0 auto .4rem;}
+    .qr-inner{display:grid;grid-template-columns:repeat(7,1fr);gap:1px;width:60px;height:60px;}
+    .qr-cell{background:white;border-radius:1px;}
+    .qr-cell.b{background:var(--navy);}
+    .releve-sig{text-align:center;}
+    .sig-line{width:120px;height:1px;background:var(--navy);margin:2rem auto .4rem;}
+
+    /* VÉRIFICATION */
+    .verify-card{background:linear-gradient(135deg,rgba(26,86,219,0.05),rgba(16,185,129,0.05));border:1.5px solid var(--border);border-radius:14px;padding:2rem;text-align:center;margin-bottom:1.5rem;}
+    .verify-icon{font-size:3rem;margin-bottom:1rem;}
+    .verify-title{font-family:'Syne',sans-serif;font-weight:800;font-size:1.1rem;margin-bottom:.5rem;}
+    .verify-code-input{padding:.75rem 1.25rem;border-radius:10px;border:2px solid var(--border);font-size:1rem;font-family:'Syne',sans-serif;font-weight:700;letter-spacing:.1em;text-align:center;width:280px;outline:none;transition:border-color .2s;}
+    .verify-code-input:focus{border-color:var(--blue);}
+    .btn-verify{padding:.75rem 2rem;border-radius:10px;background:var(--blue);color:white;font-size:.9rem;font-weight:700;cursor:pointer;border:none;margin-left:.75rem;transition:all .2s;}
+    .btn-verify:hover{background:#1344b8;}
+    .verify-result{margin-top:1.5rem;padding:1rem 1.5rem;border-radius:10px;font-size:.9rem;font-weight:600;display:none;}
+    .verify-result.valid{background:rgba(16,185,129,0.1);color:var(--success);border:1.5px solid rgba(16,185,129,0.3);display:block;}
+    .verify-result.invalid{background:rgba(239,68,68,0.1);color:var(--danger);border:1.5px solid rgba(239,68,68,0.3);display:block;}
+
+    /* PRINT BTN */
+    .print-bar{display:flex;gap:1rem;margin-bottom:1.5rem;flex-wrap:wrap;align-items:center;}
+    .btn-download{display:flex;align-items:center;gap:.5rem;padding:.7rem 1.4rem;border-radius:10px;font-size:.875rem;font-weight:600;cursor:pointer;border:none;transition:all .2s;}
+    .btn-pdf{background:var(--blue);color:white;}
+    .btn-pdf:hover{background:#1344b8;}
+    .btn-print{background:white;color:var(--navy);border:1.5px solid var(--border);}
+    .btn-print:hover{border-color:var(--blue);color:var(--blue);}
+
+    /* TOAST */
+    .toast{position:fixed;bottom:1.5rem;right:1.5rem;background:var(--navy);color:white;padding:.85rem 1.4rem;border-radius:12px;font-size:.875rem;font-weight:500;box-shadow:0 10px 30px rgba(0,0,0,0.2);z-index:9999;opacity:0;transform:translateY(20px);transition:all .3s;pointer-events:none;}
+    .toast.show{opacity:1;transform:translateY(0);}
+
+    /* TAB PANELS */
+    .tab-panel{display:none;}
+    .tab-panel.active{display:block;}
+
+    @media print{
+      .header,.results-hero,.tabs-bar,.print-bar,.toast{display:none!important;}
+      .releve-preview{border:none;padding:1rem;}
+      body{background:white;}
+    }
+    @media(max-width:700px){
+      .releve-header{flex-direction:column;gap:1rem;}
+      .releve-student{grid-template-columns:1fr;}
+      .releve-footer{flex-direction:column;gap:1.5rem;align-items:center;}
+    }
+  </style>
+</head>
+<body>
+
+<!-- HEADER -->
+<header class="header">
+  <div>
+    <div class="header-logo">Uni<span>Manage</span></div>
+    <div class="header-univ">Université de Lomé · Résultats officiels</div>
+  </div>
+  <div style="display:flex;gap:.75rem">
+    <a href="etudiant.html" style="padding:.45rem 1rem;border-radius:8px;background:rgba(255,255,255,0.08);color:rgba(255,255,255,0.6);font-size:.8rem;text-decoration:none;border:1px solid rgba(255,255,255,0.1)">← Espace étudiant</a>
+    <a href="dashboard.html" style="padding:.45rem 1rem;border-radius:8px;background:var(--blue);color:white;font-size:.8rem;text-decoration:none">Admin →</a>
+  </div>
+</header>
+
+<!-- HERO -->
+<div class="results-hero">
+  <h1>📊 Résultats & Relevés de notes</h1>
+  <p>Consultez vos résultats officiels et téléchargez votre relevé de notes sécurisé avec QR code de vérification.</p>
+  <div class="search-results">
+    <input class="search-input" id="searchInput" placeholder="🔍  Entrez votre matricule (ex: UL-2025-001) ou votre nom complet..."/>
+    <button class="btn-search" onclick="searchStudent()">Rechercher →</button>
+  </div>
+</div>
+
+<!-- MAIN -->
+<div class="main-content">
+
+  <!-- TABS -->
+  <div class="tabs-bar">
+    <button class="tab-btn active" onclick="switchTab('releve')">📄 Relevé de notes</button>
+    <button class="tab-btn" onclick="switchTab('palmares')">🏆 Palmarès</button>
+    <button class="tab-btn" onclick="switchTab('verification')">🔐 Vérifier un document</button>
+  </div>
+
+  <!-- TAB : RELEVÉ -->
+  <div class="tab-panel active" id="tab-releve">
+
+    <div class="print-bar">
+      <button class="btn-download btn-pdf" onclick="showToast('📥 Relevé PDF téléchargé avec QR code !')">📥 Télécharger PDF</button>
+      <button class="btn-download btn-print" onclick="window.print()">🖨️ Imprimer</button>
+      <span style="font-size:.8rem;color:var(--gray);margin-left:.5rem">🔐 Document sécurisé avec QR code de vérification</span>
+    </div>
+
+    <!-- RELEVÉ PREVIEW -->
+    <div class="releve-preview" id="releveDoc">
+
+      <!-- En-tête -->
+      <div class="releve-header">
+        <div>
+          <div class="releve-univ">🏛️ UNIVERSITÉ DE LOMÉ</div>
+          <div class="releve-sub">République Togolaise · Ministère de l'Enseignement Supérieur</div>
+          <div class="releve-sub" style="margin-top:.2rem">BP 1515, Lomé, Togo · univ-lome.tg</div>
+        </div>
+        <div style="text-align:right">
+          <div style="font-size:.75rem;color:var(--gray)">Réf. document</div>
+          <div style="font-family:'Syne',sans-serif;font-weight:800;font-size:.95rem;color:var(--navy)">RN-UL-2025-001-S1</div>
+          <div style="font-size:.75rem;color:var(--gray);margin-top:.2rem">Émis le 20 Janvier 2025</div>
+          <div style="margin-top:.5rem"><span class="badge badge-success">✓ Document officiel</span></div>
+        </div>
+      </div>
+
+      <!-- Titre -->
+      <div class="releve-title">Relevé de Notes — Semestre 1</div>
+
+      <!-- Infos étudiant -->
+      <div class="releve-student">
+        <div class="releve-field"><span>Nom & Prénom : </span><strong>ADZOA Kofi Emmanuel</strong></div>
+        <div class="releve-field"><span>Matricule : </span><strong>UL-2025-001</strong></div>
+        <div class="releve-field"><span>Département : </span><strong>Informatique & IA</strong></div>
+        <div class="releve-field"><span>Niveau : </span><strong>Licence 2 (L2)</strong></div>
+        <div class="releve-field"><span>Filière : </span><strong>Génie Logiciel</strong></div>
+        <div class="releve-field"><span>Année académique : </span><strong>2024–2025</strong></div>
+      </div>
+
+      <!-- Tableau des notes -->
+      <table class="releve-table">
+        <thead>
+          <tr>
+            <th>Code</th>
+            <th>Matière</th>
+            <th>Crédits</th>
+            <th>Coeff.</th>
+            <th>Note CC</th>
+            <th>Note Exam</th>
+            <th>Moyenne</th>
+            <th>Mention</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr><td>INF201</td><td>Algorithmique Avancée</td><td>6</td><td>4</td><td>17/20</td><td>15/20</td><td><strong style="color:var(--success)">16.0</strong></td><td><span class="badge badge-success">TB</span></td></tr>
+          <tr><td>INF202</td><td>Bases de données</td><td>4</td><td>3</td><td>15/20</td><td>14/20</td><td><strong style="color:var(--success)">14.5</strong></td><td><span class="badge badge-blue">B</span></td></tr>
+          <tr><td>INF203</td><td>Programmation Java (POO)</td><td>6</td><td>4</td><td>16/20</td><td>14/20</td><td><strong style="color:var(--success)">15.0</strong></td><td><span class="badge badge-blue">B</span></td></tr>
+          <tr><td>INF204</td><td>Réseaux Informatiques</td><td>4</td><td>3</td><td>13/20</td><td>11/20</td><td><strong style="color:var(--gold)">12.0</strong></td><td><span class="badge badge-gold">AB</span></td></tr>
+          <tr><td>MAT201</td><td>Mathématiques</td><td>4</td><td>3</td><td>12/20</td><td>11/20</td><td><strong style="color:var(--gold)">11.5</strong></td><td><span class="badge badge-gold">P</span></td></tr>
+          <tr><td>INF205</td><td>Systèmes d'exploitation</td><td>4</td><td>3</td><td>14/20</td><td>12/20</td><td><strong style="color:var(--gold)">13.0</strong></td><td><span class="badge badge-gold">AB</span></td></tr>
+          <tr><td>ANG201</td><td>Anglais Technique</td><td>2</td><td>2</td><td>15/20</td><td>13/20</td><td><strong style="color:var(--success)">14.0</strong></td><td><span class="badge badge-blue">B</span></td></tr>
+          <tr><td>INF206</td><td>Projet Tutoré</td><td>6</td><td>4</td><td>16/20</td><td>15/20</td><td><strong style="color:var(--success)">15.5</strong></td><td><span class="badge badge-blue">B</span></td></tr>
+          <tr><td>INF207</td><td>Architecture des SI</td><td>4</td><td>3</td><td>11/20</td><td>10/20</td><td><strong style="color:var(--gold)">10.5</strong></td><td><span class="badge badge-gold">P</span></td></tr>
+          <tr><td>INF208</td><td>Sécurité Informatique</td><td>4</td><td>3</td><td>9/20</td><td>7/20</td><td><strong style="color:var(--danger)">8.0</strong></td><td><span class="badge badge-danger">RAT</span></td></tr>
+        </tbody>
+        <tfoot>
+          <tr style="background:#F8FAFC">
+            <td colspan="2"><strong>TOTAL / MOYENNE GÉNÉRALE</strong></td>
+            <td><strong>44/60</strong></td>
+            <td><strong>32</strong></td>
+            <td colspan="2"></td>
+            <td><strong style="color:var(--blue);font-family:'Syne',sans-serif;font-size:1rem">13.8/20</strong></td>
+            <td><span class="badge badge-blue">AB</span></td>
+          </tr>
+        </tfoot>
+      </table>
+
+      <!-- Légende -->
+      <div style="display:flex;gap:1rem;flex-wrap:wrap;font-size:.75rem;color:var(--gray);margin-bottom:1.5rem">
+        <span><strong>TB</strong> = Très Bien (16–20)</span>
+        <span><strong>B</strong> = Bien (14–15.99)</span>
+        <span><strong>AB</strong> = Assez Bien (12–13.99)</span>
+        <span><strong>P</strong> = Passable (10–11.99)</span>
+        <span><strong>RAT</strong> = Rattrapage (&lt;10)</span>
+      </div>
+
+      <!-- Footer document -->
+      <div class="releve-footer">
+        <div class="releve-mention">
+          <div style="font-size:.8rem;color:var(--gray);margin-bottom:.25rem">Résultat</div>
+          <div class="releve-mention-val">ADMIS</div>
+          <div style="font-size:.8rem;color:var(--gray);margin-top:.2rem">Mention : Assez Bien</div>
+          <div style="font-size:.8rem;color:var(--gray)">44 crédits / 60 validés</div>
+          <div style="font-size:.75rem;color:var(--danger);margin-top:.3rem">⚠ 1 matière en rattrapage</div>
+        </div>
+
+        <div class="releve-qr">
+          <div style="font-size:.75rem;color:var(--gray);margin-bottom:.4rem">Vérification d'authenticité</div>
+          <!-- QR Code simulé SVG -->
+          <div class="qr-box">
+            <svg width="64" height="64" viewBox="0 0 21 21" style="image-rendering:pixelated">
+              <!-- Position detection patterns -->
+              <rect x="0" y="0" width="7" height="7" fill="white"/>
+              <rect x="1" y="1" width="5" height="5" fill="#0D1B2A"/>
+              <rect x="2" y="2" width="3" height="3" fill="white"/>
+              <rect x="3" y="3" width="1" height="1" fill="#0D1B2A"/>
+              <rect x="14" y="0" width="7" height="7" fill="white"/>
+              <rect x="15" y="1" width="5" height="5" fill="#0D1B2A"/>
+              <rect x="16" y="2" width="3" height="3" fill="white"/>
+              <rect x="17" y="3" width="1" height="1" fill="#0D1B2A"/>
+              <rect x="0" y="14" width="7" height="7" fill="white"/>
+              <rect x="1" y="15" width="5" height="5" fill="#0D1B2A"/>
+              <rect x="2" y="16" width="3" height="3" fill="white"/>
+              <rect x="3" y="17" width="1" height="1" fill="#0D1B2A"/>
+              <!-- Data modules -->
+              <rect x="8" y="0" width="1" height="1" fill="white"/><rect x="10" y="0" width="1" height="1" fill="white"/><rect x="12" y="0" width="1" height="1" fill="white"/>
+              <rect x="7" y="2" width="1" height="1" fill="white"/><rect x="9" y="2" width="1" height="1" fill="white"/><rect x="11" y="2" width="1" height="1" fill="white"/><rect x="13" y="2" width="1" height="1" fill="white"/>
+              <rect x="8" y="4" width="1" height="1" fill="white"/><rect x="10" y="4" width="1" height="1" fill="white"/>
+              <rect x="7" y="6" width="1" height="1" fill="white"/><rect x="9" y="6" width="1" height="1" fill="white"/><rect x="11" y="6" width="1" height="1" fill="white"/>
+              <rect x="0" y="7" width="1" height="1" fill="white"/><rect x="2" y="7" width="1" height="1" fill="white"/><rect x="4" y="7" width="1" height="1" fill="white"/><rect x="6" y="7" width="1" height="1" fill="white"/>
+              <rect x="8" y="7" width="1" height="1" fill="white"/><rect x="12" y="7" width="1" height="1" fill="white"/><rect x="14" y="7" width="1" height="1" fill="white"/>
+              <rect x="0" y="8" width="1" height="1" fill="white"/><rect x="4" y="8" width="1" height="1" fill="white"/><rect x="7" y="8" width="1" height="1" fill="white"/>
+              <rect x="9" y="8" width="1" height="1" fill="white"/><rect x="11" y="8" width="1" height="1" fill="white"/><rect x="13" y="8" width="1" height="1" fill="white"/>
+              <rect x="1" y="9" width="1" height="1" fill="white"/><rect x="3" y="9" width="1" height="1" fill="white"/><rect x="5" y="9" width="1" height="1" fill="white"/>
+              <rect x="8" y="9" width="1" height="1" fill="white"/><rect x="10" y="9" width="1" height="1" fill="white"/><rect x="12" y="9" width="1" height="1" fill="white"/>
+              <rect x="0" y="10" width="1" height="1" fill="white"/><rect x="2" y="10" width="1" height="1" fill="white"/><rect x="6" y="10" width="1" height="1" fill="white"/>
+              <rect x="9" y="10" width="1" height="1" fill="white"/><rect x="11" y="10" width="1" height="1" fill="white"/><rect x="13" y="10" width="1" height="1" fill="white"/>
+              <rect x="1" y="11" width="1" height="1" fill="white"/><rect x="3" y="11" width="1" height="1" fill="white"/><rect x="5" y="11" width="1" height="1" fill="white"/>
+              <rect x="7" y="11" width="1" height="1" fill="white"/><rect x="10" y="11" width="1" height="1" fill="white"/><rect x="12" y="11" width="1" height="1" fill="white"/>
+              <rect x="0" y="12" width="1" height="1" fill="white"/><rect x="4" y="12" width="1" height="1" fill="white"/><rect x="8" y="12" width="1" height="1" fill="white"/>
+              <rect x="11" y="12" width="1" height="1" fill="white"/><rect x="13" y="12" width="1" height="1" fill="white"/>
+              <rect x="8" y="13" width="1" height="1" fill="white"/><rect x="10" y="13" width="1" height="1" fill="white"/><rect x="12" y="13" width="1" height="1" fill="white"/>
+              <rect x="14" y="8" width="1" height="1" fill="white"/><rect x="16" y="8" width="1" height="1" fill="white"/><rect x="18" y="8" width="1" height="1" fill="white"/><rect x="20" y="8" width="1" height="1" fill="white"/>
+              <rect x="15" y="9" width="1" height="1" fill="white"/><rect x="17" y="9" width="1" height="1" fill="white"/><rect x="19" y="9" width="1" height="1" fill="white"/>
+              <rect x="14" y="10" width="1" height="1" fill="white"/><rect x="16" y="10" width="1" height="1" fill="white"/><rect x="20" y="10" width="1" height="1" fill="white"/>
+              <rect x="15" y="11" width="1" height="1" fill="white"/><rect x="18" y="11" width="1" height="1" fill="white"/>
+              <rect x="14" y="12" width="1" height="1" fill="white"/><rect x="17" y="12" width="1" height="1" fill="white"/><rect x="19" y="12" width="1" height="1" fill="white"/>
+              <rect x="14" y="14" width="1" height="1" fill="white"/><rect x="16" y="14" width="1" height="1" fill="white"/><rect x="18" y="14" width="1" height="1" fill="white"/><rect x="20" y="14" width="1" height="1" fill="white"/>
+              <rect x="8" y="14" width="1" height="1" fill="white"/><rect x="10" y="14" width="1" height="1" fill="white"/><rect x="12" y="14" width="1" height="1" fill="white"/>
+              <rect x="9" y="15" width="1" height="1" fill="white"/><rect x="11" y="15" width="1" height="1" fill="white"/>
+              <rect x="8" y="16" width="1" height="1" fill="white"/><rect x="10" y="16" width="1" height="1" fill="white"/><rect x="12" y="16" width="1" height="1" fill="white"/>
+              <rect x="9" y="17" width="1" height="1" fill="white"/><rect x="11" y="17" width="1" height="1" fill="white"/>
+              <rect x="8" y="18" width="1" height="1" fill="white"/><rect x="10" y="18" width="1" height="1" fill="white"/>
+              <rect x="9" y="19" width="1" height="1" fill="white"/><rect x="11" y="19" width="1" height="1" fill="white"/>
+              <rect x="8" y="20" width="1" height="1" fill="white"/><rect x="12" y="20" width="1" height="1" fill="white"/>
+              <rect x="15" y="15" width="1" height="1" fill="white"/><rect x="17" y="15" width="1" height="1" fill="white"/><rect x="19" y="15" width="1" height="1" fill="white"/>
+              <rect x="16" y="16" width="1" height="1" fill="white"/><rect x="18" y="16" width="1" height="1" fill="white"/><rect x="20" y="16" width="1" height="1" fill="white"/>
+              <rect x="14" y="17" width="1" height="1" fill="white"/><rect x="17" y="17" width="1" height="1" fill="white"/>
+              <rect x="15" y="18" width="1" height="1" fill="white"/><rect x="19" y="18" width="1" height="1" fill="white"/>
+              <rect x="16" y="19" width="1" height="1" fill="white"/><rect x="18" y="19" width="1" height="1" fill="white"/><rect x="20" y="19" width="1" height="1" fill="white"/>
+              <rect x="14" y="20" width="1" height="1" fill="white"/><rect x="16" y="20" width="1" height="1" fill="white"/><rect x="18" y="20" width="1" height="1" fill="white"/>
+            </svg>
+          </div>
+          <div style="font-size:.7rem;color:var(--gray);font-family:'Syne',sans-serif;font-weight:700">RN-UL-2025-001-S1</div>
+          <div style="font-size:.65rem;color:var(--gray);margin-top:.2rem">Scannez pour vérifier</div>
+        </div>
+
+        <div class="releve-sig">
+          <div class="sig-line"></div>
+          <div style="font-size:.8rem;font-weight:700;color:var(--navy)">Le Directeur Académique</div>
+          <div style="font-size:.75rem;color:var(--gray);margin-top:.2rem">Dr. Amavi Kokou</div>
+          <div style="font-size:.72rem;color:var(--gray)">Cachet & Signature officielle</div>
+        </div>
+      </div>
+
+    </div><!-- /releve-preview -->
+  </div>
+
+  <!-- TAB : PALMARÈS -->
+  <div class="tab-panel" id="tab-palmares">
+    <div class="card">
+      <div class="card-header">
+        <div class="card-title">🏆 Palmarès — Informatique L2 · Semestre 1 · 2024–2025</div>
+        <button onclick="showToast('📄 Palmarès PDF exporté')" style="padding:.5rem 1rem;border-radius:8px;background:var(--blue);color:white;font-size:.8rem;font-weight:600;cursor:pointer;border:none">⬇ PDF</button>
+      </div>
+      <table class="data-table">
+        <thead><tr><th>Rang</th><th>Étudiant</th><th>Matricule</th><th>Moyenne</th><th>Crédits</th><th>Mention</th><th>Résultat</th></tr></thead>
+        <tbody>
+          <tr style="background:rgba(245,158,11,0.05)"><td><span style="font-family:'Syne',sans-serif;font-weight:800;font-size:1.1rem;color:var(--gold)">🥇 1</span></td><td><strong>Béatrice Komi</strong></td><td>UL-2025-005</td><td><span class="note-val note-good">17.3/20</span></td><td>58/60</td><td><span class="badge badge-success">Très Bien</span></td><td><span class="badge badge-success">Admis</span></td></tr>
+          <tr><td><span style="font-family:'Syne',sans-serif;font-weight:800;font-size:1.1rem;color:var(--gray)">🥈 2</span></td><td><strong>Kofi Adzoa</strong></td><td>UL-2025-001</td><td><span class="note-val note-good">13.8/20</span></td><td>44/60</td><td><span class="badge badge-blue">Assez Bien</span></td><td><span class="badge badge-success">Admis</span></td></tr>
+          <tr><td><span style="font-family:'Syne',sans-serif;font-weight:800;font-size:1.1rem;color:var(--gray)">🥉 3</span></td><td><strong>Afia Mensah</strong></td><td>UL-2025-002</td><td><span class="note-val note-good">13.3/20</span></td><td>46/60</td><td><span class="badge badge-blue">Assez Bien</span></td><td><span class="badge badge-success">Admis</span></td></tr>
+          <tr><td style="color:var(--gray)">4</td><td><strong>Yao Dodzi</strong></td><td>UL-2025-003</td><td><span class="note-val note-avg">11.3/20</span></td><td>40/60</td><td><span class="badge badge-gold">Passable</span></td><td><span class="badge badge-gold">Admis cond.</span></td></tr>
+          <tr><td style="color:var(--gray)">5</td><td><strong>Selom Edem</strong></td><td>UL-2025-004</td><td><span class="note-val note-bad">7.3/20</span></td><td>18/60</td><td><span class="badge badge-danger">Insuffisant</span></td><td><span class="badge badge-danger">Ajourné</span></td></tr>
+        </tbody>
+      </table>
+      <div style="padding:1rem 1.25rem;background:#F8FAFC;border-top:1px solid var(--border);display:flex;gap:2rem;flex-wrap:wrap;font-size:.82rem">
+        <span>Total : <strong>287 étudiants</strong></span>
+        <span style="color:var(--success)">Admis : <strong>241 (84%)</strong></span>
+        <span style="color:var(--gold)">Admis cond. : <strong>28 (10%)</strong></span>
+        <span style="color:var(--danger)">Ajournés : <strong>18 (6%)</strong></span>
+        <span style="color:var(--blue)">Moyenne promo : <strong>12.8/20</strong></span>
+      </div>
+    </div>
+  </div>
+
+  <!-- TAB : VÉRIFICATION -->
+  <div class="tab-panel" id="tab-verification">
+    <div class="verify-card">
+      <div class="verify-icon">🔐</div>
+      <div class="verify-title">Vérifier l'authenticité d'un relevé de notes</div>
+      <p style="font-size:.875rem;color:var(--gray);margin-bottom:1.5rem;max-width:500px;margin-left:auto;margin-right:auto">Entrez le code de référence figurant sur le relevé de notes ou scannez le QR code pour vérifier son authenticité.</p>
+      <div style="display:flex;align-items:center;justify-content:center;flex-wrap:wrap;gap:.75rem">
+        <input class="verify-code-input" id="verifyInput" placeholder="RN-UL-2025-XXX-SX" maxlength="20"/>
+        <button class="btn-verify" onclick="verifyDocument()">Vérifier →</button>
+      </div>
+      <div id="verifyResult" class="verify-result"></div>
+    </div>
+
+    <div class="card">
+      <div class="card-header"><div class="card-title">ℹ️ Comment fonctionne la vérification ?</div></div>
+      <div class="card-body">
+        <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:1.25rem">
+          <div style="display:flex;gap:.75rem;align-items:flex-start"><div style="width:36px;height:36px;border-radius:9px;background:rgba(26,86,219,0.1);display:flex;align-items:center;justify-content:center;font-size:1rem;flex-shrink:0">1️⃣</div><div><div style="font-weight:600;font-size:.875rem;margin-bottom:.25rem">Code unique</div><div style="font-size:.8rem;color:var(--gray)">Chaque relevé possède un code de référence unique généré à l'émission.</div></div></div>
+          <div style="display:flex;gap:.75rem;align-items:flex-start"><div style="width:36px;height:36px;border-radius:9px;background:rgba(16,185,129,0.1);display:flex;align-items:center;justify-content:center;font-size:1rem;flex-shrink:0">2️⃣</div><div><div style="font-weight:600;font-size:.875rem;margin-bottom:.25rem">QR Code sécurisé</div><div style="font-size:.8rem;color:var(--gray)">Le QR code intégré pointe vers notre serveur de vérification en temps réel.</div></div></div>
+          <div style="display:flex;gap:.75rem;align-items:flex-start"><div style="width:36px;height:36px;border-radius:9px;background:rgba(245,158,11,0.1);display:flex;align-items:center;justify-content:center;font-size:1rem;flex-shrink:0">3️⃣</div><div><div style="font-weight:600;font-size:.875rem;margin-bottom:.25rem">Résultat immédiat</div><div style="font-size:.8rem;color:var(--gray)">Le résultat de la vérification est instantané avec les informations officielles.</div></div></div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+</div><!-- /main-content -->
+
+<div class="toast" id="toast"></div>
+
+<script>
+  function switchTab(id){
+    document.querySelectorAll('.tab-btn').forEach((b,i)=>{b.classList.toggle('active',['releve','palmares','verification'][i]===id);});
+    document.querySelectorAll('.tab-panel').forEach(p=>{p.classList.toggle('active',p.id==='tab-'+id);});
+  }
+
+  function searchStudent(){
+    const v=document.getElementById('searchInput').value.trim();
+    if(!v){showToast('⚠️ Entrez un matricule ou un nom');return;}
+    showToast('🔍 Chargement des résultats de '+v+'...');
+  }
+
+  function verifyDocument(){
+    const code=document.getElementById('verifyInput').value.trim().toUpperCase();
+    const result=document.getElementById('verifyResult');
+    if(!code){showToast('⚠️ Entrez un code de référence');return;}
+    if(code==='RN-UL-2025-001-S1'||code==='RN-UL-2025-001'){
+      result.className='verify-result valid';
+      result.innerHTML='✅ <strong>Document authentique</strong> — Relevé de notes de ADZOA Kofi Emmanuel (UL-2025-001) · Semestre 1 2024–2025 · Émis le 20 Jan 2025 · Université de Lomé';
+    } else {
+      result.className='verify-result invalid';
+      result.innerHTML='❌ <strong>Document non reconnu</strong> — Ce code ne correspond à aucun document officiel dans notre base de données. Veuillez vérifier le code saisi.';
+    }
+  }
+
+  let tt;
+  function showToast(msg){const t=document.getElementById('toast');t.textContent=msg;t.classList.add('show');clearTimeout(tt);tt=setTimeout(()=>t.classList.remove('show'),3000);}
+
+  document.getElementById('verifyInput').addEventListener('keypress',e=>{if(e.key==='Enter')verifyDocument();});
+</script>
+</body>
+</html>

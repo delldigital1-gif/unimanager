@@ -1,0 +1,378 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>UniManage — Hub Central</title>
+  <link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=Inter:wght@300;400;500;600&display=swap" rel="stylesheet"/>
+  <style>
+    :root{--navy:#0D1B2A;--blue:#1A56DB;--sky:#3B82F6;--gold:#F59E0B;--light:#F0F4FF;--border:#E2E8F0;--success:#10B981;--danger:#EF4444;--purple:#8B5CF6;--gray:#64748B;}
+    *{margin:0;padding:0;box-sizing:border-box;}
+    body{font-family:'Inter',sans-serif;background:#0a0f1a;color:white;min-height:100vh;}
+
+    /* HEADER */
+    .header{padding:2rem 5%;display:flex;align-items:center;justify-content:space-between;border-bottom:1px solid rgba(255,255,255,0.06);}
+    .logo{font-family:'Syne',sans-serif;font-weight:800;font-size:1.5rem;}
+    .logo span{color:var(--sky);}
+    .version-badge{background:rgba(16,185,129,0.15);color:var(--success);padding:.35rem 1rem;border-radius:100px;font-size:.78rem;font-weight:700;border:1px solid rgba(16,185,129,0.2);}
+
+    /* HERO */
+    .hero{padding:3rem 5%;text-align:center;position:relative;overflow:hidden;}
+    .hero::before{content:'';position:absolute;top:-100px;left:50%;transform:translateX(-50%);width:600px;height:600px;border-radius:50%;background:radial-gradient(circle,rgba(26,86,219,0.12) 0%,transparent 70%);pointer-events:none;}
+    .hero-tag{display:inline-flex;align-items:center;gap:.5rem;background:rgba(26,86,219,0.12);border:1px solid rgba(26,86,219,0.2);color:var(--sky);padding:.35rem 1rem;border-radius:100px;font-size:.78rem;font-weight:700;margin-bottom:1.25rem;}
+    .hero-tag::before{content:'●';font-size:.5rem;animation:pulse 2s infinite;}
+    @keyframes pulse{0%,100%{opacity:1}50%{opacity:.3}}
+    .hero h1{font-family:'Syne',sans-serif;font-weight:800;font-size:clamp(2rem,5vw,3.2rem);line-height:1.15;margin-bottom:1rem;}
+    .hero h1 em{font-style:normal;color:var(--sky);}
+    .hero p{font-size:1rem;color:rgba(255,255,255,0.45);max-width:560px;margin:0 auto 2rem;line-height:1.8;}
+    .hero-stats{display:flex;gap:2.5rem;justify-content:center;flex-wrap:wrap;margin-bottom:2.5rem;}
+    .hero-stat-val{font-family:'Syne',sans-serif;font-weight:800;font-size:1.6rem;color:white;}
+    .hero-stat-label{font-size:.75rem;color:rgba(255,255,255,0.35);margin-top:.2rem;}
+    .hero-actions{display:flex;gap:1rem;justify-content:center;flex-wrap:wrap;}
+    .btn-hero{padding:.85rem 2rem;border-radius:11px;font-size:.95rem;font-weight:700;cursor:pointer;border:none;transition:all .25s;text-decoration:none;display:inline-flex;align-items:center;gap:.5rem;}
+    .btn-hero-primary{background:var(--blue);color:white;}
+    .btn-hero-primary:hover{background:#1344b8;transform:translateY(-2px);box-shadow:0 8px 24px rgba(26,86,219,0.4);}
+    .btn-hero-secondary{background:rgba(255,255,255,0.07);color:white;border:1px solid rgba(255,255,255,0.1);}
+    .btn-hero-secondary:hover{background:rgba(255,255,255,0.12);}
+
+    /* MODULES GRID */
+    .section{padding:2rem 5%;}
+    .section-label{font-size:.72rem;font-weight:700;letter-spacing:.1em;text-transform:uppercase;color:rgba(255,255,255,0.3);margin-bottom:.6rem;}
+    .section-title{font-family:'Syne',sans-serif;font-weight:800;font-size:1.4rem;margin-bottom:.5rem;}
+    .section-sub{font-size:.875rem;color:rgba(255,255,255,0.4);margin-bottom:2rem;}
+
+    .modules-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(280px,1fr));gap:1rem;}
+    .module-card{background:rgba(255,255,255,0.04);border:1px solid rgba(255,255,255,0.08);border-radius:14px;padding:1.25rem;cursor:pointer;transition:all .25s;text-decoration:none;display:block;}
+    .module-card:hover{background:rgba(255,255,255,0.07);transform:translateY(-3px);border-color:rgba(255,255,255,0.15);}
+    .module-card:active{transform:scale(.98);}
+    .module-card.primary:hover{border-color:rgba(26,86,219,0.4);background:rgba(26,86,219,0.08);}
+    .module-card.gold:hover{border-color:rgba(245,158,11,0.4);background:rgba(245,158,11,0.07);}
+    .module-card.success:hover{border-color:rgba(16,185,129,0.4);background:rgba(16,185,129,0.07);}
+    .module-card.purple:hover{border-color:rgba(139,92,246,0.4);background:rgba(139,92,246,0.08);}
+    .module-card.danger:hover{border-color:rgba(239,68,68,0.4);background:rgba(239,68,68,0.07);}
+    .module-card-top{display:flex;align-items:center;justify-content:space-between;margin-bottom:.85rem;}
+    .module-icon{width:44px;height:44px;border-radius:12px;display:flex;align-items:center;justify-content:center;font-size:1.2rem;flex-shrink:0;}
+    .module-status{font-size:.68rem;font-weight:700;padding:.2rem .6rem;border-radius:100px;}
+    .status-ready{background:rgba(16,185,129,0.15);color:var(--success);border:1px solid rgba(16,185,129,0.2);}
+    .status-new{background:rgba(26,86,219,0.15);color:var(--sky);border:1px solid rgba(26,86,219,0.2);}
+    .module-name{font-family:'Syne',sans-serif;font-weight:700;font-size:.95rem;color:white;margin-bottom:.3rem;}
+    .module-desc{font-size:.78rem;color:rgba(255,255,255,0.4);line-height:1.6;margin-bottom:.85rem;}
+    .module-meta{display:flex;align-items:center;justify-content:space-between;font-size:.72rem;color:rgba(255,255,255,0.25);}
+    .module-open{color:var(--sky);font-weight:600;display:flex;align-items:center;gap:.3rem;}
+
+    /* ROLES SECTION */
+    .roles-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(220px,1fr));gap:1rem;margin-bottom:2rem;}
+    .role-card{background:rgba(255,255,255,0.04);border:1px solid rgba(255,255,255,0.08);border-radius:14px;padding:1.25rem;text-align:center;cursor:pointer;transition:all .25s;text-decoration:none;display:block;}
+    .role-card:hover{transform:translateY(-3px);}
+    .role-card:active{transform:scale(.98);}
+    .role-avatar{width:56px;height:56px;border-radius:16px;display:flex;align-items:center;justify-content:center;font-size:1.4rem;margin:0 auto .85rem;}
+    .role-name{font-family:'Syne',sans-serif;font-weight:700;font-size:.95rem;margin-bottom:.3rem;}
+    .role-desc{font-size:.75rem;color:rgba(255,255,255,0.4);line-height:1.6;margin-bottom:.85rem;}
+    .role-link{font-size:.78rem;font-weight:600;display:flex;align-items:center;justify-content:center;gap:.3rem;}
+
+    /* TECH STACK */
+    .stack-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(160px,1fr));gap:.75rem;}
+    .stack-item{background:rgba(255,255,255,0.04);border:1px solid rgba(255,255,255,0.07);border-radius:10px;padding:.85rem;display:flex;align-items:center;gap:.75rem;}
+    .stack-icon{font-size:1.2rem;flex-shrink:0;}
+    .stack-name{font-size:.8rem;font-weight:600;color:rgba(255,255,255,0.7);}
+    .stack-type{font-size:.68rem;color:rgba(255,255,255,0.3);margin-top:.1rem;}
+
+    /* FOOTER */
+    footer{padding:2rem 5%;border-top:1px solid rgba(255,255,255,0.06);display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:1rem;}
+    .footer-logo{font-family:'Syne',sans-serif;font-weight:800;font-size:1.1rem;}
+    .footer-logo span{color:var(--sky);}
+    .footer-links{display:flex;gap:1.5rem;}
+    .footer-link{font-size:.8rem;color:rgba(255,255,255,0.35);text-decoration:none;transition:color .2s;}
+    .footer-link:hover{color:white;}
+    .footer-copy{font-size:.75rem;color:rgba(255,255,255,0.2);}
+
+    /* SEARCH */
+    .search-wrap{max-width:500px;margin:0 auto 2.5rem;position:relative;}
+    .search-input{width:100%;padding:.85rem 1.25rem .85rem 3rem;border-radius:12px;border:1.5px solid rgba(255,255,255,0.1);background:rgba(255,255,255,0.06);color:white;font-size:.9rem;font-family:'Inter',sans-serif;outline:none;transition:border-color .2s;}
+    .search-input:focus{border-color:rgba(26,86,219,0.5);}
+    .search-input::placeholder{color:rgba(255,255,255,0.25);}
+    .search-icon{position:absolute;left:1rem;top:50%;transform:translateY(-50%);font-size:1rem;color:rgba(255,255,255,0.3);}
+
+    /* TOAST */
+    .toast{position:fixed;bottom:1.5rem;right:1.5rem;background:rgba(255,255,255,0.95);color:var(--navy);padding:.75rem 1.25rem;border-radius:10px;font-size:.83rem;font-weight:500;box-shadow:0 8px 24px rgba(0,0,0,0.3);z-index:9999;opacity:0;transform:translateY(16px);transition:all .3s;pointer-events:none;}
+    .toast.show{opacity:1;transform:translateY(0);}
+
+    @media(max-width:700px){
+      .hero-stats{gap:1.5rem;}
+      .hero-actions{flex-direction:column;align-items:center;}
+      .btn-hero{width:100%;max-width:300px;justify-content:center;}
+      .footer{flex-direction:column;text-align:center;}
+      .footer-links{justify-content:center;}
+    }
+  </style>
+</head>
+<body>
+
+<!-- HEADER -->
+<header class="header">
+  <div class="logo">Uni<span>Manage</span></div>
+  <div style="display:flex;align-items:center;gap:1rem">
+    <div class="version-badge">✅ v1.0 — 17 modules</div>
+    <a href="index.html" style="padding:.4rem .9rem;border-radius:8px;background:var(--blue);color:white;font-size:.8rem;font-weight:600;text-decoration:none">Accéder →</a>
+  </div>
+</header>
+
+<!-- HERO -->
+<div class="hero">
+  <div class="hero-tag">🚀 Plateforme SaaS Universitaire</div>
+  <h1>La plateforme complète pour<br/><em>gérer votre université</em></h1>
+  <p>17 modules intégrés pour couvrir 100% des besoins d'une université privée en Afrique francophone. Frontend complet, prêt pour le déploiement.</p>
+  <div class="hero-stats">
+    <div><div class="hero-stat-val">17</div><div class="hero-stat-label">Fichiers HTML</div></div>
+    <div><div class="hero-stat-val">8</div><div class="hero-stat-label">Rôles utilisateurs</div></div>
+    <div><div class="hero-stat-val">100%</div><div class="hero-stat-label">Frontend complet</div></div>
+    <div><div class="hero-stat-val">0</div><div class="hero-stat-label">Dépendances npm</div></div>
+  </div>
+  <div class="hero-actions">
+    <a href="index.html" class="btn-hero btn-hero-primary">🚀 Ouvrir la plateforme</a>
+    <a href="login.html" class="btn-hero btn-hero-secondary">🔐 Se connecter</a>
+    <a href="mobile.html" class="btn-hero btn-hero-secondary">📱 Version mobile</a>
+  </div>
+</div>
+
+<!-- SEARCH -->
+<div class="section" style="padding-top:0">
+  <div class="search-wrap">
+    <span class="search-icon">🔍</span>
+    <input class="search-input" id="searchInput" placeholder="Rechercher un module..." oninput="filterModules()"/>
+  </div>
+</div>
+
+<!-- PORTAILS PAR RÔLE -->
+<div class="section" style="padding-top:0">
+  <div class="section-label">Accès direct</div>
+  <div class="section-title">Portails par rôle</div>
+  <div class="section-sub">Chaque utilisateur accède à son espace personnalisé</div>
+  <div class="roles-grid">
+    <a href="dashboard.html" class="role-card" style="border-color:rgba(26,86,219,0.2)">
+      <div class="role-avatar" style="background:rgba(26,86,219,0.15)">🏛️</div>
+      <div class="role-name">Administrateur</div>
+      <div class="role-desc">Gestion complète de l'université — étudiants, enseignants, finances, résultats</div>
+      <div class="role-link" style="color:var(--sky)">Ouvrir Dashboard →</div>
+    </a>
+    <a href="etudiant.html" class="role-card" style="border-color:rgba(16,185,129,0.2)">
+      <div class="role-avatar" style="background:rgba(16,185,129,0.15)">🎓</div>
+      <div class="role-name">Étudiant</div>
+      <div class="role-desc">Notes, emploi du temps, paiements, documents, examens</div>
+      <div class="role-link" style="color:var(--success)">Espace Étudiant →</div>
+    </a>
+    <a href="enseignant.html" class="role-card" style="border-color:rgba(245,158,11,0.2)">
+      <div class="role-avatar" style="background:rgba(245,158,11,0.15)">👨‍🏫</div>
+      <div class="role-name">Enseignant</div>
+      <div class="role-desc">Cours, saisie des notes, planning, salaire, fiches de paie</div>
+      <div class="role-link" style="color:var(--gold)">Espace Enseignant →</div>
+    </a>
+    <a href="parents.html" class="role-card" style="border-color:rgba(139,92,246,0.2)">
+      <div class="role-avatar" style="background:rgba(139,92,246,0.15)">👨‍👩‍👧</div>
+      <div class="role-name">Parent</div>
+      <div class="role-desc">Suivi des enfants, absences, notes, paiements, messagerie</div>
+      <div class="role-link" style="color:#a78bfa">Espace Parents →</div>
+    </a>
+    <a href="superadmin.html" class="role-card" style="border-color:rgba(239,68,68,0.2)">
+      <div class="role-avatar" style="background:rgba(239,68,68,0.12)">⚡</div>
+      <div class="role-name">Super Admin</div>
+      <div class="role-desc">Vue globale SaaS — toutes les universités, revenus, monitoring</div>
+      <div class="role-link" style="color:var(--danger)">Super Admin →</div>
+    </a>
+    <a href="mobile.html" class="role-card" style="border-color:rgba(59,130,246,0.2)">
+      <div class="role-avatar" style="background:rgba(59,130,246,0.15)">📱</div>
+      <div class="role-name">App Mobile</div>
+      <div class="role-desc">Version mobile optimisée — 4 vues selon le rôle connecté</div>
+      <div class="role-link" style="color:var(--sky)">Version Mobile →</div>
+    </a>
+  </div>
+</div>
+
+<!-- TOUS LES MODULES -->
+<div class="section">
+  <div class="section-label">Modules</div>
+  <div class="section-title">17 fichiers — Vue complète</div>
+  <div class="section-sub">Tous les modules de la plateforme UniManage</div>
+  <div class="modules-grid" id="modulesGrid">
+
+    <!-- AUTHENTIFICATION -->
+    <a href="index.html" class="module-card primary" data-name="landing page accueil authentification inscription">
+      <div class="module-card-top"><div class="module-icon" style="background:rgba(26,86,219,0.15)">🏠</div><span class="module-status status-ready">✓ Prêt</span></div>
+      <div class="module-name">Landing Page</div>
+      <div class="module-desc">Page d'accueil publique avec présentation, fonctionnalités, tarifs et inscription.</div>
+      <div class="module-meta"><span>index.html</span><span class="module-open">Ouvrir →</span></div>
+    </a>
+
+    <a href="login.html" class="module-card primary" data-name="login connexion authentification rôle">
+      <div class="module-card-top"><div class="module-icon" style="background:rgba(26,86,219,0.15)">🔐</div><span class="module-status status-ready">✓ Prêt</span></div>
+      <div class="module-name">Connexion Unifiée</div>
+      <div class="module-desc">Login intelligent par rôle — Admin, Étudiant, Enseignant, Super Admin avec redirection automatique.</div>
+      <div class="module-meta"><span>login.html</span><span class="module-open">Ouvrir →</span></div>
+    </a>
+
+    <a href="onboarding.html" class="module-card primary" data-name="onboarding inscription université guidée 6 étapes">
+      <div class="module-card-top"><div class="module-icon" style="background:rgba(26,86,219,0.15)">📋</div><span class="module-status status-ready">✓ Prêt</span></div>
+      <div class="module-name">Onboarding Université</div>
+      <div class="module-desc">Inscription guidée en 6 étapes — infos, compte admin, plan, modules, personnalisation, récap.</div>
+      <div class="module-meta"><span>onboarding.html</span><span class="module-open">Ouvrir →</span></div>
+    </a>
+
+    <!-- PORTAILS -->
+    <a href="dashboard.html" class="module-card primary" data-name="dashboard admin tableau de bord administration">
+      <div class="module-card-top"><div class="module-icon" style="background:rgba(26,86,219,0.15)">📊</div><span class="module-status status-ready">✓ Prêt</span></div>
+      <div class="module-name">Dashboard Admin</div>
+      <div class="module-desc">Tableau de bord complet — KPIs, étudiants, enseignants, emploi du temps, examens, paiements.</div>
+      <div class="module-meta"><span>dashboard.html</span><span class="module-open">Ouvrir →</span></div>
+    </a>
+
+    <a href="etudiant.html" class="module-card success" data-name="étudiant portail notes emploi du temps paiements documents">
+      <div class="module-card-top"><div class="module-icon" style="background:rgba(16,185,129,0.15)">🎓</div><span class="module-status status-ready">✓ Prêt</span></div>
+      <div class="module-name">Portail Étudiant</div>
+      <div class="module-desc">Espace personnel étudiant — notes, emploi du temps, paiements, documents, examens, cours.</div>
+      <div class="module-meta"><span>etudiant.html</span><span class="module-open">Ouvrir →</span></div>
+    </a>
+
+    <a href="enseignant.html" class="module-card gold" data-name="enseignant professeur cours notes salaire planning">
+      <div class="module-card-top"><div class="module-icon" style="background:rgba(245,158,11,0.15)">👨‍🏫</div><span class="module-status status-ready">✓ Prêt</span></div>
+      <div class="module-name">Portail Enseignant</div>
+      <div class="module-desc">Espace enseignant — cours, saisie des notes, volume horaire, salaire, fiches de paie.</div>
+      <div class="module-meta"><span>enseignant.html</span><span class="module-open">Ouvrir →</span></div>
+    </a>
+
+    <a href="parents.html" class="module-card purple" data-name="portail parents suivi absences notes paiements enfants">
+      <div class="module-card-top"><div class="module-icon" style="background:rgba(139,92,246,0.15)">👨‍👩‍👧</div><span class="module-status status-ready">✓ Prêt</span></div>
+      <div class="module-name">Portail Parents</div>
+      <div class="module-desc">Suivi des enfants — notes, absences, emploi du temps, paiements, messagerie université.</div>
+      <div class="module-meta"><span>parents.html</span><span class="module-open">Ouvrir →</span></div>
+    </a>
+
+    <a href="superadmin.html" class="module-card danger" data-name="super admin saas plateforme universités revenus monitoring">
+      <div class="module-card-top"><div class="module-icon" style="background:rgba(139,92,246,0.15)">⚡</div><span class="module-status status-ready">✓ Prêt</span></div>
+      <div class="module-name">Super Admin SaaS</div>
+      <div class="module-desc">Vue globale plateforme — toutes les universités, revenus MRR, monitoring, incidents, logs.</div>
+      <div class="module-meta"><span>superadmin.html</span><span class="module-open">Ouvrir →</span></div>
+    </a>
+
+    <!-- MODULES ACADÉMIQUES -->
+    <a href="examens.html" class="module-card primary" data-name="examens délibération pv proclamation notes rattrapage convocations">
+      <div class="module-card-top"><div class="module-icon" style="background:rgba(26,86,219,0.15)">📝</div><span class="module-status status-ready">✓ Prêt</span></div>
+      <div class="module-name">Examens Avancés</div>
+      <div class="module-desc">Saisie notes, délibération jury, PV officiel, proclamation résultats, convocations, rattrapage.</div>
+      <div class="module-meta"><span>examens.html</span><span class="module-open">Ouvrir →</span></div>
+    </a>
+
+    <a href="resultats.html" class="module-card success" data-name="résultats relevés notes qr code vérification palmarès">
+      <div class="module-card-top"><div class="module-icon" style="background:rgba(16,185,129,0.15)">📜</div><span class="module-status status-ready">✓ Prêt</span></div>
+      <div class="module-name">Résultats & Relevés</div>
+      <div class="module-desc">Relevés de notes officiels avec QR code de vérification, palmarès, authentification documents.</div>
+      <div class="module-meta"><span>resultats.html</span><span class="module-open">Ouvrir →</span></div>
+    </a>
+
+    <a href="calendrier.html" class="module-card primary" data-name="calendrier académique événements cours examens planning">
+      <div class="module-card-top"><div class="module-icon" style="background:rgba(26,86,219,0.15)">📆</div><span class="module-status status-ready">✓ Prêt</span></div>
+      <div class="module-name">Calendrier Académique</div>
+      <div class="module-desc">Calendrier interactif vue mois/semaine/liste — cours, examens, événements, sync Google Calendar.</div>
+      <div class="module-meta"><span>calendrier.html</span><span class="module-open">Ouvrir →</span></div>
+    </a>
+
+    <a href="diplomes.html" class="module-card gold" data-name="diplômes certificats attestations qr code vérification">
+      <div class="module-card-top"><div class="module-icon" style="background:rgba(245,158,11,0.15)">🎓</div><span class="module-status status-new">✨ Nouveau</span></div>
+      <div class="module-name">Diplômes & Certificats</div>
+      <div class="module-desc">Génération diplômes officiels, certificats, attestations avec QR code anti-falsification.</div>
+      <div class="module-meta"><span>diplomes.html</span><span class="module-open">Ouvrir →</span></div>
+    </a>
+
+    <!-- COMMUNICATION -->
+    <a href="messagerie.html" class="module-card primary" data-name="messagerie chat interne messages communication">
+      <div class="module-card-top"><div class="module-icon" style="background:rgba(26,86,219,0.15)">💬</div><span class="module-status status-ready">✓ Prêt</span></div>
+      <div class="module-name">Messagerie Interne</div>
+      <div class="module-desc">Chat en temps réel entre tous les acteurs — conversations, groupes, fichiers joints, annonces.</div>
+      <div class="module-meta"><span>messagerie.html</span><span class="module-open">Ouvrir →</span></div>
+    </a>
+
+    <a href="notifications.html" class="module-card success" data-name="notifications sms email push automatique templates">
+      <div class="module-card-top"><div class="module-icon" style="background:rgba(16,185,129,0.15)">🔔</div><span class="module-status status-new">✨ Nouveau</span></div>
+      <div class="module-name">Notifications SMS/Email</div>
+      <div class="module-desc">Système complet — composer, templates, automatisation, historique, statistiques, Wave/Orange.</div>
+      <div class="module-meta"><span>notifications.html</span><span class="module-open">Ouvrir →</span></div>
+    </a>
+
+    <!-- FINANCE & ANALYTICS -->
+    <a href="rapports.html" class="module-card purple" data-name="rapports analytics statistiques exports pdf excel">
+      <div class="module-card-top"><div class="module-icon" style="background:rgba(139,92,246,0.15)">📊</div><span class="module-status status-ready">✓ Prêt</span></div>
+      <div class="module-name">Rapports & Analytics</div>
+      <div class="module-desc">Tableaux de bord analytiques, rapports académiques/financiers/RH, exports PDF et Excel.</div>
+      <div class="module-meta"><span>rapports.html</span><span class="module-open">Ouvrir →</span></div>
+    </a>
+
+    <!-- AVANCÉ -->
+    <a href="multicampus.html" class="module-card success" data-name="multi-campus gestion sites transferts comparaison">
+      <div class="module-card-top"><div class="module-icon" style="background:rgba(16,185,129,0.15)">🏢</div><span class="module-status status-new">✨ Nouveau</span></div>
+      <div class="module-name">Multi-Campus</div>
+      <div class="module-desc">Gestion de 3 campus — comparaison, carte, transferts étudiants, rapports consolidés.</div>
+      <div class="module-meta"><span>multicampus.html</span><span class="module-open">Ouvrir →</span></div>
+    </a>
+
+    <a href="mobile.html" class="module-card primary" data-name="mobile application responsive optimisée 4 rôles">
+      <div class="module-card-top"><div class="module-icon" style="background:rgba(26,86,219,0.15)">📱</div><span class="module-status status-new">✨ Nouveau</span></div>
+      <div class="module-name">Application Mobile</div>
+      <div class="module-desc">Version mobile optimisée — 4 vues selon le rôle, navigation bottom bar, FAB, toasts.</div>
+      <div class="module-meta"><span>mobile.html</span><span class="module-open">Ouvrir →</span></div>
+    </a>
+
+  </div>
+</div>
+
+<!-- STACK TECHNIQUE -->
+<div class="section">
+  <div class="section-label">Technique</div>
+  <div class="section-title">Stack utilisée</div>
+  <div class="section-sub">Aucune dépendance externe — 100% HTML/CSS/JS natif</div>
+  <div class="stack-grid">
+    <div class="stack-item"><div class="stack-icon">📄</div><div><div class="stack-name">HTML5</div><div class="stack-type">Structure</div></div></div>
+    <div class="stack-item"><div class="stack-icon">🎨</div><div><div class="stack-name">CSS3 Vanilla</div><div class="stack-type">Style & Animations</div></div></div>
+    <div class="stack-item"><div class="stack-icon">⚡</div><div><div class="stack-name">JavaScript ES6</div><div class="stack-type">Logique & Interaction</div></div></div>
+    <div class="stack-item"><div class="stack-icon">🔤</div><div><div class="stack-name">Google Fonts</div><div class="stack-type">Syne + Inter</div></div></div>
+    <div class="stack-item"><div class="stack-icon">🗄️</div><div><div class="stack-name">SessionStorage</div><div class="stack-type">Gestion de session</div></div></div>
+    <div class="stack-item"><div class="stack-icon">📱</div><div><div class="stack-name">Responsive Design</div><div class="stack-type">Mobile First</div></div></div>
+    <div class="stack-item"><div class="stack-icon">🔐</div><div><div class="stack-name">QR Code SVG</div><div class="stack-type">Vérification docs</div></div></div>
+    <div class="stack-item"><div class="stack-icon">🖨️</div><div><div class="stack-name">Print CSS</div><div class="stack-type">Export PDF natif</div></div></div>
+  </div>
+</div>
+
+<!-- FOOTER -->
+<footer>
+  <div class="footer-logo">Uni<span>Manage</span></div>
+  <div class="footer-links">
+    <a href="index.html" class="footer-link">Landing Page</a>
+    <a href="login.html" class="footer-link">Connexion</a>
+    <a href="superadmin.html" class="footer-link">Super Admin</a>
+    <a href="mobile.html" class="footer-link">Mobile</a>
+  </div>
+  <div class="footer-copy">© 2025 UniManage · Conçu par U2P-Togo / Dell Digital · Lomé, Togo 🇹🇬</div>
+</footer>
+
+<div class="toast" id="toast"></div>
+
+<script>
+  // Search modules
+  function filterModules() {
+    const q = document.getElementById('searchInput').value.toLowerCase();
+    document.querySelectorAll('.module-card').forEach(card => {
+      const data = card.getAttribute('data-name') || '';
+      const name = card.querySelector('.module-name')?.textContent || '';
+      card.style.display = (data+name).toLowerCase().includes(q) ? '' : 'none';
+    });
+  }
+
+  let tt;
+  function showToast(msg) {
+    const t = document.getElementById('toast');
+    t.textContent = msg;
+    t.classList.add('show');
+    clearTimeout(tt);
+    tt = setTimeout(() => t.classList.remove('show'), 3000);
+  }
+</script>
+</body>
+</html>

@@ -1,0 +1,904 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>UniManage — Plateforme SaaS Universitaire</title>
+  <link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=Inter:wght@300;400;500;600&display=swap" rel="stylesheet"/>
+  <style>
+    :root {
+      --navy:    #0D1B2A;
+      --blue:    #1A56DB;
+      --sky:     #3B82F6;
+      --gold:    #F59E0B;
+      --light:   #F0F4FF;
+      --white:   #FFFFFF;
+      --gray:    #64748B;
+      --border:  #E2E8F0;
+      --success: #10B981;
+      --danger:  #EF4444;
+    }
+
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+
+    body {
+      font-family: 'Inter', sans-serif;
+      background: var(--white);
+      color: var(--navy);
+      overflow-x: hidden;
+    }
+
+    /* ─── NAVBAR ─── */
+    nav {
+      position: fixed; top: 0; left: 0; right: 0;
+      z-index: 1000;
+      display: flex; align-items: center; justify-content: space-between;
+      padding: 0 5%;
+      height: 70px;
+      background: rgba(255,255,255,0.95);
+      backdrop-filter: blur(12px);
+      border-bottom: 1px solid var(--border);
+    }
+    .nav-logo {
+      font-family: 'Syne', sans-serif;
+      font-weight: 800; font-size: 1.4rem;
+      color: var(--navy);
+      text-decoration: none;
+    }
+    .nav-logo span { color: var(--blue); }
+    .nav-links { display: flex; gap: 2rem; list-style: none; }
+    .nav-links a {
+      text-decoration: none; color: var(--gray);
+      font-size: 0.9rem; font-weight: 500;
+      transition: color .2s;
+    }
+    .nav-links a:hover { color: var(--blue); }
+    .nav-cta { display: flex; gap: 1rem; align-items: center; }
+    .btn-outline {
+      padding: .5rem 1.2rem; border-radius: 8px;
+      border: 1.5px solid var(--blue); color: var(--blue);
+      font-size: .875rem; font-weight: 600; cursor: pointer;
+      background: transparent; transition: all .2s;
+      text-decoration: none;
+    }
+    .btn-outline:hover { background: var(--blue); color: white; }
+    .btn-primary {
+      padding: .5rem 1.4rem; border-radius: 8px;
+      background: var(--blue); color: white;
+      font-size: .875rem; font-weight: 600; cursor: pointer;
+      border: none; transition: all .2s;
+      text-decoration: none;
+    }
+    .btn-primary:hover { background: #1344b8; transform: translateY(-1px); }
+
+    /* ─── HERO ─── */
+    .hero {
+      min-height: 100vh;
+      display: flex; align-items: center;
+      padding: 100px 5% 60px;
+      background: linear-gradient(135deg, #F0F4FF 0%, #ffffff 60%, #EFF6FF 100%);
+      position: relative; overflow: hidden;
+    }
+    .hero::before {
+      content: '';
+      position: absolute; top: -200px; right: -200px;
+      width: 700px; height: 700px; border-radius: 50%;
+      background: radial-gradient(circle, rgba(26,86,219,0.08) 0%, transparent 70%);
+    }
+    .hero-content { max-width: 600px; z-index: 1; }
+    .hero-badge {
+      display: inline-flex; align-items: center; gap: .5rem;
+      background: rgba(26,86,219,0.1); color: var(--blue);
+      padding: .4rem 1rem; border-radius: 100px;
+      font-size: .8rem; font-weight: 600; margin-bottom: 1.5rem;
+    }
+    .hero-badge::before { content: '●'; font-size: .5rem; animation: pulse 2s infinite; }
+    @keyframes pulse { 0%,100%{opacity:1} 50%{opacity:.3} }
+    .hero h1 {
+      font-family: 'Syne', sans-serif;
+      font-size: clamp(2.2rem, 5vw, 3.5rem);
+      font-weight: 800; line-height: 1.15;
+      margin-bottom: 1.5rem;
+    }
+    .hero h1 em { font-style: normal; color: var(--blue); }
+    .hero p {
+      font-size: 1.1rem; color: var(--gray);
+      line-height: 1.8; margin-bottom: 2rem; max-width: 500px;
+    }
+    .hero-actions { display: flex; gap: 1rem; flex-wrap: wrap; margin-bottom: 3rem; }
+    .btn-hero {
+      padding: .9rem 2rem; border-radius: 10px;
+      font-size: 1rem; font-weight: 600; cursor: pointer;
+      border: none; transition: all .25s; text-decoration: none;
+      display: inline-flex; align-items: center; gap: .5rem;
+    }
+    .btn-hero-primary {
+      background: var(--blue); color: white;
+    }
+    .btn-hero-primary:hover { background: #1344b8; transform: translateY(-2px); box-shadow: 0 8px 25px rgba(26,86,219,0.35); }
+    .btn-hero-secondary {
+      background: white; color: var(--navy);
+      border: 1.5px solid var(--border);
+    }
+    .btn-hero-secondary:hover { border-color: var(--blue); color: var(--blue); }
+    .hero-stats { display: flex; gap: 2.5rem; flex-wrap: wrap; }
+    .stat-item h3 {
+      font-family: 'Syne', sans-serif;
+      font-size: 1.8rem; font-weight: 800; color: var(--navy);
+    }
+    .stat-item p { font-size: .8rem; color: var(--gray); margin-top: .2rem; }
+    .hero-visual {
+      flex: 1; display: flex; justify-content: flex-end;
+      align-items: center; z-index: 1;
+    }
+    .dashboard-mockup {
+      width: 520px; background: white;
+      border-radius: 16px; padding: 1.5rem;
+      box-shadow: 0 30px 80px rgba(13,27,42,0.15);
+      border: 1px solid var(--border);
+      animation: float 4s ease-in-out infinite;
+    }
+    @keyframes float {
+      0%,100%{transform:translateY(0)} 50%{transform:translateY(-12px)}
+    }
+    .mock-header {
+      display: flex; align-items: center; justify-content: space-between;
+      margin-bottom: 1.5rem;
+    }
+    .mock-title {
+      font-family: 'Syne', sans-serif;
+      font-weight: 700; font-size: .95rem; color: var(--navy);
+    }
+    .mock-badge {
+      background: rgba(16,185,129,0.1); color: var(--success);
+      padding: .25rem .75rem; border-radius: 100px;
+      font-size: .75rem; font-weight: 600;
+    }
+    .mock-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; margin-bottom: 1rem; }
+    .mock-card {
+      background: var(--light); border-radius: 10px;
+      padding: 1rem; border: 1px solid var(--border);
+    }
+    .mock-card-num {
+      font-family: 'Syne', sans-serif;
+      font-size: 1.6rem; font-weight: 800; color: var(--navy);
+    }
+    .mock-card-label { font-size: .75rem; color: var(--gray); margin-top: .2rem; }
+    .mock-card-accent { color: var(--blue); }
+    .mock-card-gold { color: var(--gold); }
+    .mock-bar-label { font-size: .75rem; color: var(--gray); margin-bottom: .5rem; }
+    .mock-bar-wrap {
+      height: 8px; background: var(--border);
+      border-radius: 100px; overflow: hidden;
+    }
+    .mock-bar-fill {
+      height: 100%; border-radius: 100px;
+      background: linear-gradient(90deg, var(--blue), var(--sky));
+      animation: barGrow 2s ease-out forwards;
+      width: 0;
+    }
+    @keyframes barGrow { to { width: var(--w); } }
+    .mock-list { display: flex; flex-direction: column; gap: .5rem; }
+    .mock-row {
+      display: flex; align-items: center; justify-content: space-between;
+      padding: .5rem .75rem; background: var(--light);
+      border-radius: 8px; font-size: .8rem;
+    }
+    .mock-row-name { font-weight: 500; color: var(--navy); }
+    .mock-row-badge {
+      padding: .2rem .6rem; border-radius: 100px;
+      font-size: .7rem; font-weight: 600;
+    }
+    .badge-green { background: rgba(16,185,129,0.12); color: var(--success); }
+    .badge-blue  { background: rgba(26,86,219,0.1);   color: var(--blue); }
+    .badge-gold  { background: rgba(245,158,11,0.12); color: var(--gold); }
+
+    /* ─── FEATURES ─── */
+    .section { padding: 80px 5%; }
+    .section-label {
+      display: inline-block;
+      font-size: .8rem; font-weight: 600; letter-spacing: .08em;
+      text-transform: uppercase; color: var(--blue);
+      margin-bottom: .75rem;
+    }
+    .section-title {
+      font-family: 'Syne', sans-serif;
+      font-size: clamp(1.6rem, 3vw, 2.4rem);
+      font-weight: 800; line-height: 1.2;
+      margin-bottom: 1rem; max-width: 600px;
+    }
+    .section-sub { color: var(--gray); line-height: 1.8; max-width: 550px; margin-bottom: 3rem; }
+
+    .features-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+      gap: 1.5rem;
+    }
+    .feature-card {
+      background: white; border: 1px solid var(--border);
+      border-radius: 14px; padding: 1.75rem;
+      transition: all .25s; cursor: default;
+    }
+    .feature-card:hover {
+      border-color: var(--blue);
+      box-shadow: 0 8px 30px rgba(26,86,219,0.1);
+      transform: translateY(-4px);
+    }
+    .feature-icon {
+      width: 48px; height: 48px; border-radius: 12px;
+      display: flex; align-items: center; justify-content: center;
+      font-size: 1.4rem; margin-bottom: 1rem;
+    }
+    .feature-card h3 {
+      font-family: 'Syne', sans-serif;
+      font-weight: 700; font-size: 1rem;
+      margin-bottom: .5rem; color: var(--navy);
+    }
+    .feature-card p { font-size: .875rem; color: var(--gray); line-height: 1.7; }
+
+    /* ─── PRICING ─── */
+    .pricing-section { background: var(--light); padding: 80px 5%; }
+    .pricing-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+      gap: 1.5rem; max-width: 1000px; margin: 0 auto;
+    }
+    .price-card {
+      background: white; border: 1px solid var(--border);
+      border-radius: 16px; padding: 2rem;
+      display: flex; flex-direction: column;
+    }
+    .price-card.featured {
+      border-color: var(--blue);
+      box-shadow: 0 0 0 4px rgba(26,86,219,0.08);
+      position: relative;
+    }
+    .featured-badge {
+      position: absolute; top: -14px; left: 50%; transform: translateX(-50%);
+      background: var(--blue); color: white;
+      padding: .3rem 1.2rem; border-radius: 100px;
+      font-size: .75rem; font-weight: 700;
+    }
+    .plan-name {
+      font-family: 'Syne', sans-serif;
+      font-weight: 700; font-size: 1.1rem; margin-bottom: .5rem;
+    }
+    .plan-price {
+      font-family: 'Syne', sans-serif;
+      font-size: 2.4rem; font-weight: 800;
+      color: var(--navy); margin: 1rem 0 .25rem;
+    }
+    .plan-price span { font-size: 1rem; font-weight: 400; color: var(--gray); }
+    .plan-desc { font-size: .85rem; color: var(--gray); margin-bottom: 1.5rem; }
+    .plan-features { list-style: none; margin-bottom: 2rem; flex: 1; }
+    .plan-features li {
+      display: flex; align-items: flex-start; gap: .6rem;
+      font-size: .875rem; color: var(--navy);
+      padding: .4rem 0; border-bottom: 1px solid var(--border);
+    }
+    .plan-features li:last-child { border: none; }
+    .check { color: var(--success); font-weight: 700; flex-shrink: 0; }
+    .btn-plan {
+      width: 100%; padding: .85rem; border-radius: 10px;
+      font-size: .95rem; font-weight: 600; cursor: pointer;
+      border: 1.5px solid var(--blue); transition: all .2s;
+    }
+    .btn-plan-outline { background: transparent; color: var(--blue); }
+    .btn-plan-outline:hover { background: var(--blue); color: white; }
+    .btn-plan-fill { background: var(--blue); color: white; }
+    .btn-plan-fill:hover { background: #1344b8; }
+
+    /* ─── MODAL ─── */
+    .modal-overlay {
+      position: fixed; inset: 0; z-index: 2000;
+      background: rgba(13,27,42,0.6);
+      display: none; align-items: center; justify-content: center;
+      backdrop-filter: blur(4px);
+      padding: 1rem;
+    }
+    .modal-overlay.active { display: flex; }
+    .modal {
+      background: white; border-radius: 20px;
+      width: 100%; max-width: 480px;
+      padding: 2.5rem; position: relative;
+      box-shadow: 0 40px 100px rgba(13,27,42,0.25);
+      animation: modalIn .3s ease;
+    }
+    @keyframes modalIn {
+      from { opacity:0; transform: translateY(20px) scale(.97); }
+      to   { opacity:1; transform: translateY(0) scale(1); }
+    }
+    .modal-close {
+      position: absolute; top: 1.25rem; right: 1.25rem;
+      background: var(--light); border: none; cursor: pointer;
+      width: 32px; height: 32px; border-radius: 50%;
+      display: flex; align-items: center; justify-content: center;
+      font-size: 1rem; color: var(--gray); transition: all .2s;
+    }
+    .modal-close:hover { background: var(--border); }
+    .modal-logo {
+      font-family: 'Syne', sans-serif;
+      font-weight: 800; font-size: 1.2rem; color: var(--navy);
+      margin-bottom: .25rem;
+    }
+    .modal-logo span { color: var(--blue); }
+    .modal-title {
+      font-family: 'Syne', sans-serif;
+      font-size: 1.5rem; font-weight: 800;
+      margin-bottom: .4rem;
+    }
+    .modal-sub { font-size: .875rem; color: var(--gray); margin-bottom: 2rem; }
+    .tabs {
+      display: flex; gap: 0;
+      background: var(--light); border-radius: 10px;
+      padding: .25rem; margin-bottom: 1.75rem;
+    }
+    .tab {
+      flex: 1; padding: .6rem; border-radius: 8px;
+      border: none; background: transparent;
+      font-size: .875rem; font-weight: 600; cursor: pointer;
+      color: var(--gray); transition: all .2s;
+    }
+    .tab.active { background: white; color: var(--blue); box-shadow: 0 1px 4px rgba(0,0,0,0.1); }
+    .form-panel { display: none; }
+    .form-panel.active { display: block; }
+    .form-row { display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; }
+    .form-group { margin-bottom: 1.1rem; }
+    .form-group label {
+      display: block; font-size: .8rem; font-weight: 600;
+      color: var(--navy); margin-bottom: .4rem;
+    }
+    .form-group input, .form-group select {
+      width: 100%; padding: .75rem 1rem; border-radius: 8px;
+      border: 1.5px solid var(--border); font-size: .9rem;
+      font-family: 'Inter', sans-serif; color: var(--navy);
+      background: white; transition: border-color .2s; outline: none;
+    }
+    .form-group input:focus, .form-group select:focus { border-color: var(--blue); }
+    .form-group input::placeholder { color: #aab; }
+    .btn-submit {
+      width: 100%; padding: .9rem; border-radius: 10px;
+      background: var(--blue); color: white;
+      font-size: 1rem; font-weight: 700; cursor: pointer;
+      border: none; transition: all .2s; margin-top: .5rem;
+      font-family: 'Inter', sans-serif;
+    }
+    .btn-submit:hover { background: #1344b8; transform: translateY(-1px); }
+    .divider {
+      display: flex; align-items: center; gap: 1rem;
+      margin: 1.25rem 0; color: var(--gray); font-size: .8rem;
+    }
+    .divider::before, .divider::after {
+      content: ''; flex: 1; height: 1px; background: var(--border);
+    }
+    .btn-google {
+      width: 100%; padding: .8rem; border-radius: 10px;
+      background: white; border: 1.5px solid var(--border);
+      display: flex; align-items: center; justify-content: center; gap: .75rem;
+      font-size: .9rem; font-weight: 600; cursor: pointer;
+      transition: all .2s; color: var(--navy); font-family: 'Inter', sans-serif;
+    }
+    .btn-google:hover { border-color: #4285F4; background: #f8f9ff; }
+    .google-icon { width: 18px; height: 18px; }
+    .alert {
+      padding: .75rem 1rem; border-radius: 8px;
+      font-size: .85rem; font-weight: 500; margin-bottom: 1rem;
+      display: none;
+    }
+    .alert.success { background: rgba(16,185,129,0.1); color: var(--success); display: block; }
+    .alert.error   { background: rgba(239,68,68,0.1);   color: var(--danger);  display: block; }
+
+    /* ─── FOOTER ─── */
+    footer {
+      background: var(--navy); color: rgba(255,255,255,0.7);
+      padding: 60px 5% 30px;
+    }
+    .footer-grid {
+      display: grid;
+      grid-template-columns: 2fr 1fr 1fr 1fr;
+      gap: 3rem; margin-bottom: 3rem;
+    }
+    .footer-brand p { font-size: .875rem; line-height: 1.8; margin-top: 1rem; max-width: 280px; }
+    .footer-logo {
+      font-family: 'Syne', sans-serif;
+      font-weight: 800; font-size: 1.3rem; color: white;
+    }
+    .footer-logo span { color: var(--sky); }
+    .footer-col h4 {
+      font-family: 'Syne', sans-serif;
+      font-weight: 700; color: white;
+      margin-bottom: 1rem; font-size: .95rem;
+    }
+    .footer-col ul { list-style: none; }
+    .footer-col li { margin-bottom: .5rem; }
+    .footer-col a {
+      text-decoration: none; color: rgba(255,255,255,0.6);
+      font-size: .875rem; transition: color .2s;
+    }
+    .footer-col a:hover { color: white; }
+    .footer-bottom {
+      border-top: 1px solid rgba(255,255,255,0.1);
+      padding-top: 1.5rem;
+      display: flex; justify-content: space-between; align-items: center;
+      font-size: .8rem; flex-wrap: wrap; gap: 1rem;
+    }
+
+    /* ─── RESPONSIVE ─── */
+    @media (max-width: 900px) {
+      .hero { flex-direction: column; gap: 3rem; }
+      .hero-visual { justify-content: center; }
+      .dashboard-mockup { width: 100%; max-width: 460px; }
+      .footer-grid { grid-template-columns: 1fr 1fr; }
+      .nav-links { display: none; }
+    }
+    @media (max-width: 600px) {
+      .form-row { grid-template-columns: 1fr; }
+      .footer-grid { grid-template-columns: 1fr; }
+      .hero-stats { gap: 1.5rem; }
+    }
+  </style>
+</head>
+<body>
+
+<!-- ─── NAVBAR ─── -->
+<nav>
+  <a href="#" class="nav-logo">Uni<span>Manage</span></a>
+  <ul class="nav-links">
+    <li><a href="#features">Fonctionnalités</a></li>
+    <li><a href="#pricing">Tarifs</a></li>
+    <li><a href="#contact">Contact</a></li>
+  </ul>
+  <div class="nav-cta">
+    <a href="#" class="btn-outline" onclick="openModal('login')">Se connecter</a>
+    <a href="#" class="btn-primary" onclick="openModal('register')">Essai gratuit</a>
+  </div>
+</nav>
+
+<!-- ─── HERO ─── -->
+<section class="hero">
+  <div class="hero-content">
+    <div class="hero-badge">Plateforme SaaS Universitaire N°1 en Afrique</div>
+    <h1>Gérez votre <em>université</em> depuis une seule plateforme</h1>
+    <p>Administration scolaire, emplois du temps, résultats, comptabilité — tout ce dont votre établissement a besoin, en un seul endroit sécurisé.</p>
+    <div class="hero-actions">
+      <a href="#" class="btn-hero btn-hero-primary" onclick="openModal('register')">
+        🎓 Créer un compte université
+      </a>
+      <a href="#features" class="btn-hero btn-hero-secondary">
+        Voir les fonctionnalités →
+      </a>
+    </div>
+    <div class="hero-stats">
+      <div class="stat-item">
+        <h3>50+</h3>
+        <p>Universités actives</p>
+      </div>
+      <div class="stat-item">
+        <h3>12K+</h3>
+        <p>Étudiants gérés</p>
+      </div>
+      <div class="stat-item">
+        <h3>99.9%</h3>
+        <p>Disponibilité</p>
+      </div>
+    </div>
+  </div>
+
+  <div class="hero-visual">
+    <div class="dashboard-mockup">
+      <div class="mock-header">
+        <div class="mock-title">Tableau de bord — Université de Lomé</div>
+        <div class="mock-badge">● En ligne</div>
+      </div>
+      <div class="mock-grid">
+        <div class="mock-card">
+          <div class="mock-card-num mock-card-accent">1 248</div>
+          <div class="mock-card-label">Étudiants inscrits</div>
+        </div>
+        <div class="mock-card">
+          <div class="mock-card-num mock-card-gold">87</div>
+          <div class="mock-card-label">Enseignants actifs</div>
+        </div>
+        <div class="mock-card">
+          <div class="mock-card-num" style="color:var(--success)">94%</div>
+          <div class="mock-card-label">Taux de réussite</div>
+        </div>
+        <div class="mock-card">
+          <div class="mock-card-num">12M</div>
+          <div class="mock-card-label">FCFA encaissés</div>
+        </div>
+      </div>
+      <div class="mock-card" style="margin-bottom:1rem">
+        <div class="mock-bar-label">Paiements scolarité — Janvier 2025</div>
+        <div class="mock-bar-wrap">
+          <div class="mock-bar-fill" style="--w:78%"></div>
+        </div>
+        <div style="display:flex;justify-content:space-between;margin-top:.4rem;font-size:.72rem;color:var(--gray)">
+          <span>78% collecté</span><span>22% en attente</span>
+        </div>
+      </div>
+      <div class="mock-list">
+        <div class="mock-row">
+          <span class="mock-row-name">🏛️ Droit & Sciences Politiques</span>
+          <span class="mock-row-badge badge-green">312 étudiants</span>
+        </div>
+        <div class="mock-row">
+          <span class="mock-row-name">💻 Informatique & IA</span>
+          <span class="mock-row-badge badge-blue">287 étudiants</span>
+        </div>
+        <div class="mock-row">
+          <span class="mock-row-name">📊 Gestion & Finance</span>
+          <span class="mock-row-badge badge-gold">401 étudiants</span>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ─── FEATURES ─── -->
+<section class="section" id="features">
+  <div style="text-align:center;margin-bottom:3rem">
+    <span class="section-label">Fonctionnalités</span>
+    <h2 class="section-title" style="margin:0 auto">Tout ce dont une université moderne a besoin</h2>
+    <p class="section-sub" style="margin:1rem auto 0">8 modules intégrés, conçus spécifiquement pour les établissements universitaires privés d'Afrique francophone.</p>
+  </div>
+  <div class="features-grid">
+    <div class="feature-card">
+      <div class="feature-icon" style="background:rgba(26,86,219,0.1)">🏫</div>
+      <h3>Administration scolaire</h3>
+      <p>Gérez vos facultés, départements, filières, niveaux académiques et années scolaires depuis un seul tableau de bord centralisé.</p>
+    </div>
+    <div class="feature-card">
+      <div class="feature-icon" style="background:rgba(245,158,11,0.1)">📅</div>
+      <h3>Emploi du temps</h3>
+      <p>Générez automatiquement les plannings avec détection des conflits. Vue calendrier pour chaque enseignant et chaque classe.</p>
+    </div>
+    <div class="feature-card">
+      <div class="feature-icon" style="background:rgba(16,185,129,0.1)">🎓</div>
+      <h3>Gestion étudiants</h3>
+      <p>Inscription en ligne, matricule automatique, suivi académique par semestre, relevés de notes PDF avec QR code de vérification.</p>
+    </div>
+    <div class="feature-card">
+      <div class="feature-icon" style="background:rgba(139,92,246,0.1)">👨‍🏫</div>
+      <h3>Gestion enseignants</h3>
+      <p>Profils complets, suivi des volumes horaires, évaluation anonyme par les étudiants, fiches de paie automatisées.</p>
+    </div>
+    <div class="feature-card">
+      <div class="feature-icon" style="background:rgba(239,68,68,0.1)">📝</div>
+      <h3>Examens & Résultats</h3>
+      <p>Programmation des sessions, convocations automatiques, saisie des notes, délibération en ligne, publication contrôlée des résultats.</p>
+    </div>
+    <div class="feature-card">
+      <div class="feature-icon" style="background:rgba(245,158,11,0.1)">💰</div>
+      <h3>Gestion comptable</h3>
+      <p>Encaissement des frais de scolarité, Wave & Orange Money intégrés, paiement des enseignants, tableau de bord financier complet.</p>
+    </div>
+    <div class="feature-card">
+      <div class="feature-icon" style="background:rgba(26,86,219,0.1)">📊</div>
+      <h3>Analytics & Rapports</h3>
+      <p>KPIs en temps réel, taux de réussite par département, projections financières, rapports exportables en PDF et Excel.</p>
+    </div>
+    <div class="feature-card">
+      <div class="feature-icon" style="background:rgba(16,185,129,0.1)">🔔</div>
+      <h3>Communication</h3>
+      <p>Messagerie interne, annonces ciblées par département, envoi groupé de SMS et emails, bibliothèque numérique de cours.</p>
+    </div>
+  </div>
+</section>
+
+<!-- ─── PRICING ─── -->
+<section class="pricing-section" id="pricing">
+  <div style="text-align:center;margin-bottom:3rem">
+    <span class="section-label">Tarifs</span>
+    <h2 class="section-title" style="margin:0 auto">Un plan adapté à chaque établissement</h2>
+    <p class="section-sub" style="margin:1rem auto 0">Pas de frais cachés. Changez de plan à tout moment.</p>
+  </div>
+  <div class="pricing-grid">
+    <!-- Starter -->
+    <div class="price-card">
+      <div class="plan-name">Starter</div>
+      <div style="font-size:.8rem;color:var(--gray)">Pour les petits établissements</div>
+      <div class="plan-price">25 000 <span>FCFA / mois</span></div>
+      <div class="plan-desc">Jusqu'à 300 étudiants</div>
+      <ul class="plan-features">
+        <li><span class="check">✓</span> Administration scolaire</li>
+        <li><span class="check">✓</span> Gestion étudiants & enseignants</li>
+        <li><span class="check">✓</span> Emploi du temps basique</li>
+        <li><span class="check">✓</span> Examens & résultats</li>
+        <li><span class="check">✓</span> 5 comptes administrateurs</li>
+        <li><span class="check">✓</span> Support email</li>
+      </ul>
+      <button class="btn-plan btn-plan-outline" onclick="openModal('register')">Commencer →</button>
+    </div>
+    <!-- Pro -->
+    <div class="price-card featured">
+      <div class="featured-badge">⭐ Populaire</div>
+      <div class="plan-name">Pro</div>
+      <div style="font-size:.8rem;color:var(--gray)">Pour les universités en croissance</div>
+      <div class="plan-price">75 000 <span>FCFA / mois</span></div>
+      <div class="plan-desc">Jusqu'à 1 500 étudiants</div>
+      <ul class="plan-features">
+        <li><span class="check">✓</span> Tout le plan Starter</li>
+        <li><span class="check">✓</span> Gestion comptable complète</li>
+        <li><span class="check">✓</span> Wave & Orange Money</li>
+        <li><span class="check">✓</span> Analytics avancés</li>
+        <li><span class="check">✓</span> Emploi du temps intelligent</li>
+        <li><span class="check">✓</span> Sous-domaine personnalisé</li>
+        <li><span class="check">✓</span> 20 comptes administrateurs</li>
+        <li><span class="check">✓</span> Support prioritaire</li>
+      </ul>
+      <button class="btn-plan btn-plan-fill" onclick="openModal('register')">Commencer →</button>
+    </div>
+    <!-- Enterprise -->
+    <div class="price-card">
+      <div class="plan-name">Enterprise</div>
+      <div style="font-size:.8rem;color:var(--gray)">Pour les grands établissements</div>
+      <div class="plan-price">Sur devis</div>
+      <div class="plan-desc">Étudiants illimités</div>
+      <ul class="plan-features">
+        <li><span class="check">✓</span> Tout le plan Pro</li>
+        <li><span class="check">✓</span> Multi-campus</li>
+        <li><span class="check">✓</span> API REST complète</li>
+        <li><span class="check">✓</span> Personnalisation interface</li>
+        <li><span class="check">✓</span> Intégrations sur mesure</span></li>
+        <li><span class="check">✓</span> Administrateurs illimités</li>
+        <li><span class="check">✓</span> Account manager dédié</li>
+        <li><span class="check">✓</span> SLA 99.9% garanti</li>
+      </ul>
+      <button class="btn-plan btn-plan-outline" onclick="openModal('register')">Nous contacter →</button>
+    </div>
+  </div>
+</section>
+
+<!-- ─── FOOTER ─── -->
+<footer id="contact">
+  <div class="footer-grid">
+    <div class="footer-brand">
+      <div class="footer-logo">Uni<span>Manage</span></div>
+      <p>La plateforme SaaS de référence pour la gestion des universités privées en Afrique francophone.</p>
+    </div>
+    <div class="footer-col">
+      <h4>Produit</h4>
+      <ul>
+        <li><a href="#features">Fonctionnalités</a></li>
+        <li><a href="#pricing">Tarifs</a></li>
+        <li><a href="#">Démo</a></li>
+        <li><a href="#">Mises à jour</a></li>
+      </ul>
+    </div>
+    <div class="footer-col">
+      <h4>Support</h4>
+      <ul>
+        <li><a href="#">Documentation</a></li>
+        <li><a href="#">Centre d'aide</a></li>
+        <li><a href="#">Tutoriels vidéo</a></li>
+        <li><a href="#">Contact</a></li>
+      </ul>
+    </div>
+    <div class="footer-col">
+      <h4>Légal</h4>
+      <ul>
+        <li><a href="#">Confidentialité</a></li>
+        <li><a href="#">Conditions d'utilisation</a></li>
+        <li><a href="#">Sécurité</a></li>
+      </ul>
+    </div>
+  </div>
+  <div class="footer-bottom">
+    <span>© 2025 UniManage — Tous droits réservés</span>
+    <span>Conçu pour l'Afrique francophone 🌍</span>
+  </div>
+</footer>
+
+<!-- ─── MODAL AUTH ─── -->
+<div class="modal-overlay" id="authModal" onclick="closeModalOutside(event)">
+  <div class="modal">
+    <button class="modal-close" onclick="closeModal()">✕</button>
+    <div class="modal-logo">Uni<span>Manage</span></div>
+    <h2 class="modal-title" id="modalTitle">Créer un compte</h2>
+    <p class="modal-sub" id="modalSub">Inscrivez votre université en quelques minutes</p>
+
+    <div class="tabs">
+      <button class="tab active" id="tabRegister" onclick="switchTab('register')">Inscription</button>
+      <button class="tab" id="tabLogin" onclick="switchTab('login')">Connexion</button>
+    </div>
+
+    <!-- REGISTER -->
+    <div class="form-panel active" id="panelRegister">
+      <div id="alertRegister" class="alert"></div>
+      <div class="form-row">
+        <div class="form-group">
+          <label>Nom de l'université *</label>
+          <input type="text" id="reg_univ" placeholder="Ex: Université de Lomé"/>
+        </div>
+        <div class="form-group">
+          <label>Pays *</label>
+          <select id="reg_country">
+            <option value="">Choisir...</option>
+            <option>Togo</option>
+            <option>Bénin</option>
+            <option>Côte d'Ivoire</option>
+            <option>Sénégal</option>
+            <option>Cameroun</option>
+            <option>Mali</option>
+            <option>Burkina Faso</option>
+            <option>Autre</option>
+          </select>
+        </div>
+      </div>
+      <div class="form-row">
+        <div class="form-group">
+          <label>Prénom du directeur *</label>
+          <input type="text" id="reg_fname" placeholder="Jean"/>
+        </div>
+        <div class="form-group">
+          <label>Nom *</label>
+          <input type="text" id="reg_lname" placeholder="Dupont"/>
+        </div>
+      </div>
+      <div class="form-group">
+        <label>Email professionnel *</label>
+        <input type="email" id="reg_email" placeholder="directeur@universite.tg"/>
+      </div>
+      <div class="form-row">
+        <div class="form-group">
+          <label>Mot de passe *</label>
+          <input type="password" id="reg_pass" placeholder="Min. 8 caractères"/>
+        </div>
+        <div class="form-group">
+          <label>Plan *</label>
+          <select id="reg_plan">
+            <option value="starter">Starter — 25 000 FCFA</option>
+            <option value="pro" selected>Pro — 75 000 FCFA</option>
+            <option value="enterprise">Enterprise — Sur devis</option>
+          </select>
+        </div>
+      </div>
+      <button class="btn-submit" onclick="handleRegister()">Créer mon compte université →</button>
+      <div class="divider">ou</div>
+      <button class="btn-google" onclick="handleGoogleAuth()">
+        <svg class="google-icon" viewBox="0 0 24 24"><path fill="#4285F4" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"/><path fill="#34A853" d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z"/><path fill="#FBBC05" d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z"/><path fill="#EA4335" d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z"/></svg>
+        Continuer avec Google
+      </button>
+    </div>
+
+    <!-- LOGIN -->
+    <div class="form-panel" id="panelLogin">
+      <div id="alertLogin" class="alert"></div>
+      <div class="form-group">
+        <label>Email *</label>
+        <input type="email" id="log_email" placeholder="directeur@universite.tg"/>
+      </div>
+      <div class="form-group">
+        <label>Mot de passe *</label>
+        <input type="password" id="log_pass" placeholder="Votre mot de passe"/>
+      </div>
+      <div style="text-align:right;margin-bottom:1rem">
+        <a href="#" style="font-size:.8rem;color:var(--blue);text-decoration:none">Mot de passe oublié ?</a>
+      </div>
+      <button class="btn-submit" onclick="handleLogin()">Se connecter →</button>
+      <div class="divider">ou</div>
+      <button class="btn-google" onclick="handleGoogleAuth()">
+        <svg class="google-icon" viewBox="0 0 24 24"><path fill="#4285F4" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"/><path fill="#34A853" d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z"/><path fill="#FBBC05" d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z"/><path fill="#EA4335" d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z"/></svg>
+        Continuer avec Google
+      </button>
+    </div>
+  </div>
+</div>
+
+<script>
+  // ── Modal ──
+  function openModal(tab) {
+    document.getElementById('authModal').classList.add('active');
+    switchTab(tab);
+    document.body.style.overflow = 'hidden';
+  }
+  function closeModal() {
+    document.getElementById('authModal').classList.remove('active');
+    document.body.style.overflow = '';
+  }
+  function closeModalOutside(e) {
+    if (e.target === document.getElementById('authModal')) closeModal();
+  }
+
+  function switchTab(tab) {
+    const isReg = tab === 'register';
+    document.getElementById('tabRegister').classList.toggle('active', isReg);
+    document.getElementById('tabLogin').classList.toggle('active', !isReg);
+    document.getElementById('panelRegister').classList.toggle('active', isReg);
+    document.getElementById('panelLogin').classList.toggle('active', !isReg);
+    document.getElementById('modalTitle').textContent = isReg ? 'Créer un compte' : 'Bon retour 👋';
+    document.getElementById('modalSub').textContent = isReg
+      ? 'Inscrivez votre université en quelques minutes'
+      : 'Connectez-vous à votre espace université';
+  }
+
+  // ── Register ──
+  function handleRegister() {
+    const univ  = document.getElementById('reg_univ').value.trim();
+    const email = document.getElementById('reg_email').value.trim();
+    const pass  = document.getElementById('reg_pass').value;
+    const fname = document.getElementById('reg_fname').value.trim();
+    const lname = document.getElementById('reg_lname').value.trim();
+    const country = document.getElementById('reg_country').value;
+    const plan  = document.getElementById('reg_plan').value;
+    const alertEl = document.getElementById('alertRegister');
+
+    alertEl.className = 'alert';
+    if (!univ || !email || !pass || !fname) {
+      alertEl.textContent = '⚠️ Veuillez remplir tous les champs obligatoires.';
+      alertEl.classList.add('error'); return;
+    }
+    if (pass.length < 8) {
+      alertEl.textContent = '⚠️ Le mot de passe doit contenir au moins 8 caractères.';
+      alertEl.classList.add('error'); return;
+    }
+
+    // Sauvegarder les infos dans sessionStorage
+    const userData = {
+      univ, email, fname, lname, country, plan,
+      role: 'Directeur Général',
+      initials: (fname[0] + (lname[0] || '')).toUpperCase(),
+      loggedIn: true
+    };
+    sessionStorage.setItem('unimanage_user', JSON.stringify(userData));
+
+    alertEl.textContent = '✅ Compte créé ! Redirection vers votre tableau de bord...';
+    alertEl.classList.add('success');
+    setTimeout(() => { window.location.href = 'dashboard.html'; }, 1800);
+  }
+
+  // ── Login ──
+  function handleLogin() {
+    const email = document.getElementById('log_email').value.trim();
+    const pass  = document.getElementById('log_pass').value;
+    const alertEl = document.getElementById('alertLogin');
+
+    alertEl.className = 'alert';
+    if (!email || !pass) {
+      alertEl.textContent = '⚠️ Veuillez saisir votre email et mot de passe.';
+      alertEl.classList.add('error'); return;
+    }
+
+    // Récupérer compte existant ou créer session démo
+    let userData = JSON.parse(sessionStorage.getItem('unimanage_user') || 'null');
+    if (!userData || userData.email !== email) {
+      // Session démo si pas de compte enregistré
+      userData = {
+        univ: 'Université de Lomé',
+        email, fname: 'Dr. Amavi', lname: 'Kokou',
+        role: 'Directeur Académique', initials: 'DA',
+        plan: 'pro', loggedIn: true
+      };
+    }
+    userData.loggedIn = true;
+    sessionStorage.setItem('unimanage_user', JSON.stringify(userData));
+
+    alertEl.textContent = '✅ Connexion réussie ! Redirection...';
+    alertEl.classList.add('success');
+    setTimeout(() => { window.location.href = 'dashboard.html'; }, 1500);
+  }
+
+  function handleGoogleAuth() {
+    const alertEl = document.getElementById(
+      document.getElementById('panelRegister').classList.contains('active')
+        ? 'alertRegister' : 'alertLogin'
+    );
+    // Session Google démo
+    const userData = {
+      univ: 'Université de Lomé', email: 'admin@univ-lome.tg',
+      fname: 'Admin', lname: 'Google', role: 'Directeur Général',
+      initials: 'AG', plan: 'pro', loggedIn: true
+    };
+    sessionStorage.setItem('unimanage_user', JSON.stringify(userData));
+    alertEl.className = 'alert';
+    alertEl.textContent = '🔗 Connexion Google réussie ! Redirection...';
+    alertEl.classList.add('success');
+    setTimeout(() => { window.location.href = 'dashboard.html'; }, 1500);
+  }
+
+  // Keyboard ESC
+  document.addEventListener('keydown', e => { if (e.key === 'Escape') closeModal(); });
+</script>
+</body>
+</html>

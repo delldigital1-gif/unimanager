@@ -1,0 +1,1483 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>UniManage — Tableau de bord</title>
+  <link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=Inter:wght@300;400;500;600&display=swap" rel="stylesheet"/>
+  <style>
+    :root {
+      --navy:    #0D1B2A;
+      --blue:    #1A56DB;
+      --sky:     #3B82F6;
+      --gold:    #F59E0B;
+      --light:   #F0F4FF;
+      --white:   #FFFFFF;
+      --gray:    #64748B;
+      --border:  #E2E8F0;
+      --success: #10B981;
+      --danger:  #EF4444;
+      --warning: #F59E0B;
+      --sidebar-w: 260px;
+      --topbar-h:  64px;
+    }
+    * { margin:0; padding:0; box-sizing:border-box; }
+    body { font-family:'Inter',sans-serif; background:#F8FAFC; color:var(--navy); display:flex; min-height:100vh; }
+
+    /* ─── SIDEBAR ─── */
+    .sidebar {
+      width: var(--sidebar-w);
+      background: var(--navy);
+      display: flex; flex-direction: column;
+      position: fixed; top:0; left:0; bottom:0;
+      z-index: 100; transition: transform .3s;
+      overflow-y: auto;
+    }
+    .sidebar-brand {
+      padding: 1.5rem 1.25rem 1rem;
+      border-bottom: 1px solid rgba(255,255,255,0.08);
+    }
+    .brand-name {
+      font-family:'Syne',sans-serif; font-weight:800; font-size:1.3rem; color:white;
+    }
+    .brand-name span { color: var(--sky); }
+    .brand-univ {
+      font-size:.75rem; color:rgba(255,255,255,0.45);
+      margin-top:.25rem; display:flex; align-items:center; gap:.4rem;
+    }
+    .brand-univ::before { content:'🏛️'; }
+
+    .sidebar-nav { padding:1rem 0; flex:1; }
+    .nav-group-label {
+      font-size:.65rem; font-weight:700; letter-spacing:.1em;
+      text-transform:uppercase; color:rgba(255,255,255,0.3);
+      padding:.75rem 1.25rem .4rem;
+    }
+    .nav-item {
+      display:flex; align-items:center; gap:.75rem;
+      padding:.7rem 1.25rem; cursor:pointer;
+      color:rgba(255,255,255,0.55); font-size:.875rem; font-weight:500;
+      transition:all .2s; border-left:3px solid transparent;
+      user-select:none;
+    }
+    .nav-item:hover { color:white; background:rgba(255,255,255,0.06); }
+    .nav-item.active {
+      color:white; background:rgba(26,86,219,0.25);
+      border-left-color: var(--sky);
+    }
+    .nav-icon { font-size:1rem; width:20px; text-align:center; }
+    .nav-badge {
+      margin-left:auto; background:var(--danger); color:white;
+      font-size:.65rem; font-weight:700; padding:.15rem .45rem;
+      border-radius:100px; min-width:18px; text-align:center;
+    }
+    .sidebar-footer {
+      padding:1rem 1.25rem;
+      border-top:1px solid rgba(255,255,255,0.08);
+    }
+    .user-pill {
+      display:flex; align-items:center; gap:.75rem;
+      padding:.6rem .75rem; border-radius:10px;
+      background:rgba(255,255,255,0.07); cursor:pointer;
+      transition:background .2s;
+    }
+    .user-pill:hover { background:rgba(255,255,255,0.12); }
+    .user-avatar {
+      width:34px; height:34px; border-radius:50%;
+      background:linear-gradient(135deg,var(--blue),var(--sky));
+      display:flex; align-items:center; justify-content:center;
+      font-size:.875rem; font-weight:700; color:white; flex-shrink:0;
+    }
+    .user-info { flex:1; min-width:0; }
+    .user-name { font-size:.8rem; font-weight:600; color:white; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
+    .user-role { font-size:.7rem; color:rgba(255,255,255,0.4); }
+
+    /* ─── TOPBAR ─── */
+    .topbar {
+      position:fixed; top:0;
+      left:var(--sidebar-w); right:0;
+      height:var(--topbar-h);
+      background:white; border-bottom:1px solid var(--border);
+      display:flex; align-items:center; justify-content:space-between;
+      padding:0 1.75rem; z-index:50;
+    }
+    .topbar-left { display:flex; align-items:center; gap:1rem; }
+    .page-title { font-family:'Syne',sans-serif; font-weight:700; font-size:1.1rem; }
+    .breadcrumb { font-size:.8rem; color:var(--gray); }
+    .topbar-right { display:flex; align-items:center; gap:1rem; }
+    .topbar-btn {
+      width:36px; height:36px; border-radius:9px;
+      border:1px solid var(--border); background:white;
+      display:flex; align-items:center; justify-content:center;
+      cursor:pointer; font-size:1rem; position:relative;
+      transition:all .2s;
+    }
+    .topbar-btn:hover { background:var(--light); border-color:var(--blue); }
+    .notif-dot {
+      position:absolute; top:6px; right:6px;
+      width:7px; height:7px; border-radius:50%;
+      background:var(--danger); border:1.5px solid white;
+    }
+    .year-badge {
+      background:var(--light); color:var(--blue);
+      padding:.35rem .9rem; border-radius:8px;
+      font-size:.8rem; font-weight:600; border:1px solid var(--border);
+    }
+
+    /* ─── MAIN ─── */
+    .main {
+      margin-left:var(--sidebar-w);
+      padding-top:var(--topbar-h);
+      flex:1; min-height:100vh;
+    }
+    .content { padding:1.75rem; }
+
+    /* ─── PAGES ─── */
+    .page { display:none; }
+    .page.active { display:block; }
+
+    /* ─── KPI CARDS ─── */
+    .kpi-grid {
+      display:grid; grid-template-columns:repeat(4,1fr);
+      gap:1.25rem; margin-bottom:1.75rem;
+    }
+    .kpi-card {
+      background:white; border:1px solid var(--border);
+      border-radius:14px; padding:1.25rem 1.5rem;
+      display:flex; align-items:center; gap:1rem;
+      transition:all .25s;
+    }
+    .kpi-card:hover { box-shadow:0 6px 20px rgba(0,0,0,0.07); transform:translateY(-2px); }
+    .kpi-icon {
+      width:48px; height:48px; border-radius:12px;
+      display:flex; align-items:center; justify-content:center;
+      font-size:1.3rem; flex-shrink:0;
+    }
+    .kpi-body { flex:1; }
+    .kpi-value {
+      font-family:'Syne',sans-serif; font-size:1.7rem;
+      font-weight:800; line-height:1;
+    }
+    .kpi-label { font-size:.775rem; color:var(--gray); margin-top:.3rem; }
+    .kpi-trend {
+      font-size:.75rem; font-weight:600; margin-top:.3rem;
+      display:flex; align-items:center; gap:.25rem;
+    }
+    .trend-up   { color:var(--success); }
+    .trend-down { color:var(--danger); }
+
+    /* ─── GRID 2 COLS ─── */
+    .dash-grid { display:grid; grid-template-columns:1fr 1fr; gap:1.25rem; margin-bottom:1.75rem; }
+    .dash-grid-3 { display:grid; grid-template-columns:2fr 1fr; gap:1.25rem; margin-bottom:1.75rem; }
+
+    /* ─── CARD ─── */
+    .card {
+      background:white; border:1px solid var(--border);
+      border-radius:14px; overflow:hidden;
+    }
+    .card-header {
+      display:flex; align-items:center; justify-content:space-between;
+      padding:1.1rem 1.5rem; border-bottom:1px solid var(--border);
+    }
+    .card-title { font-family:'Syne',sans-serif; font-weight:700; font-size:.95rem; }
+    .card-body { padding:1.25rem 1.5rem; }
+    .card-action {
+      font-size:.8rem; color:var(--blue); font-weight:600;
+      cursor:pointer; background:none; border:none; transition:opacity .2s;
+    }
+    .card-action:hover { opacity:.7; }
+
+    /* ─── BAR CHART ─── */
+    .bar-chart { display:flex; align-items:flex-end; gap:.6rem; height:140px; padding-bottom:.5rem; }
+    .bar-col { display:flex; flex-direction:column; align-items:center; gap:.4rem; flex:1; }
+    .bar-fill {
+      width:100%; border-radius:6px 6px 0 0;
+      background:linear-gradient(180deg,var(--blue),var(--sky));
+      min-height:4px; transition:height .6s ease;
+      position:relative;
+    }
+    .bar-fill.gold { background:linear-gradient(180deg,var(--gold),#fbbf24); }
+    .bar-fill.green { background:linear-gradient(180deg,var(--success),#34d399); }
+    .bar-label { font-size:.7rem; color:var(--gray); text-align:center; }
+    .bar-val { font-size:.7rem; font-weight:600; color:var(--navy); }
+
+    /* ─── DONUT ─── */
+    .donut-wrap { display:flex; align-items:center; gap:1.5rem; }
+    .donut-svg { flex-shrink:0; }
+    .donut-legend { display:flex; flex-direction:column; gap:.6rem; }
+    .legend-item { display:flex; align-items:center; gap:.5rem; font-size:.8rem; }
+    .legend-dot { width:10px; height:10px; border-radius:50%; flex-shrink:0; }
+
+    /* ─── TABLE ─── */
+    .data-table { width:100%; border-collapse:collapse; }
+    .data-table th {
+      text-align:left; padding:.7rem 1rem;
+      font-size:.75rem; font-weight:600; color:var(--gray);
+      text-transform:uppercase; letter-spacing:.05em;
+      background:#F8FAFC; border-bottom:1px solid var(--border);
+    }
+    .data-table td {
+      padding:.75rem 1rem; font-size:.85rem;
+      border-bottom:1px solid var(--border);
+    }
+    .data-table tr:last-child td { border:none; }
+    .data-table tr:hover td { background:#F8FAFC; }
+    .td-avatar {
+      width:30px; height:30px; border-radius:50%;
+      background:linear-gradient(135deg,var(--blue),var(--sky));
+      display:flex; align-items:center; justify-content:center;
+      font-size:.75rem; font-weight:700; color:white;
+    }
+    .td-name { font-weight:500; color:var(--navy); }
+    .td-sub  { font-size:.75rem; color:var(--gray); }
+
+    /* ─── BADGE ─── */
+    .badge {
+      display:inline-block; padding:.25rem .7rem;
+      border-radius:100px; font-size:.72rem; font-weight:600;
+    }
+    .badge-success { background:rgba(16,185,129,0.1); color:var(--success); }
+    .badge-blue    { background:rgba(26,86,219,0.1);  color:var(--blue); }
+    .badge-gold    { background:rgba(245,158,11,0.1); color:var(--gold); }
+    .badge-danger  { background:rgba(239,68,68,0.1);  color:var(--danger); }
+    .badge-gray    { background:rgba(100,116,139,0.1);color:var(--gray); }
+
+    /* ─── PROGRESS ─── */
+    .progress-list { display:flex; flex-direction:column; gap:1rem; }
+    .progress-item {}
+    .progress-top { display:flex; justify-content:space-between; margin-bottom:.4rem; }
+    .progress-name { font-size:.85rem; font-weight:500; }
+    .progress-pct  { font-size:.8rem; font-weight:600; color:var(--blue); }
+    .progress-bar  { height:7px; background:var(--border); border-radius:100px; overflow:hidden; }
+    .progress-fill { height:100%; border-radius:100px; transition:width .8s ease; }
+
+    /* ─── ACTIVITY ─── */
+    .activity-list { display:flex; flex-direction:column; gap:0; }
+    .activity-item {
+      display:flex; gap:1rem; padding:.85rem 0;
+      border-bottom:1px solid var(--border);
+    }
+    .activity-item:last-child { border:none; }
+    .activity-dot {
+      width:36px; height:36px; border-radius:10px;
+      display:flex; align-items:center; justify-content:center;
+      font-size:.95rem; flex-shrink:0;
+    }
+    .activity-body { flex:1; }
+    .activity-text { font-size:.85rem; color:var(--navy); line-height:1.5; }
+    .activity-text strong { font-weight:600; }
+    .activity-time { font-size:.75rem; color:var(--gray); margin-top:.2rem; }
+
+    /* ─── CALENDAR ─── */
+    .cal-grid {
+      display:grid; grid-template-columns:repeat(7,1fr);
+      gap:.3rem; text-align:center;
+    }
+    .cal-head { font-size:.72rem; font-weight:700; color:var(--gray); padding:.3rem 0; }
+    .cal-day {
+      font-size:.8rem; padding:.4rem;
+      border-radius:7px; cursor:pointer; transition:all .2s;
+    }
+    .cal-day:hover { background:var(--light); }
+    .cal-day.today { background:var(--blue); color:white; font-weight:700; }
+    .cal-day.has-event { position:relative; }
+    .cal-day.has-event::after {
+      content:''; position:absolute; bottom:2px; left:50%; transform:translateX(-50%);
+      width:4px; height:4px; border-radius:50%; background:var(--gold);
+    }
+    .cal-day.other-month { color:var(--border); }
+
+    /* ─── PAGE ÉTUDIANTS ─── */
+    .page-header {
+      display:flex; align-items:center; justify-content:space-between;
+      margin-bottom:1.5rem;
+    }
+    .page-header h2 { font-family:'Syne',sans-serif; font-weight:800; font-size:1.3rem; }
+    .btn-add {
+      display:flex; align-items:center; gap:.5rem;
+      padding:.6rem 1.2rem; border-radius:9px;
+      background:var(--blue); color:white;
+      font-size:.875rem; font-weight:600; cursor:pointer;
+      border:none; transition:all .2s;
+    }
+    .btn-add:hover { background:#1344b8; transform:translateY(-1px); }
+    .search-bar {
+      display:flex; align-items:center; gap:1rem;
+      margin-bottom:1.25rem; flex-wrap:wrap;
+    }
+    .search-input {
+      flex:1; min-width:240px; padding:.65rem 1rem;
+      border:1.5px solid var(--border); border-radius:9px;
+      font-size:.875rem; font-family:'Inter',sans-serif;
+      outline:none; transition:border-color .2s;
+    }
+    .search-input:focus { border-color:var(--blue); }
+    .filter-select {
+      padding:.65rem 1rem; border:1.5px solid var(--border);
+      border-radius:9px; font-size:.875rem;
+      font-family:'Inter',sans-serif; outline:none; color:var(--navy);
+      cursor:pointer;
+    }
+
+    /* ─── EMPLOI DU TEMPS ─── */
+    .timetable { width:100%; border-collapse:collapse; }
+    .timetable th {
+      background:var(--navy); color:white;
+      padding:.7rem 1rem; font-size:.8rem; font-weight:600;
+      text-align:center;
+    }
+    .timetable td {
+      border:1px solid var(--border); padding:.5rem;
+      font-size:.78rem; vertical-align:top; min-width:100px;
+      height:60px;
+    }
+    .timetable .time-col {
+      background:#F8FAFC; color:var(--gray);
+      font-size:.75rem; font-weight:600; text-align:center;
+      width:70px;
+    }
+    .cours-block {
+      background:rgba(26,86,219,0.1); border-left:3px solid var(--blue);
+      border-radius:5px; padding:.3rem .5rem; height:100%;
+    }
+    .cours-block.gold { background:rgba(245,158,11,0.1); border-left-color:var(--gold); }
+    .cours-block.green{ background:rgba(16,185,129,0.1);  border-left-color:var(--success); }
+    .cours-block.red  { background:rgba(239,68,68,0.1);   border-left-color:var(--danger); }
+    .cours-name { font-weight:600; color:var(--navy); font-size:.75rem; }
+    .cours-prof { color:var(--gray); font-size:.7rem; }
+
+    /* ─── COMPTABILITE ─── */
+    .finance-kpi { display:grid; grid-template-columns:repeat(3,1fr); gap:1.25rem; margin-bottom:1.75rem; }
+
+    /* ─── TOAST ─── */
+    .toast {
+      position:fixed; bottom:1.5rem; right:1.5rem;
+      background:var(--navy); color:white;
+      padding:.85rem 1.4rem; border-radius:12px;
+      font-size:.875rem; font-weight:500;
+      box-shadow:0 10px 30px rgba(0,0,0,0.2);
+      display:flex; align-items:center; gap:.75rem;
+      z-index:9999; opacity:0; transform:translateY(20px);
+      transition:all .3s; pointer-events:none;
+    }
+    .toast.show { opacity:1; transform:translateY(0); }
+
+    /* ─── RESPONSIVE ─── */
+    @media(max-width:1100px){
+      .kpi-grid { grid-template-columns:repeat(2,1fr); }
+      .dash-grid, .dash-grid-3 { grid-template-columns:1fr; }
+    }
+    @media(max-width:768px){
+      .sidebar { transform:translateX(-100%); }
+      .sidebar.open { transform:translateX(0); }
+      .main { margin-left:0; }
+      .topbar { left:0; }
+      .kpi-grid { grid-template-columns:1fr 1fr; }
+    }
+  </style>
+</head>
+<body>
+
+<!-- ─── SIDEBAR ─── -->
+<aside class="sidebar" id="sidebar">
+  <div class="sidebar-brand">
+    <div class="brand-name">Uni<span>Manage</span></div>
+    <div class="brand-univ">Université de Lomé</div>
+  </div>
+
+  <nav class="sidebar-nav">
+    <div class="nav-group-label">Principal</div>
+    <div class="nav-item active" onclick="showPage('dashboard')">
+      <span class="nav-icon">📊</span> Tableau de bord
+    </div>
+
+    <div class="nav-group-label">Académique</div>
+    <div class="nav-item" onclick="showPage('etudiants')">
+      <span class="nav-icon">🎓</span> Étudiants
+      <span class="nav-badge">12</span>
+    </div>
+    <div class="nav-item" onclick="showPage('enseignants')">
+      <span class="nav-icon">👨‍🏫</span> Enseignants
+    </div>
+    <div class="nav-item" onclick="showPage('emploi-temps')">
+      <span class="nav-icon">📅</span> Emploi du temps
+    </div>
+    <div class="nav-item" onclick="showPage('examens')">
+      <span class="nav-icon">📝</span> Examens & Résultats
+    </div>
+    <div class="nav-item" onclick="showPage('departements')">
+      <span class="nav-icon">🏛️</span> Départements
+    </div>
+
+    <div class="nav-group-label">Finance</div>
+    <div class="nav-item" onclick="showPage('comptabilite')">
+      <span class="nav-icon">💰</span> Comptabilité
+    </div>
+    <div class="nav-item" onclick="showPage('paiements')">
+      <span class="nav-icon">💳</span> Paiements
+      <span class="nav-badge">3</span>
+    </div>
+
+    <div class="nav-group-label">Système</div>
+    <div class="nav-item" onclick="showPage('parametres')">
+      <span class="nav-icon">⚙️</span> Paramètres
+    </div>
+    <div class="nav-item" onclick="showPage('utilisateurs')">
+      <span class="nav-icon">👥</span> Utilisateurs
+    </div>
+  </nav>
+
+  <div class="sidebar-footer">
+    <div class="user-pill">
+      <div class="user-avatar">DA</div>
+      <div class="user-info">
+        <div class="user-name">Dr. Amavi Kokou</div>
+        <div class="user-role">Directeur Académique</div>
+      </div>
+      <span style="color:rgba(255,255,255,0.3);font-size:.8rem">⋯</span>
+    </div>
+  </div>
+</aside>
+
+<!-- ─── TOPBAR ─── -->
+<header class="topbar">
+  <div class="topbar-left">
+    <div>
+      <div class="page-title" id="pageTitle">Tableau de bord</div>
+      <div class="breadcrumb" id="pageBreadcrumb">Université de Lomé · 2024–2025</div>
+    </div>
+  </div>
+  <div class="topbar-right">
+    <div class="year-badge">📆 2024–2025</div>
+    <div class="topbar-btn" onclick="showToast('📬 Vous avez 5 nouveaux messages')">
+      💬
+    </div>
+    <div class="topbar-btn" onclick="showToast('🔔 3 nouvelles notifications')">
+      🔔 <div class="notif-dot"></div>
+    </div>
+  </div>
+</header>
+
+<!-- ─── MAIN ─── -->
+<main class="main">
+<div class="content">
+
+  <!-- ══════════════════════════════
+       PAGE : TABLEAU DE BORD
+  ══════════════════════════════ -->
+  <div class="page active" id="page-dashboard">
+
+    <!-- KPI -->
+    <div class="kpi-grid">
+      <div class="kpi-card">
+        <div class="kpi-icon" style="background:rgba(26,86,219,0.1)">🎓</div>
+        <div class="kpi-body">
+          <div class="kpi-value" style="color:var(--blue)">1 248</div>
+          <div class="kpi-label">Étudiants inscrits</div>
+          <div class="kpi-trend trend-up">▲ +8% vs 2023</div>
+        </div>
+      </div>
+      <div class="kpi-card">
+        <div class="kpi-icon" style="background:rgba(245,158,11,0.1)">👨‍🏫</div>
+        <div class="kpi-body">
+          <div class="kpi-value" style="color:var(--gold)">87</div>
+          <div class="kpi-label">Enseignants actifs</div>
+          <div class="kpi-trend trend-up">▲ +5 ce semestre</div>
+        </div>
+      </div>
+      <div class="kpi-card">
+        <div class="kpi-icon" style="background:rgba(16,185,129,0.1)">✅</div>
+        <div class="kpi-body">
+          <div class="kpi-value" style="color:var(--success)">94%</div>
+          <div class="kpi-label">Taux de réussite</div>
+          <div class="kpi-trend trend-up">▲ +2% vs session 1</div>
+        </div>
+      </div>
+      <div class="kpi-card">
+        <div class="kpi-icon" style="background:rgba(239,68,68,0.1)">💰</div>
+        <div class="kpi-body">
+          <div class="kpi-value" style="color:var(--danger)">12.4M</div>
+          <div class="kpi-label">FCFA encaissés</div>
+          <div class="kpi-trend trend-down">▼ 22% impayés</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Charts row -->
+    <div class="dash-grid-3">
+      <!-- Inscriptions par mois -->
+      <div class="card">
+        <div class="card-header">
+          <div class="card-title">Inscriptions — Semestre 1</div>
+          <button class="card-action">Voir tout →</button>
+        </div>
+        <div class="card-body">
+          <div class="bar-chart">
+            <div class="bar-col"><div class="bar-fill" style="height:60%"></div><div class="bar-label">Oct</div><div class="bar-val">180</div></div>
+            <div class="bar-col"><div class="bar-fill" style="height:85%"></div><div class="bar-label">Nov</div><div class="bar-val">256</div></div>
+            <div class="bar-col"><div class="bar-fill" style="height:100%"></div><div class="bar-label">Déc</div><div class="bar-val">312</div></div>
+            <div class="bar-col"><div class="bar-fill gold" style="height:75%"></div><div class="bar-label">Jan</div><div class="bar-val">230</div></div>
+            <div class="bar-col"><div class="bar-fill gold" style="height:55%"></div><div class="bar-label">Fév</div><div class="bar-val">168</div></div>
+            <div class="bar-col"><div class="bar-fill green" style="height:40%"></div><div class="bar-label">Mar</div><div class="bar-val">102</div></div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Répartition départements -->
+      <div class="card">
+        <div class="card-header">
+          <div class="card-title">Départements</div>
+        </div>
+        <div class="card-body">
+          <div class="donut-wrap">
+            <svg class="donut-svg" width="100" height="100" viewBox="0 0 100 100">
+              <circle cx="50" cy="50" r="38" fill="none" stroke="#E2E8F0" stroke-width="14"/>
+              <circle cx="50" cy="50" r="38" fill="none" stroke="#1A56DB" stroke-width="14"
+                stroke-dasharray="89 150" stroke-dashoffset="0" stroke-linecap="round" transform="rotate(-90 50 50)"/>
+              <circle cx="50" cy="50" r="38" fill="none" stroke="#F59E0B" stroke-width="14"
+                stroke-dasharray="54 150" stroke-dashoffset="-89" stroke-linecap="round" transform="rotate(-90 50 50)"/>
+              <circle cx="50" cy="50" r="38" fill="none" stroke="#10B981" stroke-width="14"
+                stroke-dasharray="45 150" stroke-dashoffset="-143" stroke-linecap="round" transform="rotate(-90 50 50)"/>
+              <text x="50" y="54" text-anchor="middle" font-size="12" font-weight="800" fill="#0D1B2A" font-family="Syne">401</text>
+            </svg>
+            <div class="donut-legend">
+              <div class="legend-item"><div class="legend-dot" style="background:var(--blue)"></div>Gestion & Finance <strong>401</strong></div>
+              <div class="legend-item"><div class="legend-dot" style="background:var(--gold)"></div>Informatique <strong>312</strong></div>
+              <div class="legend-item"><div class="legend-dot" style="background:var(--success)"></div>Droit <strong>287</strong></div>
+              <div class="legend-item"><div class="legend-dot" style="background:var(--border)"></div>Autres <strong>248</strong></div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Bottom row -->
+    <div class="dash-grid">
+      <!-- Derniers étudiants -->
+      <div class="card">
+        <div class="card-header">
+          <div class="card-title">Inscriptions récentes</div>
+          <button class="card-action" onclick="showPage('etudiants')">Voir tout →</button>
+        </div>
+        <table class="data-table">
+          <thead><tr>
+            <th>Étudiant</th><th>Département</th><th>Niveau</th><th>Statut</th>
+          </tr></thead>
+          <tbody>
+            <tr>
+              <td><div style="display:flex;align-items:center;gap:.6rem"><div class="td-avatar">KA</div><div><div class="td-name">Kofi Adzoa</div><div class="td-sub">UL-2025-001</div></div></div></td>
+              <td>Informatique</td><td>L2</td>
+              <td><span class="badge badge-success">Actif</span></td>
+            </tr>
+            <tr>
+              <td><div style="display:flex;align-items:center;gap:.6rem"><div class="td-avatar" style="background:linear-gradient(135deg,var(--gold),#f59e0b)">AM</div><div><div class="td-name">Afia Mensah</div><div class="td-sub">UL-2025-002</div></div></div></td>
+              <td>Gestion</td><td>M1</td>
+              <td><span class="badge badge-blue">En cours</span></td>
+            </tr>
+            <tr>
+              <td><div style="display:flex;align-items:center;gap:.6rem"><div class="td-avatar" style="background:linear-gradient(135deg,var(--success),#34d399)">YD</div><div><div class="td-name">Yao Dodzi</div><div class="td-sub">UL-2025-003</div></div></div></td>
+              <td>Droit</td><td>L3</td>
+              <td><span class="badge badge-success">Actif</span></td>
+            </tr>
+            <tr>
+              <td><div style="display:flex;align-items:center;gap:.6rem"><div class="td-avatar" style="background:linear-gradient(135deg,#8b5cf6,#a78bfa)">SE</div><div><div class="td-name">Selom Edem</div><div class="td-sub">UL-2025-004</div></div></div></td>
+              <td>Sciences</td><td>L1</td>
+              <td><span class="badge badge-gold">Incomplet</span></td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+
+      <!-- Activité récente -->
+      <div class="card">
+        <div class="card-header">
+          <div class="card-title">Activité récente</div>
+        </div>
+        <div class="card-body">
+          <div class="activity-list">
+            <div class="activity-item">
+              <div class="activity-dot" style="background:rgba(16,185,129,0.12)">✅</div>
+              <div class="activity-body">
+                <div class="activity-text"><strong>Résultats publiés</strong> — Session 1 Informatique L2</div>
+                <div class="activity-time">Il y a 20 min</div>
+              </div>
+            </div>
+            <div class="activity-item">
+              <div class="activity-dot" style="background:rgba(26,86,219,0.12)">🎓</div>
+              <div class="activity-body">
+                <div class="activity-text"><strong>Kofi Adzoa</strong> a complété son inscription</div>
+                <div class="activity-time">Il y a 1h</div>
+              </div>
+            </div>
+            <div class="activity-item">
+              <div class="activity-dot" style="background:rgba(245,158,11,0.12)">💰</div>
+              <div class="activity-body">
+                <div class="activity-text">Paiement de <strong>75 000 FCFA</strong> reçu via Wave</div>
+                <div class="activity-time">Il y a 2h</div>
+              </div>
+            </div>
+            <div class="activity-item">
+              <div class="activity-dot" style="background:rgba(139,92,246,0.12)">📅</div>
+              <div class="activity-body">
+                <div class="activity-text">Emploi du temps <strong>Semestre 2</strong> mis à jour</div>
+                <div class="activity-time">Il y a 3h</div>
+              </div>
+            </div>
+            <div class="activity-item">
+              <div class="activity-dot" style="background:rgba(239,68,68,0.12)">⚠️</div>
+              <div class="activity-body">
+                <div class="activity-text"><strong>3 étudiants</strong> ont un solde impayé depuis 30 jours</div>
+                <div class="activity-time">Hier</div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Taux de paiement par département -->
+    <div class="card">
+      <div class="card-header">
+        <div class="card-title">Taux de recouvrement scolarité par département</div>
+        <button class="card-action" onclick="showPage('comptabilite')">Détails financiers →</button>
+      </div>
+      <div class="card-body">
+        <div class="progress-list">
+          <div class="progress-item">
+            <div class="progress-top"><span class="progress-name">Informatique & IA</span><span class="progress-pct">91%</span></div>
+            <div class="progress-bar"><div class="progress-fill" style="width:91%;background:linear-gradient(90deg,var(--blue),var(--sky))"></div></div>
+          </div>
+          <div class="progress-item">
+            <div class="progress-top"><span class="progress-name">Gestion & Finance</span><span class="progress-pct">78%</span></div>
+            <div class="progress-bar"><div class="progress-fill" style="width:78%;background:linear-gradient(90deg,var(--gold),#fbbf24)"></div></div>
+          </div>
+          <div class="progress-item">
+            <div class="progress-top"><span class="progress-name">Droit & Sciences Politiques</span><span class="progress-pct">85%</span></div>
+            <div class="progress-bar"><div class="progress-fill" style="width:85%;background:linear-gradient(90deg,var(--success),#34d399)"></div></div>
+          </div>
+          <div class="progress-item">
+            <div class="progress-top"><span class="progress-name">Sciences & Ingénierie</span><span class="progress-pct">62%</span></div>
+            <div class="progress-bar"><div class="progress-fill" style="width:62%;background:linear-gradient(90deg,var(--danger),#f87171)"></div></div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ══════════════════════════════
+       PAGE : ÉTUDIANTS
+  ══════════════════════════════ -->
+  <div class="page" id="page-etudiants">
+    <div class="page-header">
+      <div>
+        <h2>Étudiants</h2>
+        <div style="font-size:.85rem;color:var(--gray);margin-top:.2rem">1 248 inscrits · Année 2024–2025</div>
+      </div>
+      <button class="btn-add" onclick="showToast('📋 Formulaire d\'inscription ouvert')">+ Nouvel étudiant</button>
+    </div>
+    <div class="search-bar">
+      <input class="search-input" placeholder="🔍  Rechercher par nom, matricule..."/>
+      <select class="filter-select"><option>Tous les départements</option><option>Informatique</option><option>Gestion</option><option>Droit</option></select>
+      <select class="filter-select"><option>Tous les niveaux</option><option>L1</option><option>L2</option><option>L3</option><option>M1</option><option>M2</option></select>
+      <select class="filter-select"><option>Tous les statuts</option><option>Actif</option><option>Inactif</option><option>Suspendu</option></select>
+    </div>
+    <div class="card">
+      <table class="data-table">
+        <thead><tr>
+          <th>Étudiant</th><th>Matricule</th><th>Département</th><th>Niveau</th><th>Scolarité</th><th>Statut</th><th>Actions</th>
+        </tr></thead>
+        <tbody>
+          <tr><td><div style="display:flex;align-items:center;gap:.6rem"><div class="td-avatar">KA</div><div><div class="td-name">Kofi Adzoa</div><div class="td-sub">kofi@email.com</div></div></div></td><td>UL-2025-001</td><td>Informatique</td><td>L2</td><td><span class="badge badge-success">Payé</span></td><td><span class="badge badge-success">Actif</span></td><td><button class="card-action" onclick="showToast('👁️ Profil de Kofi Adzoa')">Voir</button></td></tr>
+          <tr><td><div style="display:flex;align-items:center;gap:.6rem"><div class="td-avatar" style="background:linear-gradient(135deg,var(--gold),#f59e0b)">AM</div><div><div class="td-name">Afia Mensah</div><div class="td-sub">afia@email.com</div></div></div></td><td>UL-2025-002</td><td>Gestion</td><td>M1</td><td><span class="badge badge-gold">Partiel</span></td><td><span class="badge badge-blue">En cours</span></td><td><button class="card-action" onclick="showToast('👁️ Profil de Afia Mensah')">Voir</button></td></tr>
+          <tr><td><div style="display:flex;align-items:center;gap:.6rem"><div class="td-avatar" style="background:linear-gradient(135deg,var(--success),#34d399)">YD</div><div><div class="td-name">Yao Dodzi</div><div class="td-sub">yao@email.com</div></div></div></td><td>UL-2025-003</td><td>Droit</td><td>L3</td><td><span class="badge badge-success">Payé</span></td><td><span class="badge badge-success">Actif</span></td><td><button class="card-action" onclick="showToast('👁️ Profil de Yao Dodzi')">Voir</button></td></tr>
+          <tr><td><div style="display:flex;align-items:center;gap:.6rem"><div class="td-avatar" style="background:linear-gradient(135deg,#8b5cf6,#a78bfa)">SE</div><div><div class="td-name">Selom Edem</div><div class="td-sub">selom@email.com</div></div></div></td><td>UL-2025-004</td><td>Sciences</td><td>L1</td><td><span class="badge badge-danger">Impayé</span></td><td><span class="badge badge-gold">Incomplet</span></td><td><button class="card-action" onclick="showToast('👁️ Profil de Selom Edem')">Voir</button></td></tr>
+          <tr><td><div style="display:flex;align-items:center;gap:.6rem"><div class="td-avatar" style="background:linear-gradient(135deg,#ec4899,#f472b6)">BK</div><div><div class="td-name">Béatrice Komi</div><div class="td-sub">bea@email.com</div></div></div></td><td>UL-2025-005</td><td>Informatique</td><td>M2</td><td><span class="badge badge-success">Payé</span></td><td><span class="badge badge-success">Actif</span></td><td><button class="card-action" onclick="showToast('👁️ Profil de Béatrice Komi')">Voir</button></td></tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+  <!-- ══════════════════════════════
+       PAGE : EMPLOI DU TEMPS
+  ══════════════════════════════ -->
+  <div class="page" id="page-emploi-temps">
+    <div class="page-header">
+      <div>
+        <h2>Emploi du temps</h2>
+        <div style="font-size:.85rem;color:var(--gray);margin-top:.2rem">Semaine du 20 au 24 Janvier 2025 · Informatique L2</div>
+      </div>
+      <button class="btn-add" onclick="showToast('📅 Créer un nouveau créneau')">+ Ajouter créneau</button>
+    </div>
+    <div class="card" style="overflow-x:auto">
+      <table class="timetable">
+        <thead><tr>
+          <th>Heure</th><th>Lundi</th><th>Mardi</th><th>Mercredi</th><th>Jeudi</th><th>Vendredi</th>
+        </tr></thead>
+        <tbody>
+          <tr>
+            <td class="time-col">07h–09h</td>
+            <td><div class="cours-block"><div class="cours-name">Algorithmes</div><div class="cours-prof">Dr. Mensah · Salle A1</div></div></td>
+            <td></td>
+            <td><div class="cours-block green"><div class="cours-name">Bases de données</div><div class="cours-prof">Prof. Komi · Salle B3</div></div></td>
+            <td></td>
+            <td><div class="cours-block gold"><div class="cours-name">Mathématiques</div><div class="cours-prof">Dr. Agbo · Amph. 1</div></div></td>
+          </tr>
+          <tr>
+            <td class="time-col">09h–11h</td>
+            <td></td>
+            <td><div class="cours-block gold"><div class="cours-name">Réseaux</div><div class="cours-prof">Prof. Dodzi · Labo Info</div></div></td>
+            <td></td>
+            <td><div class="cours-block"><div class="cours-name">POO Java</div><div class="cours-prof">Dr. Atchoe · Salle A2</div></div></td>
+            <td></td>
+          </tr>
+          <tr>
+            <td class="time-col">11h–13h</td>
+            <td><div class="cours-block green"><div class="cours-name">TP Algo</div><div class="cours-prof">Dr. Mensah · Labo</div></div></td>
+            <td></td>
+            <td><div class="cours-block red"><div class="cours-name">Examen blanc</div><div class="cours-prof">Toutes matières · Amph.</div></div></td>
+            <td></td>
+            <td></td>
+          </tr>
+          <tr>
+            <td class="time-col">14h–16h</td>
+            <td></td>
+            <td><div class="cours-block"><div class="cours-name">Syst. d'exploitation</div><div class="cours-prof">Prof. Edem · Salle C1</div></div></td>
+            <td></td>
+            <td><div class="cours-block green"><div class="cours-name">TP Réseaux</div><div class="cours-prof">Prof. Dodzi · Labo</div></div></td>
+            <td><div class="cours-block gold"><div class="cours-name">Anglais tech.</div><div class="cours-prof">Mme. Johnson · B2</div></div></td>
+          </tr>
+          <tr>
+            <td class="time-col">16h–18h</td>
+            <td><div class="cours-block red"><div class="cours-name">Projet tutoré</div><div class="cours-prof">Équipes · Salle Projet</div></div></td>
+            <td></td>
+            <td></td>
+            <td></td>
+            <td></td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+  <!-- ══════════════════════════════
+       PAGE : COMPTABILITÉ
+  ══════════════════════════════ -->
+  <div class="page" id="page-comptabilite">
+    <div class="page-header">
+      <div><h2>Comptabilité</h2><div style="font-size:.85rem;color:var(--gray);margin-top:.2rem">Année académique 2024–2025</div></div>
+      <button class="btn-add" onclick="showToast('📄 Export PDF en cours...')">⬇ Exporter</button>
+    </div>
+    <div class="finance-kpi">
+      <div class="kpi-card">
+        <div class="kpi-icon" style="background:rgba(16,185,129,0.1)">💵</div>
+        <div class="kpi-body">
+          <div class="kpi-value" style="color:var(--success)">48.2M</div>
+          <div class="kpi-label">FCFA encaissés (total)</div>
+          <div class="kpi-trend trend-up">▲ +12% vs 2023</div>
+        </div>
+      </div>
+      <div class="kpi-card">
+        <div class="kpi-icon" style="background:rgba(239,68,68,0.1)">⏳</div>
+        <div class="kpi-body">
+          <div class="kpi-value" style="color:var(--danger)">8.6M</div>
+          <div class="kpi-label">FCFA impayés</div>
+          <div class="kpi-trend trend-down">▼ 15% des étudiants</div>
+        </div>
+      </div>
+      <div class="kpi-card">
+        <div class="kpi-icon" style="background:rgba(245,158,11,0.1)">👨‍🏫</div>
+        <div class="kpi-body">
+          <div class="kpi-value" style="color:var(--gold)">12.1M</div>
+          <div class="kpi-label">FCFA payés aux enseignants</div>
+          <div class="kpi-trend trend-up">▲ Janvier soldé</div>
+        </div>
+      </div>
+    </div>
+    <div class="dash-grid">
+      <div class="card">
+        <div class="card-header"><div class="card-title">Derniers paiements reçus</div></div>
+        <table class="data-table">
+          <thead><tr><th>Étudiant</th><th>Montant</th><th>Moyen</th><th>Date</th><th>Statut</th></tr></thead>
+          <tbody>
+            <tr><td><div class="td-name">Kofi Adzoa</div></td><td><strong>250 000 FCFA</strong></td><td>Wave</td><td>20 Jan 2025</td><td><span class="badge badge-success">Confirmé</span></td></tr>
+            <tr><td><div class="td-name">Afia Mensah</div></td><td><strong>125 000 FCFA</strong></td><td>Orange Money</td><td>19 Jan 2025</td><td><span class="badge badge-success">Confirmé</span></td></tr>
+            <tr><td><div class="td-name">Yao Dodzi</div></td><td><strong>250 000 FCFA</strong></td><td>Virement</td><td>18 Jan 2025</td><td><span class="badge badge-success">Confirmé</span></td></tr>
+            <tr><td><div class="td-name">Selom Edem</div></td><td><strong>75 000 FCFA</strong></td><td>Espèces</td><td>15 Jan 2025</td><td><span class="badge badge-gold">Partiel</span></td></tr>
+          </tbody>
+        </table>
+      </div>
+      <div class="card">
+        <div class="card-header"><div class="card-title">Recouvrement par mois</div></div>
+        <div class="card-body">
+          <div class="bar-chart">
+            <div class="bar-col"><div class="bar-fill" style="height:55%"></div><div class="bar-label">Oct</div><div class="bar-val">8.2M</div></div>
+            <div class="bar-col"><div class="bar-fill" style="height:80%"></div><div class="bar-label">Nov</div><div class="bar-val">12M</div></div>
+            <div class="bar-col"><div class="bar-fill gold" style="height:100%"></div><div class="bar-label">Déc</div><div class="bar-val">15M</div></div>
+            <div class="bar-col"><div class="bar-fill green" style="height:85%"></div><div class="bar-label">Jan</div><div class="bar-val">13M</div></div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ══════════════════════════════
+       PAGE : EXAMENS
+  ══════════════════════════════ -->
+  <div class="page" id="page-examens">
+    <div class="page-header">
+      <div><h2>Examens & Résultats</h2><div style="font-size:.85rem;color:var(--gray);margin-top:.2rem">Session 2 — Février 2025</div></div>
+      <button class="btn-add" onclick="showToast('📝 Nouvelle session d\'examen créée')">+ Programmer examen</button>
+    </div>
+    <div class="kpi-grid" style="grid-template-columns:repeat(3,1fr)">
+      <div class="kpi-card"><div class="kpi-icon" style="background:rgba(26,86,219,0.1)">📋</div><div class="kpi-body"><div class="kpi-value" style="color:var(--blue)">24</div><div class="kpi-label">Examens programmés</div></div></div>
+      <div class="kpi-card"><div class="kpi-icon" style="background:rgba(16,185,129,0.1)">✅</div><div class="kpi-body"><div class="kpi-value" style="color:var(--success)">94%</div><div class="kpi-label">Taux de réussite moyen</div></div></div>
+      <div class="kpi-card"><div class="kpi-icon" style="background:rgba(245,158,11,0.1)">⏳</div><div class="kpi-body"><div class="kpi-value" style="color:var(--gold)">6</div><div class="kpi-label">Notes en attente de saisie</div></div></div>
+    </div>
+    <div class="card">
+      <div class="card-header"><div class="card-title">Examens à venir</div></div>
+      <table class="data-table">
+        <thead><tr><th>Matière</th><th>Département</th><th>Niveau</th><th>Date</th><th>Salle</th><th>Statut</th><th>Actions</th></tr></thead>
+        <tbody>
+          <tr><td><strong>Algorithmes Avancés</strong></td><td>Informatique</td><td>L2</td><td>03 Fév 2025 · 08h00</td><td>Amphithéâtre A</td><td><span class="badge badge-blue">Programmé</span></td><td><button class="card-action" onclick="showToast('📊 Saisie des notes ouverte')">Saisir notes</button></td></tr>
+          <tr><td><strong>Droit des Affaires</strong></td><td>Droit</td><td>L3</td><td>04 Fév 2025 · 10h00</td><td>Salle B2</td><td><span class="badge badge-gold">En attente</span></td><td><button class="card-action" onclick="showToast('📊 Saisie des notes ouverte')">Saisir notes</button></td></tr>
+          <tr><td><strong>Comptabilité Générale</strong></td><td>Gestion</td><td>M1</td><td>05 Fév 2025 · 14h00</td><td>Amphithéâtre B</td><td><span class="badge badge-success">Résultats publiés</span></td><td><button class="card-action" onclick="showToast('📄 Relevés téléchargeables')">Relevés PDF</button></td></tr>
+          <tr><td><strong>Réseaux Informatiques</strong></td><td>Informatique</td><td>L2</td><td>06 Fév 2025 · 08h00</td><td>Labo Informatique</td><td><span class="badge badge-blue">Programmé</span></td><td><button class="card-action" onclick="showToast('📊 Saisie des notes ouverte')">Saisir notes</button></td></tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+  <div class="page" id="page-enseignants">
+    <div class="page-header"><div><h2>Enseignants</h2><div style="font-size:.85rem;color:var(--gray)">87 enseignants · 12 vacataires</div></div><button class="btn-add" onclick="showToast('👨‍🏫 Formulaire d\'ajout ouvert')">+ Ajouter enseignant</button></div>
+    <!-- KPIs enseignants -->
+    <div class="kpi-grid" style="grid-template-columns:repeat(4,1fr);margin-bottom:1.5rem">
+      <div class="kpi-card"><div class="kpi-icon" style="background:rgba(26,86,219,0.1)">👨‍🏫</div><div class="kpi-body"><div class="kpi-value" style="color:var(--blue)">87</div><div class="kpi-label">Enseignants actifs</div></div></div>
+      <div class="kpi-card"><div class="kpi-icon" style="background:rgba(245,158,11,0.1)">📋</div><div class="kpi-body"><div class="kpi-value" style="color:var(--gold)">12</div><div class="kpi-label">Vacataires</div></div></div>
+      <div class="kpi-card"><div class="kpi-icon" style="background:rgba(16,185,129,0.1)">⏱️</div><div class="kpi-body"><div class="kpi-value" style="color:var(--success)">1 248h</div><div class="kpi-label">Heures ce semestre</div></div></div>
+      <div class="kpi-card"><div class="kpi-icon" style="background:rgba(239,68,68,0.1)">💰</div><div class="kpi-body"><div class="kpi-value" style="color:var(--danger)">12.1M</div><div class="kpi-label">FCFA salaires / mois</div></div></div>
+    </div>
+
+    <!-- Filtres + liste -->
+    <div class="search-bar" style="margin-bottom:1.25rem">
+      <input class="search-input" placeholder="🔍  Rechercher un enseignant..."/>
+      <select class="filter-select"><option>Tous les départements</option><option>Informatique</option><option>Gestion</option><option>Droit</option><option>Sciences</option></select>
+      <select class="filter-select"><option>Tous les contrats</option><option>Permanent</option><option>Vacataire</option><option>Contractuel</option></select>
+      <select class="filter-select"><option>Tous les statuts</option><option>Actif</option><option>En congé</option><option>Inactif</option></select>
+    </div>
+
+    <div class="dash-grid" style="margin-bottom:1.5rem">
+      <!-- Liste enseignants -->
+      <div class="card" style="grid-column:span 2">
+        <div class="card-header">
+          <div class="card-title">Liste des enseignants</div>
+          <button class="card-action" onclick="showToast('📄 Export Excel en cours...')">⬇ Exporter</button>
+        </div>
+        <table class="data-table">
+          <thead><tr><th>Enseignant</th><th>Spécialité</th><th>Département</th><th>Contrat</th><th>Heures</th><th>Taux/h</th><th>Statut</th><th>Actions</th></tr></thead>
+          <tbody id="enseignants-tbody">
+            <tr>
+              <td><div style="display:flex;align-items:center;gap:.6rem"><div class="td-avatar">KM</div><div><div class="td-name">Dr. Kodjo Mensah</div><div class="td-sub">kodjo@univ.tg</div></div></div></td>
+              <td>Algorithmique</td><td>Informatique</td>
+              <td><span class="badge badge-blue">Permanent</span></td>
+              <td><strong>120h</strong> / 180h</td><td>8 000 FCFA</td>
+              <td><span class="badge badge-success">Actif</span></td>
+              <td><button class="card-action" onclick="openEnseignantModal('Dr. Kodjo Mensah','Algorithmique','Informatique','Permanent','120','180','8000','Actif','KM')">Voir fiche</button></td>
+            </tr>
+            <tr>
+              <td><div style="display:flex;align-items:center;gap:.6rem"><div class="td-avatar" style="background:linear-gradient(135deg,var(--gold),#f59e0b)">AK</div><div><div class="td-name">Prof. Akosua Komi</div><div class="td-sub">akosua@univ.tg</div></div></div></td>
+              <td>Réseaux & Sécurité</td><td>Informatique</td>
+              <td><span class="badge badge-gold">Vacataire</span></td>
+              <td><strong>64h</strong> / 80h</td><td>10 000 FCFA</td>
+              <td><span class="badge badge-success">Actif</span></td>
+              <td><button class="card-action" onclick="openEnseignantModal('Prof. Akosua Komi','Réseaux & Sécurité','Informatique','Vacataire','64','80','10000','Actif','AK')">Voir fiche</button></td>
+            </tr>
+            <tr>
+              <td><div style="display:flex;align-items:center;gap:.6rem"><div class="td-avatar" style="background:linear-gradient(135deg,var(--success),#34d399)">YA</div><div><div class="td-name">Dr. Yawa Agbo</div><div class="td-sub">yawa@univ.tg</div></div></div></td>
+              <td>Mathématiques</td><td>Sciences</td>
+              <td><span class="badge badge-blue">Permanent</span></td>
+              <td><strong>145h</strong> / 180h</td><td>7 500 FCFA</td>
+              <td><span class="badge badge-success">Actif</span></td>
+              <td><button class="card-action" onclick="openEnseignantModal('Dr. Yawa Agbo','Mathématiques','Sciences','Permanent','145','180','7500','Actif','YA')">Voir fiche</button></td>
+            </tr>
+            <tr>
+              <td><div style="display:flex;align-items:center;gap:.6rem"><div class="td-avatar" style="background:linear-gradient(135deg,#8b5cf6,#a78bfa)">BE</div><div><div class="td-name">Me. Brice Edem</div><div class="td-sub">brice@univ.tg</div></div></div></td>
+              <td>Droit des Affaires</td><td>Droit</td>
+              <td><span class="badge badge-gold">Vacataire</span></td>
+              <td><strong>40h</strong> / 60h</td><td>12 000 FCFA</td>
+              <td><span class="badge badge-gold">En congé</span></td>
+              <td><button class="card-action" onclick="openEnseignantModal('Me. Brice Edem','Droit des Affaires','Droit','Vacataire','40','60','12000','En congé','BE')">Voir fiche</button></td>
+            </tr>
+            <tr>
+              <td><div style="display:flex;align-items:center;gap:.6rem"><div class="td-avatar" style="background:linear-gradient(135deg,#ec4899,#f472b6)">ND</div><div><div class="td-name">Dr. Nana Dodzi</div><div class="td-sub">nana@univ.tg</div></div></div></td>
+              <td>Comptabilité</td><td>Gestion</td>
+              <td><span class="badge badge-blue">Permanent</span></td>
+              <td><strong>160h</strong> / 180h</td><td>8 500 FCFA</td>
+              <td><span class="badge badge-success">Actif</span></td>
+              <td><button class="card-action" onclick="openEnseignantModal('Dr. Nana Dodzi','Comptabilité','Gestion','Permanent','160','180','8500','Actif','ND')">Voir fiche</button></td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+    <!-- Volume horaire par département -->
+    <div class="card">
+      <div class="card-header"><div class="card-title">Volume horaire effectué vs contractuel</div></div>
+      <div class="card-body">
+        <div class="progress-list">
+          <div class="progress-item">
+            <div class="progress-top"><span class="progress-name">Informatique & IA — 22 enseignants</span><span class="progress-pct">78%</span></div>
+            <div class="progress-bar"><div class="progress-fill" style="width:78%;background:linear-gradient(90deg,var(--blue),var(--sky))"></div></div>
+          </div>
+          <div class="progress-item">
+            <div class="progress-top"><span class="progress-name">Gestion & Finance — 18 enseignants</span><span class="progress-pct">89%</span></div>
+            <div class="progress-bar"><div class="progress-fill" style="width:89%;background:linear-gradient(90deg,var(--success),#34d399)"></div></div>
+          </div>
+          <div class="progress-item">
+            <div class="progress-top"><span class="progress-name">Droit & Sciences Politiques — 15 enseignants</span><span class="progress-pct">65%</span></div>
+            <div class="progress-bar"><div class="progress-fill" style="width:65%;background:linear-gradient(90deg,var(--gold),#fbbf24)"></div></div>
+          </div>
+          <div class="progress-item">
+            <div class="progress-top"><span class="progress-name">Sciences & Ingénierie — 20 enseignants</span><span class="progress-pct">91%</span></div>
+            <div class="progress-bar"><div class="progress-fill" style="width:91%;background:linear-gradient(90deg,#8b5cf6,#a78bfa)"></div></div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ══ MODAL FICHE ENSEIGNANT ══ -->
+  <div class="modal-overlay" id="enseignantModal" onclick="if(event.target===this)closeEnseignantModal()">
+    <div class="modal" style="max-width:520px">
+      <button class="modal-close" onclick="closeEnseignantModal()">✕</button>
+      <div style="display:flex;align-items:center;gap:1rem;margin-bottom:1.5rem">
+        <div id="ens-avatar" class="user-avatar" style="width:56px;height:56px;font-size:1.2rem;border-radius:14px"></div>
+        <div>
+          <div id="ens-nom" style="font-family:'Syne',sans-serif;font-weight:800;font-size:1.1rem"></div>
+          <div id="ens-spec" style="font-size:.85rem;color:var(--gray);margin-top:.2rem"></div>
+        </div>
+      </div>
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:1rem;margin-bottom:1.5rem">
+        <div style="background:var(--light);border-radius:10px;padding:1rem">
+          <div style="font-size:.72rem;color:var(--gray);font-weight:600;text-transform:uppercase;letter-spacing:.05em">Département</div>
+          <div id="ens-dept" style="font-weight:600;margin-top:.3rem"></div>
+        </div>
+        <div style="background:var(--light);border-radius:10px;padding:1rem">
+          <div style="font-size:.72rem;color:var(--gray);font-weight:600;text-transform:uppercase;letter-spacing:.05em">Type contrat</div>
+          <div id="ens-contrat" style="font-weight:600;margin-top:.3rem"></div>
+        </div>
+        <div style="background:var(--light);border-radius:10px;padding:1rem">
+          <div style="font-size:.72rem;color:var(--gray);font-weight:600;text-transform:uppercase;letter-spacing:.05em">Heures effectuées</div>
+          <div id="ens-heures" style="font-weight:700;color:var(--blue);font-size:1.1rem;margin-top:.3rem"></div>
+        </div>
+        <div style="background:var(--light);border-radius:10px;padding:1rem">
+          <div style="font-size:.72rem;color:var(--gray);font-weight:600;text-transform:uppercase;letter-spacing:.05em">Taux horaire</div>
+          <div id="ens-taux" style="font-weight:700;color:var(--gold);font-size:1.1rem;margin-top:.3rem"></div>
+        </div>
+      </div>
+      <div style="background:rgba(26,86,219,0.06);border-radius:12px;padding:1rem;margin-bottom:1.5rem;display:flex;justify-content:space-between;align-items:center">
+        <div>
+          <div style="font-size:.8rem;color:var(--gray)">Salaire estimé ce mois</div>
+          <div id="ens-salaire" style="font-family:'Syne',sans-serif;font-weight:800;font-size:1.4rem;color:var(--blue)"></div>
+        </div>
+        <div id="ens-statut"></div>
+      </div>
+      <div style="display:flex;gap:.75rem">
+        <button class="btn-add" style="flex:1;justify-content:center" onclick="showToast('📄 Fiche de paie générée en PDF');closeEnseignantModal()">📄 Fiche de paie</button>
+        <button class="btn-outline" style="flex:1;padding:.6rem;border-radius:9px;font-size:.875rem;font-weight:600;cursor:pointer;border:1.5px solid var(--border);color:var(--navy);background:white" onclick="showToast('✉️ Email envoyé à l\'enseignant');closeEnseignantModal()">✉️ Contacter</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ══ DÉPARTEMENTS ══ -->
+  <div class="page" id="page-departements">
+    <div class="page-header"><div><h2>Départements & Filières</h2><div style="font-size:.85rem;color:var(--gray);margin-top:.2rem">4 facultés · 12 départements · Année 2024–2025</div></div><button class="btn-add" onclick="showToast('🏛️ Nouveau département créé')">+ Département</button></div>
+    <div class="kpi-grid" style="grid-template-columns:repeat(4,1fr);margin-bottom:1.5rem">
+      <div class="kpi-card"><div class="kpi-icon" style="background:rgba(26,86,219,0.1)">🏛️</div><div class="kpi-body"><div class="kpi-value" style="color:var(--blue)">4</div><div class="kpi-label">Facultés</div></div></div>
+      <div class="kpi-card"><div class="kpi-icon" style="background:rgba(245,158,11,0.1)">📚</div><div class="kpi-body"><div class="kpi-value" style="color:var(--gold)">12</div><div class="kpi-label">Départements</div></div></div>
+      <div class="kpi-card"><div class="kpi-icon" style="background:rgba(16,185,129,0.1)">🎓</div><div class="kpi-body"><div class="kpi-value" style="color:var(--success)">28</div><div class="kpi-label">Filières actives</div></div></div>
+      <div class="kpi-card"><div class="kpi-icon" style="background:rgba(139,92,246,0.1)">📖</div><div class="kpi-body"><div class="kpi-value" style="color:#8b5cf6">186</div><div class="kpi-label">Matières enseignées</div></div></div>
+    </div>
+    <div class="features-grid" style="display:grid;grid-template-columns:repeat(auto-fit,minmax(260px,1fr));gap:1.25rem">
+      <div class="card">
+        <div class="card-header" style="background:rgba(26,86,219,0.05)">
+          <div><div class="card-title">💻 Informatique & IA</div><div style="font-size:.75rem;color:var(--gray);margin-top:.2rem">Faculté des Sciences</div></div>
+          <span class="badge badge-blue">287 étudiants</span>
+        </div>
+        <div class="card-body">
+          <div class="progress-list">
+            <div class="progress-item"><div class="progress-top"><span class="progress-name">Licence Informatique</span><span class="progress-pct">142</span></div><div class="progress-bar"><div class="progress-fill" style="width:70%;background:var(--blue)"></div></div></div>
+            <div class="progress-item"><div class="progress-top"><span class="progress-name">Master IA & Big Data</span><span class="progress-pct">88</span></div><div class="progress-bar"><div class="progress-fill" style="width:45%;background:var(--sky)"></div></div></div>
+            <div class="progress-item"><div class="progress-top"><span class="progress-name">Licence Réseaux</span><span class="progress-pct">57</span></div><div class="progress-bar"><div class="progress-fill" style="width:28%;background:var(--blue)"></div></div></div>
+          </div>
+          <div style="margin-top:1rem;display:flex;gap:.5rem">
+            <button class="card-action" onclick="showToast('📋 Détails Informatique & IA')">Voir détails</button>
+            <button class="card-action" onclick="showToast('📅 Emploi du temps Informatique')">Emploi du temps</button>
+          </div>
+        </div>
+      </div>
+      <div class="card">
+        <div class="card-header" style="background:rgba(245,158,11,0.05)">
+          <div><div class="card-title">📊 Gestion & Finance</div><div style="font-size:.75rem;color:var(--gray);margin-top:.2rem">Faculté des Sciences Économiques</div></div>
+          <span class="badge badge-gold">401 étudiants</span>
+        </div>
+        <div class="card-body">
+          <div class="progress-list">
+            <div class="progress-item"><div class="progress-top"><span class="progress-name">Licence Gestion</span><span class="progress-pct">198</span></div><div class="progress-bar"><div class="progress-fill" style="width:75%;background:var(--gold)"></div></div></div>
+            <div class="progress-item"><div class="progress-top"><span class="progress-name">Master Finance</span><span class="progress-pct">124</span></div><div class="progress-bar"><div class="progress-fill" style="width:50%;background:var(--gold)"></div></div></div>
+            <div class="progress-item"><div class="progress-top"><span class="progress-name">Licence Comptabilité</span><span class="progress-pct">79</span></div><div class="progress-bar"><div class="progress-fill" style="width:32%;background:var(--gold)"></div></div></div>
+          </div>
+          <div style="margin-top:1rem;display:flex;gap:.5rem">
+            <button class="card-action" onclick="showToast('📋 Détails Gestion & Finance')">Voir détails</button>
+            <button class="card-action" onclick="showToast('📅 Emploi du temps Gestion')">Emploi du temps</button>
+          </div>
+        </div>
+      </div>
+      <div class="card">
+        <div class="card-header" style="background:rgba(16,185,129,0.05)">
+          <div><div class="card-title">⚖️ Droit & Sciences Politiques</div><div style="font-size:.75rem;color:var(--gray);margin-top:.2rem">Faculté de Droit</div></div>
+          <span class="badge badge-success">312 étudiants</span>
+        </div>
+        <div class="card-body">
+          <div class="progress-list">
+            <div class="progress-item"><div class="progress-top"><span class="progress-name">Licence Droit Privé</span><span class="progress-pct">156</span></div><div class="progress-bar"><div class="progress-fill" style="width:68%;background:var(--success)"></div></div></div>
+            <div class="progress-item"><div class="progress-top"><span class="progress-name">Master Droit des Affaires</span><span class="progress-pct">98</span></div><div class="progress-bar"><div class="progress-fill" style="width:42%;background:var(--success)"></div></div></div>
+            <div class="progress-item"><div class="progress-top"><span class="progress-name">Licence Sciences Politiques</span><span class="progress-pct">58</span></div><div class="progress-bar"><div class="progress-fill" style="width:25%;background:var(--success)"></div></div></div>
+          </div>
+          <div style="margin-top:1rem;display:flex;gap:.5rem">
+            <button class="card-action" onclick="showToast('📋 Détails Droit')">Voir détails</button>
+            <button class="card-action" onclick="showToast('📅 Emploi du temps Droit')">Emploi du temps</button>
+          </div>
+        </div>
+      </div>
+      <div class="card">
+        <div class="card-header" style="background:rgba(139,92,246,0.05)">
+          <div><div class="card-title">🔬 Sciences & Ingénierie</div><div style="font-size:.75rem;color:var(--gray);margin-top:.2rem">Faculté des Sciences Appliquées</div></div>
+          <span class="badge" style="background:rgba(139,92,246,0.1);color:#8b5cf6">248 étudiants</span>
+        </div>
+        <div class="card-body">
+          <div class="progress-list">
+            <div class="progress-item"><div class="progress-top"><span class="progress-name">Licence Physique-Chimie</span><span class="progress-pct">112</span></div><div class="progress-bar"><div class="progress-fill" style="width:55%;background:#8b5cf6"></div></div></div>
+            <div class="progress-item"><div class="progress-top"><span class="progress-name">Master Génie Civil</span><span class="progress-pct">86</span></div><div class="progress-bar"><div class="progress-fill" style="width:40%;background:#8b5cf6"></div></div></div>
+            <div class="progress-item"><div class="progress-top"><span class="progress-name">Licence Biologie</span><span class="progress-pct">50</span></div><div class="progress-bar"><div class="progress-fill" style="width:22%;background:#8b5cf6"></div></div></div>
+          </div>
+          <div style="margin-top:1rem;display:flex;gap:.5rem">
+            <button class="card-action" onclick="showToast('📋 Détails Sciences')">Voir détails</button>
+            <button class="card-action" onclick="showToast('📅 Emploi du temps Sciences')">Emploi du temps</button>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+  <!-- ══════════════════════════════
+       PAGE : PAIEMENTS
+  ══════════════════════════════ -->
+  <div class="page" id="page-paiements">
+    <div class="page-header">
+      <div><h2>Paiements & Encaissements</h2><div style="font-size:.85rem;color:var(--gray);margin-top:.2rem">Suivi en temps réel · Année 2024–2025</div></div>
+      <div style="display:flex;gap:.75rem">
+        <button class="btn-add" onclick="openPaiementModal()">+ Enregistrer paiement</button>
+        <button class="btn-outline" style="padding:.6rem 1.2rem;border-radius:9px;font-size:.875rem;font-weight:600;cursor:pointer" onclick="showToast('📄 Export Excel généré')">⬇ Exporter</button>
+      </div>
+    </div>
+
+    <!-- KPIs -->
+    <div class="kpi-grid" style="margin-bottom:1.5rem">
+      <div class="kpi-card">
+        <div class="kpi-icon" style="background:rgba(16,185,129,0.1)">✅</div>
+        <div class="kpi-body"><div class="kpi-value" style="color:var(--success)">48.2M</div><div class="kpi-label">FCFA encaissés</div><div class="kpi-trend trend-up">▲ 847 paiements</div></div>
+      </div>
+      <div class="kpi-card">
+        <div class="kpi-icon" style="background:rgba(239,68,68,0.1)">⏳</div>
+        <div class="kpi-body"><div class="kpi-value" style="color:var(--danger)">8.6M</div><div class="kpi-label">FCFA impayés</div><div class="kpi-trend trend-down">▼ 187 étudiants</div></div>
+      </div>
+      <div class="kpi-card">
+        <div class="kpi-icon" style="background:rgba(26,86,219,0.1)">📱</div>
+        <div class="kpi-body"><div class="kpi-value" style="color:var(--blue)">62%</div><div class="kpi-label">Paiements mobile</div><div class="kpi-trend trend-up">▲ Wave + Orange</div></div>
+      </div>
+      <div class="kpi-card">
+        <div class="kpi-icon" style="background:rgba(245,158,11,0.1)">📆</div>
+        <div class="kpi-body"><div class="kpi-value" style="color:var(--gold)">3</div><div class="kpi-label">Échéances ce mois</div><div class="kpi-trend trend-down">▼ Dont 1 dépassée</div></div>
+      </div>
+    </div>
+
+    <!-- Moyens de paiement + historique -->
+    <div class="dash-grid" style="margin-bottom:1.5rem">
+      <!-- Répartition -->
+      <div class="card">
+        <div class="card-header"><div class="card-title">Répartition par moyen de paiement</div></div>
+        <div class="card-body">
+          <div style="display:flex;flex-direction:column;gap:1rem">
+            <div>
+              <div style="display:flex;justify-content:space-between;margin-bottom:.4rem;font-size:.85rem">
+                <span style="display:flex;align-items:center;gap:.5rem"><span style="font-size:1.1rem">🌊</span><strong>Wave</strong></span>
+                <span style="font-weight:700;color:var(--blue)">38% — 18.3M FCFA</span>
+              </div>
+              <div class="progress-bar"><div class="progress-fill" style="width:38%;background:linear-gradient(90deg,#1A56DB,#3B82F6)"></div></div>
+            </div>
+            <div>
+              <div style="display:flex;justify-content:space-between;margin-bottom:.4rem;font-size:.85rem">
+                <span style="display:flex;align-items:center;gap:.5rem"><span style="font-size:1.1rem">🟠</span><strong>Orange Money</strong></span>
+                <span style="font-weight:700;color:#f97316">24% — 11.6M FCFA</span>
+              </div>
+              <div class="progress-bar"><div class="progress-fill" style="width:24%;background:linear-gradient(90deg,#f97316,#fb923c)"></div></div>
+            </div>
+            <div>
+              <div style="display:flex;justify-content:space-between;margin-bottom:.4rem;font-size:.85rem">
+                <span style="display:flex;align-items:center;gap:.5rem"><span style="font-size:1.1rem">🏦</span><strong>Virement bancaire</strong></span>
+                <span style="font-weight:700;color:var(--success)">22% — 10.6M FCFA</span>
+              </div>
+              <div class="progress-bar"><div class="progress-fill" style="width:22%;background:linear-gradient(90deg,var(--success),#34d399)"></div></div>
+            </div>
+            <div>
+              <div style="display:flex;justify-content:space-between;margin-bottom:.4rem;font-size:.85rem">
+                <span style="display:flex;align-items:center;gap:.5rem"><span style="font-size:1.1rem">💵</span><strong>Espèces</strong></span>
+                <span style="font-weight:700;color:var(--gold)">16% — 7.7M FCFA</span>
+              </div>
+              <div class="progress-bar"><div class="progress-fill" style="width:16%;background:linear-gradient(90deg,var(--gold),#fbbf24)"></div></div>
+            </div>
+          </div>
+          <!-- Boutons mobile -->
+          <div style="display:grid;grid-template-columns:1fr 1fr;gap:.75rem;margin-top:1.5rem">
+            <button onclick="showToast('🌊 Lien de paiement Wave copié !')" style="padding:.75rem;border-radius:10px;border:none;background:linear-gradient(135deg,#1A56DB,#3B82F6);color:white;font-weight:700;font-size:.875rem;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:.5rem">🌊 Payer via Wave</button>
+            <button onclick="showToast('🟠 Lien Orange Money copié !')" style="padding:.75rem;border-radius:10px;border:none;background:linear-gradient(135deg,#f97316,#fb923c);color:white;font-weight:700;font-size:.875rem;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:.5rem">🟠 Orange Money</button>
+          </div>
+        </div>
+      </div>
+
+      <!-- Alertes impayés -->
+      <div class="card">
+        <div class="card-header"><div class="card-title">⚠️ Alertes impayés</div><button class="card-action" onclick="showToast('📩 SMS envoyés aux 187 étudiants')">Notifier tous</button></div>
+        <div class="card-body">
+          <div class="activity-list">
+            <div class="activity-item">
+              <div class="activity-dot" style="background:rgba(239,68,68,0.1)">🔴</div>
+              <div class="activity-body">
+                <div class="activity-text"><strong>Selom Edem</strong> — 250 000 FCFA</div>
+                <div class="activity-time">En retard de 45 jours · Sciences L1</div>
+              </div>
+              <button class="card-action" onclick="showToast('📩 Rappel envoyé à Selom Edem')">Relancer</button>
+            </div>
+            <div class="activity-item">
+              <div class="activity-dot" style="background:rgba(245,158,11,0.1)">🟡</div>
+              <div class="activity-body">
+                <div class="activity-text"><strong>Koffi Atta</strong> — 125 000 FCFA</div>
+                <div class="activity-time">En retard de 12 jours · Gestion M1</div>
+              </div>
+              <button class="card-action" onclick="showToast('📩 Rappel envoyé à Koffi Atta')">Relancer</button>
+            </div>
+            <div class="activity-item">
+              <div class="activity-dot" style="background:rgba(245,158,11,0.1)">🟡</div>
+              <div class="activity-body">
+                <div class="activity-text"><strong>Abla Dosseh</strong> — 75 000 FCFA</div>
+                <div class="activity-time">En retard de 8 jours · Droit L2</div>
+              </div>
+              <button class="card-action" onclick="showToast('📩 Rappel envoyé à Abla Dosseh')">Relancer</button>
+            </div>
+            <div class="activity-item">
+              <div class="activity-dot" style="background:rgba(239,68,68,0.1)">🔴</div>
+              <div class="activity-body">
+                <div class="activity-text"><strong>Mawuli Kokou</strong> — 250 000 FCFA</div>
+                <div class="activity-time">En retard de 60 jours · Info L3 — Accès bloqué</div>
+              </div>
+              <button class="card-action" onclick="showToast('🔓 Accès débloqué temporairement')">Débloquer</button>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Historique paiements -->
+    <div class="card">
+      <div class="card-header"><div class="card-title">Historique des paiements</div><button class="card-action" onclick="showToast('🔍 Filtre appliqué')">Filtrer</button></div>
+      <table class="data-table">
+        <thead><tr><th>Étudiant</th><th>Montant</th><th>Type</th><th>Moyen</th><th>Référence</th><th>Date</th><th>Statut</th><th>Reçu</th></tr></thead>
+        <tbody>
+          <tr><td><div class="td-name">Kofi Adzoa</div><div class="td-sub">UL-2025-001</div></td><td><strong>250 000 FCFA</strong></td><td>Scolarité S1</td><td>🌊 Wave</td><td><code style="font-size:.75rem;background:var(--light);padding:.1rem .4rem;border-radius:4px">WV-20250120-4821</code></td><td>20 Jan 2025</td><td><span class="badge badge-success">Confirmé</span></td><td><button class="card-action" onclick="showToast('📄 Reçu PDF généré')">PDF</button></td></tr>
+          <tr><td><div class="td-name">Afia Mensah</div><div class="td-sub">UL-2025-002</div></td><td><strong>125 000 FCFA</strong></td><td>Tranche 2/3</td><td>🟠 Orange</td><td><code style="font-size:.75rem;background:var(--light);padding:.1rem .4rem;border-radius:4px">OM-20250119-3317</code></td><td>19 Jan 2025</td><td><span class="badge badge-success">Confirmé</span></td><td><button class="card-action" onclick="showToast('📄 Reçu PDF généré')">PDF</button></td></tr>
+          <tr><td><div class="td-name">Yao Dodzi</div><div class="td-sub">UL-2025-003</div></td><td><strong>250 000 FCFA</strong></td><td>Scolarité S1</td><td>🏦 Virement</td><td><code style="font-size:.75rem;background:var(--light);padding:.1rem .4rem;border-radius:4px">VIR-20250118-0042</code></td><td>18 Jan 2025</td><td><span class="badge badge-success">Confirmé</span></td><td><button class="card-action" onclick="showToast('📄 Reçu PDF généré')">PDF</button></td></tr>
+          <tr><td><div class="td-name">Selom Edem</div><div class="td-sub">UL-2025-004</div></td><td><strong>75 000 FCFA</strong></td><td>Tranche 1/3</td><td>💵 Espèces</td><td><code style="font-size:.75rem;background:var(--light);padding:.1rem .4rem;border-radius:4px">ESP-20250115-0901</code></td><td>15 Jan 2025</td><td><span class="badge badge-gold">Partiel</span></td><td><button class="card-action" onclick="showToast('📄 Reçu PDF généré')">PDF</button></td></tr>
+          <tr><td><div class="td-name">Béatrice Komi</div><div class="td-sub">UL-2025-005</div></td><td><strong>250 000 FCFA</strong></td><td>Scolarité S1</td><td>🌊 Wave</td><td><code style="font-size:.75rem;background:var(--light);padding:.1rem .4rem;border-radius:4px">WV-20250114-2204</code></td><td>14 Jan 2025</td><td><span class="badge badge-success">Confirmé</span></td><td><button class="card-action" onclick="showToast('📄 Reçu PDF généré')">PDF</button></td></tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+  <!-- ══ MODAL NOUVEAU PAIEMENT ══ -->
+  <div class="modal-overlay" id="paiementModal" onclick="if(event.target===this)closePaiementModal()">
+    <div class="modal" style="max-width:480px">
+      <button class="modal-close" onclick="closePaiementModal()">✕</button>
+      <div style="font-family:'Syne',sans-serif;font-weight:800;font-size:1.2rem;margin-bottom:.25rem">Enregistrer un paiement</div>
+      <p style="font-size:.85rem;color:var(--gray);margin-bottom:1.5rem">Saisir un encaissement manuel</p>
+      <div class="form-group"><label>Étudiant *</label><select class="filter-select" style="width:100%"><option>Sélectionner un étudiant...</option><option>Kofi Adzoa — UL-2025-001</option><option>Afia Mensah — UL-2025-002</option><option>Selom Edem — UL-2025-004</option></select></div>
+      <div class="form-row">
+        <div class="form-group"><label>Montant (FCFA) *</label><input type="number" class="search-input" style="width:100%" placeholder="250 000"/></div>
+        <div class="form-group"><label>Type *</label><select class="filter-select" style="width:100%"><option>Scolarité complète</option><option>Tranche 1/3</option><option>Tranche 2/3</option><option>Tranche 3/3</option></select></div>
+      </div>
+      <div class="form-group"><label>Moyen de paiement *</label>
+        <div style="display:grid;grid-template-columns:repeat(2,1fr);gap:.6rem;margin-top:.4rem">
+          <div id="pay-wave" onclick="selectPay('wave')" style="padding:.7rem;border:2px solid var(--border);border-radius:9px;cursor:pointer;text-align:center;font-size:.85rem;font-weight:600;transition:all .2s">🌊 Wave</div>
+          <div id="pay-orange" onclick="selectPay('orange')" style="padding:.7rem;border:2px solid var(--border);border-radius:9px;cursor:pointer;text-align:center;font-size:.85rem;font-weight:600;transition:all .2s">🟠 Orange Money</div>
+          <div id="pay-virement" onclick="selectPay('virement')" style="padding:.7rem;border:2px solid var(--border);border-radius:9px;cursor:pointer;text-align:center;font-size:.85rem;font-weight:600;transition:all .2s">🏦 Virement</div>
+          <div id="pay-especes" onclick="selectPay('especes')" style="padding:.7rem;border:2px solid var(--border);border-radius:9px;cursor:pointer;text-align:center;font-size:.85rem;font-weight:600;transition:all .2s">💵 Espèces</div>
+        </div>
+      </div>
+      <div class="form-group" style="margin-top:.5rem"><label>Référence transaction</label><input type="text" class="search-input" style="width:100%" placeholder="Ex: WV-20250120-XXXX"/></div>
+      <button class="btn-submit" onclick="showToast('✅ Paiement enregistré ! Reçu PDF généré.');closePaiementModal()">Enregistrer le paiement →</button>
+    </div>
+  </div>
+
+  <!-- ══════════════════════════════
+       PAGE : PARAMÈTRES
+  ══════════════════════════════ -->
+  <div class="page" id="page-parametres">
+    <div class="page-header"><div><h2>Paramètres</h2><div style="font-size:.85rem;color:var(--gray);margin-top:.2rem">Configuration de votre université</div></div><button class="btn-add" onclick="showToast('✅ Modifications enregistrées')">💾 Sauvegarder</button></div>
+
+    <div class="dash-grid" style="margin-bottom:1.5rem">
+      <!-- Infos université -->
+      <div class="card">
+        <div class="card-header"><div class="card-title">🏛️ Informations université</div></div>
+        <div class="card-body">
+          <div class="form-group"><label>Nom officiel</label><input type="text" class="search-input" style="width:100%" value="Université de Lomé"/></div>
+          <div class="form-group"><label>Pays</label><input type="text" class="search-input" style="width:100%" value="Togo"/></div>
+          <div class="form-group"><label>Ville</label><input type="text" class="search-input" style="width:100%" value="Lomé"/></div>
+          <div class="form-group"><label>Email officiel</label><input type="email" class="search-input" style="width:100%" value="contact@univ-lome.tg"/></div>
+          <div class="form-group"><label>Téléphone</label><input type="text" class="search-input" style="width:100%" value="+228 22 XX XX XX"/></div>
+        </div>
+      </div>
+
+      <!-- Année académique -->
+      <div class="card">
+        <div class="card-header"><div class="card-title">📆 Année académique</div></div>
+        <div class="card-body">
+          <div class="form-group"><label>Année en cours</label><input type="text" class="search-input" style="width:100%" value="2024–2025"/></div>
+          <div class="form-group"><label>Début semestre 1</label><input type="date" class="search-input" style="width:100%" value="2024-10-01"/></div>
+          <div class="form-group"><label>Fin semestre 1</label><input type="date" class="search-input" style="width:100%" value="2025-02-28"/></div>
+          <div class="form-group"><label>Début semestre 2</label><input type="date" class="search-input" style="width:100%" value="2025-03-10"/></div>
+          <div class="form-group"><label>Fin semestre 2</label><input type="date" class="search-input" style="width:100%" value="2025-07-31"/></div>
+        </div>
+      </div>
+    </div>
+
+    <div class="dash-grid" style="margin-bottom:1.5rem">
+      <!-- Frais scolarité -->
+      <div class="card">
+        <div class="card-header"><div class="card-title">💰 Frais de scolarité par niveau</div><button class="card-action" onclick="showToast('➕ Nouveau tarif ajouté')">+ Ajouter</button></div>
+        <table class="data-table">
+          <thead><tr><th>Niveau</th><th>Filière</th><th>Montant FCFA</th><th>Tranches</th></tr></thead>
+          <tbody>
+            <tr><td>Licence (L1–L3)</td><td>Informatique</td><td><input type="text" style="border:1px solid var(--border);border-radius:6px;padding:.3rem .6rem;width:110px" value="250 000"/></td><td><select style="border:1px solid var(--border);border-radius:6px;padding:.3rem"><option>3 tranches</option><option>2 tranches</option><option>Comptant</option></select></td></tr>
+            <tr><td>Master (M1–M2)</td><td>Informatique</td><td><input type="text" style="border:1px solid var(--border);border-radius:6px;padding:.3rem .6rem;width:110px" value="350 000"/></td><td><select style="border:1px solid var(--border);border-radius:6px;padding:.3rem"><option>3 tranches</option><option>2 tranches</option></select></td></tr>
+            <tr><td>Licence (L1–L3)</td><td>Gestion</td><td><input type="text" style="border:1px solid var(--border);border-radius:6px;padding:.3rem .6rem;width:110px" value="220 000"/></td><td><select style="border:1px solid var(--border);border-radius:6px;padding:.3rem"><option>3 tranches</option><option>Comptant</option></select></td></tr>
+            <tr><td>Licence (L1–L3)</td><td>Droit</td><td><input type="text" style="border:1px solid var(--border);border-radius:6px;padding:.3rem .6rem;width:110px" value="200 000"/></td><td><select style="border:1px solid var(--border);border-radius:6px;padding:.3rem"><option>2 tranches</option><option>3 tranches</option></select></td></tr>
+          </tbody>
+        </table>
+      </div>
+
+      <!-- Système notation -->
+      <div class="card">
+        <div class="card-header"><div class="card-title">📊 Système de notation</div></div>
+        <div class="card-body">
+          <div class="form-group"><label>Barème</label><select class="filter-select" style="width:100%"><option selected>Sur 20 points</option><option>Crédits ECTS</option><option>GPA (0–4)</option></select></div>
+          <div class="form-group"><label>Note minimale de passage</label><input type="number" class="search-input" style="width:100%" value="10"/></div>
+          <div class="form-group"><label>Mention Passable</label><input type="text" class="search-input" style="width:100%" value="10 – 11.99"/></div>
+          <div class="form-group"><label>Mention Assez Bien</label><input type="text" class="search-input" style="width:100%" value="12 – 13.99"/></div>
+          <div class="form-group"><label>Mention Bien</label><input type="text" class="search-input" style="width:100%" value="14 – 15.99"/></div>
+          <div class="form-group"><label>Mention Très Bien</label><input type="text" class="search-input" style="width:100%" value="16 – 20"/></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Personnalisation -->
+    <div class="card">
+      <div class="card-header"><div class="card-title">🎨 Personnalisation de l'interface</div></div>
+      <div class="card-body" style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:1.5rem">
+        <div>
+          <div style="font-size:.8rem;font-weight:600;margin-bottom:.6rem">Couleur principale</div>
+          <div style="display:flex;gap:.6rem;flex-wrap:wrap">
+            <div onclick="showToast('🎨 Couleur Bleue appliquée')" style="width:32px;height:32px;border-radius:50%;background:#1A56DB;cursor:pointer;border:3px solid #1A56DB;box-shadow:0 0 0 2px white,0 0 0 4px #1A56DB"></div>
+            <div onclick="showToast('🎨 Couleur Verte appliquée')" style="width:32px;height:32px;border-radius:50%;background:#10B981;cursor:pointer"></div>
+            <div onclick="showToast('🎨 Couleur Violette appliquée')" style="width:32px;height:32px;border-radius:50%;background:#8b5cf6;cursor:pointer"></div>
+            <div onclick="showToast('🎨 Couleur Rouge appliquée')" style="width:32px;height:32px;border-radius:50%;background:#EF4444;cursor:pointer"></div>
+            <div onclick="showToast('🎨 Couleur Or appliquée')" style="width:32px;height:32px;border-radius:50%;background:#F59E0B;cursor:pointer"></div>
+          </div>
+        </div>
+        <div>
+          <div style="font-size:.8rem;font-weight:600;margin-bottom:.6rem">Logo université</div>
+          <div style="border:2px dashed var(--border);border-radius:10px;padding:1rem;text-align:center;cursor:pointer;font-size:.8rem;color:var(--gray)" onclick="showToast('📁 Sélecteur de fichier ouvert')">
+            📁 Cliquer pour uploader<br/><span style="font-size:.72rem">PNG, JPG — max 2MB</span>
+          </div>
+        </div>
+        <div>
+          <div style="font-size:.8rem;font-weight:600;margin-bottom:.6rem">Langue</div>
+          <select class="filter-select" style="width:100%"><option selected>🇫🇷 Français</option><option>🇬🇧 English</option></select>
+          <div style="font-size:.8rem;font-weight:600;margin-top:1rem;margin-bottom:.6rem">Fuseau horaire</div>
+          <select class="filter-select" style="width:100%"><option selected>Africa/Abidjan (GMT+0)</option><option>Africa/Lagos (GMT+1)</option></select>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ══════════════════════════════
+       PAGE : UTILISATEURS
+  ══════════════════════════════ -->
+  <div class="page" id="page-utilisateurs">
+    <div class="page-header"><div><h2>Utilisateurs & Accès</h2><div style="font-size:.85rem;color:var(--gray);margin-top:.2rem">Gérez les rôles et permissions de votre équipe</div></div><button class="btn-add" onclick="showToast('📧 Invitation envoyée')">+ Inviter utilisateur</button></div>
+
+    <div class="kpi-grid" style="grid-template-columns:repeat(4,1fr);margin-bottom:1.5rem">
+      <div class="kpi-card"><div class="kpi-icon" style="background:rgba(26,86,219,0.1)">👑</div><div class="kpi-body"><div class="kpi-value" style="color:var(--blue)">2</div><div class="kpi-label">Super Admins</div></div></div>
+      <div class="kpi-card"><div class="kpi-icon" style="background:rgba(245,158,11,0.1)">👨‍💼</div><div class="kpi-body"><div class="kpi-value" style="color:var(--gold)">8</div><div class="kpi-label">Administrateurs</div></div></div>
+      <div class="kpi-card"><div class="kpi-icon" style="background:rgba(16,185,129,0.1)">👨‍🏫</div><div class="kpi-body"><div class="kpi-value" style="color:var(--success)">87</div><div class="kpi-label">Enseignants</div></div></div>
+      <div class="kpi-card"><div class="kpi-icon" style="background:rgba(139,92,246,0.1)">🎓</div><div class="kpi-body"><div class="kpi-value" style="color:#8b5cf6">1 248</div><div class="kpi-label">Étudiants</div></div></div>
+    </div>
+
+    <!-- Rôles -->
+    <div class="dash-grid" style="margin-bottom:1.5rem">
+      <div class="card">
+        <div class="card-header"><div class="card-title">Membres de l'équipe admin</div></div>
+        <table class="data-table">
+          <thead><tr><th>Utilisateur</th><th>Rôle</th><th>Dernière connexion</th><th>Statut</th><th>Actions</th></tr></thead>
+          <tbody>
+            <tr><td><div style="display:flex;align-items:center;gap:.6rem"><div class="td-avatar">DA</div><div><div class="td-name">Dr. Amavi Kokou</div><div class="td-sub">amavi@univ.tg</div></div></div></td><td><span class="badge badge-blue">Directeur Académique</span></td><td>Aujourd'hui 09:32</td><td><span class="badge badge-success">Actif</span></td><td><button class="card-action" onclick="showToast('⚙️ Permissions modifiées')">Modifier</button></td></tr>
+            <tr><td><div style="display:flex;align-items:center;gap:.6rem"><div class="td-avatar" style="background:linear-gradient(135deg,var(--gold),#f59e0b)">SC</div><div><div class="td-name">Sœur Clémentine</div><div class="td-sub">clem@univ.tg</div></div></div></td><td><span class="badge badge-gold">Responsable Scolarité</span></td><td>Hier 16:45</td><td><span class="badge badge-success">Actif</span></td><td><button class="card-action" onclick="showToast('⚙️ Permissions modifiées')">Modifier</button></td></tr>
+            <tr><td><div style="display:flex;align-items:center;gap:.6rem"><div class="td-avatar" style="background:linear-gradient(135deg,var(--success),#34d399)">MK</div><div><div class="td-name">M. Mawuli Kpodo</div><div class="td-sub">mawuli@univ.tg</div></div></div></td><td><span class="badge" style="background:rgba(16,185,129,0.1);color:var(--success)">Comptable</span></td><td>20 Jan 2025</td><td><span class="badge badge-success">Actif</span></td><td><button class="card-action" onclick="showToast('⚙️ Permissions modifiées')">Modifier</button></td></tr>
+            <tr><td><div style="display:flex;align-items:center;gap:.6rem"><div class="td-avatar" style="background:linear-gradient(135deg,#8b5cf6,#a78bfa)">AE</div><div><div class="td-name">Mme Afi Etchou</div><div class="td-sub">afi@univ.tg</div></div></div></td><td><span class="badge badge-gray">Chef de département</span></td><td>19 Jan 2025</td><td><span class="badge badge-gold">En attente</span></td><td><button class="card-action" onclick="showToast('📧 Invitation renvoyée')">Relancer</button></td></tr>
+          </tbody>
+        </table>
+      </div>
+
+      <!-- Matrice permissions -->
+      <div class="card">
+        <div class="card-header"><div class="card-title">🔐 Matrice des permissions</div></div>
+        <div class="card-body" style="overflow-x:auto">
+          <table style="width:100%;border-collapse:collapse;font-size:.78rem">
+            <thead><tr>
+              <th style="text-align:left;padding:.4rem .6rem;color:var(--gray);font-weight:600">Module</th>
+              <th style="text-align:center;padding:.4rem;color:var(--blue)">Dir.</th>
+              <th style="text-align:center;padding:.4rem;color:var(--gold)">Scol.</th>
+              <th style="text-align:center;padding:.4rem;color:var(--success)">Compt.</th>
+              <th style="text-align:center;padding:.4rem;color:#8b5cf6">Ens.</th>
+            </tr></thead>
+            <tbody>
+              <tr style="border-bottom:1px solid var(--border)"><td style="padding:.4rem .6rem">Étudiants</td><td style="text-align:center">✅</td><td style="text-align:center">✅</td><td style="text-align:center">👁️</td><td style="text-align:center">👁️</td></tr>
+              <tr style="border-bottom:1px solid var(--border)"><td style="padding:.4rem .6rem">Enseignants</td><td style="text-align:center">✅</td><td style="text-align:center">👁️</td><td style="text-align:center">✅</td><td style="text-align:center">—</td></tr>
+              <tr style="border-bottom:1px solid var(--border)"><td style="padding:.4rem .6rem">Examens</td><td style="text-align:center">✅</td><td style="text-align:center">✅</td><td style="text-align:center">—</td><td style="text-align:center">✅</td></tr>
+              <tr style="border-bottom:1px solid var(--border)"><td style="padding:.4rem .6rem">Paiements</td><td style="text-align:center">✅</td><td style="text-align:center">✅</td><td style="text-align:center">✅</td><td style="text-align:center">—</td></tr>
+              <tr style="border-bottom:1px solid var(--border)"><td style="padding:.4rem .6rem">Emploi du temps</td><td style="text-align:center">✅</td><td style="text-align:center">✅</td><td style="text-align:center">—</td><td style="text-align:center">👁️</td></tr>
+              <tr><td style="padding:.4rem .6rem">Paramètres</td><td style="text-align:center">✅</td><td style="text-align:center">—</td><td style="text-align:center">—</td><td style="text-align:center">—</td></tr>
+            </tbody>
+          </table>
+          <div style="margin-top:1rem;font-size:.75rem;color:var(--gray);display:flex;gap:1rem">
+            <span>✅ Plein accès</span><span>👁️ Lecture seule</span><span>— Aucun accès</span>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+</div><!-- /content -->
+</main>
+
+<!-- ─── TOAST ─── -->
+<div class="toast" id="toast"></div>
+
+<script>
+  // ── Charger les données de session ──
+  const userData = JSON.parse(sessionStorage.getItem('unimanage_user') || 'null');
+
+  window.addEventListener('DOMContentLoaded', () => {
+    if (userData) {
+      // Nom université dans la sidebar
+      const univEl = document.getElementById('sidebarUniv');
+      if (univEl) univEl.textContent = userData.univ || 'Université';
+
+      // Nom & rôle utilisateur
+      const nameEl = document.getElementById('sidebarUserName');
+      const roleEl = document.getElementById('sidebarUserRole');
+      const avatarEl = document.getElementById('sidebarAvatar');
+      if (nameEl) nameEl.textContent = (userData.fname + ' ' + userData.lname).trim();
+      if (roleEl) roleEl.textContent = userData.role || 'Administrateur';
+      if (avatarEl) avatarEl.textContent = userData.initials || '??';
+
+      // Breadcrumb topbar
+      const breadEl = document.getElementById('pageBreadcrumb');
+      if (breadEl) breadEl.textContent = (userData.univ || 'Université') + ' · 2024–2025';
+    }
+  });
+
+  function logout() {
+    sessionStorage.removeItem('unimanage_user');
+    window.location.href = 'index.html';
+  }
+
+  // ── Navigation ──
+  const pages = ['dashboard','etudiants','enseignants','emploi-temps','departements','examens','comptabilite','paiements','parametres','utilisateurs'];
+  const titles = {
+    'dashboard':'Tableau de bord','etudiants':'Étudiants','enseignants':'Enseignants',
+    'emploi-temps':'Emploi du temps','departements':'Départements','examens':'Examens & Résultats',
+    'comptabilite':'Comptabilité','paiements':'Paiements','parametres':'Paramètres','utilisateurs':'Utilisateurs'
+  };
+
+  function showPage(id) {
+    pages.forEach(p => {
+      document.getElementById('page-'+p)?.classList.remove('active');
+      document.querySelectorAll('.nav-item').forEach(n => {
+        if (n.getAttribute('onclick')?.includes("'"+p+"'")) n.classList.remove('active');
+      });
+    });
+    document.getElementById('page-'+id)?.classList.add('active');
+    document.querySelectorAll('.nav-item').forEach(n => {
+      if (n.getAttribute('onclick')?.includes("'"+id+"'")) n.classList.add('active');
+    });
+    document.getElementById('pageTitle').textContent = titles[id] || id;
+  }
+
+  let toastTimer;
+  function showToast(msg) {
+    const t = document.getElementById('toast');
+    t.textContent = msg; t.classList.add('show');
+    clearTimeout(toastTimer);
+    toastTimer = setTimeout(() => t.classList.remove('show'), 3000);
+  }
+
+  // ── Modal Paiement ──
+  function openPaiementModal() {
+    document.getElementById('paiementModal').classList.add('active');
+    document.body.style.overflow = 'hidden';
+  }
+  function closePaiementModal() {
+    document.getElementById('paiementModal').classList.remove('active');
+    document.body.style.overflow = '';
+  }
+  function selectPay(type) {
+    ['wave','orange','virement','especes'].forEach(t => {
+      const el = document.getElementById('pay-'+t);
+      if (el) el.style.borderColor = 'var(--border)', el.style.background = 'white', el.style.color = 'var(--navy)';
+    });
+    const sel = document.getElementById('pay-'+type);
+    if (sel) { sel.style.borderColor = 'var(--blue)'; sel.style.background = 'rgba(26,86,219,0.07)'; sel.style.color = 'var(--blue)'; }
+  }
+
+  // ── Modal Fiche Enseignant ──
+  function openEnseignantModal(nom, spec, dept, contrat, heures, maxH, taux, statut, initiales) {
+    document.getElementById('ens-avatar').textContent = initiales;
+    document.getElementById('ens-nom').textContent = nom;
+    document.getElementById('ens-spec').textContent = spec;
+    document.getElementById('ens-dept').textContent = dept;
+    document.getElementById('ens-contrat').textContent = contrat;
+    document.getElementById('ens-heures').textContent = heures + 'h / ' + maxH + 'h';
+    document.getElementById('ens-taux').textContent = parseInt(taux).toLocaleString('fr') + ' FCFA/h';
+    const salaire = parseInt(heures) * parseInt(taux);
+    document.getElementById('ens-salaire').textContent = salaire.toLocaleString('fr') + ' FCFA';
+    const badgeClass = statut === 'Actif' ? 'badge-success' : statut === 'En congé' ? 'badge-gold' : 'badge-danger';
+    document.getElementById('ens-statut').innerHTML = '<span class="badge ' + badgeClass + '">' + statut + '</span>';
+    document.getElementById('enseignantModal').classList.add('active');
+    document.body.style.overflow = 'hidden';
+  }
+  function closeEnseignantModal() {
+    document.getElementById('enseignantModal').classList.remove('active');
+    document.body.style.overflow = '';
+  }
+</script>
+</body>
+</html>

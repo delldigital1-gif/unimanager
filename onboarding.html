@@ -1,0 +1,1205 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>UniManage — Inscription Université</title>
+  <link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=Inter:wght@300;400;500;600&display=swap" rel="stylesheet"/>
+  <style>
+    :root{
+      --navy:#0D1B2A;--blue:#1A56DB;--sky:#3B82F6;
+      --gold:#F59E0B;--light:#F0F4FF;--white:#FFFFFF;
+      --gray:#64748B;--border:#E2E8F0;
+      --success:#10B981;--danger:#EF4444;--purple:#8B5CF6;
+    }
+    *{margin:0;padding:0;box-sizing:border-box;}
+    body{font-family:'Inter',sans-serif;min-height:100vh;background:#F8FAFC;color:var(--navy);}
+
+    /* ── TOPBAR ── */
+    .topbar{
+      position:fixed;top:0;left:0;right:0;z-index:100;
+      background:white;border-bottom:1px solid var(--border);
+      padding:0 5%;height:64px;
+      display:flex;align-items:center;justify-content:space-between;
+    }
+    .logo{font-family:'Syne',sans-serif;font-weight:800;font-size:1.3rem;color:var(--navy);text-decoration:none;}
+    .logo span{color:var(--blue);}
+    .topbar-right{display:flex;align-items:center;gap:1rem;font-size:.85rem;}
+    .topbar-right a{color:var(--gray);text-decoration:none;}
+    .topbar-right a:hover{color:var(--blue);}
+
+    /* ── LAYOUT ── */
+    .page-wrap{
+      display:flex;min-height:100vh;
+      padding-top:64px;
+    }
+
+    /* ── LEFT STEPPER ── */
+    .stepper-panel{
+      width:300px;flex-shrink:0;
+      background:var(--navy);
+      padding:2.5rem 2rem;
+      position:sticky;top:64px;height:calc(100vh - 64px);
+      display:flex;flex-direction:column;
+    }
+    .stepper-title{
+      font-family:'Syne',sans-serif;font-weight:800;
+      font-size:1rem;color:white;margin-bottom:.4rem;
+    }
+    .stepper-sub{font-size:.78rem;color:rgba(255,255,255,0.4);margin-bottom:2rem;line-height:1.6;}
+
+    .steps-list{display:flex;flex-direction:column;gap:0;flex:1;}
+    .step-item{
+      display:flex;gap:1rem;padding:.75rem 0;
+      position:relative;cursor:pointer;
+    }
+    .step-item::before{
+      content:'';position:absolute;left:15px;top:44px;
+      width:2px;height:calc(100% - 20px);
+      background:rgba(255,255,255,0.1);
+    }
+    .step-item:last-child::before{display:none;}
+    .step-num{
+      width:30px;height:30px;border-radius:50%;
+      display:flex;align-items:center;justify-content:center;
+      font-size:.8rem;font-weight:700;flex-shrink:0;
+      border:2px solid rgba(255,255,255,0.15);
+      color:rgba(255,255,255,0.35);
+      transition:all .3s;z-index:1;
+    }
+    .step-item.done .step-num{
+      background:var(--success);border-color:var(--success);color:white;
+    }
+    .step-item.active .step-num{
+      background:var(--blue);border-color:var(--blue);color:white;
+      box-shadow:0 0 0 4px rgba(26,86,219,0.25);
+    }
+    .step-text{}
+    .step-name{font-size:.83rem;font-weight:600;color:rgba(255,255,255,0.35);transition:color .3s;}
+    .step-desc{font-size:.72rem;color:rgba(255,255,255,0.2);margin-top:.1rem;transition:color .3s;}
+    .step-item.active .step-name{color:white;}
+    .step-item.active .step-desc{color:rgba(255,255,255,0.5);}
+    .step-item.done .step-name{color:rgba(255,255,255,0.6);}
+
+    /* Progress bar */
+    .stepper-progress{margin-top:2rem;}
+    .stepper-progress-label{
+      display:flex;justify-content:space-between;
+      font-size:.75rem;color:rgba(255,255,255,0.4);margin-bottom:.6rem;
+    }
+    .stepper-progress-bar{
+      height:5px;background:rgba(255,255,255,0.1);
+      border-radius:100px;overflow:hidden;
+    }
+    .stepper-progress-fill{
+      height:100%;border-radius:100px;
+      background:linear-gradient(90deg,var(--blue),var(--sky));
+      transition:width .5s ease;
+    }
+
+    /* ── MAIN FORM ── */
+    .form-main{
+      flex:1;padding:2.5rem 3rem 4rem;
+      max-width:720px;
+    }
+
+    /* Step panel */
+    .step-panel{display:none;animation:fadeUp .35s ease;}
+    .step-panel.active{display:block;}
+    @keyframes fadeUp{
+      from{opacity:0;transform:translateY(12px)}
+      to{opacity:1;transform:translateY(0)}
+    }
+
+    .step-header{margin-bottom:2rem;}
+    .step-header-badge{
+      display:inline-flex;align-items:center;gap:.5rem;
+      background:rgba(26,86,219,0.08);color:var(--blue);
+      padding:.35rem 1rem;border-radius:100px;
+      font-size:.75rem;font-weight:700;margin-bottom:.75rem;
+      border:1px solid rgba(26,86,219,0.15);
+    }
+    .step-header h2{
+      font-family:'Syne',sans-serif;font-weight:800;
+      font-size:1.6rem;margin-bottom:.4rem;
+    }
+    .step-header p{font-size:.9rem;color:var(--gray);line-height:1.7;}
+
+    /* Form elements */
+    .form-section{
+      background:white;border:1px solid var(--border);
+      border-radius:14px;padding:1.5rem;margin-bottom:1.25rem;
+    }
+    .form-section-title{
+      font-family:'Syne',sans-serif;font-weight:700;
+      font-size:.9rem;margin-bottom:1.1rem;
+      display:flex;align-items:center;gap:.5rem;
+    }
+    .form-row{display:grid;grid-template-columns:1fr 1fr;gap:1rem;}
+    .form-row-3{display:grid;grid-template-columns:1fr 1fr 1fr;gap:1rem;}
+    .form-group{margin-bottom:.85rem;}
+    .form-group:last-child{margin-bottom:0;}
+    .form-group label{
+      display:block;font-size:.8rem;font-weight:600;
+      color:var(--navy);margin-bottom:.4rem;
+    }
+    .form-group label .required{color:var(--danger);}
+    .form-input{
+      width:100%;padding:.7rem 1rem;border-radius:9px;
+      border:1.5px solid var(--border);font-size:.875rem;
+      font-family:'Inter',sans-serif;color:var(--navy);
+      background:white;transition:all .2s;outline:none;
+    }
+    .form-input:focus{border-color:var(--blue);box-shadow:0 0 0 3px rgba(26,86,219,0.08);}
+    .form-input::placeholder{color:#aab;}
+    .form-select{
+      width:100%;padding:.7rem 1rem;border-radius:9px;
+      border:1.5px solid var(--border);font-size:.875rem;
+      font-family:'Inter',sans-serif;color:var(--navy);
+      background:white;cursor:pointer;outline:none;
+      transition:all .2s;
+    }
+    .form-select:focus{border-color:var(--blue);}
+    .form-hint{font-size:.75rem;color:var(--gray);margin-top:.35rem;}
+
+    /* Subdomain preview */
+    .subdomain-preview{
+      display:flex;align-items:center;gap:0;
+      border:1.5px solid var(--border);border-radius:9px;overflow:hidden;
+      transition:border-color .2s;
+    }
+    .subdomain-preview:focus-within{border-color:var(--blue);}
+    .subdomain-prefix{
+      padding:.7rem .85rem;background:#F8FAFC;
+      font-size:.875rem;color:var(--gray);
+      border-right:1.5px solid var(--border);white-space:nowrap;
+    }
+    .subdomain-input{
+      flex:1;padding:.7rem .85rem;border:none;
+      font-size:.875rem;font-family:'Inter',sans-serif;
+      color:var(--navy);outline:none;background:white;
+    }
+    .subdomain-suffix{
+      padding:.7rem .85rem;background:#F8FAFC;
+      font-size:.875rem;color:var(--gray);
+      border-left:1.5px solid var(--border);white-space:nowrap;
+    }
+
+    /* Plan cards */
+    .plan-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:1rem;}
+    .plan-card{
+      border:2px solid var(--border);border-radius:12px;
+      padding:1.25rem;cursor:pointer;transition:all .25s;
+      position:relative;
+    }
+    .plan-card:hover{border-color:var(--blue);background:var(--light);}
+    .plan-card.selected{border-color:var(--blue);background:var(--light);}
+    .plan-card.selected.gold{border-color:var(--gold);background:rgba(245,158,11,0.07);}
+    .plan-card.selected.purple{border-color:var(--purple);background:rgba(139,92,246,0.07);}
+    .plan-popular{
+      position:absolute;top:-11px;left:50%;transform:translateX(-50%);
+      background:var(--blue);color:white;
+      font-size:.65rem;font-weight:700;padding:.2rem .75rem;
+      border-radius:100px;white-space:nowrap;
+    }
+    .plan-name{font-family:'Syne',sans-serif;font-weight:800;font-size:.95rem;margin-bottom:.25rem;}
+    .plan-price{font-family:'Syne',sans-serif;font-weight:800;font-size:1.3rem;color:var(--navy);margin:.5rem 0 .25rem;}
+    .plan-price small{font-size:.75rem;font-weight:400;color:var(--gray);}
+    .plan-limit{font-size:.75rem;color:var(--gray);margin-bottom:.85rem;}
+    .plan-features{list-style:none;display:flex;flex-direction:column;gap:.35rem;}
+    .plan-features li{font-size:.75rem;color:var(--gray);display:flex;align-items:center;gap:.4rem;}
+    .plan-features li::before{content:'✓';color:var(--success);font-weight:700;flex-shrink:0;}
+    .plan-radio{
+      width:18px;height:18px;border-radius:50%;
+      border:2px solid var(--border);margin-top:.75rem;
+      display:flex;align-items:center;justify-content:center;
+      transition:all .2s;
+    }
+    .plan-card.selected .plan-radio{background:var(--blue);border-color:var(--blue);}
+    .plan-card.selected .plan-radio::after{content:'';width:8px;height:8px;border-radius:50%;background:white;}
+    .plan-card.selected.gold .plan-radio{background:var(--gold);border-color:var(--gold);}
+    .plan-card.selected.purple .plan-radio{background:var(--purple);border-color:var(--purple);}
+
+    /* Module toggles */
+    .module-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:.75rem;}
+    .module-toggle{
+      display:flex;align-items:center;gap:.85rem;
+      padding:.85rem 1rem;border-radius:10px;
+      border:1.5px solid var(--border);cursor:pointer;
+      transition:all .2s;
+    }
+    .module-toggle:hover{border-color:var(--blue);background:var(--light);}
+    .module-toggle.on{border-color:var(--blue);background:var(--light);}
+    .module-icon{font-size:1.2rem;flex-shrink:0;}
+    .module-body{flex:1;}
+    .module-name{font-size:.83rem;font-weight:600;color:var(--navy);}
+    .module-desc{font-size:.72rem;color:var(--gray);margin-top:.1rem;}
+    /* Toggle switch */
+    .toggle-sw{
+      width:36px;height:20px;border-radius:100px;
+      background:var(--border);position:relative;
+      transition:background .2s;flex-shrink:0;
+    }
+    .module-toggle.on .toggle-sw{background:var(--blue);}
+    .toggle-sw::after{
+      content:'';position:absolute;top:2px;left:2px;
+      width:16px;height:16px;border-radius:50%;
+      background:white;transition:transform .2s;
+      box-shadow:0 1px 3px rgba(0,0,0,0.2);
+    }
+    .module-toggle.on .toggle-sw::after{transform:translateX(16px);}
+
+    /* Upload zone */
+    .upload-zone{
+      border:2px dashed var(--border);border-radius:12px;
+      padding:2rem;text-align:center;cursor:pointer;
+      transition:all .2s;
+    }
+    .upload-zone:hover{border-color:var(--blue);background:var(--light);}
+    .upload-zone-icon{font-size:2rem;margin-bottom:.75rem;}
+    .upload-zone-title{font-weight:600;font-size:.9rem;margin-bottom:.25rem;}
+    .upload-zone-sub{font-size:.78rem;color:var(--gray);}
+
+    /* Color picker */
+    .color-grid{display:flex;gap:.75rem;flex-wrap:wrap;margin-top:.5rem;}
+    .color-dot{
+      width:36px;height:36px;border-radius:50%;
+      cursor:pointer;transition:all .2s;
+      border:3px solid transparent;
+    }
+    .color-dot.selected{
+      box-shadow:0 0 0 2px white,0 0 0 4px currentColor;
+      transform:scale(1.1);
+    }
+    .color-dot-custom{
+      width:36px;height:36px;border-radius:50%;
+      border:2px dashed var(--border);cursor:pointer;
+      display:flex;align-items:center;justify-content:center;
+      font-size:.9rem;color:var(--gray);transition:all .2s;
+    }
+    .color-dot-custom:hover{border-color:var(--blue);}
+
+    /* Recap */
+    .recap-grid{display:grid;grid-template-columns:1fr 1fr;gap:1rem;}
+    .recap-item{
+      background:white;border:1px solid var(--border);
+      border-radius:11px;padding:1rem;
+    }
+    .recap-label{font-size:.72rem;font-weight:600;color:var(--gray);text-transform:uppercase;letter-spacing:.05em;margin-bottom:.35rem;}
+    .recap-value{font-size:.9rem;font-weight:600;color:var(--navy);}
+
+    /* Nav buttons */
+    .form-nav{
+      display:flex;justify-content:space-between;align-items:center;
+      margin-top:1.75rem;
+    }
+    .btn-back{
+      display:flex;align-items:center;gap:.5rem;
+      padding:.75rem 1.5rem;border-radius:10px;
+      border:1.5px solid var(--border);background:white;
+      color:var(--navy);font-size:.9rem;font-weight:600;
+      cursor:pointer;transition:all .2s;
+    }
+    .btn-back:hover{border-color:var(--blue);color:var(--blue);}
+    .btn-forward{
+      display:flex;align-items:center;gap:.5rem;
+      padding:.75rem 2rem;border-radius:10px;
+      background:var(--blue);color:white;
+      font-size:.9rem;font-weight:700;cursor:pointer;
+      border:none;transition:all .25s;
+    }
+    .btn-forward:hover{background:#1344b8;transform:translateY(-1px);box-shadow:0 6px 18px rgba(26,86,219,0.3);}
+
+    /* Success screen */
+    .success-screen{
+      text-align:center;padding:3rem 1rem;
+      animation:fadeUp .5s ease;
+    }
+    .success-icon{
+      width:80px;height:80px;border-radius:50%;
+      background:rgba(16,185,129,0.1);
+      display:flex;align-items:center;justify-content:center;
+      font-size:2.5rem;margin:0 auto 1.5rem;
+      border:3px solid rgba(16,185,129,0.2);
+    }
+    .success-title{
+      font-family:'Syne',sans-serif;font-weight:800;
+      font-size:1.8rem;margin-bottom:.75rem;
+    }
+    .success-sub{font-size:.95rem;color:var(--gray);line-height:1.8;max-width:500px;margin:0 auto 2rem;}
+    .success-steps{
+      display:flex;flex-direction:column;gap:.6rem;
+      max-width:420px;margin:0 auto 2rem;text-align:left;
+    }
+    .success-step{
+      display:flex;align-items:center;gap:.75rem;
+      padding:.75rem 1rem;background:white;
+      border:1px solid var(--border);border-radius:10px;
+      font-size:.875rem;
+    }
+    .success-step-icon{
+      width:32px;height:32px;border-radius:8px;
+      display:flex;align-items:center;justify-content:center;
+      font-size:.9rem;flex-shrink:0;
+    }
+    .btn-go-dashboard{
+      padding:1rem 2.5rem;border-radius:12px;
+      background:var(--blue);color:white;
+      font-size:1rem;font-weight:700;cursor:pointer;
+      border:none;transition:all .25s;
+      display:inline-flex;align-items:center;gap:.75rem;
+    }
+    .btn-go-dashboard:hover{background:#1344b8;transform:translateY(-2px);box-shadow:0 8px 24px rgba(26,86,219,0.35);}
+
+    /* Alert */
+    .alert{padding:.75rem 1rem;border-radius:8px;font-size:.83rem;font-weight:500;margin-bottom:1rem;display:none;}
+    .alert.error{background:rgba(239,68,68,0.08);color:var(--danger);border:1px solid rgba(239,68,68,0.2);display:block;}
+
+    /* Toast */
+    .toast{position:fixed;bottom:1.5rem;right:1.5rem;background:var(--navy);color:white;padding:.85rem 1.4rem;border-radius:12px;font-size:.875rem;font-weight:500;box-shadow:0 10px 30px rgba(0,0,0,0.2);z-index:9999;opacity:0;transform:translateY(20px);transition:all .3s;pointer-events:none;}
+    .toast.show{opacity:1;transform:translateY(0);}
+
+    @media(max-width:900px){
+      .stepper-panel{display:none;}
+      .form-main{padding:1.5rem;}
+      .form-row,.form-row-3{grid-template-columns:1fr;}
+      .plan-grid{grid-template-columns:1fr;}
+      .module-grid{grid-template-columns:1fr;}
+      .recap-grid{grid-template-columns:1fr;}
+    }
+  </style>
+</head>
+<body>
+
+<!-- TOPBAR -->
+<nav class="topbar">
+  <a href="index.html" class="logo">Uni<span>Manage</span></a>
+  <div class="topbar-right">
+    <span style="color:var(--gray)">Déjà inscrit ?</span>
+    <a href="login.html" style="color:var(--blue);font-weight:600">Se connecter →</a>
+  </div>
+</nav>
+
+<div class="page-wrap">
+
+  <!-- ── STEPPER PANEL ── -->
+  <aside class="stepper-panel">
+    <div class="stepper-title">Inscription université</div>
+    <div class="stepper-sub">Créez votre espace UniManage en quelques étapes simples.</div>
+
+    <div class="steps-list">
+      <div class="step-item active" id="si1">
+        <div class="step-num" id="sn1">1</div>
+        <div class="step-text">
+          <div class="step-name">Informations générales</div>
+          <div class="step-desc">Nom, pays, contact officiel</div>
+        </div>
+      </div>
+      <div class="step-item" id="si2">
+        <div class="step-num" id="sn2">2</div>
+        <div class="step-text">
+          <div class="step-name">Compte administrateur</div>
+          <div class="step-desc">Directeur, email, mot de passe</div>
+        </div>
+      </div>
+      <div class="step-item" id="si3">
+        <div class="step-num" id="sn3">3</div>
+        <div class="step-text">
+          <div class="step-name">Plan & abonnement</div>
+          <div class="step-desc">Starter, Pro ou Enterprise</div>
+        </div>
+      </div>
+      <div class="step-item" id="si4">
+        <div class="step-num" id="sn4">4</div>
+        <div class="step-text">
+          <div class="step-name">Modules actifs</div>
+          <div class="step-desc">Choisissez vos fonctionnalités</div>
+        </div>
+      </div>
+      <div class="step-item" id="si5">
+        <div class="step-num" id="sn5">5</div>
+        <div class="step-text">
+          <div class="step-name">Personnalisation</div>
+          <div class="step-desc">Logo, couleurs, langue</div>
+        </div>
+      </div>
+      <div class="step-item" id="si6">
+        <div class="step-num" id="sn6">6</div>
+        <div class="step-text">
+          <div class="step-name">Récapitulatif</div>
+          <div class="step-desc">Vérifiez et confirmez</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="stepper-progress">
+      <div class="stepper-progress-label">
+        <span>Progression</span>
+        <span id="progressPct">0%</span>
+      </div>
+      <div class="stepper-progress-bar">
+        <div class="stepper-progress-fill" id="progressFill" style="width:0%"></div>
+      </div>
+    </div>
+  </aside>
+
+  <!-- ── FORM MAIN ── -->
+  <main class="form-main">
+
+    <!-- ══ STEP 1 : Infos générales ══ -->
+    <div class="step-panel active" id="panel1">
+      <div class="step-header">
+        <div class="step-header-badge">🏛️ Étape 1 sur 6</div>
+        <h2>Informations générales</h2>
+        <p>Renseignez les informations officielles de votre établissement. Ces données apparaîtront sur tous les documents officiels.</p>
+      </div>
+
+      <div id="alert1" class="alert"></div>
+
+      <div class="form-section">
+        <div class="form-section-title">📋 Identité de l'établissement</div>
+        <div class="form-group">
+          <label>Nom officiel de l'université <span class="required">*</span></label>
+          <input class="form-input" id="f_nom" placeholder="Ex: Université Privée de Lomé"/>
+        </div>
+        <div class="form-row">
+          <div class="form-group">
+            <label>Type d'établissement <span class="required">*</span></label>
+            <select class="form-select" id="f_type">
+              <option value="">Sélectionner...</option>
+              <option>Université</option>
+              <option>Institut Supérieur</option>
+              <option>Grande École</option>
+              <option>École Supérieure</option>
+              <option>Centre de Formation</option>
+            </select>
+          </div>
+          <div class="form-group">
+            <label>Année de création</label>
+            <input class="form-input" id="f_annee" placeholder="Ex: 2005" type="number" min="1900" max="2025"/>
+          </div>
+        </div>
+        <div class="form-group">
+          <label>Slogan / Description courte</label>
+          <input class="form-input" id="f_slogan" placeholder="Ex: L'excellence au service du savoir"/>
+        </div>
+      </div>
+
+      <div class="form-section">
+        <div class="form-section-title">📍 Localisation</div>
+        <div class="form-row">
+          <div class="form-group">
+            <label>Pays <span class="required">*</span></label>
+            <select class="form-select" id="f_pays">
+              <option value="">Sélectionner...</option>
+              <option>Togo</option>
+              <option>Bénin</option>
+              <option>Côte d'Ivoire</option>
+              <option>Sénégal</option>
+              <option>Cameroun</option>
+              <option>Mali</option>
+              <option>Burkina Faso</option>
+              <option>Guinée</option>
+              <option>Niger</option>
+              <option>Autre</option>
+            </select>
+          </div>
+          <div class="form-group">
+            <label>Ville <span class="required">*</span></label>
+            <input class="form-input" id="f_ville" placeholder="Ex: Lomé"/>
+          </div>
+        </div>
+        <div class="form-group">
+          <label>Adresse complète</label>
+          <input class="form-input" id="f_adresse" placeholder="Ex: BP 1234, Quartier Administratif"/>
+        </div>
+      </div>
+
+      <div class="form-section">
+        <div class="form-section-title">📞 Contacts officiels</div>
+        <div class="form-row">
+          <div class="form-group">
+            <label>Email officiel <span class="required">*</span></label>
+            <input class="form-input" id="f_email_univ" type="email" placeholder="contact@universite.tg"/>
+          </div>
+          <div class="form-group">
+            <label>Téléphone principal <span class="required">*</span></label>
+            <input class="form-input" id="f_tel" placeholder="+228 22 XX XX XX"/>
+          </div>
+        </div>
+        <div class="form-group">
+          <label>Site web (optionnel)</label>
+          <input class="form-input" id="f_site" placeholder="https://www.universite.tg"/>
+        </div>
+      </div>
+
+      <div class="form-section">
+        <div class="form-section-title">🌐 Sous-domaine UniManage</div>
+        <div class="form-group">
+          <label>Choisissez votre adresse sur la plateforme <span class="required">*</span></label>
+          <div class="subdomain-preview">
+            <span class="subdomain-prefix">https://</span>
+            <input class="subdomain-input" id="f_subdomain" placeholder="mon-universite" oninput="updateSubdomain()"/>
+            <span class="subdomain-suffix">.unimanage.app</span>
+          </div>
+          <div class="form-hint" id="subdomain-hint">💡 Ex: univ-lome → https://univ-lome.unimanage.app</div>
+        </div>
+      </div>
+
+      <div class="form-nav">
+        <div></div>
+        <button class="btn-forward" onclick="goStep(2)">Continuer → Compte admin</button>
+      </div>
+    </div>
+
+    <!-- ══ STEP 2 : Compte admin ══ -->
+    <div class="step-panel" id="panel2">
+      <div class="step-header">
+        <div class="step-header-badge">👤 Étape 2 sur 6</div>
+        <h2>Compte administrateur</h2>
+        <p>Le directeur général sera le premier Super Admin de votre université sur la plateforme.</p>
+      </div>
+
+      <div id="alert2" class="alert"></div>
+
+      <div class="form-section">
+        <div class="form-section-title">👤 Informations du directeur</div>
+        <div class="form-row">
+          <div class="form-group">
+            <label>Prénom <span class="required">*</span></label>
+            <input class="form-input" id="f_prenom" placeholder="Jean"/>
+          </div>
+          <div class="form-group">
+            <label>Nom <span class="required">*</span></label>
+            <input class="form-input" id="f_lnom" placeholder="DUPONT"/>
+          </div>
+        </div>
+        <div class="form-row">
+          <div class="form-group">
+            <label>Titre / Fonction</label>
+            <select class="form-select" id="f_titre">
+              <option>Directeur Général</option>
+              <option>Président</option>
+              <option>Recteur</option>
+              <option>Directeur Académique</option>
+              <option>Fondateur</option>
+            </select>
+          </div>
+          <div class="form-group">
+            <label>Téléphone direct</label>
+            <input class="form-input" id="f_tel_dir" placeholder="+228 90 XX XX XX"/>
+          </div>
+        </div>
+      </div>
+
+      <div class="form-section">
+        <div class="form-section-title">🔐 Identifiants de connexion</div>
+        <div class="form-group">
+          <label>Email de connexion <span class="required">*</span></label>
+          <input class="form-input" id="f_email_admin" type="email" placeholder="directeur@universite.tg"/>
+          <div class="form-hint">Cet email servira à vous connecter à la plateforme</div>
+        </div>
+        <div class="form-row">
+          <div class="form-group">
+            <label>Mot de passe <span class="required">*</span></label>
+            <input class="form-input" id="f_pass" type="password" placeholder="Min. 8 caractères" oninput="checkPass()"/>
+          </div>
+          <div class="form-group">
+            <label>Confirmer le mot de passe <span class="required">*</span></label>
+            <input class="form-input" id="f_pass2" type="password" placeholder="Répétez le mot de passe" oninput="checkPass()"/>
+          </div>
+        </div>
+        <!-- Password strength -->
+        <div id="passStrength" style="display:none;margin-top:.5rem">
+          <div style="display:flex;gap:.3rem;margin-bottom:.3rem">
+            <div id="ps1" style="flex:1;height:4px;border-radius:2px;background:var(--border);transition:background .3s"></div>
+            <div id="ps2" style="flex:1;height:4px;border-radius:2px;background:var(--border);transition:background .3s"></div>
+            <div id="ps3" style="flex:1;height:4px;border-radius:2px;background:var(--border);transition:background .3s"></div>
+            <div id="ps4" style="flex:1;height:4px;border-radius:2px;background:var(--border);transition:background .3s"></div>
+          </div>
+          <div id="passStrengthLabel" style="font-size:.72rem;color:var(--gray)"></div>
+        </div>
+      </div>
+
+      <div class="form-section">
+        <div class="form-section-title">🔒 Sécurité</div>
+        <div style="display:flex;align-items:center;gap:.75rem;padding:.75rem;background:var(--light);border-radius:9px;border:1px solid var(--border)">
+          <input type="checkbox" id="f_2fa" style="width:16px;height:16px;accent-color:var(--blue)"/>
+          <div>
+            <label for="f_2fa" style="font-size:.875rem;font-weight:600;cursor:pointer">Activer l'authentification à deux facteurs (2FA)</label>
+            <div style="font-size:.75rem;color:var(--gray);margin-top:.15rem">Recommandé — Sécurisez l'accès avec un code SMS à chaque connexion</div>
+          </div>
+        </div>
+        <div style="margin-top:.75rem;display:flex;align-items:center;gap:.75rem;padding:.75rem;background:var(--light);border-radius:9px;border:1px solid var(--border)">
+          <input type="checkbox" id="f_cgu" style="width:16px;height:16px;accent-color:var(--blue)"/>
+          <label for="f_cgu" style="font-size:.82rem;cursor:pointer">J'accepte les <a href="#" style="color:var(--blue)">Conditions Générales d'Utilisation</a> et la <a href="#" style="color:var(--blue)">Politique de confidentialité</a> <span class="required">*</span></label>
+        </div>
+      </div>
+
+      <div class="form-nav">
+        <button class="btn-back" onclick="goStep(1)">← Retour</button>
+        <button class="btn-forward" onclick="goStep(3)">Continuer → Plan</button>
+      </div>
+    </div>
+
+    <!-- ══ STEP 3 : Plan ══ -->
+    <div class="step-panel" id="panel3">
+      <div class="step-header">
+        <div class="step-header-badge">💳 Étape 3 sur 6</div>
+        <h2>Choisissez votre plan</h2>
+        <p>Commencez gratuitement pendant 30 jours. Aucune carte bancaire requise pour l'essai.</p>
+      </div>
+
+      <div class="plan-grid" id="planGrid">
+        <!-- Starter -->
+        <div class="plan-card" id="plan-starter" onclick="selectPlan('starter')">
+          <div class="plan-name">Starter</div>
+          <div style="font-size:.75rem;color:var(--gray)">Petits établissements</div>
+          <div class="plan-price">25 000 <small>FCFA/mois</small></div>
+          <div class="plan-limit">Jusqu'à 300 étudiants</div>
+          <ul class="plan-features">
+            <li>Administration scolaire</li>
+            <li>Étudiants & enseignants</li>
+            <li>Emploi du temps basique</li>
+            <li>Examens & résultats</li>
+            <li>5 administrateurs</li>
+            <li>Support email</li>
+          </ul>
+          <div class="plan-radio" id="pr-starter"></div>
+        </div>
+        <!-- Pro -->
+        <div class="plan-card selected" id="plan-pro" onclick="selectPlan('pro')">
+          <div class="plan-popular">⭐ Populaire</div>
+          <div class="plan-name" style="color:var(--blue)">Pro</div>
+          <div style="font-size:.75rem;color:var(--gray)">Universités en croissance</div>
+          <div class="plan-price" style="color:var(--blue)">75 000 <small>FCFA/mois</small></div>
+          <div class="plan-limit">Jusqu'à 1 500 étudiants</div>
+          <ul class="plan-features">
+            <li>Tout le plan Starter</li>
+            <li>Comptabilité complète</li>
+            <li>Wave & Orange Money</li>
+            <li>Analytics avancés</li>
+            <li>Sous-domaine personnalisé</li>
+            <li>20 administrateurs</li>
+            <li>Support prioritaire</li>
+          </ul>
+          <div class="plan-radio" id="pr-pro" style="background:var(--blue);border-color:var(--blue)"><div style="width:8px;height:8px;border-radius:50%;background:white"></div></div>
+        </div>
+        <!-- Enterprise -->
+        <div class="plan-card" id="plan-enterprise" onclick="selectPlan('enterprise')">
+          <div class="plan-name" style="color:var(--purple)">Enterprise</div>
+          <div style="font-size:.75rem;color:var(--gray)">Grands établissements</div>
+          <div class="plan-price" style="color:var(--purple)">Sur devis</div>
+          <div class="plan-limit">Étudiants illimités</div>
+          <ul class="plan-features">
+            <li>Tout le plan Pro</li>
+            <li>Multi-campus</li>
+            <li>API REST complète</li>
+            <li>Personnalisation totale</li>
+            <li>Admins illimités</li>
+            <li>Account manager dédié</li>
+            <li>SLA 99.9% garanti</li>
+          </ul>
+          <div class="plan-radio" id="pr-enterprise"></div>
+        </div>
+      </div>
+
+      <div style="margin-top:1.25rem;padding:1rem;background:rgba(16,185,129,0.07);border-radius:10px;border:1px solid rgba(16,185,129,0.2);font-size:.83rem;color:var(--success);display:flex;align-items:center;gap:.75rem">
+        <span style="font-size:1.1rem">🎁</span>
+        <span><strong>Essai gratuit 30 jours</strong> — Accès complet au plan Pro sans engagement. Aucune carte requise.</span>
+      </div>
+
+      <div class="form-nav">
+        <button class="btn-back" onclick="goStep(2)">← Retour</button>
+        <button class="btn-forward" onclick="goStep(4)">Continuer → Modules</button>
+      </div>
+    </div>
+
+    <!-- ══ STEP 4 : Modules ══ -->
+    <div class="step-panel" id="panel4">
+      <div class="step-header">
+        <div class="step-header-badge">⚙️ Étape 4 sur 6</div>
+        <h2>Activez vos modules</h2>
+        <p>Choisissez les fonctionnalités à activer pour votre université. Vous pourrez les modifier à tout moment.</p>
+      </div>
+
+      <div class="form-section">
+        <div class="form-section-title">📚 Modules académiques</div>
+        <div class="module-grid">
+          <div class="module-toggle on" onclick="toggleModule(this)">
+            <div class="module-icon">🎓</div>
+            <div class="module-body"><div class="module-name">Gestion étudiants</div><div class="module-desc">Inscription, profils, suivi</div></div>
+            <div class="toggle-sw"></div>
+          </div>
+          <div class="module-toggle on" onclick="toggleModule(this)">
+            <div class="module-icon">👨‍🏫</div>
+            <div class="module-body"><div class="module-name">Gestion enseignants</div><div class="module-desc">Profils, affectations, heures</div></div>
+            <div class="toggle-sw"></div>
+          </div>
+          <div class="module-toggle on" onclick="toggleModule(this)">
+            <div class="module-icon">📅</div>
+            <div class="module-body"><div class="module-name">Emploi du temps</div><div class="module-desc">Planning, salles, conflits</div></div>
+            <div class="toggle-sw"></div>
+          </div>
+          <div class="module-toggle on" onclick="toggleModule(this)">
+            <div class="module-icon">📝</div>
+            <div class="module-body"><div class="module-name">Examens & Résultats</div><div class="module-desc">Notes, délibérations, relevés</div></div>
+            <div class="toggle-sw"></div>
+          </div>
+          <div class="module-toggle on" onclick="toggleModule(this)">
+            <div class="module-icon">🏛️</div>
+            <div class="module-body"><div class="module-name">Départements & Filières</div><div class="module-desc">Structure académique</div></div>
+            <div class="toggle-sw"></div>
+          </div>
+          <div class="module-toggle on" onclick="toggleModule(this)">
+            <div class="module-icon">📚</div>
+            <div class="module-body"><div class="module-name">Bibliothèque numérique</div><div class="module-desc">Cours, TD, ressources</div></div>
+            <div class="toggle-sw"></div>
+          </div>
+        </div>
+      </div>
+
+      <div class="form-section">
+        <div class="form-section-title">💰 Modules financiers</div>
+        <div class="module-grid">
+          <div class="module-toggle on" onclick="toggleModule(this)">
+            <div class="module-icon">💳</div>
+            <div class="module-body"><div class="module-name">Paiements scolarité</div><div class="module-desc">Encaissement, tranches, reçus</div></div>
+            <div class="toggle-sw"></div>
+          </div>
+          <div class="module-toggle on" onclick="toggleModule(this)">
+            <div class="module-icon">🌊</div>
+            <div class="module-body"><div class="module-name">Mobile Money</div><div class="module-desc">Wave, Orange Money, MTN</div></div>
+            <div class="toggle-sw"></div>
+          </div>
+          <div class="module-toggle on" onclick="toggleModule(this)">
+            <div class="module-icon">📊</div>
+            <div class="module-body"><div class="module-name">Comptabilité</div><div class="module-desc">Revenus, dépenses, rapports</div></div>
+            <div class="toggle-sw"></div>
+          </div>
+          <div class="module-toggle" onclick="toggleModule(this)">
+            <div class="module-icon">💵</div>
+            <div class="module-body"><div class="module-name">Paie enseignants</div><div class="module-desc">Salaires, fiches de paie</div></div>
+            <div class="toggle-sw"></div>
+          </div>
+        </div>
+      </div>
+
+      <div class="form-section">
+        <div class="form-section-title">📢 Communication</div>
+        <div class="module-grid">
+          <div class="module-toggle on" onclick="toggleModule(this)">
+            <div class="module-icon">💬</div>
+            <div class="module-body"><div class="module-name">Messagerie interne</div><div class="module-desc">Chat entre acteurs</div></div>
+            <div class="toggle-sw"></div>
+          </div>
+          <div class="module-toggle on" onclick="toggleModule(this)">
+            <div class="module-icon">🔔</div>
+            <div class="module-body"><div class="module-name">Notifications SMS/Email</div><div class="module-desc">Alertes automatiques</div></div>
+            <div class="toggle-sw"></div>
+          </div>
+          <div class="module-toggle" onclick="toggleModule(this)">
+            <div class="module-icon">👨‍👩‍👧</div>
+            <div class="module-body"><div class="module-name">Portail parents</div><div class="module-desc">Suivi pour les familles</div></div>
+            <div class="toggle-sw"></div>
+          </div>
+          <div class="module-toggle" onclick="toggleModule(this)">
+            <div class="module-icon">📰</div>
+            <div class="module-body"><div class="module-name">Fil d'actualité</div><div class="module-desc">Annonces & actualités</div></div>
+            <div class="toggle-sw"></div>
+          </div>
+        </div>
+      </div>
+
+      <div class="form-nav">
+        <button class="btn-back" onclick="goStep(3)">← Retour</button>
+        <button class="btn-forward" onclick="goStep(5)">Continuer → Personnalisation</button>
+      </div>
+    </div>
+
+    <!-- ══ STEP 5 : Personnalisation ══ -->
+    <div class="step-panel" id="panel5">
+      <div class="step-header">
+        <div class="step-header-badge">🎨 Étape 5 sur 6</div>
+        <h2>Personnalisez votre espace</h2>
+        <p>Donnez à votre université son identité visuelle sur la plateforme.</p>
+      </div>
+
+      <div class="form-section">
+        <div class="form-section-title">🖼️ Logo de l'université</div>
+        <div class="upload-zone" onclick="showToast('📁 Sélecteur de fichier ouvert')">
+          <div class="upload-zone-icon">📁</div>
+          <div class="upload-zone-title">Cliquez pour uploader votre logo</div>
+          <div class="upload-zone-sub">PNG, JPG ou SVG · Recommandé : 200×200px · Max 2MB</div>
+        </div>
+      </div>
+
+      <div class="form-section">
+        <div class="form-section-title">🎨 Couleur principale</div>
+        <p style="font-size:.83rem;color:var(--gray);margin-bottom:.5rem">Cette couleur sera utilisée dans votre tableau de bord, relevés et communications.</p>
+        <div class="color-grid">
+          <div class="color-dot selected" style="background:#1A56DB;color:#1A56DB" onclick="selectColor(this,'#1A56DB')" title="Bleu UniManage"></div>
+          <div class="color-dot" style="background:#10B981;color:#10B981" onclick="selectColor(this,'#10B981')" title="Vert"></div>
+          <div class="color-dot" style="background:#8B5CF6;color:#8B5CF6" onclick="selectColor(this,'#8B5CF6')" title="Violet"></div>
+          <div class="color-dot" style="background:#F59E0B;color:#F59E0B" onclick="selectColor(this,'#F59E0B')" title="Or"></div>
+          <div class="color-dot" style="background:#EF4444;color:#EF4444" onclick="selectColor(this,'#EF4444')" title="Rouge"></div>
+          <div class="color-dot" style="background:#0D1B2A;color:#0D1B2A" onclick="selectColor(this,'#0D1B2A')" title="Marine"></div>
+          <div class="color-dot" style="background:#EC4899;color:#EC4899" onclick="selectColor(this,'#EC4899')" title="Rose"></div>
+          <div class="color-dot-custom" onclick="showToast('🎨 Sélecteur de couleur personnalisée')">+</div>
+        </div>
+      </div>
+
+      <div class="form-section">
+        <div class="form-section-title">⚙️ Préférences</div>
+        <div class="form-row">
+          <div class="form-group">
+            <label>Langue de l'interface</label>
+            <select class="form-select" id="f_langue">
+              <option>🇫🇷 Français</option>
+              <option>🇬🇧 English</option>
+            </select>
+          </div>
+          <div class="form-group">
+            <label>Fuseau horaire</label>
+            <select class="form-select" id="f_timezone">
+              <option>Africa/Abidjan (GMT+0)</option>
+              <option>Africa/Lagos (GMT+1)</option>
+              <option>Africa/Nairobi (GMT+3)</option>
+            </select>
+          </div>
+        </div>
+        <div class="form-row">
+          <div class="form-group">
+            <label>Système de notation</label>
+            <select class="form-select" id="f_notation">
+              <option>Sur 20 points</option>
+              <option>Crédits ECTS</option>
+              <option>GPA (0–4)</option>
+            </select>
+          </div>
+          <div class="form-group">
+            <label>Devise</label>
+            <select class="form-select" id="f_devise">
+              <option>FCFA (XOF)</option>
+              <option>EUR (€)</option>
+              <option>USD ($)</option>
+            </select>
+          </div>
+        </div>
+        <div class="form-group">
+          <label>Année académique en cours</label>
+          <input class="form-input" id="f_annee_acad" placeholder="Ex: 2024–2025" value="2024–2025"/>
+        </div>
+      </div>
+
+      <div class="form-nav">
+        <button class="btn-back" onclick="goStep(4)">← Retour</button>
+        <button class="btn-forward" onclick="goStep(6)">Continuer → Récapitulatif</button>
+      </div>
+    </div>
+
+    <!-- ══ STEP 6 : Récap ══ -->
+    <div class="step-panel" id="panel6">
+      <div class="step-header">
+        <div class="step-header-badge">✅ Étape 6 sur 6</div>
+        <h2>Récapitulatif</h2>
+        <p>Vérifiez vos informations avant de créer votre espace université.</p>
+      </div>
+
+      <div class="recap-grid" id="recapGrid">
+        <div class="recap-item">
+          <div class="recap-label">Université</div>
+          <div class="recap-value" id="r_nom">—</div>
+        </div>
+        <div class="recap-item">
+          <div class="recap-label">Type</div>
+          <div class="recap-value" id="r_type">—</div>
+        </div>
+        <div class="recap-item">
+          <div class="recap-label">Pays & Ville</div>
+          <div class="recap-value" id="r_lieu">—</div>
+        </div>
+        <div class="recap-item">
+          <div class="recap-label">Email officiel</div>
+          <div class="recap-value" id="r_email">—</div>
+        </div>
+        <div class="recap-item">
+          <div class="recap-label">Administrateur</div>
+          <div class="recap-value" id="r_admin">—</div>
+        </div>
+        <div class="recap-item">
+          <div class="recap-label">Plan choisi</div>
+          <div class="recap-value" id="r_plan">Pro — 75 000 FCFA/mois</div>
+        </div>
+        <div class="recap-item">
+          <div class="recap-label">Sous-domaine</div>
+          <div class="recap-value" id="r_subdomain" style="color:var(--blue)">—</div>
+        </div>
+        <div class="recap-item">
+          <div class="recap-label">Essai gratuit</div>
+          <div class="recap-value" style="color:var(--success)">✅ 30 jours offerts</div>
+        </div>
+      </div>
+
+      <div style="margin-top:1.25rem;padding:1rem 1.25rem;background:rgba(26,86,219,0.06);border-radius:10px;border:1px solid rgba(26,86,219,0.15);font-size:.83rem;color:var(--navy);line-height:1.7">
+        <strong>📧 Que se passe-t-il après ?</strong><br/>
+        Vous recevrez un email de confirmation avec un lien d'activation. Une fois activé, vous pourrez accéder à votre tableau de bord et commencer à configurer votre université.
+      </div>
+
+      <div class="form-nav" style="margin-top:1.5rem">
+        <button class="btn-back" onclick="goStep(5)">← Retour</button>
+        <button class="btn-forward" style="background:var(--success);padding:.85rem 2.5rem;font-size:1rem" onclick="createAccount()">
+          🚀 Créer mon espace université
+        </button>
+      </div>
+    </div>
+
+    <!-- ══ SUCCESS ══ -->
+    <div class="step-panel" id="panelSuccess">
+      <div class="success-screen">
+        <div class="success-icon">🎉</div>
+        <div class="success-title">Votre université est prête !</div>
+        <div class="success-sub">
+          Bienvenue sur UniManage ! Votre espace a été créé avec succès.
+          Un email de confirmation a été envoyé à votre adresse.
+        </div>
+
+        <div class="success-steps">
+          <div class="success-step">
+            <div class="success-step-icon" style="background:rgba(16,185,129,0.1)">✅</div>
+            <div><strong>Compte créé</strong> — Espace université activé</div>
+          </div>
+          <div class="success-step">
+            <div class="success-step-icon" style="background:rgba(26,86,219,0.1)">📧</div>
+            <div><strong>Email envoyé</strong> — Vérifiez votre boîte mail</div>
+          </div>
+          <div class="success-step">
+            <div class="success-step-icon" style="background:rgba(245,158,11,0.1)">🎁</div>
+            <div><strong>30 jours offerts</strong> — Essai Pro gratuit activé</div>
+          </div>
+          <div class="success-step">
+            <div class="success-step-icon" style="background:rgba(139,92,246,0.1)">🚀</div>
+            <div><strong>Prochaine étape</strong> — Configurez vos départements</div>
+          </div>
+        </div>
+
+        <button class="btn-go-dashboard" onclick="window.location.href='dashboard.html'">
+          🏛️ Accéder à mon tableau de bord →
+        </button>
+      </div>
+    </div>
+
+  </main>
+</div><!-- /page-wrap -->
+
+<div class="toast" id="toast"></div>
+
+<script>
+  let currentStep = 1;
+  let selectedPlan = 'pro';
+  const totalSteps = 6;
+
+  // ── Navigation ──
+  function goStep(n) {
+    // Validation basique step 1
+    if(currentStep === 1 && n > 1) {
+      const nom = document.getElementById('f_nom').value.trim();
+      const pays = document.getElementById('f_pays').value;
+      const ville = document.getElementById('f_ville').value.trim();
+      const email = document.getElementById('f_email_univ').value.trim();
+      const tel = document.getElementById('f_tel').value.trim();
+      const sub = document.getElementById('f_subdomain').value.trim();
+      const alert = document.getElementById('alert1');
+      if(!nom || !pays || !ville || !email || !tel || !sub) {
+        alert.textContent = '⚠️ Veuillez remplir tous les champs obligatoires.';
+        alert.classList.add('error');
+        window.scrollTo({top:0,behavior:'smooth'});
+        return;
+      }
+      alert.className = 'alert';
+    }
+    // Validation step 2
+    if(currentStep === 2 && n > 2) {
+      const prenom = document.getElementById('f_prenom').value.trim();
+      const lnom = document.getElementById('f_lnom').value.trim();
+      const email = document.getElementById('f_email_admin').value.trim();
+      const pass = document.getElementById('f_pass').value;
+      const pass2 = document.getElementById('f_pass2').value;
+      const cgu = document.getElementById('f_cgu').checked;
+      const alert = document.getElementById('alert2');
+      if(!prenom || !lnom || !email || !pass) {
+        alert.textContent = '⚠️ Veuillez remplir tous les champs obligatoires.';
+        alert.classList.add('error');
+        window.scrollTo({top:0,behavior:'smooth'});
+        return;
+      }
+      if(pass.length < 8) {
+        alert.textContent = '⚠️ Le mot de passe doit contenir au moins 8 caractères.';
+        alert.classList.add('error');
+        window.scrollTo({top:0,behavior:'smooth'});
+        return;
+      }
+      if(pass !== pass2) {
+        alert.textContent = '⚠️ Les mots de passe ne correspondent pas.';
+        alert.classList.add('error');
+        window.scrollTo({top:0,behavior:'smooth'});
+        return;
+      }
+      if(!cgu) {
+        alert.textContent = '⚠️ Vous devez accepter les conditions générales.';
+        alert.classList.add('error');
+        window.scrollTo({top:0,behavior:'smooth'});
+        return;
+      }
+      alert.className = 'alert';
+    }
+
+    // Update stepper
+    for(let i = 1; i <= totalSteps; i++) {
+      const si = document.getElementById('si'+i);
+      const sn = document.getElementById('sn'+i);
+      si.classList.remove('active','done');
+      if(i < n) { si.classList.add('done'); sn.textContent = '✓'; }
+      else if(i === n) { si.classList.add('active'); sn.textContent = i; }
+      else { sn.textContent = i; }
+    }
+
+    // Show panel
+    for(let i = 1; i <= totalSteps; i++) {
+      document.getElementById('panel'+i).classList.remove('active');
+    }
+    document.getElementById('panelSuccess').classList.remove('active');
+    document.getElementById('panel'+n).classList.add('active');
+
+    // Progress
+    const pct = Math.round(((n-1)/totalSteps)*100);
+    document.getElementById('progressFill').style.width = pct+'%';
+    document.getElementById('progressPct').textContent = pct+'%';
+
+    currentStep = n;
+    window.scrollTo({top:0,behavior:'smooth'});
+
+    // Update recap if step 6
+    if(n === 6) updateRecap();
+  }
+
+  // ── Plan selection ──
+  function selectPlan(plan) {
+    selectedPlan = plan;
+    ['starter','pro','enterprise'].forEach(p => {
+      const c = document.getElementById('plan-'+p);
+      const r = document.getElementById('pr-'+p);
+      c.classList.remove('selected','gold','purple');
+      r.style.background = '';
+      r.style.borderColor = '';
+      r.innerHTML = '';
+    });
+    const card = document.getElementById('plan-'+plan);
+    const radio = document.getElementById('pr-'+plan);
+    card.classList.add('selected');
+    if(plan==='enterprise'){card.classList.add('purple');radio.style.background='var(--purple)';radio.style.borderColor='var(--purple)';}
+    else if(plan==='starter'){radio.style.background='var(--blue)';radio.style.borderColor='var(--blue)';}
+    else{radio.style.background='var(--blue)';radio.style.borderColor='var(--blue)';}
+    radio.innerHTML = '<div style="width:8px;height:8px;border-radius:50%;background:white"></div>';
+  }
+
+  // ── Module toggle ──
+  function toggleModule(el) {
+    el.classList.toggle('on');
+  }
+
+  // ── Color selection ──
+  function selectColor(el, color) {
+    document.querySelectorAll('.color-dot').forEach(d => d.classList.remove('selected'));
+    el.classList.add('selected');
+    showToast('🎨 Couleur '+color+' appliquée !');
+  }
+
+  // ── Subdomain ──
+  function updateSubdomain() {
+    const val = document.getElementById('f_subdomain').value;
+    const clean = val.toLowerCase().replace(/[^a-z0-9-]/g,'');
+    document.getElementById('f_subdomain').value = clean;
+    document.getElementById('subdomain-hint').textContent =
+      clean ? '🌐 Votre adresse : https://'+clean+'.unimanage.app' : '💡 Ex: univ-lome → https://univ-lome.unimanage.app';
+  }
+
+  // ── Password strength ──
+  function checkPass() {
+    const pass = document.getElementById('f_pass').value;
+    const wrap = document.getElementById('passStrength');
+    if(!pass){wrap.style.display='none';return;}
+    wrap.style.display='block';
+    const bars = ['ps1','ps2','ps3','ps4'];
+    const label = document.getElementById('passStrengthLabel');
+    let strength = 0;
+    if(pass.length >= 8) strength++;
+    if(/[A-Z]/.test(pass)) strength++;
+    if(/[0-9]/.test(pass)) strength++;
+    if(/[^A-Za-z0-9]/.test(pass)) strength++;
+    const colors = ['var(--danger)','var(--gold)','var(--blue)','var(--success)'];
+    const labels = ['Très faible','Faible','Moyen','Fort'];
+    bars.forEach((id,i) => {
+      document.getElementById(id).style.background = i < strength ? colors[strength-1] : 'var(--border)';
+    });
+    label.textContent = labels[strength-1] || '';
+    label.style.color = colors[strength-1] || 'var(--gray)';
+  }
+
+  // ── Update recap ──
+  function updateRecap() {
+    const nom = document.getElementById('f_nom').value || '—';
+    const type = document.getElementById('f_type').value || '—';
+    const pays = document.getElementById('f_pays').value || '—';
+    const ville = document.getElementById('f_ville').value || '—';
+    const email = document.getElementById('f_email_univ').value || '—';
+    const prenom = document.getElementById('f_prenom').value || '—';
+    const lnom = document.getElementById('f_lnom').value || '—';
+    const titre = document.getElementById('f_titre').value || '';
+    const sub = document.getElementById('f_subdomain').value || '—';
+    const planLabels = {starter:'Starter — 25 000 FCFA/mois',pro:'Pro — 75 000 FCFA/mois',enterprise:'Enterprise — Sur devis'};
+
+    document.getElementById('r_nom').textContent = nom;
+    document.getElementById('r_type').textContent = type;
+    document.getElementById('r_lieu').textContent = pays+' · '+ville;
+    document.getElementById('r_email').textContent = email;
+    document.getElementById('r_admin').textContent = titre+' '+prenom+' '+lnom;
+    document.getElementById('r_plan').textContent = planLabels[selectedPlan] || '—';
+    document.getElementById('r_subdomain').textContent = sub ? sub+'.unimanage.app' : '—';
+  }
+
+  // ── Create account ──
+  function createAccount() {
+    // Save to session
+    sessionStorage.setItem('unimanage_user', JSON.stringify({
+      univ: document.getElementById('f_nom').value || 'Mon Université',
+      email: document.getElementById('f_email_admin').value,
+      fname: document.getElementById('f_prenom').value,
+      lname: document.getElementById('f_lnom').value,
+      role: 'admin', plan: selectedPlan, loggedIn: true
+    }));
+
+    // Show success
+    for(let i=1;i<=6;i++) document.getElementById('panel'+i).classList.remove('active');
+    document.getElementById('panelSuccess').classList.add('active');
+    // All steps done
+    for(let i=1;i<=6;i++){
+      document.getElementById('si'+i).classList.add('done');
+      document.getElementById('si'+i).classList.remove('active');
+      document.getElementById('sn'+i).textContent='✓';
+    }
+    document.getElementById('progressFill').style.width='100%';
+    document.getElementById('progressPct').textContent='100%';
+    window.scrollTo({top:0,behavior:'smooth'});
+  }
+
+  // ── Toast ──
+  let tt;
+  function showToast(msg){
+    const t=document.getElementById('toast');
+    t.textContent=msg;t.classList.add('show');
+    clearTimeout(tt);tt=setTimeout(()=>t.classList.remove('show'),3000);
+  }
+</script>
+</body>
+</html>

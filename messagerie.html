@@ -1,0 +1,973 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>UniManage — Messagerie</title>
+  <link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=Inter:wght@300;400;500;600&display=swap" rel="stylesheet"/>
+  <style>
+    :root{
+      --navy:#0D1B2A;--blue:#1A56DB;--sky:#3B82F6;
+      --gold:#F59E0B;--light:#F0F4FF;--white:#FFFFFF;
+      --gray:#64748B;--border:#E2E8F0;
+      --success:#10B981;--danger:#EF4444;--purple:#8B5CF6;
+    }
+    *{margin:0;padding:0;box-sizing:border-box;}
+    body{font-family:'Inter',sans-serif;background:#F8FAFC;color:var(--navy);height:100vh;display:flex;flex-direction:column;overflow:hidden;}
+
+    /* ── TOPBAR ── */
+    .topbar{
+      height:60px;background:white;border-bottom:1px solid var(--border);
+      display:flex;align-items:center;justify-content:space-between;
+      padding:0 1.25rem;flex-shrink:0;
+    }
+    .topbar-left{display:flex;align-items:center;gap:1rem;}
+    .topbar-logo{font-family:'Syne',sans-serif;font-weight:800;font-size:1.1rem;color:var(--navy);}
+    .topbar-logo span{color:var(--blue);}
+    .topbar-title{font-family:'Syne',sans-serif;font-weight:700;font-size:.95rem;}
+    .topbar-right{display:flex;align-items:center;gap:.75rem;}
+    .back-btn{
+      display:flex;align-items:center;gap:.4rem;
+      padding:.4rem .9rem;border-radius:8px;
+      border:1px solid var(--border);background:white;
+      font-size:.8rem;font-weight:600;cursor:pointer;
+      color:var(--gray);transition:all .2s;text-decoration:none;
+    }
+    .back-btn:hover{border-color:var(--blue);color:var(--blue);}
+    .compose-btn{
+      display:flex;align-items:center;gap:.4rem;
+      padding:.45rem 1rem;border-radius:8px;
+      background:var(--blue);color:white;
+      font-size:.8rem;font-weight:600;cursor:pointer;
+      border:none;transition:all .2s;
+    }
+    .compose-btn:hover{background:#1344b8;}
+
+    /* ── LAYOUT 3 colonnes ── */
+    .msg-layout{
+      display:flex;flex:1;overflow:hidden;
+    }
+
+    /* ── SIDEBAR GAUCHE ── */
+    .sidebar-left{
+      width:220px;flex-shrink:0;
+      background:var(--navy);
+      display:flex;flex-direction:column;
+      border-right:1px solid rgba(255,255,255,0.05);
+    }
+    .sidebar-user{
+      padding:1rem;border-bottom:1px solid rgba(255,255,255,0.07);
+    }
+    .user-pill{
+      display:flex;align-items:center;gap:.65rem;
+      padding:.6rem .75rem;background:rgba(255,255,255,0.06);
+      border-radius:10px;
+    }
+    .user-av{
+      width:34px;height:34px;border-radius:9px;
+      background:linear-gradient(135deg,var(--blue),var(--sky));
+      display:flex;align-items:center;justify-content:center;
+      font-size:.8rem;font-weight:800;color:white;flex-shrink:0;
+    }
+    .user-av.gold{background:linear-gradient(135deg,var(--gold),#f59e0b);}
+    .user-av.green{background:linear-gradient(135deg,var(--success),#34d399);}
+    .user-nm{font-size:.78rem;font-weight:600;color:white;}
+    .user-rl{font-size:.65rem;color:rgba(255,255,255,0.35);margin-top:.1rem;}
+    .online-dot{width:8px;height:8px;border-radius:50%;background:var(--success);margin-left:auto;flex-shrink:0;}
+
+    .sidebar-nav{padding:.75rem 0;flex:1;}
+    .nav-label{font-size:.6rem;font-weight:700;letter-spacing:.1em;text-transform:uppercase;color:rgba(255,255,255,0.25);padding:.5rem 1rem .3rem;}
+    .nav-it{
+      display:flex;align-items:center;gap:.65rem;
+      padding:.55rem 1rem;cursor:pointer;
+      color:rgba(255,255,255,0.45);font-size:.8rem;font-weight:500;
+      transition:all .2s;border-left:2px solid transparent;
+    }
+    .nav-it:hover{color:white;background:rgba(255,255,255,0.05);}
+    .nav-it.active{color:white;background:rgba(26,86,219,0.2);border-left-color:var(--sky);}
+    .nav-it-icon{font-size:.9rem;width:18px;text-align:center;}
+    .nav-it-count{
+      margin-left:auto;background:var(--danger);color:white;
+      font-size:.6rem;font-weight:700;padding:.1rem .4rem;
+      border-radius:100px;min-width:16px;text-align:center;
+    }
+
+    .sidebar-contacts{padding:0 0 1rem;}
+    .contact-item{
+      display:flex;align-items:center;gap:.65rem;
+      padding:.5rem 1rem;cursor:pointer;transition:background .2s;
+    }
+    .contact-item:hover{background:rgba(255,255,255,0.04);}
+    .contact-av{
+      width:28px;height:28px;border-radius:8px;
+      display:flex;align-items:center;justify-content:center;
+      font-size:.7rem;font-weight:700;color:white;flex-shrink:0;
+      position:relative;
+    }
+    .contact-av .online{
+      position:absolute;bottom:-2px;right:-2px;
+      width:8px;height:8px;border-radius:50%;
+      background:var(--success);border:1.5px solid var(--navy);
+    }
+    .contact-nm{font-size:.75rem;font-weight:500;color:rgba(255,255,255,0.55);}
+    .contact-role{font-size:.65rem;color:rgba(255,255,255,0.25);}
+
+    /* ── LISTE CONVERSATIONS ── */
+    .conv-list{
+      width:300px;flex-shrink:0;
+      background:white;border-right:1px solid var(--border);
+      display:flex;flex-direction:column;
+    }
+    .conv-search{
+      padding:.75rem 1rem;border-bottom:1px solid var(--border);
+    }
+    .search-inp{
+      width:100%;padding:.55rem .85rem;
+      border-radius:8px;border:1.5px solid var(--border);
+      font-size:.82rem;font-family:'Inter',sans-serif;
+      outline:none;transition:border-color .2s;
+      background:#F8FAFC;
+    }
+    .search-inp:focus{border-color:var(--blue);background:white;}
+
+    .conv-tabs{
+      display:flex;border-bottom:1px solid var(--border);
+    }
+    .conv-tab{
+      flex:1;padding:.6rem;text-align:center;
+      font-size:.75rem;font-weight:600;cursor:pointer;
+      color:var(--gray);border-bottom:2px solid transparent;
+      transition:all .2s;
+    }
+    .conv-tab.active{color:var(--blue);border-bottom-color:var(--blue);}
+
+    .conv-items{flex:1;overflow-y:auto;}
+    .conv-item{
+      display:flex;align-items:flex-start;gap:.75rem;
+      padding:.85rem 1rem;cursor:pointer;
+      border-bottom:1px solid var(--border);
+      transition:background .2s;position:relative;
+    }
+    .conv-item:hover{background:#F8FAFC;}
+    .conv-item.active{background:var(--light);border-left:3px solid var(--blue);}
+    .conv-item.unread .conv-preview{font-weight:600;color:var(--navy);}
+    .conv-av{
+      width:40px;height:40px;border-radius:11px;
+      display:flex;align-items:center;justify-content:center;
+      font-size:.9rem;font-weight:800;color:white;flex-shrink:0;
+      position:relative;
+    }
+    .conv-av .status-dot{
+      position:absolute;bottom:-2px;right:-2px;
+      width:10px;height:10px;border-radius:50%;
+      border:2px solid white;
+    }
+    .conv-body{flex:1;min-width:0;}
+    .conv-top{display:flex;justify-content:space-between;align-items:center;margin-bottom:.25rem;}
+    .conv-name{font-size:.83rem;font-weight:600;color:var(--navy);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+    .conv-time{font-size:.68rem;color:var(--gray);flex-shrink:0;margin-left:.5rem;}
+    .conv-preview{font-size:.75rem;color:var(--gray);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+    .conv-unread-dot{
+      position:absolute;right:1rem;top:50%;transform:translateY(-50%);
+      width:8px;height:8px;border-radius:50%;background:var(--blue);
+    }
+
+    /* ── ZONE CHAT ── */
+    .chat-zone{
+      flex:1;display:flex;flex-direction:column;
+      background:#F8FAFC;min-width:0;
+    }
+    .chat-header{
+      padding:.85rem 1.25rem;background:white;
+      border-bottom:1px solid var(--border);
+      display:flex;align-items:center;justify-content:space-between;
+    }
+    .chat-header-left{display:flex;align-items:center;gap:.85rem;}
+    .chat-header-av{
+      width:40px;height:40px;border-radius:11px;
+      display:flex;align-items:center;justify-content:center;
+      font-size:.9rem;font-weight:800;color:white;flex-shrink:0;
+    }
+    .chat-header-name{font-family:'Syne',sans-serif;font-weight:700;font-size:.95rem;}
+    .chat-header-sub{font-size:.72rem;color:var(--gray);margin-top:.1rem;}
+    .chat-header-status{display:flex;align-items:center;gap:.35rem;font-size:.72rem;color:var(--success);font-weight:600;}
+    .chat-header-status::before{content:'';width:7px;height:7px;border-radius:50%;background:var(--success);}
+    .chat-actions{display:flex;gap:.5rem;}
+    .chat-action-btn{
+      width:34px;height:34px;border-radius:8px;
+      border:1px solid var(--border);background:white;
+      display:flex;align-items:center;justify-content:center;
+      cursor:pointer;font-size:.9rem;transition:all .2s;
+    }
+    .chat-action-btn:hover{background:var(--light);border-color:var(--blue);}
+
+    /* Messages */
+    .chat-messages{
+      flex:1;overflow-y:auto;padding:1.25rem;
+      display:flex;flex-direction:column;gap:.75rem;
+    }
+    .date-divider{
+      text-align:center;font-size:.7rem;color:var(--gray);
+      position:relative;margin:.5rem 0;
+    }
+    .date-divider::before,.date-divider::after{
+      content:'';position:absolute;top:50%;
+      width:calc(50% - 70px);height:1px;background:var(--border);
+    }
+    .date-divider::before{left:0;}
+    .date-divider::after{right:0;}
+
+    .msg-row{display:flex;align-items:flex-end;gap:.6rem;}
+    .msg-row.mine{flex-direction:row-reverse;}
+    .msg-av-sm{
+      width:28px;height:28px;border-radius:8px;
+      display:flex;align-items:center;justify-content:center;
+      font-size:.7rem;font-weight:700;color:white;flex-shrink:0;
+    }
+    .msg-bubble{
+      max-width:65%;padding:.7rem 1rem;border-radius:14px;
+      font-size:.85rem;line-height:1.55;position:relative;
+    }
+    .msg-bubble.other{
+      background:white;border:1px solid var(--border);
+      border-bottom-left-radius:4px;color:var(--navy);
+    }
+    .msg-bubble.mine{
+      background:var(--blue);color:white;
+      border-bottom-right-radius:4px;
+    }
+    .msg-bubble.mine.gold{background:var(--gold);}
+    .msg-meta{
+      font-size:.65rem;margin-top:.35rem;
+      display:flex;align-items:center;gap:.35rem;
+    }
+    .msg-bubble.other .msg-meta{color:var(--gray);}
+    .msg-bubble.mine .msg-meta{color:rgba(255,255,255,0.65);}
+    .msg-check{font-size:.7rem;}
+
+    /* Fichier attaché */
+    .msg-file{
+      display:flex;align-items:center;gap:.6rem;
+      padding:.55rem .75rem;border-radius:8px;
+      background:rgba(255,255,255,0.15);margin-top:.4rem;
+      cursor:pointer;transition:background .2s;
+    }
+    .msg-file:hover{background:rgba(255,255,255,0.25);}
+    .msg-file-icon{font-size:1rem;}
+    .msg-file-name{font-size:.75rem;font-weight:600;}
+    .msg-file-size{font-size:.65rem;opacity:.7;}
+
+    /* Annonce */
+    .msg-annonce{
+      background:rgba(245,158,11,0.08);border:1px solid rgba(245,158,11,0.2);
+      border-radius:12px;padding:.85rem 1rem;
+      border-left:3px solid var(--gold);
+      max-width:75%;
+    }
+    .msg-annonce-title{font-size:.82rem;font-weight:700;color:var(--gold);margin-bottom:.3rem;}
+    .msg-annonce-body{font-size:.82rem;color:var(--navy);line-height:1.6;}
+    .msg-annonce-meta{font-size:.68rem;color:var(--gray);margin-top:.4rem;}
+
+    /* Typing indicator */
+    .typing-indicator{
+      display:flex;align-items:center;gap:.6rem;padding:.5rem 0;
+    }
+    .typing-dots{display:flex;gap:3px;}
+    .typing-dot{
+      width:6px;height:6px;border-radius:50%;
+      background:var(--gray);animation:typingBounce 1.2s infinite;
+    }
+    .typing-dot:nth-child(2){animation-delay:.2s;}
+    .typing-dot:nth-child(3){animation-delay:.4s;}
+    @keyframes typingBounce{0%,60%,100%{transform:translateY(0)}30%{transform:translateY(-6px)}}
+
+    /* Input zone */
+    .chat-input-zone{
+      padding:1rem 1.25rem;background:white;
+      border-top:1px solid var(--border);
+    }
+    .chat-input-bar{
+      display:flex;align-items:flex-end;gap:.75rem;
+      background:#F8FAFC;border:1.5px solid var(--border);
+      border-radius:14px;padding:.75rem 1rem;
+      transition:border-color .2s;
+    }
+    .chat-input-bar:focus-within{border-color:var(--blue);}
+    .chat-input-actions{display:flex;gap:.4rem;align-items:center;}
+    .input-action-btn{
+      width:32px;height:32px;border-radius:8px;border:none;
+      background:transparent;cursor:pointer;font-size:1rem;
+      color:var(--gray);transition:all .2s;
+      display:flex;align-items:center;justify-content:center;
+    }
+    .input-action-btn:hover{background:var(--border);color:var(--navy);}
+    .chat-textarea{
+      flex:1;border:none;background:transparent;
+      font-size:.875rem;font-family:'Inter',sans-serif;
+      color:var(--navy);resize:none;outline:none;
+      max-height:120px;min-height:22px;line-height:1.5;
+    }
+    .chat-textarea::placeholder{color:#aab;}
+    .send-btn{
+      width:38px;height:38px;border-radius:10px;
+      background:var(--blue);border:none;
+      display:flex;align-items:center;justify-content:center;
+      cursor:pointer;transition:all .2s;font-size:1rem;
+      flex-shrink:0;
+    }
+    .send-btn:hover{background:#1344b8;transform:scale(1.05);}
+    .input-hint{
+      font-size:.7rem;color:var(--gray);text-align:center;
+      margin-top:.5rem;
+    }
+
+    /* ── PANEL DROITE ── */
+    .info-panel{
+      width:240px;flex-shrink:0;
+      background:white;border-left:1px solid var(--border);
+      display:flex;flex-direction:column;overflow-y:auto;
+    }
+    .info-header{
+      padding:1rem;border-bottom:1px solid var(--border);
+      text-align:center;
+    }
+    .info-av{
+      width:56px;height:56px;border-radius:14px;
+      display:flex;align-items:center;justify-content:center;
+      font-size:1.2rem;font-weight:800;color:white;
+      margin:0 auto .6rem;
+    }
+    .info-name{font-family:'Syne',sans-serif;font-weight:700;font-size:.9rem;}
+    .info-role{font-size:.72rem;color:var(--gray);margin-top:.2rem;}
+    .info-status{
+      display:inline-flex;align-items:center;gap:.35rem;
+      font-size:.72rem;font-weight:600;color:var(--success);
+      margin-top:.4rem;
+    }
+    .info-status::before{content:'';width:6px;height:6px;border-radius:50%;background:var(--success);}
+
+    .info-section{padding:.85rem 1rem;border-bottom:1px solid var(--border);}
+    .info-section-title{font-size:.68rem;font-weight:700;text-transform:uppercase;letter-spacing:.06em;color:var(--gray);margin-bottom:.6rem;}
+    .info-field{font-size:.78rem;color:var(--navy);margin-bottom:.35rem;display:flex;gap:.4rem;}
+    .info-field span{color:var(--gray);}
+
+    .shared-files{display:flex;flex-direction:column;gap:.5rem;}
+    .shared-file{
+      display:flex;align-items:center;gap:.6rem;
+      padding:.5rem .6rem;border-radius:8px;
+      background:#F8FAFC;cursor:pointer;transition:background .2s;
+    }
+    .shared-file:hover{background:var(--light);}
+    .shared-file-icon{font-size:.9rem;}
+    .shared-file-name{font-size:.72rem;font-weight:500;color:var(--navy);}
+    .shared-file-date{font-size:.65rem;color:var(--gray);}
+
+    /* ── MODAL NOUVEAU MESSAGE ── */
+    .modal-overlay{
+      position:fixed;inset:0;z-index:2000;
+      background:rgba(13,27,42,0.5);
+      display:none;align-items:center;justify-content:center;
+      backdrop-filter:blur(4px);padding:1rem;
+    }
+    .modal-overlay.active{display:flex;}
+    .modal{
+      background:white;border-radius:18px;
+      width:100%;max-width:500px;
+      padding:1.75rem;position:relative;
+      box-shadow:0 30px 80px rgba(0,0,0,0.2);
+      animation:modalIn .3s ease;
+    }
+    @keyframes modalIn{from{opacity:0;transform:translateY(16px)}to{opacity:1;transform:translateY(0)}}
+    .modal-close{
+      position:absolute;top:1rem;right:1rem;
+      background:#F8FAFC;border:none;cursor:pointer;
+      width:30px;height:30px;border-radius:50%;
+      display:flex;align-items:center;justify-content:center;
+      font-size:.85rem;color:var(--gray);
+    }
+    .modal-title{font-family:'Syne',sans-serif;font-weight:800;font-size:1.1rem;margin-bottom:1.25rem;}
+    .form-group{margin-bottom:.85rem;}
+    .form-group label{display:block;font-size:.78rem;font-weight:600;color:var(--navy);margin-bottom:.35rem;}
+    .form-input{width:100%;padding:.65rem .9rem;border-radius:8px;border:1.5px solid var(--border);font-size:.875rem;font-family:'Inter',sans-serif;color:var(--navy);outline:none;transition:border-color .2s;}
+    .form-input:focus{border-color:var(--blue);}
+    .form-select{width:100%;padding:.65rem .9rem;border-radius:8px;border:1.5px solid var(--border);font-size:.875rem;font-family:'Inter',sans-serif;outline:none;cursor:pointer;}
+    .form-textarea{width:100%;padding:.65rem .9rem;border-radius:8px;border:1.5px solid var(--border);font-size:.875rem;font-family:'Inter',sans-serif;color:var(--navy);outline:none;resize:vertical;min-height:100px;transition:border-color .2s;}
+    .form-textarea:focus{border-color:var(--blue);}
+    .btn-send-modal{width:100%;padding:.8rem;border-radius:10px;background:var(--blue);color:white;font-size:.9rem;font-weight:700;cursor:pointer;border:none;margin-top:.5rem;}
+
+    /* TOAST */
+    .toast{position:fixed;bottom:1.5rem;right:1.5rem;background:var(--navy);color:white;padding:.75rem 1.25rem;border-radius:10px;font-size:.83rem;font-weight:500;box-shadow:0 8px 24px rgba(0,0,0,0.2);z-index:9999;opacity:0;transform:translateY(16px);transition:all .3s;pointer-events:none;}
+    .toast.show{opacity:1;transform:translateY(0);}
+
+    /* Responsive */
+    @media(max-width:1100px){.info-panel{display:none;}}
+    @media(max-width:800px){.sidebar-left{display:none;}.conv-list{width:260px;}}
+    @media(max-width:600px){.conv-list{display:none;}}
+  </style>
+</head>
+<body>
+
+<!-- TOPBAR -->
+<header class="topbar">
+  <div class="topbar-left">
+    <div class="topbar-logo">Uni<span>Manage</span></div>
+    <div style="color:var(--border)">·</div>
+    <div class="topbar-title">💬 Messagerie</div>
+  </div>
+  <div class="topbar-right">
+    <a href="dashboard.html" class="back-btn">← Tableau de bord</a>
+    <button class="compose-btn" onclick="openCompose()">✏️ Nouveau message</button>
+  </div>
+</header>
+
+<div class="msg-layout">
+
+  <!-- ── SIDEBAR GAUCHE ── -->
+  <aside class="sidebar-left">
+    <div class="sidebar-user">
+      <div class="user-pill">
+        <div class="user-av">DA</div>
+        <div>
+          <div class="user-nm">Dr. Amavi Kokou</div>
+          <div class="user-rl">Directeur Académique</div>
+        </div>
+        <div class="online-dot"></div>
+      </div>
+    </div>
+
+    <nav class="sidebar-nav">
+      <div class="nav-label">Boîte de réception</div>
+      <div class="nav-it active" onclick="setNav(this)">
+        <span class="nav-it-icon">📥</span> Reçus
+        <span class="nav-it-count">5</span>
+      </div>
+      <div class="nav-it" onclick="setNav(this)">
+        <span class="nav-it-icon">📤</span> Envoyés
+      </div>
+      <div class="nav-it" onclick="setNav(this)">
+        <span class="nav-it-icon">⭐</span> Favoris
+        <span class="nav-it-count">2</span>
+      </div>
+      <div class="nav-it" onclick="setNav(this)">
+        <span class="nav-it-icon">📢</span> Annonces
+        <span class="nav-it-count">3</span>
+      </div>
+      <div class="nav-it" onclick="setNav(this)">
+        <span class="nav-it-icon">🗂️</span> Archives
+      </div>
+
+      <div class="nav-label">Groupes</div>
+      <div class="nav-it" onclick="setNav(this)">
+        <span class="nav-it-icon">💻</span> Info L2 — Groupe
+      </div>
+      <div class="nav-it" onclick="setNav(this)">
+        <span class="nav-it-icon">👨‍🏫</span> Dept. Informatique
+      </div>
+      <div class="nav-it" onclick="setNav(this)">
+        <span class="nav-it-icon">🏛️</span> Direction Générale
+      </div>
+    </nav>
+
+    <div class="sidebar-contacts">
+      <div class="nav-label">Contacts en ligne</div>
+      <div class="contact-item" onclick="openChat('KA','Kofi Adzoa','Étudiant L2')">
+        <div class="contact-av" style="background:linear-gradient(135deg,var(--blue),var(--sky))">KA<div class="online"></div></div>
+        <div><div class="contact-nm">Kofi Adzoa</div><div class="contact-role">Étudiant</div></div>
+      </div>
+      <div class="contact-item" onclick="openChat('KM','Dr. Kodjo Mensah','Enseignant')">
+        <div class="contact-av" style="background:linear-gradient(135deg,var(--gold),#f59e0b)">KM<div class="online"></div></div>
+        <div><div class="contact-nm">Dr. K. Mensah</div><div class="contact-role">Enseignant</div></div>
+      </div>
+      <div class="contact-item" onclick="openChat('SC','Sœur Clémentine','Scolarité')">
+        <div class="contact-av" style="background:linear-gradient(135deg,var(--success),#34d399)">SC</div>
+        <div><div class="contact-nm">S. Clémentine</div><div class="contact-role">Scolarité</div></div>
+      </div>
+      <div class="contact-item" onclick="openChat('ND','Dr. Nana Dodzi','Enseignant')">
+        <div class="contact-av" style="background:linear-gradient(135deg,#ec4899,#f472b6)">ND<div class="online"></div></div>
+        <div><div class="contact-nm">Dr. N. Dodzi</div><div class="contact-role">Enseignant</div></div>
+      </div>
+    </div>
+  </aside>
+
+  <!-- ── LISTE CONVERSATIONS ── -->
+  <div class="conv-list">
+    <div class="conv-search">
+      <input class="search-inp" placeholder="🔍 Rechercher une conversation..."/>
+    </div>
+    <div class="conv-tabs">
+      <div class="conv-tab active" onclick="setConvTab(this)">Tous</div>
+      <div class="conv-tab" onclick="setConvTab(this)">Non lus (5)</div>
+      <div class="conv-tab" onclick="setConvTab(this)">Groupes</div>
+    </div>
+    <div class="conv-items">
+
+      <!-- Conv 1 — active -->
+      <div class="conv-item active" onclick="selectConv(this,'KM','Dr. Kodjo Mensah','Enseignant · Algorithmique','gold')">
+        <div class="conv-av" style="background:linear-gradient(135deg,var(--gold),#f59e0b)">
+          KM<div class="status-dot" style="background:var(--success)"></div>
+        </div>
+        <div class="conv-body">
+          <div class="conv-top">
+            <div class="conv-name">Dr. Kodjo Mensah</div>
+            <div class="conv-time">09:32</div>
+          </div>
+          <div class="conv-preview">Les notes du TD3 ont été saisies ✓</div>
+        </div>
+      </div>
+
+      <!-- Conv 2 — unread -->
+      <div class="conv-item unread" onclick="selectConv(this,'KA','Kofi Adzoa','Étudiant · Info L2','blue')">
+        <div class="conv-av" style="background:linear-gradient(135deg,var(--blue),var(--sky))">
+          KA<div class="status-dot" style="background:var(--success)"></div>
+        </div>
+        <div class="conv-body">
+          <div class="conv-top">
+            <div class="conv-name">Kofi Adzoa</div>
+            <div class="conv-time">08:15</div>
+          </div>
+          <div class="conv-preview">Bonjour, ma convocation est disponible ?</div>
+        </div>
+        <div class="conv-unread-dot"></div>
+      </div>
+
+      <!-- Conv 3 — groupe -->
+      <div class="conv-item" onclick="selectConv(this,'IL2','Info L2 — Groupe','287 membres','purple')">
+        <div class="conv-av" style="background:linear-gradient(135deg,var(--purple),#7c3aed)">
+          IL2
+        </div>
+        <div class="conv-body">
+          <div class="conv-top">
+            <div class="conv-name">Info L2 — Groupe</div>
+            <div class="conv-time">Hier</div>
+          </div>
+          <div class="conv-preview">📢 Examen reporté au 04 Fév 2025</div>
+        </div>
+        <div class="conv-unread-dot" style="background:var(--purple)"></div>
+      </div>
+
+      <!-- Conv 4 -->
+      <div class="conv-item" onclick="selectConv(this,'SC','Sœur Clémentine','Responsable Scolarité','green')">
+        <div class="conv-av" style="background:linear-gradient(135deg,var(--success),#34d399)">
+          SC
+        </div>
+        <div class="conv-body">
+          <div class="conv-top">
+            <div class="conv-name">Sœur Clémentine</div>
+            <div class="conv-time">Hier</div>
+          </div>
+          <div class="conv-preview">Le calendrier S2 est prêt pour validation</div>
+        </div>
+      </div>
+
+      <!-- Conv 5 -->
+      <div class="conv-item" onclick="selectConv(this,'MK','M. Mawuli Kpodo','Comptable','navy')">
+        <div class="conv-av" style="background:linear-gradient(135deg,#0D1B2A,#1a2d42)">
+          MK
+        </div>
+        <div class="conv-body">
+          <div class="conv-top">
+            <div class="conv-name">M. Mawuli Kpodo</div>
+            <div class="conv-time">20 Jan</div>
+          </div>
+          <div class="conv-preview">Rapport financier Jan transmis</div>
+        </div>
+      </div>
+
+      <!-- Conv 6 — annonce -->
+      <div class="conv-item" onclick="selectConv(this,'DG','Direction Générale','Groupe · 8 membres','navy')">
+        <div class="conv-av" style="background:linear-gradient(135deg,#0D1B2A,#1a2d42)">
+          DG
+        </div>
+        <div class="conv-body">
+          <div class="conv-top">
+            <div class="conv-name">Direction Générale</div>
+            <div class="conv-time">19 Jan</div>
+          </div>
+          <div class="conv-preview">📢 Réunion de direction — 25 Jan 2025</div>
+        </div>
+        <div class="conv-unread-dot" style="background:var(--gold)"></div>
+      </div>
+
+      <!-- Conv 7 -->
+      <div class="conv-item" onclick="selectConv(this,'YD','Yao Dodzi','Étudiant · Droit L3','blue')">
+        <div class="conv-av" style="background:linear-gradient(135deg,#ec4899,#f472b6)">
+          YD
+        </div>
+        <div class="conv-body">
+          <div class="conv-top">
+            <div class="conv-name">Yao Dodzi</div>
+            <div class="conv-time">18 Jan</div>
+          </div>
+          <div class="conv-preview">Merci pour la correction du devoir 📚</div>
+        </div>
+      </div>
+
+    </div>
+  </div>
+
+  <!-- ── ZONE CHAT ── -->
+  <div class="chat-zone">
+    <!-- Header chat -->
+    <div class="chat-header">
+      <div class="chat-header-left">
+        <div class="chat-header-av" id="chatAv" style="background:linear-gradient(135deg,var(--gold),#f59e0b)">KM</div>
+        <div>
+          <div class="chat-header-name" id="chatName">Dr. Kodjo Mensah</div>
+          <div class="chat-header-sub" id="chatSub">Enseignant · Algorithmique</div>
+        </div>
+        <div class="chat-header-status" id="chatStatus">En ligne</div>
+      </div>
+      <div class="chat-actions">
+        <div class="chat-action-btn" onclick="showToast('📞 Appel en cours...')">📞</div>
+        <div class="chat-action-btn" onclick="showToast('📹 Visio en cours...')">📹</div>
+        <div class="chat-action-btn" onclick="showToast('🔍 Recherche dans la conversation')">🔍</div>
+        <div class="chat-action-btn" onclick="showToast('⋯ Plus d\'options')">⋯</div>
+      </div>
+    </div>
+
+    <!-- Messages -->
+    <div class="chat-messages" id="chatMessages">
+
+      <div class="date-divider">Aujourd'hui — 22 Janvier 2025</div>
+
+      <!-- Msg reçu -->
+      <div class="msg-row">
+        <div class="msg-av-sm" style="background:linear-gradient(135deg,var(--gold),#f59e0b)">KM</div>
+        <div class="msg-bubble other">
+          Bonjour Directeur, j'ai terminé la saisie des notes du TD3 pour le groupe A d'Algorithmique L2.
+          <div class="msg-meta"><span>09:14</span></div>
+        </div>
+      </div>
+
+      <!-- Msg reçu avec fichier -->
+      <div class="msg-row">
+        <div class="msg-av-sm" style="background:linear-gradient(135deg,var(--gold),#f59e0b)">KM</div>
+        <div class="msg-bubble other">
+          Voici le récapitulatif des notes :
+          <div class="msg-file" onclick="showToast('📄 Notes_TD3_AlgoL2.pdf téléchargé')">
+            <div class="msg-file-icon">📄</div>
+            <div><div class="msg-file-name">Notes_TD3_AlgoL2.pdf</div><div class="msg-file-size">248 KB</div></div>
+          </div>
+          <div class="msg-meta"><span>09:15</span></div>
+        </div>
+      </div>
+
+      <!-- Msg envoyé -->
+      <div class="msg-row mine">
+        <div class="msg-av-sm" style="background:linear-gradient(135deg,var(--blue),var(--sky))">DA</div>
+        <div class="msg-bubble mine">
+          Parfait ! J'ai bien reçu le document. La moyenne de classe est correcte ?
+          <div class="msg-meta"><span>09:18</span><span class="msg-check">✓✓</span></div>
+        </div>
+      </div>
+
+      <!-- Msg reçu -->
+      <div class="msg-row">
+        <div class="msg-av-sm" style="background:linear-gradient(135deg,var(--gold),#f59e0b)">KM</div>
+        <div class="msg-bubble other">
+          Oui, la moyenne est de <strong>13.4/20</strong>. 89% de réussite sur le groupe. Deux étudiants sont en difficulté, je prévois une séance de rattrapage vendredi.
+          <div class="msg-meta"><span>09:22</span></div>
+        </div>
+      </div>
+
+      <!-- Annonce -->
+      <div class="msg-annonce">
+        <div class="msg-annonce-title">📢 Annonce officielle</div>
+        <div class="msg-annonce-body">L'examen de Réseaux Informatiques prévu le 28 Janvier est reporté au <strong>04 Février 2025</strong> à 08h00 — Amphithéâtre A. Merci de diffuser l'information aux étudiants concernés.</div>
+        <div class="msg-annonce-meta">Direction Académique · 09:28 · Envoyé à 287 étudiants</div>
+      </div>
+
+      <!-- Msg envoyé -->
+      <div class="msg-row mine">
+        <div class="msg-av-sm" style="background:linear-gradient(135deg,var(--blue),var(--sky))">DA</div>
+        <div class="msg-bubble mine">
+          Très bien. Pour la séance de rattrapage, utilisez la Salle B2 — elle est libre vendredi 14h–16h.
+          <div class="msg-meta"><span>09:29</span><span class="msg-check">✓✓</span></div>
+        </div>
+      </div>
+
+      <!-- Msg reçu -->
+      <div class="msg-row">
+        <div class="msg-av-sm" style="background:linear-gradient(135deg,var(--gold),#f59e0b)">KM</div>
+        <div class="msg-bubble other">
+          Noté ! Je prépare aussi le sujet pour la session de rattrapage. Je vous l'envoie pour validation avant vendredi.
+          <div class="msg-meta"><span>09:31</span></div>
+        </div>
+      </div>
+
+      <!-- Msg envoyé -->
+      <div class="msg-row mine">
+        <div class="msg-av-sm" style="background:linear-gradient(135deg,var(--blue),var(--sky))">DA</div>
+        <div class="msg-bubble mine">
+          Les notes du TD3 ont été saisies ✓
+          <div class="msg-meta"><span>09:32</span><span class="msg-check">✓✓</span></div>
+        </div>
+      </div>
+
+      <!-- Typing -->
+      <div class="typing-indicator" id="typingIndicator" style="display:none">
+        <div class="msg-av-sm" style="background:linear-gradient(135deg,var(--gold),#f59e0b)">KM</div>
+        <div class="msg-bubble other" style="padding:.6rem .85rem">
+          <div class="typing-dots">
+            <div class="typing-dot"></div>
+            <div class="typing-dot"></div>
+            <div class="typing-dot"></div>
+          </div>
+        </div>
+      </div>
+
+    </div>
+
+    <!-- Input zone -->
+    <div class="chat-input-zone">
+      <div class="chat-input-bar">
+        <div class="chat-input-actions">
+          <div class="input-action-btn" onclick="showToast('📎 Joindre un fichier')" title="Joindre un fichier">📎</div>
+          <div class="input-action-btn" onclick="showToast('🖼️ Envoyer une image')" title="Image">🖼️</div>
+          <div class="input-action-btn" onclick="showToast('😊 Emojis')" title="Emoji">😊</div>
+        </div>
+        <textarea
+          class="chat-textarea"
+          id="msgInput"
+          placeholder="Écrivez votre message..."
+          rows="1"
+          onkeydown="handleKey(event)"
+          oninput="autoResize(this)"
+        ></textarea>
+        <button class="send-btn" onclick="sendMessage()">➤</button>
+      </div>
+      <div class="input-hint">Entrée pour envoyer · Shift+Entrée pour nouvelle ligne</div>
+    </div>
+  </div>
+
+  <!-- ── INFO PANEL ── -->
+  <aside class="info-panel">
+    <div class="info-header">
+      <div class="info-av" id="infoAv" style="background:linear-gradient(135deg,var(--gold),#f59e0b)">KM</div>
+      <div class="info-name" id="infoName">Dr. Kodjo Mensah</div>
+      <div class="info-role" id="infoRole">Enseignant permanent</div>
+      <div class="info-status">En ligne</div>
+    </div>
+
+    <div class="info-section">
+      <div class="info-section-title">Informations</div>
+      <div class="info-field"><span>Spécialité :</span> Algorithmique</div>
+      <div class="info-field"><span>Département :</span> Informatique</div>
+      <div class="info-field"><span>Email :</span> kodjo@univ.tg</div>
+      <div class="info-field"><span>Tél :</span> +228 90 XX XX XX</div>
+    </div>
+
+    <div class="info-section">
+      <div class="info-section-title">Actions rapides</div>
+      <div style="display:flex;flex-direction:column;gap:.5rem">
+        <button onclick="showToast('👤 Profil complet ouvert')" style="width:100%;padding:.55rem;border-radius:8px;border:1px solid var(--border);background:white;font-size:.78rem;cursor:pointer;font-weight:500;transition:all .2s" onmouseover="this.style.borderColor='var(--blue)'" onmouseout="this.style.borderColor='var(--border)'">👤 Voir profil</button>
+        <button onclick="showToast('📅 Emploi du temps ouvert')" style="width:100%;padding:.55rem;border-radius:8px;border:1px solid var(--border);background:white;font-size:.78rem;cursor:pointer;font-weight:500;transition:all .2s" onmouseover="this.style.borderColor='var(--blue)'" onmouseout="this.style.borderColor='var(--border)'">📅 Son planning</button>
+        <button onclick="showToast('📊 Notes ouvertes')" style="width:100%;padding:.55rem;border-radius:8px;border:1px solid var(--border);background:white;font-size:.78rem;cursor:pointer;font-weight:500;transition:all .2s" onmouseover="this.style.borderColor='var(--blue)'" onmouseout="this.style.borderColor='var(--border)'">📊 Ses notes saisies</button>
+        <button onclick="showToast('💰 Salaire ouvert')" style="width:100%;padding:.55rem;border-radius:8px;border:1px solid var(--border);background:white;font-size:.78rem;cursor:pointer;font-weight:500;transition:all .2s" onmouseover="this.style.borderColor='var(--blue)'" onmouseout="this.style.borderColor='var(--border)'">💰 Sa fiche de paie</button>
+      </div>
+    </div>
+
+    <div class="info-section">
+      <div class="info-section-title">Fichiers partagés</div>
+      <div class="shared-files">
+        <div class="shared-file" onclick="showToast('📄 Notes_TD3_AlgoL2.pdf téléchargé')">
+          <div class="shared-file-icon">📄</div>
+          <div><div class="shared-file-name">Notes_TD3_AlgoL2.pdf</div><div class="shared-file-date">Aujourd'hui</div></div>
+        </div>
+        <div class="shared-file" onclick="showToast('📊 Rapport_S1_2024.xlsx téléchargé')">
+          <div class="shared-file-icon">📊</div>
+          <div><div class="shared-file-name">Rapport_S1_2024.xlsx</div><div class="shared-file-date">15 Jan 2025</div></div>
+        </div>
+        <div class="shared-file" onclick="showToast('📄 Sujet_Exam_AlgoL2.pdf téléchargé')">
+          <div class="shared-file-icon">📄</div>
+          <div><div class="shared-file-name">Sujet_Exam_AlgoL2.pdf</div><div class="shared-file-date">10 Jan 2025</div></div>
+        </div>
+      </div>
+    </div>
+  </aside>
+
+</div><!-- /msg-layout -->
+
+<!-- ── MODAL COMPOSER ── -->
+<div class="modal-overlay" id="composeModal" onclick="if(event.target===this)closeCompose()">
+  <div class="modal">
+    <button class="modal-close" onclick="closeCompose()">✕</button>
+    <div class="modal-title">✏️ Nouveau message</div>
+    <div class="form-group">
+      <label>Destinataire(s)</label>
+      <select class="form-select">
+        <option>Sélectionner...</option>
+        <option>Dr. Kodjo Mensah (Enseignant)</option>
+        <option>Kofi Adzoa (Étudiant)</option>
+        <option>Sœur Clémentine (Scolarité)</option>
+        <option>M. Mawuli Kpodo (Comptable)</option>
+        <option>📢 Tous les enseignants</option>
+        <option>📢 Tous les étudiants L2</option>
+        <option>📢 Département Informatique</option>
+        <option>📢 Direction Générale</option>
+      </select>
+    </div>
+    <div class="form-group">
+      <label>Type de message</label>
+      <select class="form-select" id="msgType">
+        <option>💬 Message privé</option>
+        <option>📢 Annonce officielle</option>
+        <option>⚠️ Alerte urgente</option>
+        <option>📅 Convocation</option>
+      </select>
+    </div>
+    <div class="form-group">
+      <label>Objet</label>
+      <input class="form-input" placeholder="Objet du message"/>
+    </div>
+    <div class="form-group">
+      <label>Message</label>
+      <textarea class="form-textarea" placeholder="Rédigez votre message..."></textarea>
+    </div>
+    <div style="display:flex;align-items:center;gap:.75rem;margin-bottom:.75rem">
+      <button onclick="showToast('📎 Fichier joint')" style="padding:.5rem 1rem;border-radius:8px;border:1px solid var(--border);background:white;font-size:.78rem;cursor:pointer;font-weight:500">📎 Joindre un fichier</button>
+      <span style="font-size:.75rem;color:var(--gray)">Max 10MB par fichier</span>
+    </div>
+    <button class="btn-send-modal" onclick="showToast('✅ Message envoyé avec succès !');closeCompose()">📤 Envoyer le message</button>
+  </div>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script>
+  // ── Navigation sidebar ──
+  function setNav(el){
+    document.querySelectorAll('.nav-it').forEach(n=>n.classList.remove('active'));
+    el.classList.add('active');
+  }
+  function setConvTab(el){
+    document.querySelectorAll('.conv-tab').forEach(t=>t.classList.remove('active'));
+    el.classList.add('active');
+  }
+
+  // ── Sélection conversation ──
+  const gradients = {
+    blue:'linear-gradient(135deg,#1A56DB,#3B82F6)',
+    gold:'linear-gradient(135deg,#F59E0B,#f59e0b)',
+    green:'linear-gradient(135deg,#10B981,#34d399)',
+    purple:'linear-gradient(135deg,#8B5CF6,#7c3aed)',
+    navy:'linear-gradient(135deg,#0D1B2A,#1a2d42)'
+  };
+
+  function selectConv(el, initials, name, sub, color){
+    document.querySelectorAll('.conv-item').forEach(c=>c.classList.remove('active'));
+    el.classList.add('active');
+    el.classList.remove('unread');
+    el.querySelector('.conv-unread-dot')?.remove();
+
+    const g = gradients[color] || gradients.blue;
+    document.getElementById('chatAv').textContent = initials;
+    document.getElementById('chatAv').style.background = g;
+    document.getElementById('chatName').textContent = name;
+    document.getElementById('chatSub').textContent = sub;
+    document.getElementById('infoAv').textContent = initials;
+    document.getElementById('infoAv').style.background = g;
+    document.getElementById('infoName').textContent = name;
+    document.getElementById('infoRole').textContent = sub;
+
+    // Simulate typing
+    showTyping();
+  }
+
+  function openChat(initials, name, sub){
+    showToast('💬 Conversation ouverte avec '+name);
+  }
+
+  // ── Typing indicator ──
+  function showTyping(){
+    const t = document.getElementById('typingIndicator');
+    t.style.display = 'flex';
+    setTimeout(()=>{ t.style.display = 'none'; }, 3000);
+  }
+
+  // ── Send message ──
+  function sendMessage(){
+    const inp = document.getElementById('msgInput');
+    const text = inp.value.trim();
+    if(!text) return;
+
+    const msgs = document.getElementById('chatMessages');
+    const typing = document.getElementById('typingIndicator');
+
+    const row = document.createElement('div');
+    row.className = 'msg-row mine';
+    const now = new Date();
+    const time = now.getHours()+':'+(now.getMinutes()+'').padStart(2,'0');
+    row.innerHTML = `
+      <div class="msg-av-sm" style="background:linear-gradient(135deg,var(--blue),var(--sky))">DA</div>
+      <div class="msg-bubble mine">
+        ${text.replace(/\n/g,'<br/>')}
+        <div class="msg-meta"><span>${time}</span><span class="msg-check">✓</span></div>
+      </div>`;
+
+    msgs.insertBefore(row, typing);
+    inp.value = '';
+    inp.style.height = 'auto';
+    msgs.scrollTop = msgs.scrollHeight;
+
+    // Simulate reply
+    setTimeout(()=>{
+      typing.style.display = 'flex';
+      msgs.scrollTop = msgs.scrollHeight;
+    }, 800);
+    setTimeout(()=>{
+      typing.style.display = 'none';
+      const replies = [
+        'Merci pour votre message ! Je reviens vers vous rapidement.',
+        'Bien reçu, je m\'en occupe.',
+        'D\'accord, je transmets l\'information.',
+        'Parfait ! À bientôt.'
+      ];
+      const reply = document.createElement('div');
+      reply.className = 'msg-row';
+      const av = document.getElementById('chatAv');
+      reply.innerHTML = `
+        <div class="msg-av-sm" style="background:${av.style.background}">${av.textContent}</div>
+        <div class="msg-bubble other">
+          ${replies[Math.floor(Math.random()*replies.length)]}
+          <div class="msg-meta"><span>${time}</span></div>
+        </div>`;
+      msgs.insertBefore(reply, typing);
+      msgs.scrollTop = msgs.scrollHeight;
+    }, 2500);
+  }
+
+  function handleKey(e){
+    if(e.key==='Enter' && !e.shiftKey){e.preventDefault();sendMessage();}
+  }
+  function autoResize(el){
+    el.style.height='auto';
+    el.style.height=Math.min(el.scrollHeight,120)+'px';
+  }
+
+  // ── Modal composer ──
+  function openCompose(){
+    document.getElementById('composeModal').classList.add('active');
+    document.body.style.overflow='hidden';
+  }
+  function closeCompose(){
+    document.getElementById('composeModal').classList.remove('active');
+    document.body.style.overflow='';
+  }
+
+  // ── Toast ──
+  let tt;
+  function showToast(msg){
+    const t=document.getElementById('toast');
+    t.textContent=msg;t.classList.add('show');
+    clearTimeout(tt);tt=setTimeout(()=>t.classList.remove('show'),3000);
+  }
+
+  document.addEventListener('keydown',e=>{if(e.key==='Escape')closeCompose();});
+
+  // Auto scroll
+  const msgs = document.getElementById('chatMessages');
+  msgs.scrollTop = msgs.scrollHeight;
+</script>
+</body>
+</html>

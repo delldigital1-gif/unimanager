@@ -1,0 +1,421 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>UniManage — Calendrier Académique</title>
+  <link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=Inter:wght@300;400;500;600&display=swap" rel="stylesheet"/>
+  <style>
+    :root{--navy:#0D1B2A;--blue:#1A56DB;--sky:#3B82F6;--gold:#F59E0B;--light:#F0F4FF;--white:#FFFFFF;--gray:#64748B;--border:#E2E8F0;--success:#10B981;--danger:#EF4444;--purple:#8B5CF6;}
+    *{margin:0;padding:0;box-sizing:border-box;}
+    body{font-family:'Inter',sans-serif;background:#F8FAFC;color:var(--navy);min-height:100vh;}
+    .topbar{position:fixed;top:0;left:0;right:0;height:60px;background:white;border-bottom:1px solid var(--border);display:flex;align-items:center;justify-content:space-between;padding:0 1.5rem;z-index:100;}
+    .topbar-logo{font-family:'Syne',sans-serif;font-weight:800;font-size:1.1rem;color:var(--navy);}
+    .topbar-logo span{color:var(--blue);}
+    .topbar-right{display:flex;align-items:center;gap:.75rem;}
+    .btn-primary{padding:.5rem 1.1rem;border-radius:9px;background:var(--blue);color:white;font-size:.83rem;font-weight:600;cursor:pointer;border:none;transition:all .2s;}
+    .btn-primary:hover{background:#1344b8;}
+    .btn-outline{padding:.5rem 1.1rem;border-radius:9px;border:1.5px solid var(--border);background:white;color:var(--navy);font-size:.83rem;font-weight:600;cursor:pointer;transition:all .2s;}
+    .btn-outline:hover{border-color:var(--blue);color:var(--blue);}
+    .back-link{padding:.4rem .9rem;border-radius:8px;border:1px solid var(--border);background:white;font-size:.8rem;font-weight:600;cursor:pointer;color:var(--gray);transition:all .2s;text-decoration:none;}
+    .back-link:hover{border-color:var(--blue);color:var(--blue);}
+    /* Main layout */
+    .main-wrap{padding-top:60px;display:flex;height:100vh;}
+    /* Sidebar */
+    .cal-sidebar{width:280px;flex-shrink:0;background:white;border-right:1px solid var(--border);padding:1.25rem;overflow-y:auto;}
+    .cal-sidebar-title{font-family:'Syne',sans-serif;font-weight:700;font-size:.9rem;margin-bottom:1rem;}
+    /* Mini calendar */
+    .mini-cal{margin-bottom:1.5rem;}
+    .mini-cal-header{display:flex;align-items:center;justify-content:space-between;margin-bottom:.75rem;}
+    .mini-cal-title{font-family:'Syne',sans-serif;font-weight:700;font-size:.85rem;}
+    .mini-cal-nav{background:none;border:none;cursor:pointer;color:var(--gray);font-size:1rem;padding:.2rem .4rem;border-radius:5px;transition:all .2s;}
+    .mini-cal-nav:hover{background:var(--light);color:var(--blue);}
+    .mini-cal-grid{display:grid;grid-template-columns:repeat(7,1fr);gap:.2rem;text-align:center;}
+    .mini-day-head{font-size:.65rem;font-weight:700;color:var(--gray);padding:.3rem 0;}
+    .mini-day{font-size:.75rem;padding:.3rem;border-radius:6px;cursor:pointer;transition:all .2s;}
+    .mini-day:hover{background:var(--light);}
+    .mini-day.today{background:var(--blue);color:white;font-weight:700;}
+    .mini-day.has-event{position:relative;}
+    .mini-day.has-event::after{content:'';position:absolute;bottom:1px;left:50%;transform:translateX(-50%);width:4px;height:4px;border-radius:50%;background:var(--gold);}
+    .mini-day.other-month{color:var(--border);}
+    .mini-day.selected{background:var(--light);border:1.5px solid var(--blue);color:var(--blue);font-weight:700;}
+    /* Event types legend */
+    .event-types{display:flex;flex-direction:column;gap:.5rem;margin-bottom:1.5rem;}
+    .event-type-item{display:flex;align-items:center;gap:.65rem;padding:.5rem .65rem;border-radius:8px;cursor:pointer;transition:background .2s;}
+    .event-type-item:hover{background:#F8FAFC;}
+    .event-type-dot{width:12px;height:12px;border-radius:3px;flex-shrink:0;}
+    .event-type-label{font-size:.8rem;font-weight:500;}
+    .event-type-count{margin-left:auto;font-size:.72rem;font-weight:700;color:var(--gray);}
+    /* Upcoming events */
+    .upcoming-list{display:flex;flex-direction:column;gap:.6rem;}
+    .upcoming-item{padding:.65rem .75rem;border-radius:9px;border-left:3px solid;cursor:pointer;transition:all .2s;}
+    .upcoming-item:hover{transform:translateX(3px);}
+    .upcoming-date{font-size:.68rem;font-weight:600;color:var(--gray);margin-bottom:.2rem;}
+    .upcoming-name{font-size:.8rem;font-weight:600;color:var(--navy);}
+    .upcoming-sub{font-size:.7rem;color:var(--gray);margin-top:.1rem;}
+    /* Main calendar */
+    .cal-main{flex:1;overflow-y:auto;padding:1.5rem;}
+    .cal-header{display:flex;align-items:center;justify-content:space-between;margin-bottom:1.25rem;}
+    .cal-title{font-family:'Syne',sans-serif;font-weight:800;font-size:1.2rem;}
+    .cal-nav-group{display:flex;align-items:center;gap:.5rem;}
+    .cal-nav-btn{padding:.45rem .9rem;border-radius:8px;border:1.5px solid var(--border);background:white;cursor:pointer;font-size:.83rem;font-weight:600;color:var(--navy);transition:all .2s;}
+    .cal-nav-btn:hover{border-color:var(--blue);color:var(--blue);}
+    .cal-nav-btn.active{background:var(--blue);color:white;border-color:var(--blue);}
+    /* Views */
+    .cal-view{display:none;}
+    .cal-view.active{display:block;}
+    /* Month grid */
+    .month-grid{border:1px solid var(--border);border-radius:14px;overflow:hidden;background:white;}
+    .month-head{display:grid;grid-template-columns:repeat(7,1fr);}
+    .month-head-cell{padding:.65rem;text-align:center;font-size:.75rem;font-weight:700;color:var(--gray);background:#F8FAFC;border-bottom:1px solid var(--border);}
+    .month-body{display:grid;grid-template-columns:repeat(7,1fr);}
+    .month-cell{border-right:1px solid var(--border);border-bottom:1px solid var(--border);min-height:100px;padding:.5rem;cursor:pointer;transition:background .15s;position:relative;}
+    .month-cell:nth-child(7n){border-right:none;}
+    .month-cell:hover{background:#FAFBFF;}
+    .month-cell.today-cell{background:rgba(26,86,219,0.03);}
+    .cell-date{font-size:.8rem;font-weight:600;width:24px;height:24px;border-radius:50%;display:flex;align-items:center;justify-content:center;margin-bottom:.3rem;}
+    .today-cell .cell-date{background:var(--blue);color:white;}
+    .month-cell.other{background:#FAFBFC;}
+    .month-cell.other .cell-date{color:var(--border);}
+    .cell-event{font-size:.68rem;font-weight:600;padding:.18rem .45rem;border-radius:4px;margin-bottom:.15rem;cursor:pointer;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;transition:opacity .2s;}
+    .cell-event:hover{opacity:.8;}
+    /* Week view */
+    .week-grid{background:white;border:1px solid var(--border);border-radius:14px;overflow:hidden;}
+    .week-head{display:grid;grid-template-columns:60px repeat(7,1fr);border-bottom:1px solid var(--border);}
+    .week-head-cell{padding:.65rem .5rem;text-align:center;font-size:.78rem;border-right:1px solid var(--border);}
+    .week-head-cell:last-child{border-right:none;}
+    .week-head-day{font-weight:700;color:var(--navy);}
+    .week-head-date{font-size:.7rem;color:var(--gray);}
+    .week-head-date.today{color:var(--blue);font-weight:700;}
+    .week-body{display:grid;grid-template-columns:60px repeat(7,1fr);}
+    .week-time{padding:.45rem .5rem;text-align:right;font-size:.68rem;color:var(--gray);border-right:1px solid var(--border);border-bottom:1px solid var(--border);height:60px;display:flex;align-items:flex-start;justify-content:flex-end;}
+    .week-slot{border-right:1px solid var(--border);border-bottom:1px solid var(--border);height:60px;padding:.2rem;position:relative;transition:background .15s;}
+    .week-slot:hover{background:#FAFBFF;}
+    .week-slot:last-child{border-right:none;}
+    .slot-event{position:absolute;left:2px;right:2px;top:2px;border-radius:5px;padding:.25rem .4rem;font-size:.68rem;font-weight:600;cursor:pointer;overflow:hidden;}
+    /* Event modal */
+    .modal-overlay{position:fixed;inset:0;z-index:2000;background:rgba(13,27,42,0.5);display:none;align-items:center;justify-content:center;backdrop-filter:blur(4px);padding:1rem;}
+    .modal-overlay.active{display:flex;}
+    .modal{background:white;border-radius:18px;width:100%;max-width:500px;padding:2rem;position:relative;box-shadow:0 30px 80px rgba(0,0,0,0.2);animation:modalIn .3s ease;}
+    @keyframes modalIn{from{opacity:0;transform:translateY(16px)}to{opacity:1;transform:translateY(0)}}
+    .modal-close{position:absolute;top:1rem;right:1rem;background:#F8FAFC;border:none;cursor:pointer;width:30px;height:30px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:.85rem;color:var(--gray);}
+    .modal-title{font-family:'Syne',sans-serif;font-weight:800;font-size:1.1rem;margin-bottom:1.25rem;}
+    .form-group{margin-bottom:.85rem;}
+    .form-group label{display:block;font-size:.78rem;font-weight:600;color:var(--navy);margin-bottom:.35rem;}
+    .form-input{width:100%;padding:.65rem .9rem;border-radius:8px;border:1.5px solid var(--border);font-size:.875rem;font-family:'Inter',sans-serif;color:var(--navy);outline:none;transition:border-color .2s;}
+    .form-input:focus{border-color:var(--blue);}
+    .form-select{width:100%;padding:.65rem .9rem;border-radius:8px;border:1.5px solid var(--border);font-size:.875rem;font-family:'Inter',sans-serif;outline:none;cursor:pointer;}
+    .form-row{display:grid;grid-template-columns:1fr 1fr;gap:.85rem;}
+    .btn-submit{width:100%;padding:.8rem;border-radius:10px;background:var(--blue);color:white;font-size:.9rem;font-weight:700;cursor:pointer;border:none;margin-top:.5rem;}
+    /* Event detail popup */
+    .event-popup{position:fixed;z-index:3000;background:white;border-radius:12px;padding:1.25rem;width:280px;box-shadow:0 16px 48px rgba(0,0,0,0.18);border:1px solid var(--border);display:none;}
+    .event-popup.show{display:block;animation:popIn .2s ease;}
+    @keyframes popIn{from{opacity:0;transform:scale(.95)}to{opacity:1;transform:scale(1)}}
+    .popup-close{float:right;background:none;border:none;cursor:pointer;color:var(--gray);font-size:.85rem;}
+    .popup-type-bar{height:4px;border-radius:2px;margin-bottom:.85rem;}
+    .popup-title{font-family:'Syne',sans-serif;font-weight:700;font-size:.92rem;margin-bottom:.5rem;}
+    .popup-meta{font-size:.78rem;color:var(--gray);display:flex;flex-direction:column;gap:.25rem;}
+    .popup-actions{display:flex;gap:.5rem;margin-top:.85rem;}
+    .badge{display:inline-block;padding:.22rem .7rem;border-radius:100px;font-size:.7rem;font-weight:600;}
+    .toast{position:fixed;bottom:1.5rem;right:1.5rem;background:var(--navy);color:white;padding:.75rem 1.25rem;border-radius:10px;font-size:.83rem;font-weight:500;box-shadow:0 8px 24px rgba(0,0,0,0.2);z-index:9999;opacity:0;transform:translateY(16px);transition:all .3s;pointer-events:none;}
+    .toast.show{opacity:1;transform:translateY(0);}
+    @media(max-width:800px){.cal-sidebar{display:none;}.cal-main{padding:1rem;}}
+  </style>
+</head>
+<body>
+
+<header class="topbar">
+  <div style="display:flex;align-items:center;gap:1rem">
+    <div class="topbar-logo">Uni<span>Manage</span></div>
+    <span style="color:var(--border)">·</span>
+    <span style="font-family:'Syne',sans-serif;font-weight:700;font-size:.95rem">📆 Calendrier Académique</span>
+  </div>
+  <div class="topbar-right">
+    <a href="dashboard.html" class="back-link">← Dashboard</a>
+    <button class="btn-outline" onclick="showToast('📅 Synchronisé avec Google Calendar !')">📅 Sync</button>
+    <button class="btn-primary" onclick="openModal()">+ Événement</button>
+  </div>
+</header>
+
+<div class="main-wrap">
+
+  <!-- SIDEBAR -->
+  <aside class="cal-sidebar">
+    <!-- Mini calendar -->
+    <div class="mini-cal">
+      <div class="mini-cal-header">
+        <button class="mini-cal-nav" onclick="changeMonth(-1)">‹</button>
+        <div class="mini-cal-title" id="miniCalTitle">Janvier 2025</div>
+        <button class="mini-cal-nav" onclick="changeMonth(1)">›</button>
+      </div>
+      <div class="mini-cal-grid" id="miniCalGrid"></div>
+    </div>
+
+    <!-- Event types -->
+    <div class="cal-sidebar-title">Types d'événements</div>
+    <div class="event-types">
+      <div class="event-type-item"><div class="event-type-dot" style="background:var(--blue)"></div><span class="event-type-label">Cours</span><span class="event-type-count">156</span></div>
+      <div class="event-type-item"><div class="event-type-dot" style="background:var(--danger)"></div><span class="event-type-label">Examens</span><span class="event-type-count">24</span></div>
+      <div class="event-type-item"><div class="event-type-dot" style="background:var(--gold)"></div><span class="event-type-label">TP / TD</span><span class="event-type-count">48</span></div>
+      <div class="event-type-item"><div class="event-type-dot" style="background:var(--success)"></div><span class="event-type-label">Réunions</span><span class="event-type-count">12</span></div>
+      <div class="event-type-item"><div class="event-type-dot" style="background:var(--purple)"></div><span class="event-type-label">Événements</span><span class="event-type-count">8</span></div>
+      <div class="event-type-item"><div class="event-type-dot" style="background:var(--navy)"></div><span class="event-type-label">Vacances</span><span class="event-type-count">6</span></div>
+    </div>
+
+    <!-- Upcoming events -->
+    <div class="cal-sidebar-title">Prochains événements</div>
+    <div class="upcoming-list">
+      <div class="upcoming-item" style="background:rgba(239,68,68,0.06);border-left-color:var(--danger)" onclick="showEventPopup(event,'📝 Examen Algorithmique L2','03 Fév 2025 · 08h00–10h00','Amphithéâtre A · 287 étudiants','var(--danger)')"><div class="upcoming-date">Lun 03 Fév 2025</div><div class="upcoming-name">📝 Examen Algorithmique</div><div class="upcoming-sub">08h00 · Amph. A · Info L2</div></div>
+      <div class="upcoming-item" style="background:rgba(245,158,11,0.06);border-left-color:var(--gold)" onclick="showEventPopup(event,'📋 Réunion Direction','05 Fév 2025 · 10h00–12h00','Salle de conférence · 8 membres','var(--gold)')"><div class="upcoming-date">Mer 05 Fév 2025</div><div class="upcoming-name">📋 Réunion de direction</div><div class="upcoming-sub">10h00 · Salle conf.</div></div>
+      <div class="upcoming-item" style="background:rgba(239,68,68,0.06);border-left-color:var(--danger)" onclick="showEventPopup(event,'📝 Examen Réseaux Info L2','06 Fév 2025 · 08h00–10h00','Labo Informatique · 287 étudiants','var(--danger)')"><div class="upcoming-date">Jeu 06 Fév 2025</div><div class="upcoming-name">📝 Examen Réseaux</div><div class="upcoming-sub">08h00 · Labo Info · Info L2</div></div>
+      <div class="upcoming-item" style="background:rgba(139,92,246,0.06);border-left-color:var(--purple)" onclick="showEventPopup(event,'🎓 Cérémonie remise diplômes','15 Fév 2025 · 10h00–13h00','Amphithéâtre principal · Tous','var(--purple)')"><div class="upcoming-date">Sam 15 Fév 2025</div><div class="upcoming-name">🎓 Remise des diplômes</div><div class="upcoming-sub">10h00 · Amphithéâtre principal</div></div>
+    </div>
+  </aside>
+
+  <!-- MAIN CALENDAR -->
+  <div class="cal-main">
+    <div class="cal-header">
+      <div style="display:flex;align-items:center;gap:1rem">
+        <button class="cal-nav-btn" onclick="changeMainMonth(-1)">‹ Précédent</button>
+        <div class="cal-title" id="mainCalTitle">Février 2025</div>
+        <button class="cal-nav-btn" onclick="changeMainMonth(1)">Suivant ›</button>
+        <button class="cal-nav-btn" onclick="goToday()">Aujourd'hui</button>
+      </div>
+      <div class="cal-nav-group">
+        <button class="cal-nav-btn active" id="btnMonth" onclick="switchView('month')">Mois</button>
+        <button class="cal-nav-btn" id="btnWeek" onclick="switchView('week')">Semaine</button>
+        <button class="cal-nav-btn" id="btnList" onclick="switchView('list')">Liste</button>
+      </div>
+    </div>
+
+    <!-- MONTH VIEW -->
+    <div class="cal-view active" id="view-month">
+      <div class="month-grid">
+        <div class="month-head">
+          <div class="month-head-cell">Lun</div><div class="month-head-cell">Mar</div><div class="month-head-cell">Mer</div><div class="month-head-cell">Jeu</div><div class="month-head-cell">Ven</div><div class="month-head-cell" style="color:var(--danger)">Sam</div><div class="month-head-cell" style="color:var(--danger)">Dim</div>
+        </div>
+        <div class="month-body" id="monthBody"></div>
+      </div>
+    </div>
+
+    <!-- WEEK VIEW -->
+    <div class="cal-view" id="view-week">
+      <div class="week-grid">
+        <div class="week-head">
+          <div style="padding:.65rem;border-right:1px solid var(--border);background:#F8FAFC"></div>
+          <div class="week-head-cell" style="background:#F8FAFC"><div class="week-head-day">Lun</div><div class="week-head-date">20 Jan</div></div>
+          <div class="week-head-cell" style="background:#F8FAFC"><div class="week-head-day">Mar</div><div class="week-head-date">21 Jan</div></div>
+          <div class="week-head-cell" style="background:#F8FAFC"><div class="week-head-day">Mer</div><div class="week-head-date today">22 Jan</div></div>
+          <div class="week-head-cell" style="background:#F8FAFC"><div class="week-head-day">Jeu</div><div class="week-head-date">23 Jan</div></div>
+          <div class="week-head-cell" style="background:#F8FAFC"><div class="week-head-day">Ven</div><div class="week-head-date">24 Jan</div></div>
+          <div class="week-head-cell" style="background:#F8FAFC;color:var(--danger)"><div class="week-head-day">Sam</div><div class="week-head-date">25 Jan</div></div>
+          <div class="week-head-cell" style="background:#F8FAFC;color:var(--danger)"><div class="week-head-day">Dim</div><div class="week-head-date">26 Jan</div></div>
+        </div>
+        <div class="week-body" id="weekBody"></div>
+      </div>
+    </div>
+
+    <!-- LIST VIEW -->
+    <div class="cal-view" id="view-list">
+      <div style="background:white;border:1px solid var(--border);border-radius:14px;overflow:hidden">
+        <div style="padding:1rem 1.25rem;border-bottom:1px solid var(--border);font-family:'Syne',sans-serif;font-weight:700;font-size:.92rem">Tous les événements — Février 2025</div>
+        <div id="listEvents" style="display:flex;flex-direction:column"></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Event popup -->
+<div class="event-popup" id="eventPopup">
+  <button class="popup-close" onclick="closePopup()">✕</button>
+  <div class="popup-type-bar" id="popupBar"></div>
+  <div class="popup-title" id="popupTitle"></div>
+  <div class="popup-meta" id="popupMeta"></div>
+  <div class="popup-actions">
+    <button style="flex:1;padding:.45rem;border-radius:7px;border:none;background:var(--blue);color:white;font-size:.78rem;font-weight:600;cursor:pointer" onclick="showToast('✏️ Événement modifié');closePopup()">Modifier</button>
+    <button style="padding:.45rem .85rem;border-radius:7px;border:1px solid var(--border);background:white;font-size:.78rem;cursor:pointer" onclick="showToast('🗑️ Événement supprimé');closePopup()">Supprimer</button>
+  </div>
+</div>
+
+<!-- Modal ajouter événement -->
+<div class="modal-overlay" id="eventModal" onclick="if(event.target===this)closeModal()">
+  <div class="modal">
+    <button class="modal-close" onclick="closeModal()">✕</button>
+    <div class="modal-title">📆 Ajouter un événement</div>
+    <div class="form-group"><label>Titre de l'événement *</label><input class="form-input" placeholder="Ex: Examen Algorithmique L2"/></div>
+    <div class="form-group">
+      <label>Type *</label>
+      <select class="form-select">
+        <option>📚 Cours</option><option>📝 Examen</option><option>🔧 TP / TD</option>
+        <option>📋 Réunion</option><option>🎓 Événement</option><option>🏖️ Vacances</option>
+      </select>
+    </div>
+    <div class="form-row">
+      <div class="form-group"><label>Date début *</label><input class="form-input" type="date" value="2025-02-03"/></div>
+      <div class="form-group"><label>Date fin</label><input class="form-input" type="date" value="2025-02-03"/></div>
+    </div>
+    <div class="form-row">
+      <div class="form-group"><label>Heure début</label><input class="form-input" type="time" value="08:00"/></div>
+      <div class="form-group"><label>Heure fin</label><input class="form-input" type="time" value="10:00"/></div>
+    </div>
+    <div class="form-group"><label>Lieu / Salle</label><select class="form-select"><option>Amphithéâtre A</option><option>Amphithéâtre B</option><option>Salle B2</option><option>Labo Info</option><option>Salle de conférence</option></select></div>
+    <div class="form-group"><label>Concerne</label><select class="form-select"><option>Tous</option><option>Informatique L2</option><option>Gestion M1</option><option>Droit L3</option><option>Direction</option></select></div>
+    <div class="form-group"><label>Description</label><input class="form-input" placeholder="Informations complémentaires..."/></div>
+    <button class="btn-submit" onclick="showToast('✅ Événement créé et publié !');closeModal()">Créer l'événement →</button>
+  </div>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script>
+  // ── Données événements ──
+  const events = {
+    '2025-02-03':[{title:'📝 Examen Algorithmique',color:'#EF4444',bg:'rgba(239,68,68,0.1)',time:'08h–10h'},{title:'📚 Cours BD L1',color:'#1A56DB',bg:'rgba(26,86,219,0.1)',time:'14h–16h'}],
+    '2025-02-04':[{title:'📋 Réunion pédagogique',color:'#10B981',bg:'rgba(16,185,129,0.1)',time:'10h–12h'}],
+    '2025-02-05':[{title:'📋 Direction générale',color:'#F59E0B',bg:'rgba(245,158,11,0.1)',time:'10h–12h'},{title:'🔧 TP Réseaux L2',color:'#F59E0B',bg:'rgba(245,158,11,0.1)',time:'14h–16h'}],
+    '2025-02-06':[{title:'📝 Examen Réseaux',color:'#EF4444',bg:'rgba(239,68,69,0.1)',time:'08h–10h'}],
+    '2025-02-10':[{title:'🔄 Rattrapage Sécurité',color:'#EF4444',bg:'rgba(239,68,68,0.1)',time:'14h–16h'}],
+    '2025-02-12':[{title:'📝 Examen BD',color:'#EF4444',bg:'rgba(239,68,69,0.1)',time:'10h–12h'}],
+    '2025-02-15':[{title:'🎓 Remise des diplômes',color:'#8B5CF6',bg:'rgba(139,92,246,0.1)',time:'10h–13h'}],
+    '2025-02-17':[{title:'🏖️ Vacances de mi-sem.',color:'#0D1B2A',bg:'rgba(13,27,42,0.07)',time:'Journée'}],
+    '2025-02-18':[{title:'🏖️ Vacances de mi-sem.',color:'#0D1B2A',bg:'rgba(13,27,42,0.07)',time:'Journée'}],
+    '2025-02-19':[{title:'🏖️ Vacances de mi-sem.',color:'#0D1B2A',bg:'rgba(13,27,42,0.07)',time:'Journée'}],
+    '2025-02-20':[{title:'🏖️ Vacances de mi-sem.',color:'#0D1B2A',bg:'rgba(13,27,42,0.07)',time:'Journée'}],
+    '2025-02-22':[{title:'📚 Reprise des cours',color:'#1A56DB',bg:'rgba(26,86,219,0.1)',time:'07h–18h'}],
+    '2025-02-24':[{title:'📝 Examen Java',color:'#EF4444',bg:'rgba(239,68,69,0.1)',time:'08h–10h'}],
+  };
+
+  let currentYear=2025,currentMonth=1; // 0-indexed: 1=Feb
+  let miniYear=2025,miniMonth=0; // 0-indexed: 0=Jan
+
+  const months=['Janvier','Février','Mars','Avril','Mai','Juin','Juillet','Août','Septembre','Octobre','Novembre','Décembre'];
+  const days=['L','M','M','J','V','S','D'];
+
+  function renderMiniCal(){
+    const el=document.getElementById('miniCalGrid');
+    document.getElementById('miniCalTitle').textContent=months[miniMonth]+' '+miniYear;
+    el.innerHTML=days.map(d=>`<div class="mini-day-head">${d}</div>`).join('');
+    const first=new Date(miniYear,miniMonth,1).getDay();
+    const offset=(first===0?6:first-1);
+    const daysInMonth=new Date(miniYear,miniMonth+1,0).getDate();
+    const prevDays=new Date(miniYear,miniMonth,0).getDate();
+    for(let i=offset-1;i>=0;i--){
+      el.innerHTML+=`<div class="mini-day other-month">${prevDays-i}</div>`;
+    }
+    const today=new Date();
+    for(let d=1;d<=daysInMonth;d++){
+      const dateStr=`${miniYear}-${String(miniMonth+1).padStart(2,'0')}-${String(d).padStart(2,'0')}`;
+      const isToday=today.getDate()===d&&today.getMonth()===miniMonth&&today.getFullYear()===miniYear;
+      const hasEv=events[dateStr];
+      el.innerHTML+=`<div class="mini-day${isToday?' today':''}${hasEv?' has-event':''}" onclick="showToast('📅 ${months[miniMonth]} ${d}')">${d}</div>`;
+    }
+    const remaining=(7-((offset+daysInMonth)%7))%7;
+    for(let d=1;d<=remaining;d++) el.innerHTML+=`<div class="mini-day other-month">${d}</div>`;
+  }
+
+  function changeMonth(dir){miniMonth+=dir;if(miniMonth>11){miniMonth=0;miniYear++;}else if(miniMonth<0){miniMonth=11;miniYear--;}renderMiniCal();}
+
+  function renderMainCal(){
+    const el=document.getElementById('monthBody');
+    document.getElementById('mainCalTitle').textContent=months[currentMonth]+' '+currentYear;
+    el.innerHTML='';
+    const first=new Date(currentYear,currentMonth,1).getDay();
+    const offset=(first===0?6:first-1);
+    const daysInMonth=new Date(currentYear,currentMonth+1,0).getDate();
+    const prevDays=new Date(currentYear,currentMonth,0).getDate();
+    const today=new Date();
+    for(let i=offset-1;i>=0;i--){
+      el.innerHTML+=`<div class="month-cell other"><div class="cell-date" style="color:var(--border)">${prevDays-i}</div></div>`;
+    }
+    for(let d=1;d<=daysInMonth;d++){
+      const dateStr=`${currentYear}-${String(currentMonth+1).padStart(2,'0')}-${String(d).padStart(2,'0')}`;
+      const isToday=today.getDate()===d&&today.getMonth()===currentMonth&&today.getFullYear()===currentYear;
+      const dayEvents=events[dateStr]||[];
+      let evHtml=dayEvents.slice(0,2).map(e=>`<div class="cell-event" style="background:${e.bg};color:${e.color}" onclick="event.stopPropagation();showEventPopup(event,'${e.title}','${months[currentMonth]} ${d} · ${e.time}','','${e.color}')">${e.title}</div>`).join('');
+      if(dayEvents.length>2) evHtml+=`<div style="font-size:.65rem;color:var(--gray);padding:.1rem .3rem">+${dayEvents.length-2} autres</div>`;
+      el.innerHTML+=`<div class="month-cell${isToday?' today-cell':''}" onclick="showToast('📅 ${months[currentMonth]} ${d}')"><div class="cell-date">${d}</div>${evHtml}</div>`;
+    }
+    const total=offset+daysInMonth;
+    const remaining=(7-(total%7))%7;
+    for(let d=1;d<=remaining;d++) el.innerHTML+=`<div class="month-cell other"><div class="cell-date" style="color:var(--border)">${d}</div></div>`;
+
+    // Render list
+    renderList();
+  }
+
+  function renderList(){
+    const el=document.getElementById('listEvents');
+    el.innerHTML='';
+    const sorted=Object.entries(events).filter(([k])=>k.startsWith(`${currentYear}-${String(currentMonth+1).padStart(2,'0')}`)).sort(([a],[b])=>a.localeCompare(b));
+    sorted.forEach(([date,evs])=>{
+      const d=new Date(date);
+      const label=d.toLocaleDateString('fr-FR',{weekday:'long',day:'numeric',month:'long'});
+      el.innerHTML+=`<div style="padding:.6rem 1.25rem;background:#F8FAFC;border-bottom:1px solid var(--border);font-size:.78rem;font-weight:700;color:var(--gray);text-transform:uppercase;letter-spacing:.04em">${label}</div>`;
+      evs.forEach(e=>{
+        el.innerHTML+=`<div style="display:flex;align-items:center;gap:1rem;padding:.75rem 1.25rem;border-bottom:1px solid var(--border);cursor:pointer;transition:background .2s" onmouseover="this.style.background='#F8FAFC'" onmouseout="this.style.background='white'" onclick="showEventPopup(event,'${e.title}','${label} · ${e.time}','','${e.color}')"><div style="width:12px;height:12px;border-radius:3px;background:${e.color};flex-shrink:0"></div><div style="flex:1"><div style="font-size:.85rem;font-weight:600">${e.title}</div><div style="font-size:.72rem;color:var(--gray);margin-top:.1rem">⏰ ${e.time}</div></div></div>`;
+      });
+    });
+    if(!sorted.length) el.innerHTML='<div style="text-align:center;padding:2rem;color:var(--gray);font-size:.85rem">Aucun événement ce mois-ci</div>';
+  }
+
+  function renderWeek(){
+    const el=document.getElementById('weekBody');
+    el.innerHTML='';
+    const times=['07h','08h','09h','10h','11h','12h','13h','14h','15h','16h','17h','18h'];
+    const dayEvents=[
+      [{title:'Algorithmique L2',color:'#1A56DB',bg:'rgba(26,86,219,0.1)',row:0,span:2}],
+      [],
+      [{title:'Bases de données L1',color:'#10B981',bg:'rgba(16,185,129,0.1)',row:0,span:2},{title:'TP Réseaux',color:'#F59E0B',bg:'rgba(245,158,11,0.1)',row:6,span:2}],
+      [{title:'POO Java L2',color:'#1A56DB',bg:'rgba(26,86,219,0.1)',row:2,span:2}],
+      [{title:'Maths L2',color:'#F59E0B',bg:'rgba(245,158,11,0.1)',row:0,span:2},{title:'Anglais Tech.',color:'#8B5CF6',bg:'rgba(139,92,246,0.1)',row:6,span:2}],
+      [],[],
+    ];
+    times.forEach((t,ti)=>{
+      el.innerHTML+=`<div class="week-time">${t}</div>`;
+      for(let d=0;d<7;d++){
+        const ev=dayEvents[d].find(e=>e.row===ti);
+        let evHtml='';
+        if(ev) evHtml=`<div class="slot-event" style="background:${ev.bg};color:${ev.color};border-left:3px solid ${ev.color}" onclick="showToast('📚 ${ev.title}')">${ev.title}</div>`;
+        el.innerHTML+=`<div class="week-slot">${evHtml}</div>`;
+      }
+    });
+  }
+
+  function changeMainMonth(dir){currentMonth+=dir;if(currentMonth>11){currentMonth=0;currentYear++;}else if(currentMonth<0){currentMonth=11;currentYear--;}renderMainCal();}
+  function goToday(){const t=new Date();currentYear=t.getFullYear();currentMonth=t.getMonth();renderMainCal();}
+
+  function switchView(v){
+    ['month','week','list'].forEach(vv=>{document.getElementById('view-'+vv).classList.remove('active');document.getElementById('btn'+vv.charAt(0).toUpperCase()+vv.slice(1)).classList.remove('active');});
+    document.getElementById('view-'+v).classList.add('active');
+    document.getElementById('btn'+v.charAt(0).toUpperCase()+v.slice(1)).classList.add('active');
+    if(v==='week')renderWeek();
+  }
+
+  function showEventPopup(e,title,meta1,meta2,color){
+    const popup=document.getElementById('eventPopup');
+    document.getElementById('popupBar').style.background=color;
+    document.getElementById('popupTitle').textContent=title;
+    document.getElementById('popupMeta').innerHTML=`<span>📅 ${meta1}</span>${meta2?`<span>📍 ${meta2}</span>`:''}`;
+    const x=Math.min(e.clientX,window.innerWidth-300);
+    const y=Math.min(e.clientY,window.innerHeight-200);
+    popup.style.left=x+'px';popup.style.top=y+'px';
+    popup.classList.add('show');
+    e.stopPropagation();
+  }
+  function closePopup(){document.getElementById('eventPopup').classList.remove('show');}
+  document.addEventListener('click',()=>closePopup());
+
+  function openModal(){document.getElementById('eventModal').classList.add('active');document.body.style.overflow='hidden';}
+  function closeModal(){document.getElementById('eventModal').classList.remove('active');document.body.style.overflow='';}
+
+  let tt;
+  function showToast(msg){const t=document.getElementById('toast');t.textContent=msg;t.classList.add('show');clearTimeout(tt);tt=setTimeout(()=>t.classList.remove('show'),3000);}
+
+  document.addEventListener('keydown',e=>{if(e.key==='Escape'){closeModal();closePopup();}});
+
+  // Init
+  renderMiniCal();
+  renderMainCal();
+</script>
+</body>
+</html>

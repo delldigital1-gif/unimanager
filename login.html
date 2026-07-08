@@ -1,0 +1,667 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>UniManage — Connexion</title>
+  <link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=Inter:wght@300;400;500;600&display=swap" rel="stylesheet"/>
+  <style>
+    :root{
+      --navy:#0D1B2A;--blue:#1A56DB;--sky:#3B82F6;
+      --gold:#F59E0B;--light:#F0F4FF;--white:#FFFFFF;
+      --gray:#64748B;--border:#E2E8F0;
+      --success:#10B981;--danger:#EF4444;--purple:#8B5CF6;
+    }
+    *{margin:0;padding:0;box-sizing:border-box;}
+    body{font-family:'Inter',sans-serif;min-height:100vh;display:flex;background:#0a0f1a;overflow:hidden;}
+
+    /* ── LEFT PANEL ── */
+    .left-panel{
+      flex:1;display:flex;flex-direction:column;justify-content:center;
+      padding:3rem 4rem;position:relative;overflow:hidden;
+      background:linear-gradient(135deg,#0d1520 0%,#0a1628 50%,#0d1a2e 100%);
+    }
+    /* Animated background circles */
+    .bg-circle{position:absolute;border-radius:50%;pointer-events:none;}
+    .bg-c1{width:500px;height:500px;top:-150px;left:-150px;background:radial-gradient(circle,rgba(26,86,219,0.12) 0%,transparent 70%);}
+    .bg-c2{width:400px;height:400px;bottom:-100px;right:-100px;background:radial-gradient(circle,rgba(139,92,246,0.1) 0%,transparent 70%);}
+    .bg-c3{width:300px;height:300px;top:50%;left:50%;transform:translate(-50%,-50%);background:radial-gradient(circle,rgba(16,185,129,0.05) 0%,transparent 70%);}
+
+    .left-logo{
+      font-family:'Syne',sans-serif;font-weight:800;font-size:1.5rem;
+      color:white;margin-bottom:3rem;position:relative;z-index:1;
+    }
+    .left-logo span{color:var(--sky);}
+
+    .left-content{position:relative;z-index:1;}
+    .left-content h1{
+      font-family:'Syne',sans-serif;font-weight:800;
+      font-size:clamp(1.8rem,3vw,2.5rem);
+      color:white;line-height:1.2;margin-bottom:1rem;
+    }
+    .left-content h1 em{font-style:normal;color:var(--sky);}
+    .left-content p{font-size:.95rem;color:rgba(255,255,255,0.45);line-height:1.8;max-width:380px;margin-bottom:2.5rem;}
+
+    /* Role cards preview */
+    .role-cards{display:flex;flex-direction:column;gap:.75rem;max-width:380px;}
+    .role-card-preview{
+      display:flex;align-items:center;gap:1rem;
+      padding:.85rem 1.1rem;border-radius:12px;
+      background:rgba(255,255,255,0.04);
+      border:1px solid rgba(255,255,255,0.07);
+      transition:all .3s;cursor:default;
+    }
+    .role-card-preview.highlight{
+      background:rgba(26,86,219,0.12);
+      border-color:rgba(26,86,219,0.3);
+    }
+    .role-card-preview.highlight.gold{
+      background:rgba(245,158,11,0.1);
+      border-color:rgba(245,158,11,0.25);
+    }
+    .role-card-preview.highlight.green{
+      background:rgba(16,185,129,0.1);
+      border-color:rgba(16,185,129,0.25);
+    }
+    .role-card-preview.highlight.purple{
+      background:rgba(139,92,246,0.12);
+      border-color:rgba(139,92,246,0.3);
+    }
+    .role-icon-wrap{
+      width:38px;height:38px;border-radius:10px;
+      display:flex;align-items:center;justify-content:center;
+      font-size:1.1rem;flex-shrink:0;
+    }
+    .role-info{}
+    .role-name{font-size:.85rem;font-weight:700;color:white;}
+    .role-desc{font-size:.72rem;color:rgba(255,255,255,0.35);margin-top:.1rem;}
+    .role-arrow{margin-left:auto;color:rgba(255,255,255,0.2);font-size:.9rem;transition:all .3s;}
+    .role-card-preview.highlight .role-arrow{color:rgba(255,255,255,0.6);}
+
+    .left-footer{
+      position:absolute;bottom:1.5rem;left:4rem;
+      font-size:.75rem;color:rgba(255,255,255,0.2);
+      z-index:1;
+    }
+
+    /* ── RIGHT PANEL ── */
+    .right-panel{
+      width:480px;flex-shrink:0;
+      background:white;display:flex;flex-direction:column;
+      justify-content:center;padding:3rem;
+      position:relative;overflow:hidden;
+    }
+    .right-panel::before{
+      content:'';position:absolute;top:-80px;right:-80px;
+      width:250px;height:250px;border-radius:50%;
+      background:radial-gradient(circle,rgba(26,86,219,0.05) 0%,transparent 70%);
+    }
+
+    /* STEPS */
+    .step{display:none;animation:fadeIn .3s ease;}
+    .step.active{display:block;}
+    @keyframes fadeIn{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:translateY(0)}}
+
+    /* STEP 1 — Choisir rôle */
+    .step-label{
+      font-size:.72rem;font-weight:700;letter-spacing:.08em;
+      text-transform:uppercase;color:var(--blue);margin-bottom:.6rem;
+    }
+    .step-title{
+      font-family:'Syne',sans-serif;font-weight:800;
+      font-size:1.5rem;color:var(--navy);margin-bottom:.4rem;
+    }
+    .step-sub{font-size:.875rem;color:var(--gray);margin-bottom:1.75rem;line-height:1.6;}
+
+    .role-selector{display:flex;flex-direction:column;gap:.65rem;margin-bottom:1.5rem;}
+    .role-option{
+      display:flex;align-items:center;gap:.85rem;
+      padding:.85rem 1rem;border-radius:12px;
+      border:2px solid var(--border);cursor:pointer;
+      transition:all .2s;position:relative;
+    }
+    .role-option:hover{border-color:var(--blue);background:var(--light);}
+    .role-option.selected{border-color:var(--blue);background:var(--light);}
+    .role-option.selected.gold-sel{border-color:var(--gold);background:rgba(245,158,11,0.07);}
+    .role-option.selected.green-sel{border-color:var(--success);background:rgba(16,185,129,0.07);}
+    .role-option.selected.purple-sel{border-color:var(--purple);background:rgba(139,92,246,0.07);}
+    .role-opt-icon{
+      width:42px;height:42px;border-radius:10px;
+      display:flex;align-items:center;justify-content:center;
+      font-size:1.2rem;flex-shrink:0;
+    }
+    .role-opt-body{flex:1;}
+    .role-opt-name{font-weight:700;font-size:.9rem;color:var(--navy);}
+    .role-opt-desc{font-size:.75rem;color:var(--gray);margin-top:.15rem;}
+    .role-opt-check{
+      width:20px;height:20px;border-radius:50%;
+      border:2px solid var(--border);
+      display:flex;align-items:center;justify-content:center;
+      flex-shrink:0;transition:all .2s;font-size:.7rem;color:white;
+    }
+    .role-option.selected .role-opt-check{background:var(--blue);border-color:var(--blue);}
+    .role-option.selected.gold-sel .role-opt-check{background:var(--gold);border-color:var(--gold);}
+    .role-option.selected.green-sel .role-opt-check{background:var(--success);border-color:var(--success);}
+    .role-option.selected.purple-sel .role-opt-check{background:var(--purple);border-color:var(--purple);}
+
+    .btn-next{
+      width:100%;padding:.9rem;border-radius:11px;
+      background:var(--blue);color:white;
+      font-size:1rem;font-weight:700;cursor:pointer;
+      border:none;transition:all .25s;
+      font-family:'Inter',sans-serif;
+      display:flex;align-items:center;justify-content:center;gap:.5rem;
+    }
+    .btn-next:hover{background:#1344b8;transform:translateY(-1px);box-shadow:0 8px 20px rgba(26,86,219,0.3);}
+    .btn-next:disabled{background:var(--border);color:var(--gray);cursor:not-allowed;transform:none;box-shadow:none;}
+
+    /* STEP 2 — Formulaire login */
+    .back-btn{
+      display:flex;align-items:center;gap:.4rem;
+      font-size:.8rem;color:var(--gray);cursor:pointer;
+      margin-bottom:1.5rem;transition:color .2s;
+      background:none;border:none;padding:0;
+    }
+    .back-btn:hover{color:var(--blue);}
+
+    /* Role badge dans form */
+    .role-badge-active{
+      display:inline-flex;align-items:center;gap:.5rem;
+      padding:.4rem 1rem;border-radius:100px;
+      font-size:.8rem;font-weight:700;margin-bottom:1.25rem;
+    }
+
+    .form-group{margin-bottom:1rem;}
+    .form-group label{
+      display:block;font-size:.8rem;font-weight:600;
+      color:var(--navy);margin-bottom:.4rem;
+    }
+    .form-input{
+      width:100%;padding:.75rem 1rem;border-radius:9px;
+      border:1.5px solid var(--border);font-size:.9rem;
+      font-family:'Inter',sans-serif;color:var(--navy);
+      background:white;transition:border-color .2s;outline:none;
+    }
+    .form-input:focus{border-color:var(--blue);}
+    .form-input.gold-focus:focus{border-color:var(--gold);}
+    .form-input.green-focus:focus{border-color:var(--success);}
+    .form-input.purple-focus:focus{border-color:var(--purple);}
+
+    .forgot-link{
+      font-size:.78rem;color:var(--blue);text-decoration:none;
+      float:right;margin-top:.35rem;
+    }
+
+    .btn-login{
+      width:100%;padding:.9rem;border-radius:11px;
+      color:white;font-size:1rem;font-weight:700;cursor:pointer;
+      border:none;transition:all .25s;font-family:'Inter',sans-serif;
+      display:flex;align-items:center;justify-content:center;gap:.5rem;
+      margin-top:.75rem;
+    }
+
+    .divider{
+      display:flex;align-items:center;gap:1rem;
+      margin:1.25rem 0;color:var(--gray);font-size:.78rem;
+    }
+    .divider::before,.divider::after{content:'';flex:1;height:1px;background:var(--border);}
+
+    .btn-google{
+      width:100%;padding:.8rem;border-radius:10px;
+      background:white;border:1.5px solid var(--border);
+      display:flex;align-items:center;justify-content:center;gap:.75rem;
+      font-size:.875rem;font-weight:600;cursor:pointer;
+      transition:all .2s;color:var(--navy);font-family:'Inter',sans-serif;
+    }
+    .btn-google:hover{border-color:#4285F4;background:#f8f9ff;}
+
+    /* STEP 3 — Loading / Redirection */
+    .loading-step{text-align:center;padding:2rem 0;}
+    .loader-circle{
+      width:72px;height:72px;border-radius:50%;
+      border:5px solid var(--border);
+      border-top-color:var(--blue);
+      animation:spin 1s linear infinite;
+      margin:0 auto 1.5rem;
+    }
+    @keyframes spin{to{transform:rotate(360deg)}}
+    .loading-title{font-family:'Syne',sans-serif;font-weight:800;font-size:1.2rem;color:var(--navy);margin-bottom:.5rem;}
+    .loading-sub{font-size:.875rem;color:var(--gray);}
+    .loading-steps-list{margin-top:1.5rem;display:flex;flex-direction:column;gap:.6rem;text-align:left;}
+    .loading-step-item{
+      display:flex;align-items:center;gap:.75rem;
+      font-size:.83rem;color:var(--gray);
+      padding:.5rem .75rem;border-radius:8px;
+      transition:all .3s;
+    }
+    .loading-step-item.done{color:var(--success);background:rgba(16,185,129,0.07);}
+    .loading-step-item.active-step{color:var(--blue);background:var(--light);}
+    .step-dot{width:8px;height:8px;border-radius:50%;background:var(--border);flex-shrink:0;transition:all .3s;}
+    .loading-step-item.done .step-dot{background:var(--success);}
+    .loading-step-item.active-step .step-dot{background:var(--blue);animation:pulse 1s infinite;}
+    @keyframes pulse{0%,100%{opacity:1}50%{opacity:.3}}
+
+    /* ALERT */
+    .alert{padding:.75rem 1rem;border-radius:8px;font-size:.83rem;font-weight:500;margin-bottom:1rem;display:none;}
+    .alert.error{background:rgba(239,68,68,0.08);color:var(--danger);border:1px solid rgba(239,68,68,0.2);display:block;}
+    .alert.success{background:rgba(16,185,129,0.08);color:var(--success);border:1px solid rgba(16,185,129,0.2);display:block;}
+
+    /* DEMO HINT */
+    .demo-hint{
+      margin-top:1.25rem;padding:.85rem 1rem;
+      background:#F8FAFC;border-radius:10px;
+      border:1px solid var(--border);font-size:.78rem;
+      color:var(--gray);line-height:1.7;
+    }
+    .demo-hint strong{color:var(--navy);}
+    .demo-accounts{display:flex;flex-direction:column;gap:.3rem;margin-top:.5rem;}
+    .demo-account{
+      display:flex;align-items:center;justify-content:space-between;
+      cursor:pointer;padding:.3rem .5rem;border-radius:6px;
+      transition:background .2s;
+    }
+    .demo-account:hover{background:var(--border);}
+    .demo-account span{font-weight:600;color:var(--blue);}
+
+    /* Responsive */
+    @media(max-width:900px){
+      .left-panel{display:none;}
+      .right-panel{width:100%;padding:2rem 1.5rem;}
+    }
+  </style>
+</head>
+<body>
+
+<!-- ── LEFT PANEL ── -->
+<div class="left-panel">
+  <div class="bg-circle bg-c1"></div>
+  <div class="bg-circle bg-c2"></div>
+  <div class="bg-circle bg-c3"></div>
+
+  <div class="left-logo">Uni<span>Manage</span></div>
+
+  <div class="left-content">
+    <h1>La plateforme qui <em>unifie</em> votre université</h1>
+    <p>Un seul login intelligent pour accéder à votre espace personnalisé — Admin, Enseignant, Étudiant ou Super Admin.</p>
+
+    <div class="role-cards">
+      <div class="role-card-preview highlight" id="preview-admin">
+        <div class="role-icon-wrap" style="background:rgba(26,86,219,0.15)">🏛️</div>
+        <div class="role-info">
+          <div class="role-name">Administrateur</div>
+          <div class="role-desc">Gestion complète de l'université</div>
+        </div>
+        <div class="role-arrow">→</div>
+      </div>
+      <div class="role-card-preview highlight gold" id="preview-enseignant">
+        <div class="role-icon-wrap" style="background:rgba(245,158,11,0.15)">👨‍🏫</div>
+        <div class="role-info">
+          <div class="role-name">Enseignant</div>
+          <div class="role-desc">Cours, notes, planning, salaire</div>
+        </div>
+        <div class="role-arrow">→</div>
+      </div>
+      <div class="role-card-preview highlight green" id="preview-etudiant">
+        <div class="role-icon-wrap" style="background:rgba(16,185,129,0.15)">🎓</div>
+        <div class="role-info">
+          <div class="role-name">Étudiant</div>
+          <div class="role-desc">Notes, emploi du temps, paiements</div>
+        </div>
+        <div class="role-arrow">→</div>
+      </div>
+      <div class="role-card-preview highlight purple" id="preview-superadmin">
+        <div class="role-icon-wrap" style="background:rgba(139,92,246,0.15)">⚡</div>
+        <div class="role-info">
+          <div class="role-name">Super Admin</div>
+          <div class="role-desc">Plateforme · Toutes les universités</div>
+        </div>
+        <div class="role-arrow">→</div>
+      </div>
+    </div>
+  </div>
+
+  <div class="left-footer">© 2025 UniManage · Tous droits réservés</div>
+</div>
+
+<!-- ── RIGHT PANEL ── -->
+<div class="right-panel">
+
+  <!-- STEP 1 : Choisir rôle -->
+  <div class="step active" id="step1">
+    <div class="step-label">Étape 1 / 2</div>
+    <div class="step-title">Qui êtes-vous ?</div>
+    <div class="step-sub">Sélectionnez votre rôle pour accéder à votre espace personnalisé.</div>
+
+    <div class="role-selector">
+      <div class="role-option" id="opt-admin" onclick="selectRole('admin')">
+        <div class="role-opt-icon" style="background:rgba(26,86,219,0.1)">🏛️</div>
+        <div class="role-opt-body">
+          <div class="role-opt-name">Administrateur / Directeur</div>
+          <div class="role-opt-desc">Gestion complète de l'université</div>
+        </div>
+        <div class="role-opt-check" id="check-admin">✓</div>
+      </div>
+      <div class="role-option" id="opt-enseignant" onclick="selectRole('enseignant')">
+        <div class="role-opt-icon" style="background:rgba(245,158,11,0.1)">👨‍🏫</div>
+        <div class="role-opt-body">
+          <div class="role-opt-name">Enseignant / Professeur</div>
+          <div class="role-opt-desc">Cours, notes, planning, salaire</div>
+        </div>
+        <div class="role-opt-check" id="check-enseignant">✓</div>
+      </div>
+      <div class="role-option" id="opt-etudiant" onclick="selectRole('etudiant')">
+        <div class="role-opt-icon" style="background:rgba(16,185,129,0.1)">🎓</div>
+        <div class="role-opt-body">
+          <div class="role-opt-name">Étudiant</div>
+          <div class="role-opt-desc">Notes, emploi du temps, documents</div>
+        </div>
+        <div class="role-opt-check" id="check-etudiant">✓</div>
+      </div>
+      <div class="role-option" id="opt-superadmin" onclick="selectRole('superadmin')">
+        <div class="role-opt-icon" style="background:rgba(139,92,246,0.1)">⚡</div>
+        <div class="role-opt-body">
+          <div class="role-opt-name">Super Admin Plateforme</div>
+          <div class="role-opt-desc">Accès global · Toutes les universités</div>
+        </div>
+        <div class="role-opt-check" id="check-superadmin">✓</div>
+      </div>
+    </div>
+
+    <button class="btn-next" id="btnNext" onclick="goStep2()" disabled>
+      Continuer → <span id="btnNextLabel"></span>
+    </button>
+
+    <div style="text-align:center;margin-top:1.25rem">
+      <a href="index.html" style="font-size:.8rem;color:var(--gray);text-decoration:none">← Retour à l'accueil</a>
+    </div>
+  </div>
+
+  <!-- STEP 2 : Formulaire login -->
+  <div class="step" id="step2">
+    <button class="back-btn" onclick="goStep1()">← Changer de rôle</button>
+
+    <div id="roleBadge" class="role-badge-active"></div>
+
+    <div class="step-label">Étape 2 / 2</div>
+    <div class="step-title" id="step2Title">Connexion</div>
+    <div class="step-sub" id="step2Sub">Entrez vos identifiants</div>
+
+    <div id="alertBox" class="alert"></div>
+
+    <!-- Champ université (admin seulement) -->
+    <div class="form-group" id="univField" style="display:none">
+      <label>Nom de l'université</label>
+      <input class="form-input" id="univInput" placeholder="Ex: Université de Lomé" list="univList"/>
+      <datalist id="univList">
+        <option value="Université de Lomé"/>
+        <option value="UCAO Abidjan"/>
+        <option value="UGB Saint-Louis"/>
+        <option value="ESSEC Douala"/>
+      </datalist>
+    </div>
+
+    <!-- Champ matricule (étudiant seulement) -->
+    <div class="form-group" id="matriculeField" style="display:none">
+      <label>Matricule étudiant</label>
+      <input class="form-input" id="matriculeInput" placeholder="Ex: UL-2025-001"/>
+    </div>
+
+    <div class="form-group">
+      <label>Adresse email</label>
+      <input class="form-input" id="emailInput" placeholder="votre@email.com" type="email"/>
+    </div>
+    <div class="form-group">
+      <label>Mot de passe <a href="#" class="forgot-link">Oublié ?</a></label>
+      <input class="form-input" id="passInput" placeholder="••••••••" type="password"/>
+    </div>
+
+    <div style="display:flex;align-items:center;gap:.5rem;margin-bottom:.5rem">
+      <input type="checkbox" id="remember" style="accent-color:var(--blue)"/>
+      <label for="remember" style="font-size:.8rem;color:var(--gray)">Se souvenir de moi</label>
+    </div>
+
+    <button class="btn-login" id="btnLogin" onclick="handleLogin()">
+      <span id="loginBtnIcon">🔓</span> <span id="loginBtnText">Se connecter</span>
+    </button>
+
+    <div class="divider">ou</div>
+
+    <button class="btn-google" onclick="handleGoogle()">
+      <svg width="18" height="18" viewBox="0 0 24 24"><path fill="#4285F4" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"/><path fill="#34A853" d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z"/><path fill="#FBBC05" d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z"/><path fill="#EA4335" d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z"/></svg>
+      Continuer avec Google
+    </button>
+
+    <!-- Comptes démo -->
+    <div class="demo-hint">
+      <strong>🧪 Comptes de démonstration</strong>
+      <div class="demo-accounts" id="demoAccounts"></div>
+    </div>
+  </div>
+
+  <!-- STEP 3 : Loading -->
+  <div class="step" id="step3">
+    <div class="loading-step">
+      <div class="loader-circle" id="loaderCircle"></div>
+      <div class="loading-title" id="loadingTitle">Connexion en cours...</div>
+      <div class="loading-sub" id="loadingSub">Vérification de vos identifiants</div>
+      <div class="loading-steps-list" id="loadingStepsList">
+        <div class="loading-step-item active-step" id="ls1"><div class="step-dot"></div>Vérification des identifiants</div>
+        <div class="loading-step-item" id="ls2"><div class="step-dot"></div>Chargement de votre profil</div>
+        <div class="loading-step-item" id="ls3"><div class="step-dot"></div>Préparation de votre espace</div>
+        <div class="loading-step-item" id="ls4"><div class="step-dot"></div>Redirection vers votre tableau de bord</div>
+      </div>
+    </div>
+  </div>
+
+</div><!-- /right-panel -->
+
+<script>
+  // ── État global ──
+  let selectedRole = null;
+
+  const roles = {
+    admin: {
+      label: '🏛️ Administrateur',
+      color: 'var(--blue)', bgColor: 'rgba(26,86,219,0.1)',
+      selClass: '', focusClass: '',
+      title: 'Connexion Administrateur',
+      sub: 'Accédez à votre tableau de bord universitaire',
+      redirect: 'dashboard.html',
+      demo: { email: 'admin@univ-lome.tg', pass: 'admin1234', label: 'Admin Université de Lomé' }
+    },
+    enseignant: {
+      label: '👨‍🏫 Enseignant',
+      color: 'var(--gold)', bgColor: 'rgba(245,158,11,0.1)',
+      selClass: 'gold-sel', focusClass: 'gold-focus',
+      title: 'Connexion Enseignant',
+      sub: 'Accédez à votre espace cours et notes',
+      redirect: 'enseignant.html',
+      demo: { email: 'kodjo.mensah@univ-lome.tg', pass: 'prof1234', label: 'Dr. Kodjo Mensah' }
+    },
+    etudiant: {
+      label: '🎓 Étudiant',
+      color: 'var(--success)', bgColor: 'rgba(16,185,129,0.1)',
+      selClass: 'green-sel', focusClass: 'green-focus',
+      title: 'Connexion Étudiant',
+      sub: 'Accédez à vos notes, emploi du temps et documents',
+      redirect: 'etudiant.html',
+      demo: { email: 'kofi.adzoa@student.univ-lome.tg', pass: 'etudiant1234', label: 'Kofi Adzoa — UL-2025-001' }
+    },
+    superadmin: {
+      label: '⚡ Super Admin',
+      color: 'var(--purple)', bgColor: 'rgba(139,92,246,0.1)',
+      selClass: 'purple-sel', focusClass: 'purple-focus',
+      title: 'Accès Super Admin',
+      sub: 'Plateforme UniManage · Accès restreint',
+      redirect: 'superadmin.html',
+      demo: { email: 'superadmin@unimanage.app', pass: 'super1234', label: 'Super Admin Plateforme' }
+    }
+  };
+
+  // ── STEP 1 : Sélection rôle ──
+  function selectRole(role) {
+    selectedRole = role;
+    // Reset tous
+    ['admin','enseignant','etudiant','superadmin'].forEach(r => {
+      const opt = document.getElementById('opt-'+r);
+      opt.classList.remove('selected','gold-sel','green-sel','purple-sel');
+    });
+    const opt = document.getElementById('opt-'+role);
+    opt.classList.add('selected');
+    if(roles[role].selClass) opt.classList.add(roles[role].selClass);
+
+    // Active le bouton
+    const btn = document.getElementById('btnNext');
+    btn.disabled = false;
+    btn.style.background = roles[role].color;
+
+    // Highlight left panel
+    ['admin','enseignant','etudiant','superadmin'].forEach(r => {
+      const p = document.getElementById('preview-'+r);
+      if(p) p.style.opacity = r === role ? '1' : '0.4';
+    });
+  }
+
+  function goStep2() {
+    if(!selectedRole) return;
+    const r = roles[selectedRole];
+
+    // Badge rôle
+    const badge = document.getElementById('roleBadge');
+    badge.style.background = r.bgColor;
+    badge.style.color = r.color;
+    badge.textContent = r.label;
+
+    // Titre & sub
+    document.getElementById('step2Title').textContent = r.title;
+    document.getElementById('step2Sub').textContent = r.sub;
+
+    // Bouton login couleur
+    document.getElementById('btnLogin').style.background = r.color;
+
+    // Champs spéciaux
+    document.getElementById('univField').style.display = selectedRole === 'admin' ? 'block' : 'none';
+    document.getElementById('matriculeField').style.display = selectedRole === 'etudiant' ? 'block' : 'none';
+
+    // Focus class inputs
+    ['emailInput','passInput'].forEach(id => {
+      const el = document.getElementById(id);
+      el.classList.remove('gold-focus','green-focus','purple-focus');
+      if(r.focusClass) el.classList.add(r.focusClass);
+    });
+
+    // Démo accounts
+    const demoDiv = document.getElementById('demoAccounts');
+    demoDiv.innerHTML = `
+      <div class="demo-account" onclick="fillDemo()">
+        <span style="font-size:.78rem">${r.demo.label}</span>
+        <span style="font-size:.75rem">Remplir →</span>
+      </div>`;
+
+    // Transition
+    showStep('step2');
+  }
+
+  function goStep1() {
+    showStep('step1');
+    document.getElementById('alertBox').className = 'alert';
+    // Reset left panel opacities
+    ['admin','enseignant','etudiant','superadmin'].forEach(r => {
+      const p = document.getElementById('preview-'+r);
+      if(p) p.style.opacity = '1';
+    });
+  }
+
+  function fillDemo() {
+    const r = roles[selectedRole];
+    document.getElementById('emailInput').value = r.demo.email;
+    document.getElementById('passInput').value = r.demo.pass;
+    if(selectedRole === 'etudiant') document.getElementById('matriculeInput').value = 'UL-2025-001';
+    if(selectedRole === 'admin') document.getElementById('univInput').value = 'Université de Lomé';
+  }
+
+  // ── STEP 2 : Login ──
+  function handleLogin() {
+    const email = document.getElementById('emailInput').value.trim();
+    const pass  = document.getElementById('passInput').value;
+    const alertBox = document.getElementById('alertBox');
+
+    alertBox.className = 'alert';
+    if(!email || !pass) {
+      alertBox.textContent = '⚠️ Veuillez remplir tous les champs.';
+      alertBox.classList.add('error'); return;
+    }
+    if(pass.length < 6) {
+      alertBox.textContent = '⚠️ Mot de passe incorrect.';
+      alertBox.classList.add('error'); return;
+    }
+
+    // Sauvegarde session
+    const r = roles[selectedRole];
+    sessionStorage.setItem('unimanage_user', JSON.stringify({
+      role: selectedRole, email,
+      univ: document.getElementById('univInput')?.value || 'Université de Lomé',
+      redirect: r.redirect, loggedIn: true
+    }));
+
+    // Go loading
+    startLoading();
+  }
+
+  function handleGoogle() {
+    const r = roles[selectedRole];
+    sessionStorage.setItem('unimanage_user', JSON.stringify({
+      role: selectedRole, email: 'google@demo.com',
+      univ: 'Université de Lomé', redirect: r.redirect, loggedIn: true
+    }));
+    startLoading();
+  }
+
+  // ── STEP 3 : Loading animation ──
+  function startLoading() {
+    showStep('step3');
+    const r = roles[selectedRole];
+    document.getElementById('loaderCircle').style.borderTopColor = r.color;
+    document.getElementById('loadingTitle').textContent = 'Connexion ' + r.label + '...';
+
+    const steps = ['ls1','ls2','ls3','ls4'];
+    const redirect = r.redirect;
+    let i = 0;
+
+    function nextStep() {
+      if(i > 0) {
+        document.getElementById(steps[i-1]).classList.remove('active-step');
+        document.getElementById(steps[i-1]).classList.add('done');
+        document.getElementById(steps[i-1]).querySelector('.step-dot').style.background = 'var(--success)';
+      }
+      if(i < steps.length) {
+        document.getElementById(steps[i]).classList.add('active-step');
+        i++;
+        setTimeout(nextStep, 700);
+      } else {
+        document.getElementById('loadingTitle').textContent = '✅ Connecté !';
+        document.getElementById('loadingSub').textContent = 'Redirection vers votre espace...';
+        setTimeout(() => { window.location.href = redirect; }, 600);
+      }
+    }
+    nextStep();
+  }
+
+  // ── Utilitaires ──
+  function showStep(id) {
+    ['step1','step2','step3'].forEach(s => {
+      document.getElementById(s).classList.remove('active');
+    });
+    document.getElementById(id).classList.add('active');
+  }
+
+  // Enter key
+  document.addEventListener('keydown', e => {
+    if(e.key === 'Enter') {
+      if(document.getElementById('step1').classList.contains('active') && selectedRole) goStep2();
+      else if(document.getElementById('step2').classList.contains('active')) handleLogin();
+    }
+  });
+</script>
+</body>
+</html>

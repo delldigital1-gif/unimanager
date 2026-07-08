@@ -1,0 +1,520 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>UniManage — Multi-Campus</title>
+  <link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=Inter:wght@300;400;500;600&display=swap" rel="stylesheet"/>
+  <style>
+    :root{--navy:#0D1B2A;--blue:#1A56DB;--sky:#3B82F6;--gold:#F59E0B;--light:#F0F4FF;--white:#FFFFFF;--gray:#64748B;--border:#E2E8F0;--success:#10B981;--danger:#EF4444;--purple:#8B5CF6;--sidebar-w:240px;--topbar-h:64px;}
+    *{margin:0;padding:0;box-sizing:border-box;}
+    body{font-family:'Inter',sans-serif;background:#F8FAFC;color:var(--navy);display:flex;min-height:100vh;}
+    .sidebar{width:var(--sidebar-w);background:var(--navy);display:flex;flex-direction:column;position:fixed;top:0;left:0;bottom:0;z-index:100;overflow-y:auto;}
+    .sidebar-brand{padding:1.25rem;border-bottom:1px solid rgba(255,255,255,0.08);}
+    .brand-name{font-family:'Syne',sans-serif;font-weight:800;font-size:1.2rem;color:white;}
+    .brand-name span{color:var(--sky);}
+    .brand-sub{font-size:.72rem;color:rgba(255,255,255,0.35);margin-top:.2rem;}
+    .campus-selector{margin:.75rem;background:rgba(255,255,255,0.06);border-radius:10px;padding:.65rem .85rem;border:1px solid rgba(255,255,255,0.1);}
+    .campus-selector-label{font-size:.65rem;color:rgba(255,255,255,0.35);text-transform:uppercase;letter-spacing:.07em;margin-bottom:.35rem;}
+    .campus-select{width:100%;background:rgba(255,255,255,0.08);border:1px solid rgba(255,255,255,0.12);border-radius:7px;color:white;padding:.45rem .65rem;font-size:.8rem;font-family:'Inter',sans-serif;outline:none;cursor:pointer;}
+    .campus-select option{background:var(--navy);color:white;}
+    .sidebar-nav{padding:.5rem 0;flex:1;}
+    .nav-group{font-size:.62rem;font-weight:700;letter-spacing:.1em;text-transform:uppercase;color:rgba(255,255,255,0.25);padding:.6rem 1.1rem .3rem;}
+    .nav-it{display:flex;align-items:center;gap:.65rem;padding:.6rem 1.1rem;cursor:pointer;color:rgba(255,255,255,0.5);font-size:.83rem;font-weight:500;transition:all .2s;border-left:2px solid transparent;}
+    .nav-it:hover{color:white;background:rgba(255,255,255,0.05);}
+    .nav-it.active{color:white;background:rgba(26,86,219,0.2);border-left-color:var(--sky);}
+    .sidebar-footer{padding:1rem 1.1rem;border-top:1px solid rgba(255,255,255,0.07);}
+    .btn-back-dash{width:100%;padding:.6rem;border-radius:8px;background:rgba(255,255,255,0.07);color:rgba(255,255,255,0.6);border:none;font-size:.8rem;font-weight:600;cursor:pointer;}
+    .btn-back-dash:hover{background:rgba(255,255,255,0.12);color:white;}
+    .topbar{position:fixed;top:0;left:var(--sidebar-w);right:0;height:var(--topbar-h);background:white;border-bottom:1px solid var(--border);display:flex;align-items:center;justify-content:space-between;padding:0 1.75rem;z-index:50;}
+    .page-title{font-family:'Syne',sans-serif;font-weight:700;font-size:1.05rem;}
+    .topbar-right{display:flex;align-items:center;gap:.75rem;}
+    .btn-primary{display:flex;align-items:center;gap:.4rem;padding:.55rem 1.1rem;border-radius:9px;background:var(--blue);color:white;font-size:.83rem;font-weight:600;cursor:pointer;border:none;transition:all .2s;}
+    .btn-primary:hover{background:#1344b8;}
+    .btn-outline{padding:.55rem 1.1rem;border-radius:9px;border:1.5px solid var(--border);background:white;color:var(--navy);font-size:.83rem;font-weight:600;cursor:pointer;transition:all .2s;}
+    .btn-outline:hover{border-color:var(--blue);color:var(--blue);}
+    .main{margin-left:var(--sidebar-w);padding-top:var(--topbar-h);flex:1;}
+    .content{padding:1.75rem;}
+    .page{display:none;}
+    .page.active{display:block;animation:fadeIn .3s ease;}
+    @keyframes fadeIn{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:translateY(0)}}
+    .kpi-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:1.1rem;margin-bottom:1.5rem;}
+    .kpi-card{background:white;border:1px solid var(--border);border-radius:12px;padding:1.1rem 1.25rem;transition:all .2s;}
+    .kpi-card:hover{box-shadow:0 4px 16px rgba(0,0,0,0.07);transform:translateY(-2px);}
+    .kpi-icon{width:42px;height:42px;border-radius:10px;display:flex;align-items:center;justify-content:center;font-size:1.2rem;margin-bottom:.65rem;}
+    .kpi-value{font-family:'Syne',sans-serif;font-size:1.6rem;font-weight:800;line-height:1;}
+    .kpi-label{font-size:.75rem;color:var(--gray);margin-top:.25rem;}
+    .kpi-trend{font-size:.72rem;font-weight:600;margin-top:.25rem;}
+    .trend-up{color:var(--success);}
+    .trend-down{color:var(--danger);}
+    .dash-grid{display:grid;grid-template-columns:1fr 1fr;gap:1.25rem;margin-bottom:1.5rem;}
+    .dash-grid-3{display:grid;grid-template-columns:repeat(3,1fr);gap:1.25rem;margin-bottom:1.5rem;}
+    .card{background:white;border:1px solid var(--border);border-radius:14px;overflow:hidden;margin-bottom:1.25rem;}
+    .card-header{display:flex;align-items:center;justify-content:space-between;padding:1rem 1.25rem;border-bottom:1px solid var(--border);}
+    .card-title{font-family:'Syne',sans-serif;font-weight:700;font-size:.92rem;}
+    .card-body{padding:1.1rem 1.25rem;}
+    .card-action{font-size:.8rem;color:var(--blue);font-weight:600;cursor:pointer;background:none;border:none;}
+    .badge{display:inline-block;padding:.22rem .7rem;border-radius:100px;font-size:.7rem;font-weight:600;}
+    .badge-success{background:rgba(16,185,129,0.1);color:var(--success);}
+    .badge-blue{background:rgba(26,86,219,0.1);color:var(--blue);}
+    .badge-gold{background:rgba(245,158,11,0.1);color:var(--gold);}
+    .badge-danger{background:rgba(239,68,68,0.1);color:var(--danger);}
+    .badge-purple{background:rgba(139,92,246,0.1);color:var(--purple);}
+    .data-table{width:100%;border-collapse:collapse;}
+    .data-table th{text-align:left;padding:.65rem 1rem;font-size:.72rem;font-weight:600;color:var(--gray);text-transform:uppercase;letter-spacing:.05em;background:#F8FAFC;border-bottom:1px solid var(--border);}
+    .data-table td{padding:.72rem 1rem;font-size:.83rem;border-bottom:1px solid var(--border);}
+    .data-table tr:last-child td{border:none;}
+    .data-table tr:hover td{background:#F8FAFC;}
+    /* Campus cards */
+    .campus-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(300px,1fr));gap:1.25rem;margin-bottom:1.5rem;}
+    .campus-card{background:white;border:1px solid var(--border);border-radius:14px;overflow:hidden;cursor:pointer;transition:all .25s;}
+    .campus-card:hover{box-shadow:0 8px 24px rgba(0,0,0,0.1);transform:translateY(-3px);}
+    .campus-card.active-campus{border-color:var(--blue);box-shadow:0 0 0 3px rgba(26,86,219,0.1);}
+    .campus-card-header{padding:1.1rem 1.25rem;border-bottom:1px solid var(--border);display:flex;align-items:center;gap:.85rem;}
+    .campus-logo{width:44px;height:44px;border-radius:11px;display:flex;align-items:center;justify-content:center;font-size:1.1rem;font-weight:800;color:white;flex-shrink:0;}
+    .campus-name{font-family:'Syne',sans-serif;font-weight:700;font-size:.95rem;}
+    .campus-location{font-size:.75rem;color:var(--gray);margin-top:.15rem;}
+    .campus-stats{display:grid;grid-template-columns:repeat(3,1fr);padding:.85rem 1.25rem;gap:.5rem;}
+    .campus-stat{text-align:center;}
+    .campus-stat-val{font-family:'Syne',sans-serif;font-weight:800;font-size:1rem;}
+    .campus-stat-label{font-size:.65rem;color:var(--gray);margin-top:.15rem;}
+    .campus-footer{padding:.65rem 1.25rem;background:#F8FAFC;border-top:1px solid var(--border);display:flex;justify-content:space-between;align-items:center;}
+    /* Map placeholder */
+    .map-placeholder{background:linear-gradient(135deg,#e8f4f8,#f0f7ff);border-radius:12px;height:280px;display:flex;align-items:center;justify-content:center;position:relative;overflow:hidden;border:1px solid var(--border);}
+    .map-pin{position:absolute;display:flex;flex-direction:column;align-items:center;cursor:pointer;}
+    .map-pin-dot{width:14px;height:14px;border-radius:50%;border:2px solid white;box-shadow:0 2px 8px rgba(0,0,0,0.2);}
+    .map-pin-label{background:white;border-radius:6px;padding:.2rem .5rem;font-size:.65rem;font-weight:700;margin-top:.2rem;box-shadow:0 2px 8px rgba(0,0,0,0.15);white-space:nowrap;}
+    /* Comparison table */
+    .comparison-table{width:100%;border-collapse:collapse;}
+    .comparison-table th{padding:.65rem 1rem;font-size:.75rem;font-weight:700;text-align:center;border-bottom:2px solid var(--border);}
+    .comparison-table th:first-child{text-align:left;}
+    .comparison-table td{padding:.65rem 1rem;font-size:.83rem;text-align:center;border-bottom:1px solid var(--border);}
+    .comparison-table td:first-child{text-align:left;font-weight:500;}
+    .comparison-table tr:hover td{background:#F8FAFC;}
+    .comparison-table tr:last-child td{border:none;}
+    /* Progress */
+    .progress-bar{height:6px;background:var(--border);border-radius:100px;overflow:hidden;margin-top:.3rem;}
+    .progress-fill{height:100%;border-radius:100px;}
+    /* Form */
+    .form-group{margin-bottom:.85rem;}
+    .form-group label{display:block;font-size:.78rem;font-weight:600;color:var(--navy);margin-bottom:.35rem;}
+    .form-input{width:100%;padding:.65rem .9rem;border-radius:8px;border:1.5px solid var(--border);font-size:.875rem;font-family:'Inter',sans-serif;color:var(--navy);outline:none;transition:border-color .2s;}
+    .form-input:focus{border-color:var(--blue);}
+    .form-select{width:100%;padding:.65rem .9rem;border-radius:8px;border:1.5px solid var(--border);font-size:.875rem;font-family:'Inter',sans-serif;outline:none;cursor:pointer;}
+    .form-row{display:grid;grid-template-columns:1fr 1fr;gap:.85rem;}
+    .btn-submit{padding:.8rem 2rem;border-radius:10px;background:var(--blue);color:white;font-size:.9rem;font-weight:700;cursor:pointer;border:none;transition:all .2s;}
+    .btn-submit:hover{background:#1344b8;}
+    /* Modal */
+    .modal-overlay{position:fixed;inset:0;z-index:2000;background:rgba(13,27,42,0.5);display:none;align-items:center;justify-content:center;backdrop-filter:blur(4px);padding:1rem;}
+    .modal-overlay.active{display:flex;}
+    .modal{background:white;border-radius:18px;width:100%;max-width:520px;padding:2rem;position:relative;box-shadow:0 30px 80px rgba(0,0,0,0.2);animation:modalIn .3s ease;}
+    @keyframes modalIn{from{opacity:0;transform:translateY(16px)}to{opacity:1;transform:translateY(0)}}
+    .modal-close{position:absolute;top:1rem;right:1rem;background:#F8FAFC;border:none;cursor:pointer;width:30px;height:30px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:.85rem;color:var(--gray);}
+    .modal-title{font-family:'Syne',sans-serif;font-weight:800;font-size:1.1rem;margin-bottom:1.25rem;}
+    .toast{position:fixed;bottom:1.5rem;right:1.5rem;background:var(--navy);color:white;padding:.75rem 1.25rem;border-radius:10px;font-size:.83rem;font-weight:500;box-shadow:0 8px 24px rgba(0,0,0,0.2);z-index:9999;opacity:0;transform:translateY(16px);transition:all .3s;pointer-events:none;}
+    .toast.show{opacity:1;transform:translateY(0);}
+    @media(max-width:1100px){.kpi-grid{grid-template-columns:repeat(2,1fr);}.dash-grid,.dash-grid-3{grid-template-columns:1fr;}.campus-stats{grid-template-columns:repeat(3,1fr);}}
+  </style>
+</head>
+<body>
+
+<aside class="sidebar">
+  <div class="sidebar-brand">
+    <div class="brand-name">Uni<span>Manage</span></div>
+    <div class="brand-sub">🏢 Gestion Multi-Campus</div>
+  </div>
+  <div class="campus-selector">
+    <div class="campus-selector-label">Campus actif</div>
+    <select class="campus-select" onchange="switchCampus(this.value)">
+      <option value="all">🌍 Tous les campus</option>
+      <option value="lome">🏛️ Campus Principal — Lomé</option>
+      <option value="kara">🏛️ Campus Kara</option>
+      <option value="sokode">🏛️ Campus Sokodé</option>
+    </select>
+  </div>
+  <nav class="sidebar-nav">
+    <div class="nav-group">Vue globale</div>
+    <div class="nav-it active" onclick="showPage('overview')">📊 Tableau de bord global</div>
+    <div class="nav-it" onclick="showPage('carte')">🗺️ Carte des campus</div>
+    <div class="nav-it" onclick="showPage('comparaison')">📈 Comparaison campus</div>
+    <div class="nav-group">Gestion Campus</div>
+    <div class="nav-it" onclick="showPage('campus-lome')">🏛️ Campus Lomé</div>
+    <div class="nav-it" onclick="showPage('campus-kara')">🏛️ Campus Kara</div>
+    <div class="nav-it" onclick="showPage('campus-sokode')">🏛️ Campus Sokodé</div>
+    <div class="nav-it" onclick="openModal('addCampus')">➕ Ajouter un campus</div>
+    <div class="nav-group">Synchronisation</div>
+    <div class="nav-it" onclick="showPage('programmes')">📚 Programmes partagés</div>
+    <div class="nav-it" onclick="showPage('transferts')">🔄 Transferts étudiants</div>
+    <div class="nav-it" onclick="showPage('ressources')">📦 Ressources partagées</div>
+    <div class="nav-group">Administration</div>
+    <div class="nav-it" onclick="showPage('rapports')">📄 Rapports consolidés</div>
+    <div class="nav-it" onclick="showPage('parametres')">⚙️ Paramètres</div>
+  </nav>
+  <div class="sidebar-footer">
+    <button class="btn-back-dash" onclick="window.location.href='dashboard.html'">← Tableau de bord</button>
+  </div>
+</aside>
+
+<header class="topbar">
+  <div>
+    <div class="page-title" id="pageTitle">Tableau de bord global</div>
+    <div style="font-size:.78rem;color:var(--gray)" id="pageSubtitle">Université de Lomé · 3 campus · Vue consolidée</div>
+  </div>
+  <div class="topbar-right">
+    <div style="display:flex;align-items:center;gap:.4rem;padding:.35rem .85rem;border-radius:8px;background:rgba(16,185,129,0.1);color:var(--success);font-size:.78rem;font-weight:600;border:1px solid rgba(16,185,129,0.2)">
+      <span style="width:6px;height:6px;border-radius:50%;background:var(--success);display:inline-block;animation:pulse 2s infinite"></span>
+      3 campus en ligne
+    </div>
+    <button class="btn-outline" onclick="showToast('🔄 Synchronisation en cours...')">🔄 Synchroniser</button>
+    <button class="btn-primary" onclick="openModal('addCampus')">+ Nouveau campus</button>
+  </div>
+</header>
+
+<main class="main"><div class="content">
+
+  <!-- ══ OVERVIEW ══ -->
+  <div class="page active" id="page-overview">
+    <!-- Global KPIs -->
+    <div class="kpi-grid">
+      <div class="kpi-card"><div class="kpi-icon" style="background:rgba(26,86,219,0.1)">🏢</div><div class="kpi-value" style="color:var(--blue)">3</div><div class="kpi-label">Campus actifs</div><div class="kpi-trend trend-up">▲ +1 depuis 2023</div></div>
+      <div class="kpi-card"><div class="kpi-icon" style="background:rgba(16,185,129,0.1)">🎓</div><div class="kpi-value" style="color:var(--success)">1 248</div><div class="kpi-label">Étudiants total</div><div class="kpi-trend trend-up">▲ +8% vs 2024</div></div>
+      <div class="kpi-card"><div class="kpi-icon" style="background:rgba(245,158,11,0.1)">👨‍🏫</div><div class="kpi-value" style="color:var(--gold)">87</div><div class="kpi-label">Enseignants total</div><div class="kpi-trend trend-up">Tous campus</div></div>
+      <div class="kpi-card"><div class="kpi-icon" style="background:rgba(139,92,246,0.1)">💰</div><div class="kpi-value" style="color:var(--purple)">48.2M</div><div class="kpi-label">FCFA revenus global</div><div class="kpi-trend trend-up">▲ +12%</div></div>
+    </div>
+
+    <!-- Campus cards -->
+    <div class="campus-grid">
+      <!-- Campus Lomé -->
+      <div class="campus-card active-campus" onclick="showPage('campus-lome')">
+        <div class="campus-card-header">
+          <div class="campus-logo" style="background:linear-gradient(135deg,var(--blue),var(--sky))">CL</div>
+          <div>
+            <div class="campus-name">Campus Principal — Lomé</div>
+            <div class="campus-location">📍 Avenue de la Libération, Lomé</div>
+          </div>
+          <span class="badge badge-success" style="margin-left:auto">● Actif</span>
+        </div>
+        <div class="campus-stats">
+          <div class="campus-stat"><div class="campus-stat-val" style="color:var(--blue)">842</div><div class="campus-stat-label">Étudiants</div></div>
+          <div class="campus-stat"><div class="campus-stat-val" style="color:var(--gold)">58</div><div class="campus-stat-label">Enseignants</div></div>
+          <div class="campus-stat"><div class="campus-stat-val" style="color:var(--success)">94%</div><div class="campus-stat-label">Réussite</div></div>
+        </div>
+        <div class="campus-footer">
+          <span style="font-size:.75rem;color:var(--gray)">Fondé en 2008 · 4 facultés</span>
+          <span style="font-size:.75rem;font-weight:600;color:var(--blue)">32.4M FCFA →</span>
+        </div>
+      </div>
+
+      <!-- Campus Kara -->
+      <div class="campus-card" onclick="showPage('campus-kara')">
+        <div class="campus-card-header">
+          <div class="campus-logo" style="background:linear-gradient(135deg,var(--gold),#f59e0b)">CK</div>
+          <div>
+            <div class="campus-name">Campus Kara</div>
+            <div class="campus-location">📍 Route de Niamtougou, Kara</div>
+          </div>
+          <span class="badge badge-success" style="margin-left:auto">● Actif</span>
+        </div>
+        <div class="campus-stats">
+          <div class="campus-stat"><div class="campus-stat-val" style="color:var(--gold)">287</div><div class="campus-stat-label">Étudiants</div></div>
+          <div class="campus-stat"><div class="campus-stat-val" style="color:var(--gold)">21</div><div class="campus-stat-label">Enseignants</div></div>
+          <div class="campus-stat"><div class="campus-stat-val" style="color:var(--gold)">91%</div><div class="campus-stat-label">Réussite</div></div>
+        </div>
+        <div class="campus-footer">
+          <span style="font-size:.75rem;color:var(--gray)">Fondé en 2015 · 2 facultés</span>
+          <span style="font-size:.75rem;font-weight:600;color:var(--gold)">10.8M FCFA →</span>
+        </div>
+      </div>
+
+      <!-- Campus Sokodé -->
+      <div class="campus-card" onclick="showPage('campus-sokode')">
+        <div class="campus-card-header">
+          <div class="campus-logo" style="background:linear-gradient(135deg,var(--success),#34d399)">CS</div>
+          <div>
+            <div class="campus-name">Campus Sokodé</div>
+            <div class="campus-location">📍 Quartier Administratif, Sokodé</div>
+          </div>
+          <span class="badge badge-success" style="margin-left:auto">● Actif</span>
+        </div>
+        <div class="campus-stats">
+          <div class="campus-stat"><div class="campus-stat-val" style="color:var(--success)">119</div><div class="campus-stat-label">Étudiants</div></div>
+          <div class="campus-stat"><div class="campus-stat-val" style="color:var(--success)">8</div><div class="campus-stat-label">Enseignants</div></div>
+          <div class="campus-stat"><div class="campus-stat-val" style="color:var(--success)">88%</div><div class="campus-stat-label">Réussite</div></div>
+        </div>
+        <div class="campus-footer">
+          <span style="font-size:.75rem;color:var(--gray)">Fondé en 2020 · 1 faculté</span>
+          <span style="font-size:.75rem;font-weight:600;color:var(--success)">5.0M FCFA →</span>
+        </div>
+      </div>
+
+      <!-- Ajouter campus -->
+      <div class="campus-card" style="border:2px dashed var(--border);display:flex;align-items:center;justify-content:center;min-height:180px" onclick="openModal('addCampus')">
+        <div style="text-align:center;color:var(--gray)">
+          <div style="font-size:2rem;margin-bottom:.5rem">+</div>
+          <div style="font-size:.85rem;font-weight:600">Ajouter un campus</div>
+          <div style="font-size:.75rem;margin-top:.25rem">Nouveau site universitaire</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Activité globale + alertes -->
+    <div class="dash-grid">
+      <div class="card">
+        <div class="card-header"><div class="card-title">📊 Performance par campus</div></div>
+        <div class="card-body" style="display:flex;flex-direction:column;gap:1rem">
+          <div>
+            <div style="display:flex;justify-content:space-between;font-size:.83rem;margin-bottom:.3rem">
+              <span style="display:flex;align-items:center;gap:.5rem"><div style="width:10px;height:10px;border-radius:2px;background:var(--blue)"></div>🏛️ Lomé</span>
+              <span style="font-weight:700">94% · 32.4M FCFA</span>
+            </div>
+            <div class="progress-bar"><div class="progress-fill" style="width:94%;background:var(--blue)"></div></div>
+          </div>
+          <div>
+            <div style="display:flex;justify-content:space-between;font-size:.83rem;margin-bottom:.3rem">
+              <span style="display:flex;align-items:center;gap:.5rem"><div style="width:10px;height:10px;border-radius:2px;background:var(--gold)"></div>🏛️ Kara</span>
+              <span style="font-weight:700">91% · 10.8M FCFA</span>
+            </div>
+            <div class="progress-bar"><div class="progress-fill" style="width:91%;background:var(--gold)"></div></div>
+          </div>
+          <div>
+            <div style="display:flex;justify-content:space-between;font-size:.83rem;margin-bottom:.3rem">
+              <span style="display:flex;align-items:center;gap:.5rem"><div style="width:10px;height:10px;border-radius:2px;background:var(--success)"></div>🏛️ Sokodé</span>
+              <span style="font-weight:700">88% · 5.0M FCFA</span>
+            </div>
+            <div class="progress-bar"><div class="progress-fill" style="width:88%;background:var(--success)"></div></div>
+          </div>
+        </div>
+      </div>
+      <div class="card">
+        <div class="card-header"><div class="card-title">🔔 Alertes & Synchronisation</div></div>
+        <div class="card-body" style="display:flex;flex-direction:column;gap:.6rem">
+          <div style="display:flex;gap:.75rem;padding:.75rem;background:rgba(16,185,129,0.06);border-radius:9px;border-left:3px solid var(--success)">
+            <span>✅</span><div><div style="font-size:.83rem;font-weight:600">Sync réussie — Campus Kara</div><div style="font-size:.72rem;color:var(--gray)">Il y a 5 min · 287 données synchronisées</div></div>
+          </div>
+          <div style="display:flex;gap:.75rem;padding:.75rem;background:rgba(245,158,11,0.06);border-radius:9px;border-left:3px solid var(--gold)">
+            <span>⚠️</span><div><div style="font-size:.83rem;font-weight:600">Emploi du temps — Sokodé</div><div style="font-size:.72rem;color:var(--gray)">Conflit détecté · Salle C2 · Jeudi 14h</div></div>
+          </div>
+          <div style="display:flex;gap:.75rem;padding:.75rem;background:rgba(26,86,219,0.06);border-radius:9px;border-left:3px solid var(--blue)">
+            <span>🔄</span><div><div style="font-size:.83rem;font-weight:600">Transfert étudiant approuvé</div><div style="font-size:.72rem;color:var(--gray)">Kofi A. · Lomé → Kara · Info L2</div></div>
+          </div>
+          <div style="display:flex;gap:.75rem;padding:.75rem;background:rgba(16,185,129,0.06);border-radius:9px;border-left:3px solid var(--success)">
+            <span>💰</span><div><div style="font-size:.83rem;font-weight:600">Rapport financier consolidé</div><div style="font-size:.72rem;color:var(--gray)">3 campus · 48.2M FCFA total · Jan 2025</div></div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ══ CARTE ══ -->
+  <div class="page" id="page-carte">
+    <div style="margin-bottom:1.5rem"><h2 style="font-family:'Syne',sans-serif;font-weight:800;font-size:1.3rem">🗺️ Carte des campus</h2></div>
+    <div class="map-placeholder">
+      <div style="position:absolute;inset:0;background:linear-gradient(135deg,#c8dfe8 0%,#d4e8d4 50%,#e8dfc8 100%);opacity:.5"></div>
+      <!-- Pins campus -->
+      <div class="map-pin" style="bottom:25%;left:30%" onclick="showToast('🏛️ Campus Principal Lomé · 842 étudiants')">
+        <div class="map-pin-dot" style="background:var(--blue);width:18px;height:18px"></div>
+        <div class="map-pin-label" style="color:var(--blue)">🏛️ Lomé · 842 ét.</div>
+      </div>
+      <div class="map-pin" style="top:25%;left:45%" onclick="showToast('🏛️ Campus Kara · 287 étudiants')">
+        <div class="map-pin-dot" style="background:var(--gold);width:14px;height:14px"></div>
+        <div class="map-pin-label" style="color:var(--gold)">🏛️ Kara · 287 ét.</div>
+      </div>
+      <div class="map-pin" style="top:40%;left:55%" onclick="showToast('🏛️ Campus Sokodé · 119 étudiants')">
+        <div class="map-pin-dot" style="background:var(--success);width:12px;height:12px"></div>
+        <div class="map-pin-label" style="color:var(--success)">🏛️ Sokodé · 119 ét.</div>
+      </div>
+      <div style="position:absolute;bottom:1rem;right:1rem;background:white;border-radius:8px;padding:.65rem .85rem;font-size:.75rem;border:1px solid var(--border)">
+        <div style="display:flex;flex-direction:column;gap:.3rem">
+          <span style="display:flex;align-items:center;gap:.4rem"><span style="width:10px;height:10px;border-radius:50%;background:var(--blue)"></span>Campus principal</span>
+          <span style="display:flex;align-items:center;gap:.4rem"><span style="width:10px;height:10px;border-radius:50%;background:var(--gold)"></span>Campus secondaire</span>
+          <span style="display:flex;align-items:center;gap:.4rem"><span style="width:10px;height:10px;border-radius:50%;background:var(--success)"></span>Campus annexe</span>
+        </div>
+      </div>
+      <div style="text-align:center;z-index:1">
+        <div style="font-size:3rem;margin-bottom:.5rem">🗺️</div>
+        <div style="font-family:'Syne',sans-serif;font-weight:700;color:var(--navy)">Carte interactive Togo</div>
+        <div style="font-size:.8rem;color:var(--gray);margin-top:.25rem">Cliquez sur un campus pour voir les détails</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ══ COMPARAISON ══ -->
+  <div class="page" id="page-comparaison">
+    <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:1.5rem">
+      <div><h2 style="font-family:'Syne',sans-serif;font-weight:800;font-size:1.3rem">📈 Comparaison inter-campus</h2></div>
+      <button class="btn-outline" onclick="showToast('📊 Rapport comparatif exporté !')">⬇ Exporter</button>
+    </div>
+    <div class="card">
+      <table class="comparison-table">
+        <thead>
+          <tr>
+            <th>Indicateur</th>
+            <th style="color:var(--blue)">🏛️ Lomé</th>
+            <th style="color:var(--gold)">🏛️ Kara</th>
+            <th style="color:var(--success)">🏛️ Sokodé</th>
+            <th style="color:var(--navy)">Total</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr><td><strong>Étudiants inscrits</strong></td><td><span style="font-family:'Syne',sans-serif;font-weight:700;color:var(--blue)">842</span></td><td><span style="font-family:'Syne',sans-serif;font-weight:700;color:var(--gold)">287</span></td><td><span style="font-family:'Syne',sans-serif;font-weight:700;color:var(--success)">119</span></td><td><strong>1 248</strong></td></tr>
+          <tr><td><strong>Enseignants actifs</strong></td><td>58</td><td>21</td><td>8</td><td><strong>87</strong></td></tr>
+          <tr><td><strong>Taux de réussite</strong></td><td><span style="color:var(--success);font-weight:700">94%</span></td><td><span style="color:var(--gold);font-weight:700">91%</span></td><td><span style="color:var(--gold);font-weight:700">88%</span></td><td><strong>92%</strong></td></tr>
+          <tr><td><strong>Revenus (FCFA)</strong></td><td>32.4M</td><td>10.8M</td><td>5.0M</td><td><strong>48.2M</strong></td></tr>
+          <tr><td><strong>Taux recouvrement</strong></td><td><span style="color:var(--success);font-weight:700">85%</span></td><td><span style="color:var(--gold);font-weight:700">78%</span></td><td><span style="color:var(--danger);font-weight:700">71%</span></td><td><strong>82%</strong></td></tr>
+          <tr><td><strong>Départements actifs</strong></td><td>4</td><td>2</td><td>1</td><td><strong>7</strong></td></tr>
+          <tr><td><strong>Salles disponibles</strong></td><td>24</td><td>12</td><td>6</td><td><strong>42</strong></td></tr>
+          <tr><td><strong>Année de création</strong></td><td>2008</td><td>2015</td><td>2020</td><td>—</td></tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+  <!-- ══ CAMPUS LOMÉ ══ -->
+  <div class="page" id="page-campus-lome">
+    <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:1.5rem">
+      <div style="display:flex;align-items:center;gap:.85rem">
+        <div style="width:48px;height:48px;border-radius:12px;background:linear-gradient(135deg,var(--blue),var(--sky));display:flex;align-items:center;justify-content:center;font-size:1.1rem;font-weight:700;color:white">CL</div>
+        <div><h2 style="font-family:'Syne',sans-serif;font-weight:800;font-size:1.3rem">Campus Principal — Lomé</h2><div style="font-size:.83rem;color:var(--gray)">📍 Avenue de la Libération, Lomé · Campus principal</div></div>
+      </div>
+      <div style="display:flex;gap:.75rem">
+        <button class="btn-outline" onclick="showToast('⚙️ Paramètres Campus Lomé ouverts')">⚙️ Paramètres</button>
+        <button class="btn-primary" onclick="showToast('📊 Rapport Campus Lomé exporté !')">📊 Rapport</button>
+      </div>
+    </div>
+    <div class="kpi-grid">
+      <div class="kpi-card"><div class="kpi-icon" style="background:rgba(26,86,219,0.1)">🎓</div><div class="kpi-value" style="color:var(--blue)">842</div><div class="kpi-label">Étudiants</div><div class="kpi-trend trend-up">▲ +10% vs 2024</div></div>
+      <div class="kpi-card"><div class="kpi-icon" style="background:rgba(245,158,11,0.1)">👨‍🏫</div><div class="kpi-value" style="color:var(--gold)">58</div><div class="kpi-label">Enseignants</div><div class="kpi-trend trend-up">4 permanents · 12 vacataires</div></div>
+      <div class="kpi-card"><div class="kpi-icon" style="background:rgba(16,185,129,0.1)">✅</div><div class="kpi-value" style="color:var(--success)">94%</div><div class="kpi-label">Taux réussite</div><div class="kpi-trend trend-up">▲ Meilleur campus</div></div>
+      <div class="kpi-card"><div class="kpi-icon" style="background:rgba(139,92,246,0.1)">💰</div><div class="kpi-value" style="color:var(--purple)">32.4M</div><div class="kpi-label">FCFA revenus</div><div class="kpi-trend trend-up">▲ 67% du total</div></div>
+    </div>
+    <div class="dash-grid">
+      <div class="card">
+        <div class="card-header"><div class="card-title">📚 Départements actifs</div></div>
+        <table class="data-table">
+          <thead><tr><th>Département</th><th>Étudiants</th><th>Enseignants</th><th>Réussite</th></tr></thead>
+          <tbody>
+            <tr><td><strong>💻 Informatique & IA</strong></td><td>287</td><td>22</td><td><span style="color:var(--success);font-weight:700">94%</span></td></tr>
+            <tr><td><strong>📊 Gestion & Finance</strong></td><td>312</td><td>18</td><td><span style="color:var(--gold);font-weight:700">91%</span></td></tr>
+            <tr><td><strong>⚖️ Droit</strong></td><td>156</td><td>12</td><td><span style="color:var(--success);font-weight:700">93%</span></td></tr>
+            <tr><td><strong>🔬 Sciences</strong></td><td>87</td><td>6</td><td><span style="color:var(--gold);font-weight:700">88%</span></td></tr>
+          </tbody>
+        </table>
+      </div>
+      <div class="card">
+        <div class="card-header"><div class="card-title">🏫 Infrastructures</div></div>
+        <div class="card-body">
+          <div style="display:flex;flex-direction:column;gap:.75rem">
+            <div style="display:flex;justify-content:space-between;align-items:center;padding:.6rem .75rem;background:#F8FAFC;border-radius:8px"><span style="font-size:.83rem">🎓 Amphithéâtres</span><span style="font-weight:700">3 (capacité 450 places)</span></div>
+            <div style="display:flex;justify-content:space-between;align-items:center;padding:.6rem .75rem;background:#F8FAFC;border-radius:8px"><span style="font-size:.83rem">🏛️ Salles de cours</span><span style="font-weight:700">18 (capacité 30–50 places)</span></div>
+            <div style="display:flex;justify-content:space-between;align-items:center;padding:.6rem .75rem;background:#F8FAFC;border-radius:8px"><span style="font-size:.83rem">💻 Laboratoires informatiques</span><span style="font-weight:700">3 (120 postes)</span></div>
+            <div style="display:flex;justify-content:space-between;align-items:center;padding:.6rem .75rem;background:#F8FAFC;border-radius:8px"><span style="font-size:.83rem">📚 Bibliothèque</span><span style="font-weight:700">1 (8 500 ouvrages)</span></div>
+            <div style="display:flex;justify-content:space-between;align-items:center;padding:.6rem .75rem;background:#F8FAFC;border-radius:8px"><span style="font-size:.83rem">🍽️ Cafétéria</span><span style="font-weight:700">2 points de restauration</span></div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ══ CAMPUS KARA ══ -->
+  <div class="page" id="page-campus-kara">
+    <div style="display:flex;align-items:center;gap:.85rem;margin-bottom:1.5rem">
+      <div style="width:48px;height:48px;border-radius:12px;background:linear-gradient(135deg,var(--gold),#f59e0b);display:flex;align-items:center;justify-content:center;font-size:1.1rem;font-weight:700;color:white">CK</div>
+      <div><h2 style="font-family:'Syne',sans-serif;font-weight:800;font-size:1.3rem">Campus Kara</h2><div style="font-size:.83rem;color:var(--gray)">📍 Route de Niamtougou, Kara · Campus secondaire</div></div>
+    </div>
+    <div class="kpi-grid">
+      <div class="kpi-card"><div class="kpi-icon" style="background:rgba(245,158,11,0.1)">🎓</div><div class="kpi-value" style="color:var(--gold)">287</div><div class="kpi-label">Étudiants</div><div class="kpi-trend trend-up">▲ +15% vs 2024</div></div>
+      <div class="kpi-card"><div class="kpi-icon" style="background:rgba(245,158,11,0.1)">👨‍🏫</div><div class="kpi-value" style="color:var(--gold)">21</div><div class="kpi-label">Enseignants</div><div class="kpi-trend">3 inter-campus</div></div>
+      <div class="kpi-card"><div class="kpi-icon" style="background:rgba(16,185,129,0.1)">✅</div><div class="kpi-value" style="color:var(--success)">91%</div><div class="kpi-label">Taux réussite</div></div>
+      <div class="kpi-card"><div class="kpi-icon" style="background:rgba(245,158,11,0.1)">💰</div><div class="kpi-value" style="color:var(--gold)">10.8M</div><div class="kpi-label">FCFA revenus</div></div>
+    </div>
+    <div class="card"><div class="card-header"><div class="card-title">Départements — Campus Kara</div></div><table class="data-table"><thead><tr><th>Département</th><th>Étudiants</th><th>Enseignants</th><th>Réussite</th></tr></thead><tbody><tr><td><strong>📊 Gestion & Commerce</strong></td><td>168</td><td>12</td><td><span style="color:var(--success);font-weight:700">93%</span></td></tr><tr><td><strong>💻 Informatique</strong></td><td>119</td><td>9</td><td><span style="color:var(--gold);font-weight:700">89%</span></td></tr></tbody></table></div>
+  </div>
+
+  <!-- ══ CAMPUS SOKODÉ ══ -->
+  <div class="page" id="page-campus-sokode">
+    <div style="display:flex;align-items:center;gap:.85rem;margin-bottom:1.5rem">
+      <div style="width:48px;height:48px;border-radius:12px;background:linear-gradient(135deg,var(--success),#34d399);display:flex;align-items:center;justify-content:center;font-size:1.1rem;font-weight:700;color:white">CS</div>
+      <div><h2 style="font-family:'Syne',sans-serif;font-weight:800;font-size:1.3rem">Campus Sokodé</h2><div style="font-size:.83rem;color:var(--gray)">📍 Quartier Administratif, Sokodé · Campus annexe</div></div>
+    </div>
+    <div class="kpi-grid">
+      <div class="kpi-card"><div class="kpi-icon" style="background:rgba(16,185,129,0.1)">🎓</div><div class="kpi-value" style="color:var(--success)">119</div><div class="kpi-label">Étudiants</div><div class="kpi-trend trend-up">▲ +22% vs 2024</div></div>
+      <div class="kpi-card"><div class="kpi-icon" style="background:rgba(16,185,129,0.1)">👨‍🏫</div><div class="kpi-value" style="color:var(--success)">8</div><div class="kpi-label">Enseignants</div><div class="kpi-trend">2 inter-campus</div></div>
+      <div class="kpi-card"><div class="kpi-icon" style="background:rgba(16,185,129,0.1)">✅</div><div class="kpi-value" style="color:var(--success)">88%</div><div class="kpi-label">Taux réussite</div></div>
+      <div class="kpi-card"><div class="kpi-icon" style="background:rgba(16,185,129,0.1)">💰</div><div class="kpi-value" style="color:var(--success)">5.0M</div><div class="kpi-label">FCFA revenus</div></div>
+    </div>
+    <div class="card"><div class="card-header"><div class="card-title">Département — Campus Sokodé</div></div><table class="data-table"><thead><tr><th>Département</th><th>Étudiants</th><th>Enseignants</th><th>Réussite</th></tr></thead><tbody><tr><td><strong>📊 Gestion & Administration</strong></td><td>119</td><td>8</td><td><span style="color:var(--gold);font-weight:700">88%</span></td></tr></tbody></table></div>
+  </div>
+
+  <!-- ══ TRANSFERTS ══ -->
+  <div class="page" id="page-transferts">
+    <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:1.5rem">
+      <div><h2 style="font-family:'Syne',sans-serif;font-weight:800;font-size:1.3rem">🔄 Transferts inter-campus</h2></div>
+      <button class="btn-primary" onclick="openModal('addTransfert')">+ Nouveau transfert</button>
+    </div>
+    <div class="card">
+      <div class="card-header"><div class="card-title">Demandes de transfert</div></div>
+      <table class="data-table">
+        <thead><tr><th>Étudiant</th><th>Campus origine</th><th>Campus destination</th><th>Filière</th><th>Date</th><th>Statut</th><th>Action</th></tr></thead>
+        <tbody>
+          <tr><td><strong>Kofi Adzoa</strong></td><td>🏛️ Lomé</td><td>🏛️ Kara</td><td>Informatique L2</td><td>20 Jan 2025</td><td><span class="badge badge-success">✓ Approuvé</span></td><td><button class="card-action" onclick="showToast('📄 Attestation transfert téléchargée')">PDF</button></td></tr>
+          <tr><td><strong>Selom Edem</strong></td><td>🏛️ Lomé</td><td>🏛️ Sokodé</td><td>Gestion L1</td><td>19 Jan 2025</td><td><span class="badge badge-gold">En attente</span></td><td><div style="display:flex;gap:.4rem"><button class="card-action" onclick="showToast('✅ Transfert approuvé !')">Approuver</button><button class="card-action" style="color:var(--danger)" onclick="showToast('❌ Transfert refusé')">Refuser</button></div></td></tr>
+          <tr><td><strong>Afi Gbade</strong></td><td>🏛️ Kara</td><td>🏛️ Lomé</td><td>Droit L3</td><td>17 Jan 2025</td><td><span class="badge badge-blue">En cours</span></td><td><button class="card-action" onclick="showToast('📋 Dossier de transfert ouvert')">Voir dossier</button></td></tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+  <!-- PAGES SIMPLES -->
+  <div class="page" id="page-programmes"><div style="margin-bottom:1.5rem"><h2 style="font-family:'Syne',sans-serif;font-weight:800;font-size:1.3rem">📚 Programmes partagés</h2></div><div class="card"><div class="card-body" style="text-align:center;padding:3rem"><div style="font-size:3rem;margin-bottom:1rem">📚</div><div style="font-family:'Syne',sans-serif;font-weight:700;font-size:1.1rem">7 programmes partagés entre les 3 campus</div><div style="color:var(--gray);margin-top:.5rem;font-size:.85rem">Curricula synchronisés · Examens unifiés</div></div></div></div>
+  <div class="page" id="page-ressources"><div style="margin-bottom:1.5rem"><h2 style="font-family:'Syne',sans-serif;font-weight:800;font-size:1.3rem">📦 Ressources partagées</h2></div><div class="card"><div class="card-body" style="text-align:center;padding:3rem"><div style="font-size:3rem;margin-bottom:1rem">📦</div><div style="font-family:'Syne',sans-serif;font-weight:700;font-size:1.1rem">Bibliothèque numérique · Outils pédagogiques partagés</div></div></div></div>
+  <div class="page" id="page-rapports"><div style="margin-bottom:1.5rem"><h2 style="font-family:'Syne',sans-serif;font-weight:800;font-size:1.3rem">📄 Rapports consolidés</h2></div><div class="card"><div class="card-body" style="text-align:center;padding:3rem"><div style="font-size:3rem;margin-bottom:1rem">📄</div><div style="font-family:'Syne',sans-serif;font-weight:700;font-size:1.1rem">Rapport consolidé 3 campus disponible</div><br/><button class="btn-primary" onclick="showToast('📥 Rapport consolidé PDF exporté !')">📥 Télécharger</button></div></div></div>
+  <div class="page" id="page-parametres"><div style="margin-bottom:1.5rem"><h2 style="font-family:'Syne',sans-serif;font-weight:800;font-size:1.3rem">⚙️ Paramètres Multi-campus</h2></div><div class="card"><div class="card-body" style="text-align:center;padding:3rem"><div style="font-size:3rem;margin-bottom:1rem">⚙️</div><div style="font-family:'Syne',sans-serif;font-weight:700;font-size:1.1rem">Configuration synchronisation & permissions</div></div></div></div>
+
+</div></main>
+
+<!-- MODALS -->
+<div class="modal-overlay" id="addCampusModal" onclick="if(event.target===this)closeModal('addCampus')">
+  <div class="modal">
+    <button class="modal-close" onclick="closeModal('addCampus')">✕</button>
+    <div class="modal-title">🏢 Ajouter un nouveau campus</div>
+    <div class="form-group"><label>Nom du campus *</label><input class="form-input" placeholder="Ex: Campus Atakpamé"/></div>
+    <div class="form-row">
+      <div class="form-group"><label>Ville *</label><input class="form-input" placeholder="Atakpamé"/></div>
+      <div class="form-group"><label>Type</label><select class="form-select"><option>Campus principal</option><option>Campus secondaire</option><option>Campus annexe</option></select></div>
+    </div>
+    <div class="form-group"><label>Adresse complète</label><input class="form-input" placeholder="Rue, Quartier, Ville"/></div>
+    <div class="form-group"><label>Directeur du campus *</label><input class="form-input" placeholder="Nom du directeur local"/></div>
+    <div class="form-group"><label>Email officiel *</label><input class="form-input" type="email" placeholder="campus@universite.tg"/></div>
+    <button class="btn-submit" onclick="showToast('✅ Campus Atakpamé créé et synchronisé !');closeModal('addCampus')">Créer le campus →</button>
+  </div>
+</div>
+
+<div class="modal-overlay" id="addTransfertModal" onclick="if(event.target===this)closeModal('addTransfert')">
+  <div class="modal">
+    <button class="modal-close" onclick="closeModal('addTransfert')">✕</button>
+    <div class="modal-title">🔄 Demande de transfert</div>
+    <div class="form-group"><label>Étudiant *</label><select class="form-select"><option>Kofi Adzoa — UL-2025-001</option><option>Afia Mensah — UL-2025-002</option><option>Selom Edem — UL-2025-004</option></select></div>
+    <div class="form-row">
+      <div class="form-group"><label>Campus origine *</label><select class="form-select"><option>Campus Lomé</option><option>Campus Kara</option><option>Campus Sokodé</option></select></div>
+      <div class="form-group"><label>Campus destination *</label><select class="form-select"><option>Campus Kara</option><option>Campus Lomé</option><option>Campus Sokodé</option></select></div>
+    </div>
+    <div class="form-group"><label>Motif du transfert</label><select class="form-select"><option>Rapprochement familial</option><option>Raisons médicales</option><option>Raisons académiques</option><option>Autre</option></select></div>
+    <div class="form-group"><label>Date effective souhaitée</label><input class="form-input" type="date" value="2025-02-01"/></div>
+    <button class="btn-submit" onclick="showToast('📋 Demande de transfert soumise !');closeModal('addTransfert')">Soumettre la demande →</button>
+  </div>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script>
+  const pages=['overview','carte','comparaison','campus-lome','campus-kara','campus-sokode','programmes','transferts','ressources','rapports','parametres'];
+  const titles={'overview':'Tableau de bord global','carte':'Carte des campus','comparaison':'Comparaison inter-campus','campus-lome':'Campus Lomé','campus-kara':'Campus Kara','campus-sokode':'Campus Sokodé','programmes':'Programmes partagés','transferts':'Transferts inter-campus','ressources':'Ressources partagées','rapports':'Rapports consolidés','parametres':'Paramètres'};
+  function showPage(id){pages.forEach(p=>{document.getElementById('page-'+p)?.classList.remove('active');document.querySelectorAll('.nav-it').forEach(n=>{if(n.getAttribute('onclick')?.includes("'"+p+"'"))n.classList.remove('active');});});document.getElementById('page-'+id)?.classList.add('active');document.querySelectorAll('.nav-it').forEach(n=>{if(n.getAttribute('onclick')?.includes("'"+id+"'"))n.classList.add('active');});document.getElementById('pageTitle').textContent=titles[id]||id;}
+  function openModal(id){document.getElementById(id+'Modal').classList.add('active');document.body.style.overflow='hidden';}
+  function closeModal(id){document.getElementById(id+'Modal').classList.remove('active');document.body.style.overflow='';}
+  function switchCampus(v){const labels={all:'Vue consolidée — 3 campus',lome:'Campus Principal · Lomé',kara:'Campus Secondaire · Kara',sokode:'Campus Annexe · Sokodé'};document.getElementById('pageSubtitle').textContent='Université de Lomé · '+labels[v];showToast('🏛️ Campus sélectionné : '+labels[v]);}
+  let tt;function showToast(msg){const t=document.getElementById('toast');t.textContent=msg;t.classList.add('show');clearTimeout(tt);tt=setTimeout(()=>t.classList.remove('show'),3000);}
+  document.addEventListener('keydown',e=>{if(e.key==='Escape'){['addCampus','addTransfert'].forEach(id=>{document.getElementById(id+'Modal')?.classList.remove('active');});document.body.style.overflow='';}});
+</script>
+</body>
+</html>

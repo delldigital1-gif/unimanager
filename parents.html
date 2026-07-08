@@ -1,0 +1,461 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>UniManage — Portail Parents</title>
+  <link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=Inter:wght@300;400;500;600&display=swap" rel="stylesheet"/>
+  <style>
+    :root{--navy:#0D1B2A;--blue:#1A56DB;--sky:#3B82F6;--gold:#F59E0B;--light:#F0F4FF;--white:#FFFFFF;--gray:#64748B;--border:#E2E8F0;--success:#10B981;--danger:#EF4444;--purple:#8B5CF6;--sidebar-w:240px;--topbar-h:64px;}
+    *{margin:0;padding:0;box-sizing:border-box;}
+    body{font-family:'Inter',sans-serif;background:#F8FAFC;color:var(--navy);display:flex;min-height:100vh;}
+    .sidebar{width:var(--sidebar-w);background:linear-gradient(180deg,#0D1B2A 0%,#1a2d42 100%);display:flex;flex-direction:column;position:fixed;top:0;left:0;bottom:0;z-index:100;overflow-y:auto;}
+    .sidebar-brand{padding:1.5rem 1.25rem 1rem;border-bottom:1px solid rgba(255,255,255,0.08);}
+    .brand-name{font-family:'Syne',sans-serif;font-weight:800;font-size:1.2rem;color:white;}
+    .brand-name span{color:var(--sky);}
+    .brand-sub{font-size:.72rem;color:rgba(255,255,255,0.4);margin-top:.2rem;}
+    .parent-card{margin:1rem 1rem 0;background:rgba(255,255,255,0.07);border-radius:12px;padding:1rem;border:1px solid rgba(255,255,255,0.1);}
+    .parent-avatar{width:48px;height:48px;border-radius:12px;background:linear-gradient(135deg,var(--purple),#7c3aed);display:flex;align-items:center;justify-content:center;font-size:1.1rem;font-weight:800;color:white;margin-bottom:.75rem;}
+    .parent-name{font-weight:700;color:white;font-size:.9rem;}
+    .parent-sub{font-size:.72rem;color:rgba(255,255,255,0.45);margin-top:.15rem;}
+    .children-list{margin-top:.75rem;display:flex;flex-direction:column;gap:.4rem;}
+    .child-pill{display:flex;align-items:center;gap:.5rem;padding:.4rem .6rem;background:rgba(255,255,255,0.06);border-radius:8px;cursor:pointer;transition:background .2s;}
+    .child-pill:hover{background:rgba(255,255,255,0.1);}
+    .child-pill.active{background:rgba(26,86,219,0.25);border:1px solid rgba(59,130,246,0.3);}
+    .child-av{width:24px;height:24px;border-radius:6px;display:flex;align-items:center;justify-content:center;font-size:.65rem;font-weight:700;color:white;flex-shrink:0;}
+    .child-info{}
+    .child-nm{font-size:.75rem;font-weight:600;color:white;}
+    .child-lvl{font-size:.65rem;color:rgba(255,255,255,0.35);}
+    .sidebar-nav{padding:.75rem 0;flex:1;}
+    .nav-group{font-size:.62rem;font-weight:700;letter-spacing:.1em;text-transform:uppercase;color:rgba(255,255,255,0.25);padding:.6rem 1.1rem .3rem;}
+    .nav-it{display:flex;align-items:center;gap:.65rem;padding:.6rem 1.1rem;cursor:pointer;color:rgba(255,255,255,0.5);font-size:.83rem;font-weight:500;transition:all .2s;border-left:2px solid transparent;}
+    .nav-it:hover{color:white;background:rgba(255,255,255,0.05);}
+    .nav-it.active{color:white;background:rgba(139,92,246,0.2);border-left-color:#a78bfa;}
+    .nav-badge{margin-left:auto;background:var(--danger);color:white;font-size:.6rem;font-weight:700;padding:.1rem .4rem;border-radius:100px;}
+    .sidebar-footer{padding:1rem 1.1rem;border-top:1px solid rgba(255,255,255,0.07);}
+    .btn-logout{width:100%;padding:.6rem;border-radius:8px;background:rgba(239,68,68,0.12);color:#f87171;border:1px solid rgba(239,68,68,0.18);font-size:.8rem;font-weight:600;cursor:pointer;}
+    .topbar{position:fixed;top:0;left:var(--sidebar-w);right:0;height:var(--topbar-h);background:white;border-bottom:1px solid var(--border);display:flex;align-items:center;justify-content:space-between;padding:0 1.75rem;z-index:50;}
+    .page-title{font-family:'Syne',sans-serif;font-weight:700;font-size:1.05rem;}
+    .topbar-right{display:flex;align-items:center;gap:.75rem;}
+    .btn-primary{padding:.5rem 1.1rem;border-radius:9px;background:var(--purple);color:white;font-size:.83rem;font-weight:600;cursor:pointer;border:none;transition:all .2s;}
+    .btn-primary:hover{background:#7c3aed;}
+    .main{margin-left:var(--sidebar-w);padding-top:var(--topbar-h);flex:1;}
+    .content{padding:1.75rem;}
+    .page{display:none;}
+    .page.active{display:block;animation:fadeIn .3s ease;}
+    @keyframes fadeIn{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:translateY(0)}}
+    .kpi-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:1.1rem;margin-bottom:1.5rem;}
+    .kpi-card{background:white;border:1px solid var(--border);border-radius:12px;padding:1.1rem 1.25rem;transition:all .2s;}
+    .kpi-card:hover{box-shadow:0 4px 16px rgba(0,0,0,0.07);transform:translateY(-2px);}
+    .kpi-icon{width:40px;height:40px;border-radius:10px;display:flex;align-items:center;justify-content:center;font-size:1.1rem;margin-bottom:.65rem;}
+    .kpi-value{font-family:'Syne',sans-serif;font-size:1.5rem;font-weight:800;line-height:1;}
+    .kpi-label{font-size:.75rem;color:var(--gray);margin-top:.25rem;}
+    .dash-grid{display:grid;grid-template-columns:1fr 1fr;gap:1.25rem;margin-bottom:1.5rem;}
+    .card{background:white;border:1px solid var(--border);border-radius:14px;overflow:hidden;margin-bottom:1.25rem;}
+    .card-header{display:flex;align-items:center;justify-content:space-between;padding:1rem 1.25rem;border-bottom:1px solid var(--border);}
+    .card-title{font-family:'Syne',sans-serif;font-weight:700;font-size:.92rem;}
+    .card-body{padding:1.1rem 1.25rem;}
+    .card-action{font-size:.8rem;color:var(--purple);font-weight:600;cursor:pointer;background:none;border:none;}
+    .badge{display:inline-block;padding:.22rem .7rem;border-radius:100px;font-size:.7rem;font-weight:600;}
+    .badge-success{background:rgba(16,185,129,0.1);color:var(--success);}
+    .badge-blue{background:rgba(26,86,219,0.1);color:var(--blue);}
+    .badge-gold{background:rgba(245,158,11,0.1);color:var(--gold);}
+    .badge-danger{background:rgba(239,68,68,0.1);color:var(--danger);}
+    .badge-purple{background:rgba(139,92,246,0.1);color:var(--purple);}
+    .data-table{width:100%;border-collapse:collapse;}
+    .data-table th{text-align:left;padding:.65rem 1rem;font-size:.72rem;font-weight:600;color:var(--gray);text-transform:uppercase;letter-spacing:.05em;background:#F8FAFC;border-bottom:1px solid var(--border);}
+    .data-table td{padding:.72rem 1rem;font-size:.83rem;border-bottom:1px solid var(--border);}
+    .data-table tr:last-child td{border:none;}
+    .data-table tr:hover td{background:#F8FAFC;}
+    .note-good{color:var(--success);font-family:'Syne',sans-serif;font-weight:800;}
+    .note-avg{color:var(--gold);font-family:'Syne',sans-serif;font-weight:800;}
+    .note-bad{color:var(--danger);font-family:'Syne',sans-serif;font-weight:800;}
+    .progress-bar{height:7px;background:var(--border);border-radius:100px;overflow:hidden;margin-top:.35rem;}
+    .progress-fill{height:100%;border-radius:100px;}
+    .activity-item{display:flex;gap:.85rem;padding:.75rem 0;border-bottom:1px solid var(--border);}
+    .activity-item:last-child{border:none;}
+    .activity-dot{width:36px;height:36px;border-radius:10px;display:flex;align-items:center;justify-content:center;font-size:.9rem;flex-shrink:0;}
+    .activity-text{font-size:.83rem;color:var(--navy);line-height:1.5;}
+    .activity-text strong{font-weight:600;}
+    .activity-time{font-size:.72rem;color:var(--gray);margin-top:.2rem;}
+    .pay-item{display:flex;align-items:center;justify-content:space-between;padding:.75rem 0;border-bottom:1px solid var(--border);}
+    .pay-item:last-child{border:none;}
+    .pay-label{font-size:.85rem;font-weight:500;}
+    .pay-sub{font-size:.75rem;color:var(--gray);margin-top:.15rem;}
+    .pay-amount{font-family:'Syne',sans-serif;font-weight:800;font-size:1rem;}
+    /* Absence calendar */
+    .absence-grid{display:grid;grid-template-columns:repeat(7,1fr);gap:.3rem;}
+    .abs-day{text-align:center;padding:.4rem;border-radius:6px;font-size:.72rem;}
+    .abs-day.present{background:rgba(16,185,129,0.1);color:var(--success);}
+    .abs-day.absent{background:rgba(239,68,68,0.12);color:var(--danger);}
+    .abs-day.retard{background:rgba(245,158,11,0.1);color:var(--gold);}
+    .abs-day.weekend{background:#F8FAFC;color:var(--border);}
+    .abs-day.header{font-weight:700;color:var(--gray);background:none;}
+    /* Message form */
+    .form-group{margin-bottom:.85rem;}
+    .form-group label{display:block;font-size:.78rem;font-weight:600;color:var(--navy);margin-bottom:.35rem;}
+    .form-input{width:100%;padding:.65rem .9rem;border-radius:8px;border:1.5px solid var(--border);font-size:.875rem;font-family:'Inter',sans-serif;color:var(--navy);outline:none;transition:border-color .2s;}
+    .form-input:focus{border-color:var(--purple);}
+    .form-textarea{width:100%;padding:.65rem .9rem;border-radius:8px;border:1.5px solid var(--border);font-size:.875rem;font-family:'Inter',sans-serif;color:var(--navy);outline:none;resize:vertical;min-height:100px;transition:border-color .2s;}
+    .form-textarea:focus{border-color:var(--purple);}
+    .btn-submit{padding:.75rem 1.5rem;border-radius:10px;background:var(--purple);color:white;font-size:.9rem;font-weight:700;cursor:pointer;border:none;transition:all .2s;}
+    .btn-submit:hover{background:#7c3aed;}
+    /* Child selector tabs */
+    .child-tabs{display:flex;gap:.5rem;margin-bottom:1.5rem;flex-wrap:wrap;}
+    .child-tab{display:flex;align-items:center;gap:.5rem;padding:.55rem 1rem;border-radius:9px;border:1.5px solid var(--border);background:white;cursor:pointer;font-size:.83rem;font-weight:600;color:var(--gray);transition:all .2s;}
+    .child-tab:hover{border-color:var(--purple);color:var(--purple);}
+    .child-tab.active{border-color:var(--purple);background:rgba(139,92,246,0.07);color:var(--purple);}
+    .child-tab-av{width:24px;height:24px;border-radius:6px;display:flex;align-items:center;justify-content:center;font-size:.65rem;font-weight:700;color:white;flex-shrink:0;}
+    .toast{position:fixed;bottom:1.5rem;right:1.5rem;background:var(--navy);color:white;padding:.75rem 1.25rem;border-radius:10px;font-size:.83rem;font-weight:500;box-shadow:0 8px 24px rgba(0,0,0,0.2);z-index:9999;opacity:0;transform:translateY(16px);transition:all .3s;pointer-events:none;}
+    .toast.show{opacity:1;transform:translateY(0);}
+    @media(max-width:900px){.kpi-grid{grid-template-columns:repeat(2,1fr);}.dash-grid{grid-template-columns:1fr;}}
+  </style>
+</head>
+<body>
+
+<aside class="sidebar">
+  <div class="sidebar-brand">
+    <div class="brand-name">Uni<span>Manage</span></div>
+    <div class="brand-sub">👨‍👩‍👧 Portail Parents</div>
+  </div>
+  <div class="parent-card">
+    <div class="parent-avatar">MA</div>
+    <div class="parent-name">M. & Mme Adzoa</div>
+    <div class="parent-sub">Parent / Tuteur légal</div>
+    <div style="font-size:.7rem;color:rgba(255,255,255,0.3);margin-top:.5rem;margin-bottom:.4rem">Mes enfants</div>
+    <div class="children-list">
+      <div class="child-pill active" onclick="selectChild('kofi')">
+        <div class="child-av" style="background:linear-gradient(135deg,var(--blue),var(--sky))">KA</div>
+        <div class="child-info"><div class="child-nm">Kofi Adzoa</div><div class="child-lvl">Info L2 · UL-2025-001</div></div>
+      </div>
+      <div class="child-pill" onclick="selectChild('ama')">
+        <div class="child-av" style="background:linear-gradient(135deg,var(--success),#34d399)">AA</div>
+        <div class="child-info"><div class="child-nm">Ama Adzoa</div><div class="child-lvl">Gestion L1 · UL-2025-089</div></div>
+      </div>
+    </div>
+  </div>
+  <nav class="sidebar-nav">
+    <div class="nav-group">Suivi</div>
+    <div class="nav-it active" onclick="showPage('accueil')">🏠 Tableau de bord</div>
+    <div class="nav-it" onclick="showPage('notes')">📊 Notes & Résultats</div>
+    <div class="nav-it" onclick="showPage('presences')">✅ Présences & Absences</div>
+    <div class="nav-it" onclick="showPage('emploi')">📅 Emploi du temps</div>
+    <div class="nav-group">Finance</div>
+    <div class="nav-it" onclick="showPage('paiements')">💳 Paiements scolarité<span class="nav-badge">!</span></div>
+    <div class="nav-it" onclick="showPage('documents')">📄 Documents</div>
+    <div class="nav-group">Communication</div>
+    <div class="nav-it" onclick="showPage('messages')">💬 Contacter l'université<span class="nav-badge">2</span></div>
+    <div class="nav-it" onclick="showPage('notifications')">🔔 Notifications</div>
+  </nav>
+  <div class="sidebar-footer">
+    <button class="btn-logout" onclick="window.location.href='login.html'">🚪 Déconnexion</button>
+  </div>
+</aside>
+
+<header class="topbar">
+  <div>
+    <div class="page-title" id="pageTitle">Tableau de bord</div>
+    <div style="font-size:.78rem;color:var(--gray)">Université de Lomé · Suivi de <span id="childName">Kofi Adzoa</span></div>
+  </div>
+  <div class="topbar-right">
+    <button class="btn-primary" onclick="showPage('messages')">✉️ Contacter l'université</button>
+  </div>
+</header>
+
+<main class="main"><div class="content">
+
+  <!-- Child tabs -->
+  <div class="child-tabs">
+    <div class="child-tab active" id="tab-kofi" onclick="selectChild('kofi')">
+      <div class="child-tab-av" style="background:linear-gradient(135deg,var(--blue),var(--sky))">KA</div>Kofi Adzoa — Info L2
+    </div>
+    <div class="child-tab" id="tab-ama" onclick="selectChild('ama')">
+      <div class="child-tab-av" style="background:linear-gradient(135deg,var(--success),#34d399)">AA</div>Ama Adzoa — Gestion L1
+    </div>
+  </div>
+
+  <!-- ══ ACCUEIL ══ -->
+  <div class="page active" id="page-accueil">
+    <div class="kpi-grid">
+      <div class="kpi-card"><div class="kpi-icon" style="background:rgba(26,86,219,0.1)">📊</div><div class="kpi-value" style="color:var(--blue)" id="kpi-moy">13.8</div><div class="kpi-label">Moyenne générale /20</div></div>
+      <div class="kpi-card"><div class="kpi-icon" style="background:rgba(16,185,129,0.1)">✅</div><div class="kpi-value" style="color:var(--success)" id="kpi-pres">94%</div><div class="kpi-label">Taux de présence</div></div>
+      <div class="kpi-card"><div class="kpi-icon" style="background:rgba(239,68,68,0.1)">💳</div><div class="kpi-value" style="color:var(--success)" id="kpi-pay">Payé</div><div class="kpi-label">Scolarité 2024–2025</div></div>
+      <div class="kpi-card"><div class="kpi-icon" style="background:rgba(245,158,11,0.1)">🏅</div><div class="kpi-value" style="color:var(--gold)" id="kpi-rang">2ème</div><div class="kpi-label">Rang dans la classe</div></div>
+    </div>
+    <div class="dash-grid">
+      <!-- Activité récente -->
+      <div class="card">
+        <div class="card-header"><div class="card-title">🔔 Activité récente</div></div>
+        <div class="card-body" id="recentActivity">
+          <div class="activity-item"><div class="activity-dot" style="background:rgba(16,185,129,0.1)">✅</div><div><div class="activity-text"><strong>Résultats publiés</strong> — Semestre 1 · Moyenne : 13.8/20</div><div class="activity-time">Aujourd'hui 09h32</div></div></div>
+          <div class="activity-item"><div class="activity-dot" style="background:rgba(26,86,219,0.1)">📝</div><div><div class="activity-text">Examen <strong>Algorithmique</strong> programmé le 03 Fév 2025</div><div class="activity-time">Hier 14h00</div></div></div>
+          <div class="activity-item"><div class="activity-dot" style="background:rgba(16,185,129,0.1)">💳</div><div><div class="activity-text">Paiement de <strong>83 334 FCFA</strong> confirmé — Tranche 3/3</div><div class="activity-time">20 Jan 2025</div></div></div>
+          <div class="activity-item"><div class="activity-dot" style="background:rgba(245,158,11,0.1)">⚠️</div><div><div class="activity-text"><strong>1 absence</strong> signalée — Cours Réseaux du 15 Jan</div><div class="activity-time">15 Jan 2025</div></div></div>
+          <div class="activity-item"><div class="activity-dot" style="background:rgba(139,92,246,0.1)">📢</div><div><div class="activity-text">Annonce : <strong>Examen Réseaux reporté</strong> au 04 Fév 2025</div><div class="activity-time">13 Jan 2025</div></div></div>
+        </div>
+      </div>
+      <!-- Progression matières -->
+      <div class="card">
+        <div class="card-header"><div class="card-title">📈 Progression par matière</div><button class="card-action" onclick="showPage('notes')">Voir tout →</button></div>
+        <div class="card-body" id="progressMatieres">
+          <div style="display:flex;flex-direction:column;gap:.85rem">
+            <div><div style="display:flex;justify-content:space-between;font-size:.83rem;margin-bottom:.3rem"><span>Algorithmique</span><span class="note-good">16/20</span></div><div class="progress-bar"><div class="progress-fill" style="width:80%;background:var(--success)"></div></div></div>
+            <div><div style="display:flex;justify-content:space-between;font-size:.83rem;margin-bottom:.3rem"><span>POO Java</span><span class="note-good">15/20</span></div><div class="progress-bar"><div class="progress-fill" style="width:75%;background:var(--success)"></div></div></div>
+            <div><div style="display:flex;justify-content:space-between;font-size:.83rem;margin-bottom:.3rem"><span>Bases de données</span><span class="note-good">14.5/20</span></div><div class="progress-bar"><div class="progress-fill" style="width:72%;background:var(--blue)"></div></div></div>
+            <div><div style="display:flex;justify-content:space-between;font-size:.83rem;margin-bottom:.3rem"><span>Réseaux</span><span class="note-avg">12/20</span></div><div class="progress-bar"><div class="progress-fill" style="width:60%;background:var(--gold)"></div></div></div>
+            <div><div style="display:flex;justify-content:space-between;font-size:.83rem;margin-bottom:.3rem"><span>Sécurité Informatique</span><span class="note-bad">8/20</span></div><div class="progress-bar"><div class="progress-fill" style="width:40%;background:var(--danger)"></div></div></div>
+          </div>
+          <div style="margin-top:1rem;padding:.75rem;background:rgba(239,68,68,0.07);border-radius:9px;border:1px solid rgba(239,68,68,0.15);font-size:.82rem;color:var(--danger)">
+            ⚠️ <strong>Sécurité Informatique</strong> : note insuffisante. Rattrapage prévu le 10 Fév 2025.
+          </div>
+        </div>
+      </div>
+    </div>
+    <!-- Message urgent -->
+    <div style="background:linear-gradient(135deg,rgba(139,92,246,0.08),rgba(26,86,219,0.05));border:1px solid rgba(139,92,246,0.2);border-radius:14px;padding:1.25rem;display:flex;align-items:center;justify-content:space-between;gap:1rem;flex-wrap:wrap">
+      <div style="display:flex;align-items:center;gap:1rem">
+        <div style="font-size:2rem">📢</div>
+        <div><div style="font-weight:700;font-size:.92rem">Message de l'université</div><div style="font-size:.83rem;color:var(--gray);margin-top:.2rem">L'examen de Réseaux Informatiques du 28 Jan est reporté au 04 Fév 2025 · 08h00 · Amphithéâtre A.</div></div>
+      </div>
+      <button class="btn-primary" style="white-space:nowrap" onclick="showToast('✅ Message lu et confirmé')">Accusé réception</button>
+    </div>
+  </div>
+
+  <!-- ══ NOTES ══ -->
+  <div class="page" id="page-notes">
+    <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:1.5rem">
+      <div><h2 style="font-family:'Syne',sans-serif;font-weight:800;font-size:1.3rem">📊 Notes & Résultats</h2><div style="font-size:.85rem;color:var(--gray);margin-top:.2rem" id="notes-sub">Kofi Adzoa · Informatique L2 · Semestre 1</div></div>
+      <button class="btn-primary" onclick="showToast('📄 Relevé de notes PDF téléchargé !')">📄 Relevé PDF</button>
+    </div>
+    <div class="kpi-grid" style="grid-template-columns:repeat(4,1fr)">
+      <div class="kpi-card"><div class="kpi-icon" style="background:rgba(26,86,219,0.1)">📊</div><div class="kpi-value" style="color:var(--blue)" id="n-moy">13.8/20</div><div class="kpi-label">Moyenne générale</div></div>
+      <div class="kpi-card"><div class="kpi-icon" style="background:rgba(16,185,129,0.1)">🏅</div><div class="kpi-value" style="color:var(--success)" id="n-mention">Assez Bien</div><div class="kpi-label">Mention</div></div>
+      <div class="kpi-card"><div class="kpi-icon" style="background:rgba(245,158,11,0.1)">✅</div><div class="kpi-value" style="color:var(--gold)" id="n-credits">44/60</div><div class="kpi-label">Crédits validés</div></div>
+      <div class="kpi-card"><div class="kpi-icon" style="background:rgba(139,92,246,0.1)">🏆</div><div class="kpi-value" style="color:var(--purple)" id="n-rang">2ème/287</div><div class="kpi-label">Rang promotion</div></div>
+    </div>
+    <div class="card">
+      <div class="card-header"><div class="card-title">Détail des notes — Semestre 1</div></div>
+      <table class="data-table">
+        <thead><tr><th>Matière</th><th>Enseignant</th><th>Coeff.</th><th>CC</th><th>Examen</th><th>Moyenne</th><th>Mention</th><th>Statut</th></tr></thead>
+        <tbody id="notesTable">
+          <tr><td><strong>Algorithmique Avancée</strong></td><td>Dr. Mensah</td><td>4</td><td>17</td><td>15</td><td><span class="note-good">16.0</span></td><td><span class="badge badge-success">Très Bien</span></td><td><span class="badge badge-success">✓ Validé</span></td></tr>
+          <tr><td><strong>POO Java</strong></td><td>Dr. Atchoe</td><td>4</td><td>16</td><td>14</td><td><span class="note-good">15.0</span></td><td><span class="badge badge-blue">Bien</span></td><td><span class="badge badge-success">✓ Validé</span></td></tr>
+          <tr><td><strong>Bases de données</strong></td><td>Prof. Komi</td><td>3</td><td>15</td><td>14</td><td><span class="note-good">14.5</span></td><td><span class="badge badge-blue">Bien</span></td><td><span class="badge badge-success">✓ Validé</span></td></tr>
+          <tr><td><strong>Réseaux Informatiques</strong></td><td>Prof. Dodzi</td><td>3</td><td>13</td><td>11</td><td><span class="note-avg">12.0</span></td><td><span class="badge badge-gold">Assez Bien</span></td><td><span class="badge badge-success">✓ Validé</span></td></tr>
+          <tr><td><strong>Mathématiques</strong></td><td>Dr. Agbo</td><td>3</td><td>12</td><td>11</td><td><span class="note-avg">11.5</span></td><td><span class="badge badge-gold">Passable</span></td><td><span class="badge badge-success">✓ Validé</span></td></tr>
+          <tr><td><strong>Sécurité Informatique</strong></td><td>Prof. Komi</td><td>3</td><td>9</td><td>7</td><td><span class="note-bad">8.0</span></td><td><span class="badge badge-danger">Insuffisant</span></td><td><span class="badge badge-danger">Rattrapage</span></td></tr>
+          <tr><td><strong>Projet Tutoré</strong></td><td>Dr. Mensah</td><td>4</td><td>16</td><td>15</td><td><span class="note-good">15.5</span></td><td><span class="badge badge-blue">Bien</span></td><td><span class="badge badge-success">✓ Validé</span></td></tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+  <!-- ══ PRÉSENCES ══ -->
+  <div class="page" id="page-presences">
+    <div style="margin-bottom:1.5rem"><h2 style="font-family:'Syne',sans-serif;font-weight:800;font-size:1.3rem">✅ Présences & Absences</h2><div style="font-size:.85rem;color:var(--gray)">Semestre 1 · Janvier 2025</div></div>
+    <div class="kpi-grid" style="grid-template-columns:repeat(3,1fr)">
+      <div class="kpi-card"><div class="kpi-icon" style="background:rgba(16,185,129,0.1)">✅</div><div class="kpi-value" style="color:var(--success)">94%</div><div class="kpi-label">Taux de présence</div></div>
+      <div class="kpi-card"><div class="kpi-icon" style="background:rgba(239,68,68,0.1)">❌</div><div class="kpi-value" style="color:var(--danger)">3</div><div class="kpi-label">Absences ce mois</div></div>
+      <div class="kpi-card"><div class="kpi-icon" style="background:rgba(245,158,11,0.1)">⏰</div><div class="kpi-value" style="color:var(--gold)">1</div><div class="kpi-label">Retards signalés</div></div>
+    </div>
+    <div class="card">
+      <div class="card-header"><div class="card-title">Calendrier de présence — Janvier 2025</div></div>
+      <div class="card-body">
+        <div class="absence-grid" style="margin-bottom:.75rem">
+          <div class="abs-day header">L</div><div class="abs-day header">M</div><div class="abs-day header">M</div><div class="abs-day header">J</div><div class="abs-day header">V</div><div class="abs-day header weekend">S</div><div class="abs-day header weekend">D</div>
+          <div class="abs-day weekend"></div><div class="abs-day weekend"></div><div class="abs-day present">01✓</div><div class="abs-day present">02✓</div><div class="abs-day present">03✓</div><div class="abs-day weekend">04</div><div class="abs-day weekend">05</div>
+          <div class="abs-day present">06✓</div><div class="abs-day present">07✓</div><div class="abs-day present">08✓</div><div class="abs-day present">09✓</div><div class="abs-day present">10✓</div><div class="abs-day weekend">11</div><div class="abs-day weekend">12</div>
+          <div class="abs-day present">13✓</div><div class="abs-day present">14✓</div><div class="abs-day absent">15✗</div><div class="abs-day present">16✓</div><div class="abs-day retard">17⏰</div><div class="abs-day weekend">18</div><div class="abs-day weekend">19</div>
+          <div class="abs-day present">20✓</div><div class="abs-day present">21✓</div><div class="abs-day present">22✓</div><div class="abs-day present">23✓</div><div class="abs-day present">24✓</div><div class="abs-day weekend">25</div><div class="abs-day weekend">26</div>
+          <div class="abs-day present">27✓</div><div class="abs-day present">28✓</div><div class="abs-day absent">29✗</div><div class="abs-day present">30✓</div><div class="abs-day absent">31✗</div><div class="abs-day weekend"></div><div class="abs-day weekend"></div>
+        </div>
+        <div style="display:flex;gap:1rem;font-size:.75rem;flex-wrap:wrap">
+          <span style="display:flex;align-items:center;gap:.35rem"><span style="width:12px;height:12px;border-radius:3px;background:rgba(16,185,129,0.1);border:1px solid var(--success);display:inline-block"></span>Présent</span>
+          <span style="display:flex;align-items:center;gap:.35rem"><span style="width:12px;height:12px;border-radius:3px;background:rgba(239,68,68,0.12);border:1px solid var(--danger);display:inline-block"></span>Absent</span>
+          <span style="display:flex;align-items:center;gap:.35rem"><span style="width:12px;height:12px;border-radius:3px;background:rgba(245,158,11,0.1);border:1px solid var(--gold);display:inline-block"></span>Retard</span>
+        </div>
+      </div>
+    </div>
+    <div class="card">
+      <div class="card-header"><div class="card-title">Détail des absences</div></div>
+      <table class="data-table">
+        <thead><tr><th>Date</th><th>Cours concerné</th><th>Enseignant</th><th>Type</th><th>Justifiée</th></tr></thead>
+        <tbody>
+          <tr><td>15 Jan 2025</td><td>Réseaux Informatiques</td><td>Prof. Dodzi</td><td><span class="badge badge-danger">Absence</span></td><td><span class="badge badge-gold">En attente</span></td></tr>
+          <tr><td>17 Jan 2025</td><td>Algorithmique — TP</td><td>Dr. Mensah</td><td><span class="badge badge-gold">Retard</span></td><td><span class="badge badge-success">Justifié</span></td></tr>
+          <tr><td>29 Jan 2025</td><td>Mathématiques</td><td>Dr. Agbo</td><td><span class="badge badge-danger">Absence</span></td><td><span class="badge badge-danger">Non justifiée</span></td></tr>
+          <tr><td>31 Jan 2025</td><td>Sécurité Informatique</td><td>Prof. Komi</td><td><span class="badge badge-danger">Absence</span></td><td><span class="badge badge-gold">En attente</span></td></tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+  <!-- ══ PAIEMENTS ══ -->
+  <div class="page" id="page-paiements">
+    <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:1.5rem">
+      <div><h2 style="font-family:'Syne',sans-serif;font-weight:800;font-size:1.3rem">💳 Paiements scolarité</h2></div>
+      <button class="btn-primary" onclick="showToast('🌊 Lien Wave de paiement généré !')">🌊 Payer via Wave</button>
+    </div>
+    <div class="kpi-grid" style="grid-template-columns:repeat(3,1fr)">
+      <div class="kpi-card"><div class="kpi-icon" style="background:rgba(16,185,129,0.1)">✅</div><div class="kpi-value" style="color:var(--success)">250 000</div><div class="kpi-label">FCFA payés (total)</div></div>
+      <div class="kpi-card"><div class="kpi-icon" style="background:rgba(239,68,68,0.1)">⏳</div><div class="kpi-value" style="color:var(--success)">0</div><div class="kpi-label">FCFA restants</div></div>
+      <div class="kpi-card"><div class="kpi-icon" style="background:rgba(26,86,219,0.1)">📋</div><div class="kpi-value" style="color:var(--blue)">3/3</div><div class="kpi-label">Tranches soldées</div></div>
+    </div>
+    <div class="dash-grid">
+      <div class="card">
+        <div class="card-header"><div class="card-title">Plan de paiement — Kofi Adzoa</div></div>
+        <div class="card-body">
+          <div class="pay-item"><div><div class="pay-label">Tranche 1 — Inscription</div><div class="pay-sub">Payé le 02 Oct 2024 · Wave</div></div><div style="text-align:right"><div class="pay-amount" style="color:var(--success)">83 333 FCFA</div><span class="badge badge-success">✓ Payé</span></div></div>
+          <div class="pay-item"><div><div class="pay-label">Tranche 2 — Milieu S1</div><div class="pay-sub">Payé le 15 Nov 2024 · Orange Money</div></div><div style="text-align:right"><div class="pay-amount" style="color:var(--success)">83 333 FCFA</div><span class="badge badge-success">✓ Payé</span></div></div>
+          <div class="pay-item"><div><div class="pay-label">Tranche 3 — Fin S1</div><div class="pay-sub">Payé le 20 Jan 2025 · Wave</div></div><div style="text-align:right"><div class="pay-amount" style="color:var(--success)">83 334 FCFA</div><span class="badge badge-success">✓ Payé</span></div></div>
+          <div style="padding:1rem;background:rgba(16,185,129,0.07);border-radius:10px;text-align:center;margin-top:.75rem"><div style="font-size:.78rem;color:var(--gray)">Scolarité 2024–2025</div><div style="font-family:'Syne',sans-serif;font-weight:800;font-size:1.2rem;color:var(--success)">ENTIÈREMENT SOLDÉE ✓</div></div>
+        </div>
+      </div>
+      <div class="card">
+        <div class="card-header"><div class="card-title">Reçus de paiement</div></div>
+        <div class="card-body">
+          <div class="pay-item"><div><div class="pay-label">Reçu REC-2024-0892</div><div class="pay-sub">Tranche 1 · 02 Oct 2024</div></div><button onclick="showToast('📄 Reçu téléchargé')" style="padding:.4rem .9rem;border-radius:7px;border:1px solid var(--border);background:white;font-size:.78rem;cursor:pointer;font-weight:600">📄 PDF</button></div>
+          <div class="pay-item"><div><div class="pay-label">Reçu REC-2024-1145</div><div class="pay-sub">Tranche 2 · 15 Nov 2024</div></div><button onclick="showToast('📄 Reçu téléchargé')" style="padding:.4rem .9rem;border-radius:7px;border:1px solid var(--border);background:white;font-size:.78rem;cursor:pointer;font-weight:600">📄 PDF</button></div>
+          <div class="pay-item"><div><div class="pay-label">Reçu REC-2025-0041</div><div class="pay-sub">Tranche 3 · 20 Jan 2025</div></div><button onclick="showToast('📄 Reçu téléchargé')" style="padding:.4rem .9rem;border-radius:7px;border:1px solid var(--border);background:white;font-size:.78rem;cursor:pointer;font-weight:600">📄 PDF</button></div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ══ DOCUMENTS ══ -->
+  <div class="page" id="page-documents">
+    <div style="margin-bottom:1.5rem"><h2 style="font-family:'Syne',sans-serif;font-weight:800;font-size:1.3rem">📄 Documents officiels</h2></div>
+    <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(260px,1fr));gap:1rem">
+      <div class="card" style="cursor:pointer" onclick="showToast('📄 Relevé de notes S1 téléchargé')"><div class="card-body"><div style="font-size:2rem;margin-bottom:.75rem">📊</div><div style="font-weight:700;margin-bottom:.25rem">Relevé de notes S1</div><div style="font-size:.78rem;color:var(--gray);margin-bottom:.75rem">2024–2025 · Avec QR code de vérification</div><span class="badge badge-success">Disponible</span></div></div>
+      <div class="card" style="cursor:pointer" onclick="showToast('📄 Attestation d\'inscription téléchargée')"><div class="card-body"><div style="font-size:2rem;margin-bottom:.75rem">📋</div><div style="font-weight:700;margin-bottom:.25rem">Attestation d'inscription</div><div style="font-size:.78rem;color:var(--gray);margin-bottom:.75rem">Année 2024–2025 · Université de Lomé</div><span class="badge badge-success">Disponible</span></div></div>
+      <div class="card" style="cursor:pointer" onclick="showToast('🎓 Carte étudiant téléchargée')"><div class="card-body"><div style="font-size:2rem;margin-bottom:.75rem">🎓</div><div style="font-weight:700;margin-bottom:.25rem">Carte étudiant</div><div style="font-size:.78rem;color:var(--gray);margin-bottom:.75rem">Validité 2024–2025</div><span class="badge badge-success">Disponible</span></div></div>
+      <div class="card" style="cursor:pointer" onclick="showToast('📋 Convocation téléchargée')"><div class="card-body"><div style="font-size:2rem;margin-bottom:.75rem">📋</div><div style="font-weight:700;margin-bottom:.25rem">Convocation examens S1</div><div style="font-size:.78rem;color:var(--gray);margin-bottom:.75rem">Amphithéâtre A · Place N°24</div><span class="badge badge-blue">Session 1</span></div></div>
+    </div>
+  </div>
+
+  <!-- ══ MESSAGES ══ -->
+  <div class="page" id="page-messages">
+    <div style="margin-bottom:1.5rem"><h2 style="font-family:'Syne',sans-serif;font-weight:800;font-size:1.3rem">💬 Contacter l'université</h2></div>
+    <div class="dash-grid">
+      <div class="card">
+        <div class="card-header"><div class="card-title">Envoyer un message</div></div>
+        <div class="card-body">
+          <div class="form-group"><label>Destinataire</label><select style="width:100%;padding:.65rem .9rem;border-radius:8px;border:1.5px solid var(--border);font-size:.875rem;font-family:'Inter',sans-serif;outline:none"><option>Direction Académique</option><option>Responsable Scolarité</option><option>Dr. Kodjo Mensah (Enseignant)</option><option>Service Comptabilité</option></select></div>
+          <div class="form-group"><label>Objet *</label><input class="form-input" placeholder="Objet de votre message"/></div>
+          <div class="form-group"><label>Concerne l'enfant</label><select style="width:100%;padding:.65rem .9rem;border-radius:8px;border:1.5px solid var(--border);font-size:.875rem;font-family:'Inter',sans-serif;outline:none"><option>Kofi Adzoa — Info L2</option><option>Ama Adzoa — Gestion L1</option></select></div>
+          <div class="form-group"><label>Message *</label><textarea class="form-textarea" placeholder="Décrivez votre demande ou préoccupation..."></textarea></div>
+          <button class="btn-submit" onclick="showToast('✅ Message envoyé à la Direction Académique !')">📤 Envoyer le message</button>
+        </div>
+      </div>
+      <div class="card">
+        <div class="card-header"><div class="card-title">Messages reçus</div><span class="badge badge-danger">2 nouveaux</span></div>
+        <div class="card-body">
+          <div style="display:flex;flex-direction:column;gap:.75rem">
+            <div style="padding:.85rem;background:rgba(26,86,219,0.06);border-radius:10px;border-left:3px solid var(--blue);cursor:pointer" onclick="showToast('📧 Message ouvert')"><div style="display:flex;justify-content:space-between;margin-bottom:.3rem"><span style="font-size:.83rem;font-weight:700">Direction Académique</span><span style="font-size:.7rem;color:var(--gray)">Aujourd'hui</span></div><div style="font-size:.8rem;font-weight:600">Résultats S1 disponibles</div><div style="font-size:.75rem;color:var(--gray);margin-top:.2rem">Les résultats du semestre 1 de Kofi sont publiés...</div></div>
+            <div style="padding:.85rem;background:rgba(245,158,11,0.06);border-radius:10px;border-left:3px solid var(--gold);cursor:pointer" onclick="showToast('📧 Message ouvert')"><div style="display:flex;justify-content:space-between;margin-bottom:.3rem"><span style="font-size:.83rem;font-weight:700">Responsable Scolarité</span><span style="font-size:.7rem;color:var(--gray)">Hier</span></div><div style="font-size:.8rem;font-weight:600">Absence non justifiée — 29 Jan</div><div style="font-size:.75rem;color:var(--gray);margin-top:.2rem">Votre enfant était absent le 29 Jan...</div></div>
+            <div style="padding:.85rem;background:#F8FAFC;border-radius:10px;border-left:3px solid var(--border);cursor:pointer" onclick="showToast('📧 Message ouvert')"><div style="display:flex;justify-content:space-between;margin-bottom:.3rem"><span style="font-size:.83rem;font-weight:700">Comptabilité</span><span style="font-size:.7rem;color:var(--gray)">20 Jan</span></div><div style="font-size:.8rem;font-weight:600">Confirmation paiement tranche 3</div><div style="font-size:.75rem;color:var(--gray);margin-top:.2rem">Votre paiement de 83 334 FCFA a été reçu...</div></div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ══ NOTIFICATIONS ══ -->
+  <div class="page" id="page-notifications">
+    <div style="margin-bottom:1.5rem"><h2 style="font-family:'Syne',sans-serif;font-weight:800;font-size:1.3rem">🔔 Notifications</h2></div>
+    <div class="card">
+      <div class="card-header"><div class="card-title">Toutes les notifications</div><button class="card-action" onclick="showToast('✅ Toutes marquées comme lues')">Tout marquer lu</button></div>
+      <div class="card-body" style="display:flex;flex-direction:column;gap:.6rem">
+        <div style="display:flex;gap:.85rem;padding:.85rem;background:rgba(26,86,219,0.05);border-radius:10px;border-left:3px solid var(--blue)"><div style="font-size:1.3rem">📊</div><div style="flex:1"><div style="font-size:.85rem;font-weight:600">Résultats S1 publiés — Kofi Adzoa</div><div style="font-size:.78rem;color:var(--gray);margin-top:.2rem">Moyenne générale : 13.8/20 · Mention : Assez Bien · Rang : 2ème</div><div style="font-size:.7rem;color:var(--blue);margin-top:.3rem;font-weight:600">Aujourd'hui 09h32</div></div></div>
+        <div style="display:flex;gap:.85rem;padding:.85rem;background:rgba(239,68,68,0.05);border-radius:10px;border-left:3px solid var(--danger)"><div style="font-size:1.3rem">⚠️</div><div style="flex:1"><div style="font-size:.85rem;font-weight:600">Absence non justifiée — Kofi</div><div style="font-size:.78rem;color:var(--gray);margin-top:.2rem">Mathématiques du 29 Jan — veuillez fournir un justificatif</div><div style="font-size:.7rem;color:var(--danger);margin-top:.3rem;font-weight:600">Hier 14h00</div></div></div>
+        <div style="display:flex;gap:.85rem;padding:.85rem;background:rgba(16,185,129,0.05);border-radius:10px;border-left:3px solid var(--success)"><div style="font-size:1.3rem">💳</div><div style="flex:1"><div style="font-size:.85rem;font-weight:600">Paiement confirmé — 83 334 FCFA</div><div style="font-size:.78rem;color:var(--gray);margin-top:.2rem">Tranche 3/3 reçue via Wave · Scolarité entièrement soldée</div><div style="font-size:.7rem;color:var(--success);margin-top:.3rem;font-weight:600">20 Jan 2025</div></div></div>
+        <div style="display:flex;gap:.85rem;padding:.85rem;background:#F8FAFC;border-radius:10px;border-left:3px solid var(--border)"><div style="font-size:1.3rem">📅</div><div style="flex:1"><div style="font-size:.85rem;font-weight:600">Examen Réseaux reporté</div><div style="font-size:.78rem;color:var(--gray);margin-top:.2rem">Nouvelle date : 04 Fév 2025 à 08h00 · Amphithéâtre A</div><div style="font-size:.7rem;color:var(--gray);margin-top:.3rem;font-weight:600">13 Jan 2025</div></div></div>
+      </div>
+    </div>
+    <!-- Préférences notifications -->
+    <div class="card">
+      <div class="card-header"><div class="card-title">⚙️ Préférences de notification</div></div>
+      <div class="card-body">
+        <div style="display:flex;flex-direction:column;gap:.75rem">
+          <div style="display:flex;align-items:center;justify-content:space-between;padding:.65rem .85rem;background:#F8FAFC;border-radius:9px">
+            <div><div style="font-size:.85rem;font-weight:600">📊 Résultats & Notes</div><div style="font-size:.75rem;color:var(--gray)">Publication et mise à jour des notes</div></div>
+            <input type="checkbox" checked style="width:16px;height:16px;accent-color:var(--purple)"/>
+          </div>
+          <div style="display:flex;align-items:center;justify-content:space-between;padding:.65rem .85rem;background:#F8FAFC;border-radius:9px">
+            <div><div style="font-size:.85rem;font-weight:600">⚠️ Absences</div><div style="font-size:.75rem;color:var(--gray)">Toute absence ou retard signalé</div></div>
+            <input type="checkbox" checked style="width:16px;height:16px;accent-color:var(--purple)"/>
+          </div>
+          <div style="display:flex;align-items:center;justify-content:space-between;padding:.65rem .85rem;background:#F8FAFC;border-radius:9px">
+            <div><div style="font-size:.85rem;font-weight:600">💳 Paiements</div><div style="font-size:.75rem;color:var(--gray)">Confirmations et rappels d'échéance</div></div>
+            <input type="checkbox" checked style="width:16px;height:16px;accent-color:var(--purple)"/>
+          </div>
+          <div style="display:flex;align-items:center;justify-content:space-between;padding:.65rem .85rem;background:#F8FAFC;border-radius:9px">
+            <div><div style="font-size:.85rem;font-weight:600">📢 Annonces université</div><div style="font-size:.75rem;color:var(--gray)">Informations générales et annonces officielles</div></div>
+            <input type="checkbox" style="width:16px;height:16px;accent-color:var(--purple)"/>
+          </div>
+          <div style="display:flex;align-items:center;justify-content:space-between;padding:.65rem .85rem;background:#F8FAFC;border-radius:9px">
+            <div><div style="font-size:.85rem;font-weight:600">📱 SMS</div><div style="font-size:.75rem;color:var(--gray)">Recevoir les alertes par SMS en plus de l'email</div></div>
+            <input type="checkbox" checked style="width:16px;height:16px;accent-color:var(--purple)"/>
+          </div>
+        </div>
+        <button class="btn-submit" style="margin-top:1rem" onclick="showToast('✅ Préférences enregistrées !')">Enregistrer les préférences</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- EMPLOI DU TEMPS -->
+  <div class="page" id="page-emploi">
+    <div style="margin-bottom:1.5rem"><h2 style="font-family:'Syne',sans-serif;font-weight:800;font-size:1.3rem">📅 Emploi du temps</h2><div style="font-size:.85rem;color:var(--gray)">Kofi Adzoa · Informatique L2 · Semaine du 20–24 Jan</div></div>
+    <div class="card" style="overflow-x:auto">
+      <table style="width:100%;border-collapse:collapse">
+        <thead><tr><th style="background:var(--navy);color:white;padding:.7rem 1rem;font-size:.8rem;text-align:center">Heure</th><th style="background:var(--navy);color:white;padding:.7rem 1rem;font-size:.8rem;text-align:center">Lundi</th><th style="background:var(--navy);color:white;padding:.7rem 1rem;font-size:.8rem;text-align:center">Mardi</th><th style="background:var(--navy);color:white;padding:.7rem 1rem;font-size:.8rem;text-align:center">Mercredi</th><th style="background:var(--navy);color:white;padding:.7rem 1rem;font-size:.8rem;text-align:center">Jeudi</th><th style="background:var(--navy);color:white;padding:.7rem 1rem;font-size:.8rem;text-align:center">Vendredi</th></tr></thead>
+        <tbody>
+          <tr><td style="background:#F8FAFC;color:var(--gray);font-size:.75rem;font-weight:600;text-align:center;padding:.5rem;border:1px solid var(--border)">07h–09h</td><td style="border:1px solid var(--border);padding:.5rem;height:65px"><div style="background:rgba(26,86,219,0.1);border-left:3px solid var(--blue);border-radius:5px;padding:.4rem .5rem;height:100%"><div style="font-weight:600;font-size:.75rem">Algorithmes</div><div style="color:var(--gray);font-size:.7rem">Dr. Mensah · A1</div></div></td><td style="border:1px solid var(--border);padding:.5rem;height:65px"></td><td style="border:1px solid var(--border);padding:.5rem;height:65px"><div style="background:rgba(16,185,129,0.1);border-left:3px solid var(--success);border-radius:5px;padding:.4rem .5rem;height:100%"><div style="font-weight:600;font-size:.75rem">Bases de données</div><div style="color:var(--gray);font-size:.7rem">Prof. Komi · B3</div></div></td><td style="border:1px solid var(--border);padding:.5rem;height:65px"></td><td style="border:1px solid var(--border);padding:.5rem;height:65px"><div style="background:rgba(245,158,11,0.1);border-left:3px solid var(--gold);border-radius:5px;padding:.4rem .5rem;height:100%"><div style="font-weight:600;font-size:.75rem">Mathématiques</div><div style="color:var(--gray);font-size:.7rem">Dr. Agbo · Amph.1</div></div></td></tr>
+          <tr><td style="background:#F8FAFC;color:var(--gray);font-size:.75rem;font-weight:600;text-align:center;padding:.5rem;border:1px solid var(--border)">14h–16h</td><td style="border:1px solid var(--border);padding:.5rem;height:65px"></td><td style="border:1px solid var(--border);padding:.5rem;height:65px"><div style="background:rgba(26,86,219,0.1);border-left:3px solid var(--blue);border-radius:5px;padding:.4rem .5rem;height:100%"><div style="font-weight:600;font-size:.75rem">Syst. exploitation</div><div style="color:var(--gray);font-size:.7rem">Prof. Edem · C1</div></div></td><td style="border:1px solid var(--border);padding:.5rem;height:65px"></td><td style="border:1px solid var(--border);padding:.5rem;height:65px"><div style="background:rgba(16,185,129,0.1);border-left:3px solid var(--success);border-radius:5px;padding:.4rem .5rem;height:100%"><div style="font-weight:600;font-size:.75rem">TP Réseaux</div><div style="color:var(--gray);font-size:.7rem">Prof. Dodzi · Labo</div></div></td><td style="border:1px solid var(--border);padding:.5rem;height:65px"><div style="background:rgba(245,158,11,0.1);border-left:3px solid var(--gold);border-radius:5px;padding:.4rem .5rem;height:100%"><div style="font-weight:600;font-size:.75rem">Anglais Tech.</div><div style="color:var(--gray);font-size:.7rem">Mme. Johnson · B2</div></div></td></tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+</div></main>
+
+<div class="toast" id="toast"></div>
+
+<script>
+  const pages=['accueil','notes','presences','emploi','paiements','documents','messages','notifications'];
+  const titles={'accueil':'Tableau de bord','notes':'Notes & Résultats','presences':'Présences & Absences','emploi':'Emploi du temps','paiements':'Paiements scolarité','documents':'Documents officiels','messages':'Messages','notifications':'Notifications'};
+
+  const childData={
+    kofi:{name:'Kofi Adzoa',moy:'13.8',pres:'94%',pay:'Payé',rang:'2ème',mention:'Assez Bien',credits:'44/60',rang2:'2ème/287'},
+    ama:{name:'Ama Adzoa',moy:'11.2',pres:'98%',pay:'Partiel',rang:'12ème',mention:'Passable',credits:'28/60',rang2:'12ème/245'}
+  };
+
+  function showPage(id){
+    pages.forEach(p=>{document.getElementById('page-'+p)?.classList.remove('active');document.querySelectorAll('.nav-it').forEach(n=>{if(n.getAttribute('onclick')?.includes("'"+p+"'"))n.classList.remove('active');});});
+    document.getElementById('page-'+id)?.classList.add('active');
+    document.querySelectorAll('.nav-it').forEach(n=>{if(n.getAttribute('onclick')?.includes("'"+id+"'"))n.classList.add('active');});
+    document.getElementById('pageTitle').textContent=titles[id]||id;
+  }
+
+  function selectChild(id){
+    const d=childData[id];
+    document.getElementById('childName').textContent=d.name;
+    document.getElementById('kpi-moy').textContent=d.moy;
+    document.getElementById('kpi-pres').textContent=d.pres;
+    document.getElementById('kpi-pay').textContent=d.pay;
+    document.getElementById('kpi-rang').textContent=d.rang;
+    document.getElementById('n-moy').textContent=d.moy+'/20';
+    document.getElementById('n-mention').textContent=d.mention;
+    document.getElementById('n-credits').textContent=d.credits;
+    document.getElementById('n-rang').textContent=d.rang2;
+    document.querySelectorAll('.child-pill').forEach(p=>p.classList.remove('active'));
+    document.querySelectorAll('.child-tab').forEach(t=>t.classList.remove('active'));
+    document.getElementById('tab-'+id)?.classList.add('active');
+    showToast('👤 Affichage : '+d.name);
+  }
+
+  let tt;
+  function showToast(msg){const t=document.getElementById('toast');t.textContent=msg;t.classList.add('show');clearTimeout(tt);tt=setTimeout(()=>t.classList.remove('show'),3000);}
+</script>
+</body>
+</html>

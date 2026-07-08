@@ -1,0 +1,432 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>UniManage — Super Admin</title>
+  <link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=Inter:wght@300;400;500;600&display=swap" rel="stylesheet"/>
+  <style>
+    :root{--navy:#0D1B2A;--blue:#1A56DB;--sky:#3B82F6;--gold:#F59E0B;--light:#F0F4FF;--white:#FFFFFF;--gray:#64748B;--border:#E2E8F0;--success:#10B981;--danger:#EF4444;--purple:#8B5CF6;--sidebar-w:260px;--topbar-h:64px;}
+    *{margin:0;padding:0;box-sizing:border-box;}
+    body{font-family:'Inter',sans-serif;background:#0a0f1a;color:white;display:flex;min-height:100vh;}
+
+    /* SIDEBAR */
+    .sidebar{width:var(--sidebar-w);background:linear-gradient(180deg,#0d1520 0%,#060d16 100%);display:flex;flex-direction:column;position:fixed;top:0;left:0;bottom:0;z-index:100;overflow-y:auto;border-right:1px solid rgba(255,255,255,0.05);}
+    .sidebar-brand{padding:1.5rem 1.25rem 1rem;border-bottom:1px solid rgba(255,255,255,0.06);}
+    .brand-logo{font-family:'Syne',sans-serif;font-weight:800;font-size:1.3rem;color:white;}
+    .brand-logo span{color:var(--sky);}
+    .brand-tag{display:inline-flex;align-items:center;gap:.4rem;background:rgba(139,92,246,0.2);color:#a78bfa;padding:.2rem .75rem;border-radius:100px;font-size:.7rem;font-weight:700;margin-top:.4rem;border:1px solid rgba(139,92,246,0.3);}
+    .admin-pill{margin:1rem 1rem 0;background:rgba(255,255,255,0.04);border-radius:12px;padding:.85rem 1rem;border:1px solid rgba(255,255,255,0.07);display:flex;align-items:center;gap:.75rem;}
+    .admin-avatar{width:38px;height:38px;border-radius:10px;background:linear-gradient(135deg,var(--purple),#a78bfa);display:flex;align-items:center;justify-content:center;font-weight:800;font-size:.9rem;flex-shrink:0;}
+    .admin-info{}
+    .admin-name{font-size:.85rem;font-weight:600;color:white;}
+    .admin-role{font-size:.7rem;color:rgba(255,255,255,0.4);margin-top:.1rem;}
+    .sidebar-nav{padding:1rem 0;flex:1;}
+    .nav-group-label{font-size:.62rem;font-weight:700;letter-spacing:.1em;text-transform:uppercase;color:rgba(255,255,255,0.25);padding:.75rem 1.25rem .4rem;}
+    .nav-item{display:flex;align-items:center;gap:.75rem;padding:.65rem 1.25rem;cursor:pointer;color:rgba(255,255,255,0.45);font-size:.875rem;font-weight:500;transition:all .2s;border-left:3px solid transparent;}
+    .nav-item:hover{color:white;background:rgba(255,255,255,0.04);}
+    .nav-item.active{color:white;background:rgba(139,92,246,0.15);border-left-color:var(--purple);}
+    .nav-icon{font-size:1rem;width:20px;text-align:center;}
+    .nav-badge{margin-left:auto;background:var(--danger);color:white;font-size:.62rem;font-weight:700;padding:.12rem .4rem;border-radius:100px;}
+    .sidebar-footer{padding:1rem 1.25rem;border-top:1px solid rgba(255,255,255,0.06);}
+    .btn-logout{width:100%;padding:.6rem;border-radius:8px;background:rgba(239,68,68,0.12);color:#f87171;border:1px solid rgba(239,68,68,0.18);font-size:.8rem;font-weight:600;cursor:pointer;}
+
+    /* TOPBAR */
+    .topbar{position:fixed;top:0;left:var(--sidebar-w);right:0;height:var(--topbar-h);background:rgba(10,15,26,0.95);backdrop-filter:blur(12px);border-bottom:1px solid rgba(255,255,255,0.06);display:flex;align-items:center;justify-content:space-between;padding:0 1.75rem;z-index:50;}
+    .page-title{font-family:'Syne',sans-serif;font-weight:700;font-size:1.05rem;color:white;}
+    .breadcrumb{font-size:.78rem;color:rgba(255,255,255,0.35);}
+    .topbar-right{display:flex;align-items:center;gap:.75rem;}
+    .live-badge{display:flex;align-items:center;gap:.5rem;background:rgba(16,185,129,0.12);color:var(--success);padding:.3rem .9rem;border-radius:8px;font-size:.78rem;font-weight:600;border:1px solid rgba(16,185,129,0.2);}
+    .live-dot{width:6px;height:6px;border-radius:50%;background:var(--success);animation:pulse 2s infinite;}
+    @keyframes pulse{0%,100%{opacity:1}50%{opacity:.3}}
+    .topbar-btn{width:36px;height:36px;border-radius:9px;border:1px solid rgba(255,255,255,0.1);background:rgba(255,255,255,0.04);display:flex;align-items:center;justify-content:center;cursor:pointer;font-size:1rem;transition:all .2s;}
+    .topbar-btn:hover{background:rgba(255,255,255,0.08);}
+
+    /* MAIN */
+    .main{margin-left:var(--sidebar-w);padding-top:var(--topbar-h);flex:1;}
+    .content{padding:1.75rem;}
+    .page{display:none;}
+    .page.active{display:block;}
+
+    /* KPI CARDS */
+    .kpi-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:1.25rem;margin-bottom:1.75rem;}
+    .kpi-card{background:rgba(255,255,255,0.04);border:1px solid rgba(255,255,255,0.08);border-radius:14px;padding:1.25rem 1.5rem;transition:all .25s;position:relative;overflow:hidden;}
+    .kpi-card::before{content:'';position:absolute;top:-30px;right:-30px;width:100px;height:100px;border-radius:50%;opacity:.06;}
+    .kpi-card:hover{background:rgba(255,255,255,0.06);transform:translateY(-2px);}
+    .kpi-icon{width:44px;height:44px;border-radius:11px;display:flex;align-items:center;justify-content:center;font-size:1.2rem;margin-bottom:.85rem;}
+    .kpi-value{font-family:'Syne',sans-serif;font-size:1.8rem;font-weight:800;line-height:1;}
+    .kpi-label{font-size:.775rem;color:rgba(255,255,255,0.45);margin-top:.3rem;}
+    .kpi-trend{font-size:.75rem;font-weight:600;margin-top:.35rem;display:flex;align-items:center;gap:.25rem;}
+    .trend-up{color:var(--success);}
+    .trend-down{color:var(--danger);}
+
+    /* CARDS */
+    .dash-grid{display:grid;grid-template-columns:1fr 1fr;gap:1.25rem;margin-bottom:1.75rem;}
+    .dash-grid-3{display:grid;grid-template-columns:2fr 1fr;gap:1.25rem;margin-bottom:1.75rem;}
+    .card{background:rgba(255,255,255,0.04);border:1px solid rgba(255,255,255,0.08);border-radius:14px;overflow:hidden;}
+    .card-header{display:flex;align-items:center;justify-content:space-between;padding:1.1rem 1.5rem;border-bottom:1px solid rgba(255,255,255,0.06);}
+    .card-title{font-family:'Syne',sans-serif;font-weight:700;font-size:.92rem;color:white;}
+    .card-body{padding:1.25rem 1.5rem;}
+    .card-action{font-size:.8rem;color:var(--sky);font-weight:600;cursor:pointer;background:none;border:none;}
+
+    /* TABLE */
+    .data-table{width:100%;border-collapse:collapse;}
+    .data-table th{text-align:left;padding:.7rem 1rem;font-size:.72rem;font-weight:600;color:rgba(255,255,255,0.35);text-transform:uppercase;letter-spacing:.05em;background:rgba(255,255,255,0.02);border-bottom:1px solid rgba(255,255,255,0.06);}
+    .data-table td{padding:.75rem 1rem;font-size:.83rem;border-bottom:1px solid rgba(255,255,255,0.04);color:rgba(255,255,255,0.8);}
+    .data-table tr:last-child td{border:none;}
+    .data-table tr:hover td{background:rgba(255,255,255,0.02);}
+
+    /* BADGES */
+    .badge{display:inline-block;padding:.22rem .7rem;border-radius:100px;font-size:.7rem;font-weight:600;}
+    .badge-success{background:rgba(16,185,129,0.15);color:var(--success);}
+    .badge-blue{background:rgba(26,86,219,0.2);color:var(--sky);}
+    .badge-gold{background:rgba(245,158,11,0.15);color:var(--gold);}
+    .badge-danger{background:rgba(239,68,68,0.15);color:var(--danger);}
+    .badge-purple{background:rgba(139,92,246,0.2);color:#a78bfa;}
+    .badge-gray{background:rgba(100,116,139,0.2);color:rgba(255,255,255,0.5);}
+
+    /* BAR CHART */
+    .bar-chart{display:flex;align-items:flex-end;gap:.7rem;height:130px;padding-bottom:.5rem;}
+    .bar-col{display:flex;flex-direction:column;align-items:center;gap:.35rem;flex:1;}
+    .bar-fill{width:100%;border-radius:6px 6px 0 0;min-height:4px;transition:height .6s;}
+    .bar-label{font-size:.68rem;color:rgba(255,255,255,0.4);}
+    .bar-val{font-size:.68rem;font-weight:600;color:rgba(255,255,255,0.7);}
+
+    /* PROGRESS */
+    .progress-bar{height:6px;background:rgba(255,255,255,0.08);border-radius:100px;overflow:hidden;margin-top:.35rem;}
+    .progress-fill{height:100%;border-radius:100px;}
+
+    /* MAP-LIKE GRID */
+    .univ-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(300px,1fr));gap:1.1rem;}
+    .univ-card{background:rgba(255,255,255,0.04);border:1px solid rgba(255,255,255,0.08);border-radius:13px;padding:1.25rem;transition:all .2s;cursor:pointer;}
+    .univ-card:hover{background:rgba(255,255,255,0.07);border-color:rgba(139,92,246,0.3);transform:translateY(-2px);}
+    .univ-logo{width:42px;height:42px;border-radius:10px;display:flex;align-items:center;justify-content:center;font-size:1.1rem;font-weight:800;color:white;margin-bottom:.85rem;flex-shrink:0;}
+    .univ-name{font-family:'Syne',sans-serif;font-weight:700;font-size:.95rem;color:white;margin-bottom:.2rem;}
+    .univ-meta{font-size:.75rem;color:rgba(255,255,255,0.4);margin-bottom:.75rem;}
+    .univ-stats{display:grid;grid-template-columns:1fr 1fr 1fr;gap:.5rem;margin-bottom:.85rem;}
+    .univ-stat{text-align:center;background:rgba(255,255,255,0.04);border-radius:7px;padding:.5rem;}
+    .univ-stat-val{font-family:'Syne',sans-serif;font-weight:800;font-size:1rem;color:white;}
+    .univ-stat-label{font-size:.65rem;color:rgba(255,255,255,0.4);margin-top:.15rem;}
+
+    /* REVENUE SECTION */
+    .revenue-card{background:linear-gradient(135deg,rgba(139,92,246,0.15) 0%,rgba(26,86,219,0.1) 100%);border:1px solid rgba(139,92,246,0.2);border-radius:14px;padding:1.5rem;margin-bottom:1.75rem;}
+
+    /* ACTIVITY */
+    .activity-item{display:flex;gap:1rem;padding:.8rem 0;border-bottom:1px solid rgba(255,255,255,0.05);}
+    .activity-item:last-child{border:none;}
+    .activity-dot{width:34px;height:34px;border-radius:9px;display:flex;align-items:center;justify-content:center;font-size:.9rem;flex-shrink:0;}
+    .activity-text{font-size:.83rem;color:rgba(255,255,255,0.7);line-height:1.5;}
+    .activity-text strong{color:white;font-weight:600;}
+    .activity-time{font-size:.72rem;color:rgba(255,255,255,0.3);margin-top:.2rem;}
+
+    /* TOAST */
+    .toast{position:fixed;bottom:1.5rem;right:1.5rem;background:rgba(255,255,255,0.95);color:var(--navy);padding:.85rem 1.4rem;border-radius:12px;font-size:.875rem;font-weight:500;box-shadow:0 10px 30px rgba(0,0,0,0.4);z-index:9999;opacity:0;transform:translateY(20px);transition:all .3s;pointer-events:none;}
+    .toast.show{opacity:1;transform:translateY(0);}
+
+    /* MODAL */
+    .modal-overlay{position:fixed;inset:0;z-index:2000;background:rgba(0,0,0,0.75);display:none;align-items:center;justify-content:center;backdrop-filter:blur(6px);padding:1rem;}
+    .modal-overlay.active{display:flex;}
+    .modal{background:#0d1520;border:1px solid rgba(255,255,255,0.1);border-radius:18px;width:100%;max-width:500px;padding:2rem;position:relative;box-shadow:0 40px 100px rgba(0,0,0,0.5);}
+    .modal-close{position:absolute;top:1.1rem;right:1.1rem;background:rgba(255,255,255,0.07);border:none;cursor:pointer;width:30px;height:30px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:.9rem;color:rgba(255,255,255,0.5);}
+    .form-group{margin-bottom:1rem;}
+    .form-group label{display:block;font-size:.78rem;font-weight:600;color:rgba(255,255,255,0.6);margin-bottom:.4rem;}
+    .form-input{width:100%;padding:.7rem 1rem;border-radius:8px;border:1.5px solid rgba(255,255,255,0.1);background:rgba(255,255,255,0.05);color:white;font-size:.875rem;font-family:'Inter',sans-serif;outline:none;transition:border-color .2s;}
+    .form-input:focus{border-color:var(--purple);}
+    .btn-submit{width:100%;padding:.85rem;border-radius:10px;background:linear-gradient(135deg,var(--purple),#7c3aed);color:white;font-size:.95rem;font-weight:700;cursor:pointer;border:none;margin-top:.5rem;}
+
+    @media(max-width:1100px){.kpi-grid{grid-template-columns:repeat(2,1fr);}.dash-grid,.dash-grid-3{grid-template-columns:1fr;}}
+  </style>
+</head>
+<body>
+
+<!-- SIDEBAR -->
+<aside class="sidebar">
+  <div class="sidebar-brand">
+    <div class="brand-logo">Uni<span>Manage</span></div>
+    <div class="brand-tag">⚡ Super Admin</div>
+  </div>
+  <div class="admin-pill">
+    <div class="admin-avatar">SA</div>
+    <div class="admin-info">
+      <div class="admin-name">Super Admin</div>
+      <div class="admin-role">Plateforme · Accès total</div>
+    </div>
+  </div>
+  <nav class="sidebar-nav">
+    <div class="nav-group-label">Plateforme</div>
+    <div class="nav-item active" onclick="showPage('overview')"><span class="nav-icon">🌍</span> Vue globale</div>
+    <div class="nav-item" onclick="showPage('universites')"><span class="nav-icon">🏛️</span> Universités <span class="nav-badge">52</span></div>
+    <div class="nav-item" onclick="showPage('revenus')"><span class="nav-icon">💰</span> Revenus SaaS</div>
+    <div class="nav-item" onclick="showPage('abonnements')"><span class="nav-icon">📋</span> Abonnements</div>
+    <div class="nav-group-label">Monitoring</div>
+    <div class="nav-item" onclick="showPage('activite')"><span class="nav-icon">📊</span> Activité</div>
+    <div class="nav-item" onclick="showPage('incidents')"><span class="nav-icon">⚠️</span> Incidents <span class="nav-badge">2</span></div>
+    <div class="nav-item" onclick="showPage('logs')"><span class="nav-icon">📜</span> Logs système</div>
+    <div class="nav-group-label">Administration</div>
+    <div class="nav-item" onclick="showPage('admins')"><span class="nav-icon">👑</span> Admins</div>
+    <div class="nav-item" onclick="showPage('parametres')"><span class="nav-icon">⚙️</span> Paramètres</div>
+  </nav>
+  <div class="sidebar-footer">
+    <button class="btn-logout" onclick="window.location.href='index.html'">🚪 Déconnexion</button>
+  </div>
+</aside>
+
+<!-- TOPBAR -->
+<header class="topbar">
+  <div>
+    <div class="page-title" id="pageTitle">Vue globale</div>
+    <div class="breadcrumb" id="pageBreadcrumb">UniManage Platform · Tableau de bord Super Admin</div>
+  </div>
+  <div class="topbar-right">
+    <div class="live-badge"><div class="live-dot"></div> Système opérationnel</div>
+    <div class="topbar-btn" onclick="showToast('🔔 2 alertes système actives')">🔔</div>
+    <div class="topbar-btn" onclick="openModal()">+ Université</div>
+  </div>
+</header>
+
+<main class="main"><div class="content">
+
+  <!-- ══ PAGE : VUE GLOBALE ══ -->
+  <div class="page active" id="page-overview">
+
+    <!-- Revenue Banner -->
+    <div class="revenue-card">
+      <div style="display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:1rem">
+        <div>
+          <div style="font-size:.8rem;color:rgba(255,255,255,0.5);margin-bottom:.3rem">Revenu SaaS total 2025</div>
+          <div style="font-family:'Syne',sans-serif;font-weight:800;font-size:2.5rem;color:white">47.8M <span style="font-size:1.1rem;color:rgba(255,255,255,0.5)">FCFA</span></div>
+          <div style="font-size:.85rem;color:var(--success);margin-top:.3rem">▲ +34% vs 2024</div>
+        </div>
+        <div style="display:flex;gap:2rem;flex-wrap:wrap">
+          <div style="text-align:center"><div style="font-family:'Syne',sans-serif;font-weight:800;font-size:1.5rem;color:white">52</div><div style="font-size:.75rem;color:rgba(255,255,255,0.4)">Universités actives</div></div>
+          <div style="text-align:center"><div style="font-family:'Syne',sans-serif;font-weight:800;font-size:1.5rem;color:white">48K</div><div style="font-size:.75rem;color:rgba(255,255,255,0.4)">Étudiants gérés</div></div>
+          <div style="text-align:center"><div style="font-family:'Syne',sans-serif;font-weight:800;font-size:1.5rem;color:white">8</div><div style="font-size:.75rem;color:rgba(255,255,255,0.4)">Pays couverts</div></div>
+          <div style="text-align:center"><div style="font-family:'Syne',sans-serif;font-weight:800;font-size:1.5rem;color:white">99.9%</div><div style="font-size:.75rem;color:rgba(255,255,255,0.4)">Uptime ce mois</div></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- KPIs -->
+    <div class="kpi-grid">
+      <div class="kpi-card" style="border-color:rgba(139,92,246,0.2)">
+        <div class="kpi-icon" style="background:rgba(139,92,246,0.15)">🏛️</div>
+        <div class="kpi-value" style="color:#a78bfa">52</div>
+        <div class="kpi-label">Universités actives</div>
+        <div class="kpi-trend trend-up">▲ +8 ce trimestre</div>
+      </div>
+      <div class="kpi-card">
+        <div class="kpi-icon" style="background:rgba(26,86,219,0.15)">🎓</div>
+        <div class="kpi-value" style="color:var(--sky)">48 240</div>
+        <div class="kpi-label">Étudiants sur la plateforme</div>
+        <div class="kpi-trend trend-up">▲ +12% vs N-1</div>
+      </div>
+      <div class="kpi-card">
+        <div class="kpi-icon" style="background:rgba(16,185,129,0.15)">💵</div>
+        <div class="kpi-value" style="color:var(--success)">3.98M</div>
+        <div class="kpi-label">FCFA revenus / mois</div>
+        <div class="kpi-trend trend-up">▲ +5 abonnements</div>
+      </div>
+      <div class="kpi-card">
+        <div class="kpi-icon" style="background:rgba(239,68,68,0.15)">⚠️</div>
+        <div class="kpi-value" style="color:var(--danger)">3</div>
+        <div class="kpi-label">Abonnements expirés</div>
+        <div class="kpi-trend trend-down">▼ Relance nécessaire</div>
+      </div>
+    </div>
+
+    <!-- Charts -->
+    <div class="dash-grid-3">
+      <div class="card">
+        <div class="card-header"><div class="card-title">📈 Croissance universités 2025</div></div>
+        <div class="card-body">
+          <div class="bar-chart">
+            <div class="bar-col"><div class="bar-fill" style="height:35%;background:linear-gradient(180deg,#8B5CF6,#7c3aed)"></div><div class="bar-label">Jan</div><div class="bar-val">38</div></div>
+            <div class="bar-col"><div class="bar-fill" style="height:42%;background:linear-gradient(180deg,#8B5CF6,#7c3aed)"></div><div class="bar-label">Fév</div><div class="bar-val">40</div></div>
+            <div class="bar-col"><div class="bar-fill" style="height:48%;background:linear-gradient(180deg,#8B5CF6,#7c3aed)"></div><div class="bar-label">Mar</div><div class="bar-val">43</div></div>
+            <div class="bar-col"><div class="bar-fill" style="height:55%;background:linear-gradient(180deg,#8B5CF6,#7c3aed)"></div><div class="bar-label">Avr</div><div class="bar-val">46</div></div>
+            <div class="bar-col"><div class="bar-fill" style="height:65%;background:linear-gradient(180deg,#8B5CF6,#7c3aed)"></div><div class="bar-label">Mai</div><div class="bar-val">48</div></div>
+            <div class="bar-col"><div class="bar-fill" style="height:80%;background:linear-gradient(180deg,var(--gold),#f59e0b)"></div><div class="bar-label">Jun</div><div class="bar-val">50</div></div>
+            <div class="bar-col"><div class="bar-fill" style="height:100%;background:linear-gradient(180deg,var(--success),#10b981)"></div><div class="bar-label">Jul</div><div class="bar-val">52</div></div>
+          </div>
+        </div>
+      </div>
+      <div class="card">
+        <div class="card-header"><div class="card-title">Plans actifs</div></div>
+        <div class="card-body">
+          <div style="display:flex;flex-direction:column;gap:.85rem">
+            <div>
+              <div style="display:flex;justify-content:space-between;font-size:.82rem;margin-bottom:.3rem"><span style="color:rgba(255,255,255,0.7)">🟢 Enterprise</span><span style="font-weight:700;color:#a78bfa">12 — 1.8M FCFA</span></div>
+              <div class="progress-bar"><div class="progress-fill" style="width:23%;background:var(--purple)"></div></div>
+            </div>
+            <div>
+              <div style="display:flex;justify-content:space-between;font-size:.82rem;margin-bottom:.3rem"><span style="color:rgba(255,255,255,0.7)">🔵 Pro</span><span style="font-weight:700;color:var(--sky)">28 — 2.1M FCFA</span></div>
+              <div class="progress-bar"><div class="progress-fill" style="width:54%;background:var(--sky)"></div></div>
+            </div>
+            <div>
+              <div style="display:flex;justify-content:space-between;font-size:.82rem;margin-bottom:.3rem"><span style="color:rgba(255,255,255,0.7)">⚪ Starter</span><span style="font-weight:700;color:rgba(255,255,255,0.5)">12 — 300K FCFA</span></div>
+              <div class="progress-bar"><div class="progress-fill" style="width:23%;background:rgba(255,255,255,0.25)"></div></div>
+            </div>
+          </div>
+          <div style="margin-top:1.25rem;padding:.85rem;background:rgba(255,255,255,0.04);border-radius:10px;text-align:center">
+            <div style="font-size:.75rem;color:rgba(255,255,255,0.4)">MRR (Monthly Recurring Revenue)</div>
+            <div style="font-family:'Syne',sans-serif;font-weight:800;font-size:1.4rem;color:var(--success);margin-top:.25rem">3 980 000 FCFA</div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Universités récentes + Activité -->
+    <div class="dash-grid">
+      <div class="card">
+        <div class="card-header"><div class="card-title">🏛️ Dernières universités inscrites</div><button class="card-action" onclick="showPage('universites')">Voir toutes →</button></div>
+        <table class="data-table">
+          <thead><tr><th>Université</th><th>Pays</th><th>Plan</th><th>Étudiants</th><th>Statut</th></tr></thead>
+          <tbody>
+            <tr><td><div style="font-weight:600;color:white">Université de Lomé</div><div style="font-size:.72rem;color:rgba(255,255,255,0.35)">univ-lome.unimanage.app</div></td><td>🇹🇬 Togo</td><td><span class="badge badge-blue">Pro</span></td><td>1 248</td><td><span class="badge badge-success">Actif</span></td></tr>
+            <tr><td><div style="font-weight:600;color:white">UCAO Abidjan</div><div style="font-size:.72rem;color:rgba(255,255,255,0.35)">ucao.unimanage.app</div></td><td>🇨🇮 Côte d'Ivoire</td><td><span class="badge badge-purple">Enterprise</span></td><td>3 420</td><td><span class="badge badge-success">Actif</span></td></tr>
+            <tr><td><div style="font-weight:600;color:white">UGB Saint-Louis</div><div style="font-size:.72rem;color:rgba(255,255,255,0.35)">ugb.unimanage.app</div></td><td>🇸🇳 Sénégal</td><td><span class="badge badge-blue">Pro</span></td><td>2 180</td><td><span class="badge badge-success">Actif</span></td></tr>
+            <tr><td><div style="font-weight:600;color:white">IAM Cotonou</div><div style="font-size:.72rem;color:rgba(255,255,255,0.35)">iam.unimanage.app</div></td><td>🇧🇯 Bénin</td><td><span class="badge badge-gray">Starter</span></td><td>487</td><td><span class="badge badge-gold">Trial</span></td></tr>
+            <tr><td><div style="font-weight:600;color:white">ESSEC Douala</div><div style="font-size:.72rem;color:rgba(255,255,255,0.35)">essec.unimanage.app</div></td><td>🇨🇲 Cameroun</td><td><span class="badge badge-purple">Enterprise</span></td><td>4 100</td><td><span class="badge badge-success">Actif</span></td></tr>
+          </tbody>
+        </table>
+      </div>
+      <div class="card">
+        <div class="card-header"><div class="card-title">🔔 Activité plateforme</div></div>
+        <div class="card-body">
+          <div>
+            <div class="activity-item"><div class="activity-dot" style="background:rgba(16,185,129,0.15)">✅</div><div><div class="activity-text"><strong>UCAO Abidjan</strong> a upgradé vers Enterprise</div><div class="activity-time">Il y a 15 min</div></div></div>
+            <div class="activity-item"><div class="activity-dot" style="background:rgba(139,92,246,0.15)">🏛️</div><div><div class="activity-text"><strong>Nouvelle université</strong> inscrite — ISIG Lomé</div><div class="activity-time">Il y a 2h</div></div></div>
+            <div class="activity-item"><div class="activity-dot" style="background:rgba(245,158,11,0.15)">💰</div><div><div class="activity-text">Paiement abonnement <strong>Pro — 75 000 FCFA</strong> reçu (UGB)</div><div class="activity-time">Il y a 4h</div></div></div>
+            <div class="activity-item"><div class="activity-dot" style="background:rgba(239,68,68,0.15)">⚠️</div><div><div class="activity-text">Abonnement <strong>IAM Niamey</strong> expire dans 3 jours</div><div class="activity-time">Hier</div></div></div>
+            <div class="activity-item"><div class="activity-dot" style="background:rgba(26,86,219,0.15)">🔄</div><div><div class="activity-text">Mise à jour système v2.4.1 déployée avec succès</div><div class="activity-time">Hier 22h00</div></div></div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Répartition géographique -->
+    <div class="card">
+      <div class="card-header"><div class="card-title">🌍 Répartition géographique</div><button class="card-action" onclick="showToast('🗺️ Carte interactive — bientôt disponible')">Voir carte →</button></div>
+      <div class="card-body">
+        <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(180px,1fr));gap:1rem">
+          <div style="padding:1rem;background:rgba(255,255,255,0.04);border-radius:10px;display:flex;align-items:center;gap:.75rem"><span style="font-size:1.5rem">🇨🇮</span><div><div style="font-weight:700;color:white">Côte d'Ivoire</div><div style="font-size:.75rem;color:rgba(255,255,255,0.4)">14 universités · 18 200 étudiants</div><div class="progress-bar" style="margin-top:.4rem"><div class="progress-fill" style="width:27%;background:var(--sky)"></div></div></div></div>
+          <div style="padding:1rem;background:rgba(255,255,255,0.04);border-radius:10px;display:flex;align-items:center;gap:.75rem"><span style="font-size:1.5rem">🇸🇳</span><div><div style="font-weight:700;color:white">Sénégal</div><div style="font-size:.75rem;color:rgba(255,255,255,0.4)">11 universités · 14 300 étudiants</div><div class="progress-bar" style="margin-top:.4rem"><div class="progress-fill" style="width:22%;background:var(--success)"></div></div></div></div>
+          <div style="padding:1rem;background:rgba(255,255,255,0.04);border-radius:10px;display:flex;align-items:center;gap:.75rem"><span style="font-size:1.5rem">🇨🇲</span><div><div style="font-weight:700;color:white">Cameroun</div><div style="font-size:.75rem;color:rgba(255,255,255,0.4)">9 universités · 8 700 étudiants</div><div class="progress-bar" style="margin-top:.4rem"><div class="progress-fill" style="width:18%;background:var(--gold)"></div></div></div></div>
+          <div style="padding:1rem;background:rgba(255,255,255,0.04);border-radius:10px;display:flex;align-items:center;gap:.75rem"><span style="font-size:1.5rem">🇹🇬</span><div><div style="font-weight:700;color:white">Togo</div><div style="font-size:.75rem;color:rgba(255,255,255,0.4)">8 universités · 4 200 étudiants</div><div class="progress-bar" style="margin-top:.4rem"><div class="progress-fill" style="width:15%;background:var(--purple)"></div></div></div></div>
+          <div style="padding:1rem;background:rgba(255,255,255,0.04);border-radius:10px;display:flex;align-items:center;gap:.75rem"><span style="font-size:1.5rem">🇧🇯</span><div><div style="font-weight:700;color:white">Bénin</div><div style="font-size:.75rem;color:rgba(255,255,255,0.4)">6 universités · 2 840 étudiants</div><div class="progress-bar" style="margin-top:.4rem"><div class="progress-fill" style="width:11%;background:var(--danger)"></div></div></div></div>
+          <div style="padding:1rem;background:rgba(255,255,255,0.04);border-radius:10px;display:flex;align-items:center;gap:.75rem"><span style="font-size:1.5rem">🌍</span><div><div style="font-weight:700;color:white">Autres pays</div><div style="font-size:.75rem;color:rgba(255,255,255,0.4)">4 universités · Mali, BF, Niger, Guinée</div><div class="progress-bar" style="margin-top:.4rem"><div class="progress-fill" style="width:8%;background:rgba(255,255,255,0.3)"></div></div></div></div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ══ PAGE : UNIVERSITÉS ══ -->
+  <div class="page" id="page-universites">
+    <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:1.5rem">
+      <div><h2 style="font-family:'Syne',sans-serif;font-weight:800;font-size:1.3rem;color:white">Universités</h2><div style="font-size:.85rem;color:rgba(255,255,255,0.4);margin-top:.2rem">52 établissements · 8 pays</div></div>
+      <button onclick="openModal()" style="padding:.65rem 1.2rem;border-radius:9px;background:var(--purple);color:white;font-size:.875rem;font-weight:600;cursor:pointer;border:none">+ Ajouter université</button>
+    </div>
+    <div class="univ-grid">
+      <div class="univ-card" onclick="showToast('🏛️ Université de Lomé — Tableau de bord')">
+        <div style="display:flex;align-items:center;gap:.75rem;margin-bottom:.75rem"><div class="univ-logo" style="background:linear-gradient(135deg,var(--blue),var(--sky))">UL</div><div><div class="univ-name">Université de Lomé</div><div class="univ-meta">🇹🇬 Lomé, Togo · Pro · Depuis Jan 2024</div></div></div>
+        <div class="univ-stats"><div class="univ-stat"><div class="univ-stat-val">1 248</div><div class="univ-stat-label">Étudiants</div></div><div class="univ-stat"><div class="univ-stat-val">87</div><div class="univ-stat-label">Enseignants</div></div><div class="univ-stat"><div class="univ-stat-val" style="color:var(--success)">98%</div><div class="univ-stat-label">Uptime</div></div></div>
+        <div style="display:flex;justify-content:space-between;align-items:center"><span class="badge badge-success">● Actif</span><span style="font-size:.75rem;color:rgba(255,255,255,0.4)">75 000 FCFA/mois</span></div>
+      </div>
+      <div class="univ-card" onclick="showToast('🏛️ UCAO Abidjan — Tableau de bord')">
+        <div style="display:flex;align-items:center;gap:.75rem;margin-bottom:.75rem"><div class="univ-logo" style="background:linear-gradient(135deg,var(--gold),#d97706)">UC</div><div><div class="univ-name">UCAO Abidjan</div><div class="univ-meta">🇨🇮 Abidjan, Côte d'Ivoire · Enterprise</div></div></div>
+        <div class="univ-stats"><div class="univ-stat"><div class="univ-stat-val">3 420</div><div class="univ-stat-label">Étudiants</div></div><div class="univ-stat"><div class="univ-stat-val">214</div><div class="univ-stat-label">Enseignants</div></div><div class="univ-stat"><div class="univ-stat-val" style="color:var(--success)">99.9%</div><div class="univ-stat-label">Uptime</div></div></div>
+        <div style="display:flex;justify-content:space-between;align-items:center"><span class="badge badge-purple">● Enterprise</span><span style="font-size:.75rem;color:rgba(255,255,255,0.4)">Sur devis</span></div>
+      </div>
+      <div class="univ-card" onclick="showToast('🏛️ UGB Saint-Louis — Tableau de bord')">
+        <div style="display:flex;align-items:center;gap:.75rem;margin-bottom:.75rem"><div class="univ-logo" style="background:linear-gradient(135deg,var(--success),#059669)">UG</div><div><div class="univ-name">UGB Saint-Louis</div><div class="univ-meta">🇸🇳 Saint-Louis, Sénégal · Pro</div></div></div>
+        <div class="univ-stats"><div class="univ-stat"><div class="univ-stat-val">2 180</div><div class="univ-stat-label">Étudiants</div></div><div class="univ-stat"><div class="univ-stat-val">156</div><div class="univ-stat-label">Enseignants</div></div><div class="univ-stat"><div class="univ-stat-val" style="color:var(--success)">99%</div><div class="univ-stat-label">Uptime</div></div></div>
+        <div style="display:flex;justify-content:space-between;align-items:center"><span class="badge badge-success">● Actif</span><span style="font-size:.75rem;color:rgba(255,255,255,0.4)">75 000 FCFA/mois</span></div>
+      </div>
+      <div class="univ-card" onclick="showToast('🏛️ IAM Cotonou — Tableau de bord')">
+        <div style="display:flex;align-items:center;gap:.75rem;margin-bottom:.75rem"><div class="univ-logo" style="background:linear-gradient(135deg,var(--danger),#dc2626)">IA</div><div><div class="univ-name">IAM Cotonou</div><div class="univ-meta">🇧🇯 Cotonou, Bénin · Starter · Trial</div></div></div>
+        <div class="univ-stats"><div class="univ-stat"><div class="univ-stat-val">487</div><div class="univ-stat-label">Étudiants</div></div><div class="univ-stat"><div class="univ-stat-val">34</div><div class="univ-stat-label">Enseignants</div></div><div class="univ-stat"><div class="univ-stat-val" style="color:var(--gold)">97%</div><div class="univ-stat-label">Uptime</div></div></div>
+        <div style="display:flex;justify-content:space-between;align-items:center"><span class="badge badge-gold">⏱ Trial — 3j restants</span><span style="font-size:.75rem;color:rgba(255,255,255,0.4)">25 000 FCFA/mois</span></div>
+      </div>
+      <div class="univ-card" onclick="showToast('🏛️ ESSEC Douala — Tableau de bord')">
+        <div style="display:flex;align-items:center;gap:.75rem;margin-bottom:.75rem"><div class="univ-logo" style="background:linear-gradient(135deg,var(--purple),#7c3aed)">ES</div><div><div class="univ-name">ESSEC Douala</div><div class="univ-meta">🇨🇲 Douala, Cameroun · Enterprise</div></div></div>
+        <div class="univ-stats"><div class="univ-stat"><div class="univ-stat-val">4 100</div><div class="univ-stat-label">Étudiants</div></div><div class="univ-stat"><div class="univ-stat-val">287</div><div class="univ-stat-label">Enseignants</div></div><div class="univ-stat"><div class="univ-stat-val" style="color:var(--success)">99.9%</div><div class="univ-stat-label">Uptime</div></div></div>
+        <div style="display:flex;justify-content:space-between;align-items:center"><span class="badge badge-purple">● Enterprise</span><span style="font-size:.75rem;color:rgba(255,255,255,0.4)">Sur devis</span></div>
+      </div>
+      <div class="univ-card" style="border:2px dashed rgba(255,255,255,0.1);display:flex;align-items:center;justify-content:center;cursor:pointer;min-height:160px" onclick="openModal()">
+        <div style="text-align:center;color:rgba(255,255,255,0.3)"><div style="font-size:2rem;margin-bottom:.5rem">+</div><div style="font-size:.85rem;font-weight:600">Ajouter une université</div></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ══ PAGE : REVENUS ══ -->
+  <div class="page" id="page-revenus">
+    <div style="margin-bottom:1.5rem"><h2 style="font-family:'Syne',sans-serif;font-weight:800;font-size:1.3rem;color:white">Revenus SaaS</h2><div style="font-size:.85rem;color:rgba(255,255,255,0.4);margin-top:.2rem">Suivi financier de la plateforme</div></div>
+    <div class="kpi-grid" style="grid-template-columns:repeat(3,1fr)">
+      <div class="kpi-card"><div class="kpi-icon" style="background:rgba(16,185,129,0.15)">💵</div><div class="kpi-value" style="color:var(--success)">47.8M</div><div class="kpi-label">FCFA revenus 2025</div><div class="kpi-trend trend-up">▲ +34% vs 2024</div></div>
+      <div class="kpi-card"><div class="kpi-icon" style="background:rgba(139,92,246,0.15)">📈</div><div class="kpi-value" style="color:#a78bfa">3.98M</div><div class="kpi-label">FCFA MRR actuel</div><div class="kpi-trend trend-up">▲ +5 nouveaux ce mois</div></div>
+      <div class="kpi-card"><div class="kpi-icon" style="background:rgba(245,158,11,0.15)">🎯</div><div class="kpi-value" style="color:var(--gold)">76.5M</div><div class="kpi-label">FCFA objectif 2025</div><div class="kpi-trend trend-up">62% atteint</div></div>
+    </div>
+    <div class="card">
+      <div class="card-header"><div class="card-title">Revenus mensuels 2025</div></div>
+      <div class="card-body">
+        <div class="bar-chart" style="height:160px">
+          <div class="bar-col"><div class="bar-fill" style="height:50%;background:linear-gradient(180deg,var(--purple),#7c3aed)"></div><div class="bar-label">Jan</div><div class="bar-val">4.8M</div></div>
+          <div class="bar-col"><div class="bar-fill" style="height:55%;background:linear-gradient(180deg,var(--purple),#7c3aed)"></div><div class="bar-label">Fév</div><div class="bar-val">5.2M</div></div>
+          <div class="bar-col"><div class="bar-fill" style="height:60%;background:linear-gradient(180deg,var(--purple),#7c3aed)"></div><div class="bar-label">Mar</div><div class="bar-val">5.8M</div></div>
+          <div class="bar-col"><div class="bar-fill" style="height:65%;background:linear-gradient(180deg,var(--purple),#7c3aed)"></div><div class="bar-label">Avr</div><div class="bar-val">6.2M</div></div>
+          <div class="bar-col"><div class="bar-fill" style="height:72%;background:linear-gradient(180deg,var(--purple),#7c3aed)"></div><div class="bar-label">Mai</div><div class="bar-val">6.9M</div></div>
+          <div class="bar-col"><div class="bar-fill" style="height:80%;background:linear-gradient(180deg,var(--gold),#f59e0b)"></div><div class="bar-label">Jun</div><div class="bar-val">7.6M</div></div>
+          <div class="bar-col"><div class="bar-fill" style="height:100%;background:linear-gradient(180deg,var(--success),#10b981)"></div><div class="bar-label">Jul</div><div class="bar-val">11.3M</div></div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ══ PAGES PLACEHOLDER ══ -->
+  <div class="page" id="page-abonnements"><div style="margin-bottom:1.5rem"><h2 style="font-family:'Syne',sans-serif;font-weight:800;font-size:1.3rem;color:white">Abonnements</h2></div><div class="card"><div class="card-body" style="text-align:center;padding:3rem"><div style="font-size:3rem;margin-bottom:1rem">📋</div><div style="font-family:'Syne',sans-serif;font-weight:700;font-size:1.1rem;color:white">52 abonnements actifs · 3 expirés</div></div></div></div>
+  <div class="page" id="page-activite"><div style="margin-bottom:1.5rem"><h2 style="font-family:'Syne',sans-serif;font-weight:800;font-size:1.3rem;color:white">Activité</h2></div><div class="card"><div class="card-body" style="text-align:center;padding:3rem"><div style="font-size:3rem;margin-bottom:1rem">📊</div><div style="font-family:'Syne',sans-serif;font-weight:700;font-size:1.1rem;color:white">2 847 actions aujourd'hui · 48K utilisateurs actifs</div></div></div></div>
+  <div class="page" id="page-incidents"><div style="margin-bottom:1.5rem"><h2 style="font-family:'Syne',sans-serif;font-weight:800;font-size:1.3rem;color:white">Incidents</h2></div><div class="card"><div class="card-body" style="text-align:center;padding:3rem"><div style="font-size:3rem;margin-bottom:1rem">⚠️</div><div style="font-family:'Syne',sans-serif;font-weight:700;font-size:1.1rem;color:white">2 incidents actifs · Priorité haute</div></div></div></div>
+  <div class="page" id="page-logs"><div style="margin-bottom:1.5rem"><h2 style="font-family:'Syne',sans-serif;font-weight:800;font-size:1.3rem;color:white">Logs système</h2></div><div class="card"><div class="card-body" style="padding:1.25rem;font-family:monospace;font-size:.78rem;color:var(--success);background:#050a10;border-radius:8px"><div>[2025-01-22 09:32:11] ✅ Paiement reçu — UCAO Abidjan — 150 000 FCFA</div><div style="margin-top:.4rem">[2025-01-22 09:18:45] 🏛️ Nouvelle inscription — ISIG Lomé — Plan Starter</div><div style="margin-top:.4rem">[2025-01-22 08:55:12] 🔄 Backup automatique — 52 bases de données — OK</div><div style="margin-top:.4rem">[2025-01-22 08:00:00] ✅ Uptime check — 99.9% — Tous systèmes opérationnels</div><div style="margin-top:.4rem;color:var(--gold)">[2025-01-21 23:45:02] ⚠️ Tentative connexion suspecte — IP bloquée</div><div style="margin-top:.4rem">[2025-01-21 22:00:00] 🔄 Déploiement v2.4.1 — Succès</div></div></div></div>
+  <div class="page" id="page-admins"><div style="margin-bottom:1.5rem"><h2 style="font-family:'Syne',sans-serif;font-weight:800;font-size:1.3rem;color:white">Admins plateforme</h2></div><div class="card"><div class="card-body" style="text-align:center;padding:3rem"><div style="font-size:3rem;margin-bottom:1rem">👑</div><div style="font-family:'Syne',sans-serif;font-weight:700;font-size:1.1rem;color:white">3 Super Admins · Accès total plateforme</div></div></div></div>
+  <div class="page" id="page-parametres"><div style="margin-bottom:1.5rem"><h2 style="font-family:'Syne',sans-serif;font-weight:800;font-size:1.3rem;color:white">Paramètres plateforme</h2></div><div class="card"><div class="card-body" style="text-align:center;padding:3rem"><div style="font-size:3rem;margin-bottom:1rem">⚙️</div><div style="font-family:'Syne',sans-serif;font-weight:700;font-size:1.1rem;color:white">Configuration globale de la plateforme</div></div></div></div>
+
+</div></main>
+
+<!-- MODAL AJOUT UNIVERSITÉ -->
+<div class="modal-overlay" id="addModal" onclick="if(event.target===this)closeModal()">
+  <div class="modal">
+    <button class="modal-close" onclick="closeModal()">✕</button>
+    <div style="font-family:'Syne',sans-serif;font-weight:800;font-size:1.2rem;color:white;margin-bottom:.25rem">Ajouter une université</div>
+    <p style="font-size:.83rem;color:rgba(255,255,255,0.4);margin-bottom:1.5rem">Créer un nouvel espace université sur la plateforme</p>
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:1rem">
+      <div class="form-group"><label>Nom de l'université *</label><input class="form-input" placeholder="Ex: Université de Lomé"/></div>
+      <div class="form-group"><label>Pays *</label><select class="form-input"><option>Togo</option><option>Côte d'Ivoire</option><option>Sénégal</option><option>Cameroun</option><option>Bénin</option><option>Autre</option></select></div>
+    </div>
+    <div class="form-group"><label>Email du directeur *</label><input class="form-input" placeholder="directeur@universite.tg"/></div>
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:1rem">
+      <div class="form-group"><label>Plan *</label><select class="form-input"><option>Starter — 25 000 FCFA</option><option>Pro — 75 000 FCFA</option><option>Enterprise — Sur devis</option></select></div>
+      <div class="form-group"><label>Sous-domaine *</label><input class="form-input" placeholder="univ-nom"/></div>
+    </div>
+    <button class="btn-submit" onclick="showToast('✅ Université créée ! Email d\'invitation envoyé.');closeModal()">Créer l'espace université →</button>
+  </div>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script>
+  const pages=['overview','universites','revenus','abonnements','activite','incidents','logs','admins','parametres'];
+  const titles={'overview':'Vue globale','universites':'Universités','revenus':'Revenus SaaS','abonnements':'Abonnements','activite':'Activité','incidents':'Incidents','logs':'Logs système','admins':'Admins','parametres':'Paramètres'};
+  function showPage(id){
+    pages.forEach(p=>{document.getElementById('page-'+p)?.classList.remove('active');document.querySelectorAll('.nav-item').forEach(n=>{if(n.getAttribute('onclick')?.includes("'"+p+"'"))n.classList.remove('active');});});
+    document.getElementById('page-'+id)?.classList.add('active');
+    document.querySelectorAll('.nav-item').forEach(n=>{if(n.getAttribute('onclick')?.includes("'"+id+"'"))n.classList.add('active');});
+    document.getElementById('pageTitle').textContent=titles[id]||id;
+  }
+  function openModal(){document.getElementById('addModal').classList.add('active');document.body.style.overflow='hidden';}
+  function closeModal(){document.getElementById('addModal').classList.remove('active');document.body.style.overflow='';}
+  let tt;
+  function showToast(msg){const t=document.getElementById('toast');t.textContent=msg;t.classList.add('show');clearTimeout(tt);tt=setTimeout(()=>t.classList.remove('show'),3000);}
+  document.addEventListener('keydown',e=>{if(e.key==='Escape')closeModal();});
+</script>
+</body>
+</html>
