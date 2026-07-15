@@ -1,6 +1,7 @@
 <!DOCTYPE html>
 <html lang="fr">
 <head>
+<style>html{visibility:hidden}</style>
   <meta charset="UTF-8"/>
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
   <title>UniManage — Espace Étudiant</title>
@@ -8,6 +9,16 @@
   <style>
     :root{--navy:#0D1B2A;--blue:#1A56DB;--sky:#3B82F6;--gold:#F59E0B;--light:#F0F4FF;--white:#FFFFFF;--gray:#64748B;--border:#E2E8F0;--success:#10B981;--danger:#EF4444;--sidebar-w:240px;--topbar-h:64px;}
     *{margin:0;padding:0;box-sizing:border-box;}
+    .modal-overlay{position:fixed;inset:0;z-index:2000;background:rgba(13,27,42,0.5);display:none;align-items:center;justify-content:center;backdrop-filter:blur(4px);padding:1rem;}
+    .modal-overlay.active{display:flex;}
+    .modal{background:white;border-radius:18px;width:100%;max-width:420px;padding:2rem;position:relative;box-shadow:0 30px 80px rgba(0,0,0,0.2);}
+    .modal-close{position:absolute;top:1rem;right:1rem;background:#F8FAFC;border:none;cursor:pointer;width:30px;height:30px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:.85rem;color:var(--gray);}
+    .form-group{margin-bottom:.85rem;}
+    .form-group label{display:block;font-size:.8rem;font-weight:600;color:var(--navy);margin-bottom:.35rem;}
+    .form-input{width:100%;padding:.65rem .9rem;border-radius:8px;border:1.5px solid var(--border);font-size:.875rem;font-family:'Inter',sans-serif;color:var(--navy);outline:none;transition:border-color .2s;}
+    .form-input:focus{border-color:var(--blue);}
+    .btn-submit{width:100%;padding:.8rem;border-radius:10px;background:var(--blue);color:white;font-size:.9rem;font-weight:700;cursor:pointer;border:none;margin-top:.5rem;transition:all .2s;}
+    .btn-submit:hover{background:#1344b8;}
     body{font-family:'Inter',sans-serif;background:#F8FAFC;color:var(--navy);display:flex;min-height:100vh;}
     .sidebar{width:var(--sidebar-w);background:linear-gradient(180deg,#0D1B2A 0%,#1a2d42 100%);display:flex;flex-direction:column;position:fixed;top:0;left:0;bottom:0;z-index:100;overflow-y:auto;}
     .sidebar-brand{padding:1.5rem 1.25rem 1rem;border-bottom:1px solid rgba(255,255,255,0.08);}
@@ -92,6 +103,11 @@
   </style>
 </head>
 <body>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script src="https://cdn.jsdelivr.net/npm/jspdf@2.5.2/dist/jspdf.umd.min.js"></script>
+<script src="supabase-config.js"></script>
+<script src="auth-guard.js"></script>
+<script>window.authReady = requireAuth('etudiant');</script>
 
 <!-- SIDEBAR -->
 <aside class="sidebar">
@@ -100,10 +116,10 @@
     <div class="brand-sub">Espace Étudiant</div>
   </div>
   <div class="student-card">
-    <div class="student-avatar">KA</div>
-    <div class="student-name">Kofi Adzoa</div>
-    <div class="student-mat">UL-2025-001</div>
-    <div class="student-dept">💻 Informatique L2</div>
+    <div class="student-avatar" id="sc-avatar">KA</div>
+    <div class="student-name" id="sc-nom">Kofi Adzoa</div>
+    <div class="student-mat" id="sc-mat">UL-2025-001</div>
+    <div class="student-dept" id="sc-dept">💻 Informatique L2</div>
   </div>
   <nav class="sidebar-nav">
     <div class="nav-group-label">Mon espace</div>
@@ -142,7 +158,7 @@
     <div class="kpi-grid">
       <div class="kpi-card"><div class="kpi-icon" style="background:rgba(26,86,219,0.1)">📊</div><div class="kpi-value" style="color:var(--blue)">13.8</div><div class="kpi-label">Moyenne générale / 20</div></div>
       <div class="kpi-card"><div class="kpi-icon" style="background:rgba(16,185,129,0.1)">✅</div><div class="kpi-value" style="color:var(--success)">8/10</div><div class="kpi-label">Matières validées</div></div>
-      <div class="kpi-card"><div class="kpi-icon" style="background:rgba(245,158,11,0.1)">📅</div><div class="kpi-value" style="color:var(--gold)">94%</div><div class="kpi-label">Taux de présence</div></div>
+      <div class="kpi-card"><div class="kpi-icon" style="background:rgba(245,158,11,0.1)">📅</div><div class="kpi-value" style="color:var(--gold)" id="kpi-presence">—</div><div class="kpi-label">Taux de présence</div></div>
       <div class="kpi-card"><div class="kpi-icon" style="background:rgba(239,68,68,0.1)">💳</div><div class="kpi-value" style="color:var(--danger)">Payé</div><div class="kpi-label">Statut scolarité</div></div>
     </div>
     <div class="dash-grid">
@@ -188,30 +204,21 @@
   <div class="page" id="page-notes">
     <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:1.5rem">
       <div><h2 style="font-family:'Syne',sans-serif;font-weight:800;font-size:1.3rem">Mes notes</h2><div style="font-size:.85rem;color:var(--gray);margin-top:.2rem">Semestre 1 · Informatique L2</div></div>
-      <button onclick="showToast('📄 Relevé de notes PDF téléchargé !')" style="display:flex;align-items:center;gap:.5rem;padding:.65rem 1.2rem;border-radius:9px;background:var(--blue);color:white;font-size:.875rem;font-weight:600;cursor:pointer;border:none">📄 Relevé PDF</button>
+      <button onclick="downloadReleveNotes()" style="display:flex;align-items:center;gap:.5rem;padding:.65rem 1.2rem;border-radius:9px;background:var(--blue);color:white;font-size:.875rem;font-weight:600;cursor:pointer;border:none">📄 Relevé PDF</button>
     </div>
     <!-- Récap -->
     <div class="kpi-grid" style="margin-bottom:1.5rem">
-      <div class="kpi-card"><div class="kpi-icon" style="background:rgba(26,86,219,0.1)">📊</div><div class="kpi-value" style="color:var(--blue)">13.8</div><div class="kpi-label">Moyenne générale</div></div>
-      <div class="kpi-card"><div class="kpi-icon" style="background:rgba(16,185,129,0.1)">🏅</div><div class="kpi-value" style="color:var(--success)">Assez Bien</div><div class="kpi-label">Mention</div></div>
-      <div class="kpi-card"><div class="kpi-icon" style="background:rgba(245,158,11,0.1)">✅</div><div class="kpi-value" style="color:var(--gold)">52/60</div><div class="kpi-label">Crédits validés</div></div>
-      <div class="kpi-card"><div class="kpi-icon" style="background:rgba(139,92,246,0.1)">📋</div><div class="kpi-value" style="color:#8b5cf6">8/10</div><div class="kpi-label">UE validées</div></div>
+      <div class="kpi-card"><div class="kpi-icon" style="background:rgba(26,86,219,0.1)">📊</div><div class="kpi-value" style="color:var(--blue)" id="kpi-moyenne">—</div><div class="kpi-label">Moyenne générale</div></div>
+      <div class="kpi-card"><div class="kpi-icon" style="background:rgba(16,185,129,0.1)">🏅</div><div class="kpi-value" style="color:var(--success)" id="kpi-mention">—</div><div class="kpi-label">Mention</div></div>
+      <div class="kpi-card"><div class="kpi-icon" style="background:rgba(245,158,11,0.1)">✅</div><div class="kpi-value" style="color:var(--gold)" id="kpi-credits">—</div><div class="kpi-label">Crédits validés</div></div>
+      <div class="kpi-card"><div class="kpi-icon" style="background:rgba(139,92,246,0.1)">📋</div><div class="kpi-value" style="color:#8b5cf6" id="kpi-ue">—</div><div class="kpi-label">UE validées</div></div>
     </div>
     <div class="card">
       <div class="card-header"><div class="card-title">Détail par matière — Semestre 1</div></div>
       <table class="data-table">
         <thead><tr><th>Matière</th><th>Enseignant</th><th>Coeff.</th><th>Crédits</th><th>Note /20</th><th>Mention</th><th>Statut</th></tr></thead>
-        <tbody>
-          <tr><td><strong>Algorithmique Avancée</strong></td><td>Dr. Mensah</td><td>4</td><td>6</td><td><span class="note-cell note-good">16.0</span></td><td><span class="badge badge-success">Très Bien</span></td><td><span class="badge badge-success">Validé ✓</span></td></tr>
-          <tr><td><strong>Bases de données</strong></td><td>Prof. Komi</td><td>3</td><td>4</td><td><span class="note-cell note-good">14.5</span></td><td><span class="badge badge-blue">Bien</span></td><td><span class="badge badge-success">Validé ✓</span></td></tr>
-          <tr><td><strong>Programmation Java</strong></td><td>Dr. Atchoe</td><td>4</td><td>6</td><td><span class="note-cell note-good">15.0</span></td><td><span class="badge badge-blue">Bien</span></td><td><span class="badge badge-success">Validé ✓</span></td></tr>
-          <tr><td><strong>Réseaux Informatiques</strong></td><td>Prof. Dodzi</td><td>3</td><td>4</td><td><span class="note-cell note-avg">12.0</span></td><td><span class="badge badge-gold">Assez Bien</span></td><td><span class="badge badge-success">Validé ✓</span></td></tr>
-          <tr><td><strong>Mathématiques</strong></td><td>Dr. Agbo</td><td>3</td><td>4</td><td><span class="note-cell note-avg">11.5</span></td><td><span class="badge badge-gold">Passable</span></td><td><span class="badge badge-success">Validé ✓</span></td></tr>
-          <tr><td><strong>Systèmes d'exploitation</strong></td><td>Prof. Edem</td><td>3</td><td>4</td><td><span class="note-cell note-avg">13.0</span></td><td><span class="badge badge-gold">Assez Bien</span></td><td><span class="badge badge-success">Validé ✓</span></td></tr>
-          <tr><td><strong>Anglais Technique</strong></td><td>Mme. Johnson</td><td>2</td><td>2</td><td><span class="note-cell note-good">14.0</span></td><td><span class="badge badge-blue">Bien</span></td><td><span class="badge badge-success">Validé ✓</span></td></tr>
-          <tr><td><strong>Projet Tutoré</strong></td><td>Dr. Mensah</td><td>4</td><td>6</td><td><span class="note-cell note-good">15.5</span></td><td><span class="badge badge-blue">Bien</span></td><td><span class="badge badge-success">Validé ✓</span></td></tr>
-          <tr><td><strong>Architecture des SI</strong></td><td>Dr. Atchoe</td><td>3</td><td>4</td><td><span class="note-cell note-avg">10.5</span></td><td><span class="badge badge-gold">Passable</span></td><td><span class="badge badge-success">Validé ✓</span></td></tr>
-          <tr><td><strong>Sécurité Informatique</strong></td><td>Prof. Komi</td><td>3</td><td>4</td><td><span class="note-cell note-bad">8.0</span></td><td><span class="badge badge-danger">Insuffisant</span></td><td><span class="badge badge-danger">Rattrapage</span></td></tr>
+        <tbody id="tbodyNotes">
+          <tr><td colspan="7" style="text-align:center;color:var(--gray);padding:2rem">Chargement des notes...</td></tr>
         </tbody>
       </table>
     </div>
@@ -220,8 +227,7 @@
   <!-- PAGE EMPLOI DU TEMPS -->
   <div class="page" id="page-emploidutemps">
     <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:1.5rem">
-      <div><h2 style="font-family:'Syne',sans-serif;font-weight:800;font-size:1.3rem">Emploi du temps</h2><div style="font-size:.85rem;color:var(--gray);margin-top:.2rem">Semaine du 20 au 24 Janvier 2025</div></div>
-      <button onclick="showToast('📅 Synchronisé avec Google Calendar !')" style="padding:.65rem 1.2rem;border-radius:9px;background:white;border:1.5px solid var(--border);color:var(--navy);font-size:.875rem;font-weight:600;cursor:pointer">📅 Google Calendar</button>
+      <div><h2 style="font-family:'Syne',sans-serif;font-weight:800;font-size:1.3rem">Emploi du temps</h2><div style="font-size:.85rem;color:var(--gray);margin-top:.2rem" id="et-sub">Chargement…</div></div>
     </div>
     <div class="card" style="overflow-x:auto">
       <table style="width:100%;border-collapse:collapse">
@@ -233,39 +239,8 @@
           <th style="background:var(--navy);color:white;padding:.7rem 1rem;font-size:.8rem;font-weight:600;text-align:center">Jeudi</th>
           <th style="background:var(--navy);color:white;padding:.7rem 1rem;font-size:.8rem;font-weight:600;text-align:center">Vendredi</th>
         </tr></thead>
-        <tbody>
-          <tr>
-            <td style="background:#F8FAFC;color:var(--gray);font-size:.75rem;font-weight:600;text-align:center;padding:.5rem;border:1px solid var(--border)">07h–09h</td>
-            <td style="border:1px solid var(--border);padding:.5rem;height:65px"><div style="background:rgba(26,86,219,0.1);border-left:3px solid var(--blue);border-radius:5px;padding:.4rem .5rem;height:100%"><div style="font-weight:600;font-size:.75rem">Algorithmes</div><div style="color:var(--gray);font-size:.7rem">Dr. Mensah · A1</div></div></td>
-            <td style="border:1px solid var(--border);padding:.5rem;height:65px"></td>
-            <td style="border:1px solid var(--border);padding:.5rem;height:65px"><div style="background:rgba(16,185,129,0.1);border-left:3px solid var(--success);border-radius:5px;padding:.4rem .5rem;height:100%"><div style="font-weight:600;font-size:.75rem">Bases de données</div><div style="color:var(--gray);font-size:.7rem">Prof. Komi · B3</div></div></td>
-            <td style="border:1px solid var(--border);padding:.5rem;height:65px"></td>
-            <td style="border:1px solid var(--border);padding:.5rem;height:65px"><div style="background:rgba(245,158,11,0.1);border-left:3px solid var(--gold);border-radius:5px;padding:.4rem .5rem;height:100%"><div style="font-weight:600;font-size:.75rem">Mathématiques</div><div style="color:var(--gray);font-size:.7rem">Dr. Agbo · Amph.1</div></div></td>
-          </tr>
-          <tr>
-            <td style="background:#F8FAFC;color:var(--gray);font-size:.75rem;font-weight:600;text-align:center;padding:.5rem;border:1px solid var(--border)">09h–11h</td>
-            <td style="border:1px solid var(--border);padding:.5rem;height:65px"></td>
-            <td style="border:1px solid var(--border);padding:.5rem;height:65px"><div style="background:rgba(245,158,11,0.1);border-left:3px solid var(--gold);border-radius:5px;padding:.4rem .5rem;height:100%"><div style="font-weight:600;font-size:.75rem">Réseaux</div><div style="color:var(--gray);font-size:.7rem">Prof. Dodzi · Labo</div></div></td>
-            <td style="border:1px solid var(--border);padding:.5rem;height:65px"></td>
-            <td style="border:1px solid var(--border);padding:.5rem;height:65px"><div style="background:rgba(26,86,219,0.1);border-left:3px solid var(--blue);border-radius:5px;padding:.4rem .5rem;height:100%"><div style="font-weight:600;font-size:.75rem">POO Java</div><div style="color:var(--gray);font-size:.7rem">Dr. Atchoe · A2</div></div></td>
-            <td style="border:1px solid var(--border);padding:.5rem;height:65px"></td>
-          </tr>
-          <tr>
-            <td style="background:#F8FAFC;color:var(--gray);font-size:.75rem;font-weight:600;text-align:center;padding:.5rem;border:1px solid var(--border)">11h–13h</td>
-            <td style="border:1px solid var(--border);padding:.5rem;height:65px"><div style="background:rgba(16,185,129,0.1);border-left:3px solid var(--success);border-radius:5px;padding:.4rem .5rem;height:100%"><div style="font-weight:600;font-size:.75rem">TP Algo</div><div style="color:var(--gray);font-size:.7rem">Dr. Mensah · Labo</div></div></td>
-            <td style="border:1px solid var(--border);padding:.5rem;height:65px"></td>
-            <td style="border:1px solid var(--border);padding:.5rem;height:65px"><div style="background:rgba(239,68,68,0.1);border-left:3px solid var(--danger);border-radius:5px;padding:.4rem .5rem;height:100%"><div style="font-weight:600;font-size:.75rem">🔴 Examen blanc</div><div style="color:var(--gray);font-size:.7rem">Amphithéâtre</div></div></td>
-            <td style="border:1px solid var(--border);padding:.5rem;height:65px"></td>
-            <td style="border:1px solid var(--border);padding:.5rem;height:65px"></td>
-          </tr>
-          <tr>
-            <td style="background:#F8FAFC;color:var(--gray);font-size:.75rem;font-weight:600;text-align:center;padding:.5rem;border:1px solid var(--border)">14h–16h</td>
-            <td style="border:1px solid var(--border);padding:.5rem;height:65px"></td>
-            <td style="border:1px solid var(--border);padding:.5rem;height:65px"><div style="background:rgba(26,86,219,0.1);border-left:3px solid var(--blue);border-radius:5px;padding:.4rem .5rem;height:100%"><div style="font-weight:600;font-size:.75rem">Syst. exploitation</div><div style="color:var(--gray);font-size:.7rem">Prof. Edem · C1</div></div></td>
-            <td style="border:1px solid var(--border);padding:.5rem;height:65px"></td>
-            <td style="border:1px solid var(--border);padding:.5rem;height:65px"><div style="background:rgba(16,185,129,0.1);border-left:3px solid var(--success);border-radius:5px;padding:.4rem .5rem;height:100%"><div style="font-weight:600;font-size:.75rem">TP Réseaux</div><div style="color:var(--gray);font-size:.7rem">Prof. Dodzi · Labo</div></div></td>
-            <td style="border:1px solid var(--border);padding:.5rem;height:65px"><div style="background:rgba(245,158,11,0.1);border-left:3px solid var(--gold);border-radius:5px;padding:.4rem .5rem;height:100%"><div style="font-weight:600;font-size:.75rem">Anglais Tech.</div><div style="color:var(--gray);font-size:.7rem">Mme. Johnson · B2</div></div></td>
-          </tr>
+        <tbody id="et-tbody">
+          <tr><td colspan="6" style="text-align:center;color:var(--gray);padding:2rem">Chargement...</td></tr>
         </tbody>
       </table>
     </div>
@@ -275,28 +250,24 @@
   <div class="page" id="page-paiements">
     <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:1.5rem">
       <div><h2 style="font-family:'Syne',sans-serif;font-weight:800;font-size:1.3rem">Mes paiements</h2><div style="font-size:.85rem;color:var(--gray);margin-top:.2rem">Année académique 2024–2025</div></div>
-      <button onclick="showToast('🌊 Lien de paiement Wave généré !')" style="display:flex;align-items:center;gap:.5rem;padding:.65rem 1.2rem;border-radius:9px;background:var(--blue);color:white;font-size:.875rem;font-weight:600;cursor:pointer;border:none">🌊 Payer maintenant</button>
+      <button onclick="ouvrirPaiementEnLigne()" style="display:flex;align-items:center;gap:.5rem;padding:.65rem 1.2rem;border-radius:9px;background:var(--blue);color:white;font-size:.875rem;font-weight:600;cursor:pointer;border:none">🌊 Payer maintenant</button>
     </div>
     <div class="kpi-grid" style="grid-template-columns:repeat(3,1fr);margin-bottom:1.5rem">
-      <div class="kpi-card"><div class="kpi-icon" style="background:rgba(16,185,129,0.1)">✅</div><div class="kpi-value" style="color:var(--success)">250 000</div><div class="kpi-label">FCFA payés</div></div>
-      <div class="kpi-card"><div class="kpi-icon" style="background:rgba(239,68,68,0.1)">⏳</div><div class="kpi-value" style="color:var(--danger)">0</div><div class="kpi-label">FCFA restants</div></div>
-      <div class="kpi-card"><div class="kpi-icon" style="background:rgba(26,86,219,0.1)">📋</div><div class="kpi-value" style="color:var(--blue)">3/3</div><div class="kpi-label">Tranches payées</div></div>
+      <div class="kpi-card"><div class="kpi-icon" style="background:rgba(16,185,129,0.1)">✅</div><div class="kpi-value" style="color:var(--success)" id="ep-kpi-paye">—</div><div class="kpi-label">FCFA payés</div></div>
+      <div class="kpi-card"><div class="kpi-icon" style="background:rgba(239,68,68,0.1)">⏳</div><div class="kpi-value" style="color:var(--danger)" id="ep-kpi-restant">—</div><div class="kpi-label">FCFA restants</div></div>
+      <div class="kpi-card"><div class="kpi-icon" style="background:rgba(26,86,219,0.1)">📋</div><div class="kpi-value" style="color:var(--blue)" id="ep-kpi-versements">—</div><div class="kpi-label">Versements</div></div>
     </div>
     <div class="dash-grid">
       <div class="card">
         <div class="card-header"><div class="card-title">Plan de paiement scolarité</div></div>
-        <div class="card-body">
-          <div class="pay-item"><div><div class="pay-label">Tranche 1 — Inscription</div><div class="pay-sub">Payé le 02 Oct 2024 · Wave</div></div><div style="text-align:right"><div class="pay-amount" style="color:var(--success)">83 333 FCFA</div><span class="badge badge-success">✓ Payé</span></div></div>
-          <div class="pay-item"><div><div class="pay-label">Tranche 2 — Milieu S1</div><div class="pay-sub">Payé le 15 Nov 2024 · Orange Money</div></div><div style="text-align:right"><div class="pay-amount" style="color:var(--success)">83 333 FCFA</div><span class="badge badge-success">✓ Payé</span></div></div>
-          <div class="pay-item"><div><div class="pay-label">Tranche 3 — Fin S1</div><div class="pay-sub">Payé le 20 Jan 2025 · Wave</div></div><div style="text-align:right"><div class="pay-amount" style="color:var(--success)">83 334 FCFA</div><span class="badge badge-success">✓ Payé</span></div></div>
+        <div class="card-body" id="ep-plan">
+          <div style="text-align:center;color:var(--gray);padding:1.5rem;font-size:.85rem">Chargement…</div>
         </div>
       </div>
       <div class="card">
         <div class="card-header"><div class="card-title">Reçus de paiement</div></div>
-        <div class="card-body">
-          <div class="pay-item"><div><div class="pay-label">Reçu N° REC-2024-0892</div><div class="pay-sub">Tranche 1 · 02 Oct 2024</div></div><button onclick="showToast('📄 Reçu PDF téléchargé')" style="padding:.4rem .9rem;border-radius:7px;border:1px solid var(--border);background:white;font-size:.78rem;cursor:pointer;font-weight:600">📄 PDF</button></div>
-          <div class="pay-item"><div><div class="pay-label">Reçu N° REC-2024-1145</div><div class="pay-sub">Tranche 2 · 15 Nov 2024</div></div><button onclick="showToast('📄 Reçu PDF téléchargé')" style="padding:.4rem .9rem;border-radius:7px;border:1px solid var(--border);background:white;font-size:.78rem;cursor:pointer;font-weight:600">📄 PDF</button></div>
-          <div class="pay-item"><div><div class="pay-label">Reçu N° REC-2025-0041</div><div class="pay-sub">Tranche 3 · 20 Jan 2025</div></div><button onclick="showToast('📄 Reçu PDF téléchargé')" style="padding:.4rem .9rem;border-radius:7px;border:1px solid var(--border);background:white;font-size:.78rem;cursor:pointer;font-weight:600">📄 PDF</button></div>
+        <div class="card-body" id="ep-recus">
+          <div style="text-align:center;color:var(--gray);padding:1.5rem;font-size:.85rem">Chargement…</div>
         </div>
       </div>
     </div>
@@ -353,11 +324,11 @@
         <div class="card-header"><div class="card-title">👤 Informations personnelles</div></div>
         <div class="card-body">
           <div style="display:flex;align-items:center;gap:1rem;margin-bottom:1.5rem;padding:1rem;background:var(--light);border-radius:12px">
-            <div style="width:64px;height:64px;border-radius:14px;background:linear-gradient(135deg,var(--blue),var(--sky));display:flex;align-items:center;justify-content:center;font-size:1.5rem;font-weight:800;color:white">KA</div>
-            <div><div style="font-family:'Syne',sans-serif;font-weight:800;font-size:1.1rem">Kofi Adzoa</div><div style="font-size:.8rem;color:var(--gray);margin-top:.2rem">UL-2025-001 · Informatique L2</div><div style="margin-top:.4rem"><span class="badge badge-success">Étudiant actif</span></div></div>
+            <div style="width:64px;height:64px;border-radius:14px;background:linear-gradient(135deg,var(--blue),var(--sky));display:flex;align-items:center;justify-content:center;font-size:1.5rem;font-weight:800;color:white" id="pf-avatar">KA</div>
+            <div><div style="font-family:'Syne',sans-serif;font-weight:800;font-size:1.1rem" id="pf-nom">Kofi Adzoa</div><div style="font-size:.8rem;color:var(--gray);margin-top:.2rem" id="pf-matdept">UL-2025-001 · Informatique L2</div><div style="margin-top:.4rem"><span class="badge badge-success" id="pf-statut-badge">Étudiant actif</span></div></div>
           </div>
           <div style="display:flex;flex-direction:column;gap:.75rem">
-            <div style="display:flex;justify-content:space-between;padding:.6rem 0;border-bottom:1px solid var(--border);font-size:.85rem"><span style="color:var(--gray)">Email</span><span style="font-weight:500">kofi.adzoa@student.univ.tg</span></div>
+            <div style="display:flex;justify-content:space-between;padding:.6rem 0;border-bottom:1px solid var(--border);font-size:.85rem"><span style="color:var(--gray)">Email</span><span style="font-weight:500" id="pf-email">kofi.adzoa@student.univ.tg</span></div>
             <div style="display:flex;justify-content:space-between;padding:.6rem 0;border-bottom:1px solid var(--border);font-size:.85rem"><span style="color:var(--gray)">Téléphone</span><span style="font-weight:500">+228 90 XX XX XX</span></div>
             <div style="display:flex;justify-content:space-between;padding:.6rem 0;border-bottom:1px solid var(--border);font-size:.85rem"><span style="color:var(--gray)">Date de naissance</span><span style="font-weight:500">15 Mars 2001</span></div>
             <div style="display:flex;justify-content:space-between;padding:.6rem 0;border-bottom:1px solid var(--border);font-size:.85rem"><span style="color:var(--gray)">Nationalité</span><span style="font-weight:500">🇹🇬 Togolaise</span></div>
@@ -369,9 +340,9 @@
         <div class="card-header"><div class="card-title">🎓 Informations académiques</div></div>
         <div class="card-body">
           <div style="display:flex;flex-direction:column;gap:.75rem">
-            <div style="display:flex;justify-content:space-between;padding:.6rem 0;border-bottom:1px solid var(--border);font-size:.85rem"><span style="color:var(--gray)">Matricule</span><span style="font-weight:700;color:var(--blue)">UL-2025-001</span></div>
-            <div style="display:flex;justify-content:space-between;padding:.6rem 0;border-bottom:1px solid var(--border);font-size:.85rem"><span style="color:var(--gray)">Département</span><span style="font-weight:500">Informatique & IA</span></div>
-            <div style="display:flex;justify-content:space-between;padding:.6rem 0;border-bottom:1px solid var(--border);font-size:.85rem"><span style="color:var(--gray)">Niveau</span><span style="font-weight:500">Licence 2 (L2)</span></div>
+            <div style="display:flex;justify-content:space-between;padding:.6rem 0;border-bottom:1px solid var(--border);font-size:.85rem"><span style="color:var(--gray)">Matricule</span><span style="font-weight:700;color:var(--blue)" id="pf-matricule">UL-2025-001</span></div>
+            <div style="display:flex;justify-content:space-between;padding:.6rem 0;border-bottom:1px solid var(--border);font-size:.85rem"><span style="color:var(--gray)">Département</span><span style="font-weight:500" id="pf-departement">Informatique & IA</span></div>
+            <div style="display:flex;justify-content:space-between;padding:.6rem 0;border-bottom:1px solid var(--border);font-size:.85rem"><span style="color:var(--gray)">Niveau</span><span style="font-weight:500" id="pf-niveau">Licence 2 (L2)</span></div>
             <div style="display:flex;justify-content:space-between;padding:.6rem 0;border-bottom:1px solid var(--border);font-size:.85rem"><span style="color:var(--gray)">Filière</span><span style="font-weight:500">Génie Logiciel</span></div>
             <div style="display:flex;justify-content:space-between;padding:.6rem 0;border-bottom:1px solid var(--border);font-size:.85rem"><span style="color:var(--gray)">Moyenne S1</span><span style="font-weight:700;color:var(--success)">13.8/20</span></div>
             <div style="display:flex;justify-content:space-between;padding:.6rem 0;font-size:.85rem"><span style="color:var(--gray)">Crédits validés</span><span style="font-weight:700;color:var(--blue)">52/60</span></div>
@@ -396,6 +367,19 @@
 
 </div></main>
 
+<!-- ══ MODAL PAIEMENT EN LIGNE ══ -->
+<div class="modal-overlay" id="payOnlineModal" onclick="if(event.target===this)fermerPaiementEnLigne()">
+  <div class="modal">
+    <button class="modal-close" onclick="fermerPaiementEnLigne()">✕</button>
+    <div style="font-family:'Syne',sans-serif;font-weight:800;font-size:1.15rem;margin-bottom:.25rem">🌊 Payer en ligne</div>
+    <p style="font-size:.85rem;color:var(--gray);margin-bottom:1.25rem">Paiement sécurisé via CinetPay (Wave, Orange Money, carte…)</p>
+    <div id="payOnlineError" style="display:none;background:rgba(239,68,68,0.08);color:var(--danger);border:1px solid rgba(239,68,68,0.2);padding:.6rem 1rem;border-radius:8px;font-size:.83rem;margin-bottom:1rem"></div>
+    <div class="form-group"><label>Montant (FCFA)</label><input id="po_amount" type="number" class="form-input" placeholder="Ex: 50000"/></div>
+    <div class="form-group"><label>Numéro de téléphone (mobile money)</label><input id="po_phone" type="tel" class="form-input" placeholder="Ex: 90000000"/></div>
+    <button class="btn-submit" id="po_submit" onclick="lancerPaiementEnLigne()">Continuer vers le paiement →</button>
+  </div>
+</div>
+
 <div class="toast" id="toast"></div>
 
 <script>
@@ -412,6 +396,338 @@
   }
   let tt;
   function showToast(msg){const t=document.getElementById('toast');t.textContent=msg;t.classList.add('show');clearTimeout(tt);tt=setTimeout(()=>t.classList.remove('show'),3000);}
+
+  // ── Charger le vrai dossier étudiant (Supabase) ──
+  let monDossier = null;
+  async function loadMonDossier(user) {
+    const { data: rec, error } = await supabaseClient
+      .from('students').select('*').eq('profile_id', user.id).maybeSingle();
+    if (error || !rec) { console.warn('Dossier étudiant introuvable pour ce compte.'); return; }
+    monDossier = rec;
+
+    const initials = rec.full_name.split(' ').filter(Boolean).map(s=>s[0]).join('').slice(0,2).toUpperCase();
+    const matdept = `${rec.matricule} · ${rec.department || '—'} ${rec.level || ''}`.trim();
+
+    document.getElementById('sc-avatar').textContent = initials;
+    document.getElementById('sc-nom').textContent = rec.full_name;
+    document.getElementById('sc-mat').textContent = rec.matricule;
+    document.getElementById('sc-dept').textContent = `💻 ${rec.department || '—'} ${rec.level || ''}`;
+
+    document.getElementById('pf-avatar').textContent = initials;
+    document.getElementById('pf-nom').textContent = rec.full_name;
+    document.getElementById('pf-matdept').textContent = matdept;
+    document.getElementById('pf-email').textContent = rec.email || user.email;
+    document.getElementById('pf-matricule').textContent = rec.matricule;
+    document.getElementById('pf-departement').textContent = rec.department || '—';
+    document.getElementById('pf-niveau').textContent = rec.level || '—';
+  }
+
+  // ── Charger les vraies notes (Supabase) ──
+  function mention(m) {
+    if (m >= 16) return 'Très Bien';
+    if (m >= 14) return 'Bien';
+    if (m >= 12) return 'Assez Bien';
+    if (m >= 10) return 'Passable';
+    return 'Insuffisant';
+  }
+  function mentionBadge(m) {
+    if (m >= 14) return 'badge-success';
+    if (m >= 10) return 'badge-gold';
+    return 'badge-danger';
+  }
+
+  let mesNotes = [];
+  async function loadNotes(studentRecord) {
+    const { data: notes, error } = await supabaseClient
+      .from('grades').select('*').eq('student_id', studentRecord.id).order('matiere');
+    if (error) { console.error(error); return; }
+    mesNotes = notes || [];
+
+    const tbody = document.getElementById('tbodyNotes');
+    if (!notes || notes.length === 0) {
+      tbody.innerHTML = '<tr><td colspan="7" style="text-align:center;color:var(--gray);padding:2rem">Aucune note saisie pour le moment.</td></tr>';
+      return;
+    }
+
+    let totalPoints = 0, totalCoeff = 0, creditsValides = 0, ueValidees = 0;
+    tbody.innerHTML = notes.map(n => {
+      const moyenne = (n.note_cc != null && n.note_exam != null) ? (n.note_cc * 0.3 + n.note_exam * 0.7) : null;
+      if (moyenne != null) {
+        totalPoints += moyenne * n.coefficient;
+        totalCoeff += n.coefficient;
+        if (moyenne >= 10) { creditsValides += n.credits; ueValidees++; }
+      }
+      const noteClass = moyenne == null ? '' : (moyenne >= 14 ? 'note-good' : moyenne >= 10 ? 'note-avg' : 'note-bad');
+      const statutBadge = moyenne == null ? 'badge-gray' : (moyenne >= 10 ? 'badge-success' : 'badge-danger');
+      const statutTxt = moyenne == null ? 'En attente' : (moyenne >= 10 ? 'Validé ✓' : 'Rattrapage');
+      return `<tr>
+        <td><strong>${n.matiere}</strong></td>
+        <td>${n.enseignant_nom || '—'}</td>
+        <td>${n.coefficient}</td>
+        <td>${n.credits}</td>
+        <td>${moyenne != null ? `<span class="note-cell ${noteClass}">${moyenne.toFixed(1)}</span>` : '—'}</td>
+        <td>${moyenne != null ? `<span class="badge ${mentionBadge(moyenne)}">${mention(moyenne)}</span>` : '—'}</td>
+        <td><span class="badge ${statutBadge}">${statutTxt}</span></td>
+      </tr>`;
+    }).join('');
+
+    const moyenneGenerale = totalCoeff > 0 ? (totalPoints / totalCoeff) : 0;
+    document.getElementById('kpi-moyenne').textContent = moyenneGenerale.toFixed(1);
+    document.getElementById('kpi-mention').textContent = mention(moyenneGenerale);
+    document.getElementById('kpi-credits').textContent = `${creditsValides}/60`;
+    document.getElementById('kpi-ue').textContent = `${ueValidees}/${notes.length}`;
+  }
+
+  // ── Charger les vrais paiements (Supabase) ──
+  let mesPaiements = [];
+  async function loadPaiements(studentRecord) {
+    const { data: pays, error } = await supabaseClient
+      .from('payments').select('*').eq('student_id', studentRecord.id).eq('statut', 'Confirmé').order('paid_at');
+    if (error) { console.error(error); return; }
+    mesPaiements = pays || [];
+
+    const totalPaye = (pays || []).reduce((s, p) => s + Number(p.amount), 0);
+    const restant = Math.max(0, studentRecord.frais_total - totalPaye);
+
+    document.getElementById('ep-kpi-paye').textContent = totalPaye.toLocaleString('fr-FR');
+    document.getElementById('ep-kpi-restant').textContent = restant.toLocaleString('fr-FR');
+    document.getElementById('ep-kpi-versements').textContent = (pays || []).length;
+
+    const planEl = document.getElementById('ep-plan');
+    const recusEl = document.getElementById('ep-recus');
+
+    if (!pays || pays.length === 0) {
+      planEl.innerHTML = '<div style="text-align:center;color:var(--gray);padding:1.5rem;font-size:.85rem">Aucun paiement enregistré pour le moment.</div>';
+      recusEl.innerHTML = '<div style="text-align:center;color:var(--gray);padding:1.5rem;font-size:.85rem">Aucun reçu disponible.</div>';
+      return;
+    }
+
+    const fmtDate = d => new Date(d).toLocaleDateString('fr-FR', { day:'2-digit', month:'short', year:'numeric' });
+
+    planEl.innerHTML = pays.map(p => `
+      <div class="pay-item"><div><div class="pay-label">${p.type}</div><div class="pay-sub">Payé le ${fmtDate(p.paid_at)} · ${p.method}</div></div><div style="text-align:right"><div class="pay-amount" style="color:var(--success)">${Number(p.amount).toLocaleString('fr-FR')} FCFA</div><span class="badge badge-success">✓ Payé</span></div></div>`).join('');
+
+    recusEl.innerHTML = pays.map(p => `
+      <div class="pay-item"><div><div class="pay-label">Reçu N° ${p.reference || ('REC-' + p.id.slice(0,8).toUpperCase())}</div><div class="pay-sub">${p.type} · ${fmtDate(p.paid_at)}</div></div><button onclick="downloadRecuPaiement('${p.id}')" style="padding:.4rem .9rem;border-radius:7px;border:1px solid var(--border);background:white;font-size:.78rem;cursor:pointer;font-weight:600">📄 PDF</button></div>`).join('');
+  }
+
+  // ── Paiement en ligne (CinetPay) ──
+  function ouvrirPaiementEnLigne() {
+    if (!monDossier) { showToast('⚠️ Dossier introuvable'); return; }
+    document.getElementById('po_amount').value = '';
+    document.getElementById('po_phone').value = '';
+    document.getElementById('payOnlineError').style.display = 'none';
+    document.getElementById('payOnlineModal').classList.add('active');
+    document.body.style.overflow = 'hidden';
+  }
+  function fermerPaiementEnLigne() {
+    document.getElementById('payOnlineModal').classList.remove('active');
+    document.body.style.overflow = '';
+  }
+
+  async function lancerPaiementEnLigne() {
+    const errBox = document.getElementById('payOnlineError');
+    errBox.style.display = 'none';
+
+    const amount = Number(document.getElementById('po_amount').value);
+    const phone = document.getElementById('po_phone').value.trim();
+
+    if (!monDossier || !amount || amount <= 0 || !phone) {
+      errBox.textContent = '⚠️ Montant et numéro de téléphone sont obligatoires.';
+      errBox.style.display = 'block';
+      return;
+    }
+
+    const btn = document.getElementById('po_submit');
+    btn.disabled = true;
+    btn.textContent = 'Redirection en cours…';
+
+    const returnUrl = window.location.origin + '/paiement-retour.html';
+    const { data, error } = await supabaseClient.functions.invoke('cinetpay-initiate', {
+      body: { student_id: monDossier.id, amount, type: 'Scolarité', phone, return_url: returnUrl },
+    });
+
+    btn.disabled = false;
+    btn.textContent = 'Continuer vers le paiement →';
+
+    if (error || !data?.payment_url) {
+      let msg = 'Le paiement en ligne est momentanément indisponible.';
+      try { const body = await error?.context?.json?.(); if (body?.error) msg = body.error; } catch (e) {}
+      errBox.textContent = '⚠️ ' + msg;
+      errBox.style.display = 'block';
+      return;
+    }
+
+    window.location.href = data.payment_url;
+  }
+
+  // ── Génération PDF (reçu de paiement) ──
+  function downloadRecuPaiement(paymentId) {
+    const p = mesPaiements.find(x => x.id === paymentId);
+    if (!p || !monDossier) { showToast('⚠️ Reçu introuvable'); return; }
+    const { jsPDF } = window.jspdf;
+    const doc = new jsPDF();
+    const reference = p.reference || ('REC-' + p.id.slice(0, 8).toUpperCase());
+    const dateStr = new Date(p.paid_at).toLocaleDateString('fr-FR', { day:'2-digit', month:'long', year:'numeric' });
+
+    doc.setFont('helvetica', 'bold'); doc.setFontSize(20); doc.setTextColor(13, 27, 42);
+    doc.text('UniManage', 14, 20);
+    doc.setFontSize(11); doc.setTextColor(100, 116, 139); doc.setFont('helvetica', 'normal');
+    doc.text(monDossier.university || '', 14, 27);
+
+    doc.setDrawColor(226, 232, 240); doc.line(14, 33, 196, 33);
+
+    doc.setFont('helvetica', 'bold'); doc.setFontSize(16); doc.setTextColor(13, 27, 42);
+    doc.text('REÇU DE PAIEMENT', 14, 45);
+    doc.setFont('helvetica', 'normal'); doc.setFontSize(10); doc.setTextColor(100, 116, 139);
+    doc.text('N° ' + reference, 14, 52);
+
+    const rows = [
+      ['Étudiant', monDossier.full_name],
+      ['Matricule', monDossier.matricule],
+      ['Département', `${monDossier.department || '—'} ${monDossier.level || ''}`.trim()],
+      ['Type de versement', p.type],
+      ['Moyen de paiement', p.method],
+      ['Date', dateStr],
+      ['Statut', 'Confirmé'],
+    ];
+    let y = 65;
+    doc.setFontSize(10);
+    rows.forEach(([label, val]) => {
+      doc.setTextColor(100, 116, 139); doc.text(label, 14, y);
+      doc.setTextColor(13, 27, 42); doc.setFont('helvetica', 'bold'); doc.text(String(val), 80, y);
+      doc.setFont('helvetica', 'normal');
+      y += 8;
+    });
+
+    y += 6;
+    doc.setDrawColor(226, 232, 240); doc.line(14, y, 196, y);
+    y += 12;
+    doc.setFont('helvetica', 'bold'); doc.setFontSize(14); doc.setTextColor(16, 185, 129);
+    doc.text('Montant : ' + Number(p.amount).toLocaleString('fr-FR') + ' FCFA', 14, y);
+
+    doc.setFont('helvetica', 'normal'); doc.setFontSize(8); doc.setTextColor(148, 163, 184);
+    doc.text('Document généré électroniquement le ' + new Date().toLocaleDateString('fr-FR') + ' via UniManage.', 14, 280);
+
+    doc.save(`recu_${reference}.pdf`);
+  }
+
+  // ── Génération PDF (relevé de notes) ──
+  function downloadReleveNotes() {
+    if (!monDossier) { showToast('⚠️ Dossier introuvable'); return; }
+    if (mesNotes.length === 0) { showToast('⚠️ Aucune note à exporter'); return; }
+    const { jsPDF } = window.jspdf;
+    const doc = new jsPDF();
+
+    doc.setFont('helvetica', 'bold'); doc.setFontSize(20); doc.setTextColor(13, 27, 42);
+    doc.text('UniManage', 14, 20);
+    doc.setFontSize(11); doc.setTextColor(100, 116, 139); doc.setFont('helvetica', 'normal');
+    doc.text(monDossier.university || '', 14, 27);
+    doc.setDrawColor(226, 232, 240); doc.line(14, 33, 196, 33);
+
+    doc.setFont('helvetica', 'bold'); doc.setFontSize(16); doc.setTextColor(13, 27, 42);
+    doc.text('RELEVÉ DE NOTES', 14, 45);
+
+    doc.setFont('helvetica', 'normal'); doc.setFontSize(10); doc.setTextColor(100, 116, 139);
+    doc.text(`${monDossier.full_name}  ·  ${monDossier.matricule}`, 14, 53);
+    doc.text(`${monDossier.department || '—'} ${monDossier.level || ''}`.trim(), 14, 59);
+
+    let y = 72;
+    doc.setFont('helvetica', 'bold'); doc.setFontSize(9); doc.setTextColor(255,255,255);
+    doc.setFillColor(13, 27, 42);
+    doc.rect(14, y - 5, 182, 8, 'F');
+    doc.text('Matière', 16, y);
+    doc.text('Enseignant', 80, y);
+    doc.text('Coeff.', 128, y);
+    doc.text('Note/20', 148, y);
+    doc.text('Mention', 172, y);
+    y += 9;
+
+    let totalPoints = 0, totalCoeff = 0, creditsValides = 0;
+    doc.setFont('helvetica', 'normal'); doc.setTextColor(13, 27, 42);
+    mesNotes.forEach((n, i) => {
+      const moyenne = (n.note_cc != null && n.note_exam != null) ? (n.note_cc * 0.3 + n.note_exam * 0.7) : null;
+      if (moyenne != null) {
+        totalPoints += moyenne * n.coefficient; totalCoeff += n.coefficient;
+        if (moyenne >= 10) creditsValides += n.credits;
+      }
+      if (i % 2 === 0) { doc.setFillColor(248, 250, 252); doc.rect(14, y - 5, 182, 8, 'F'); }
+      doc.setFontSize(9);
+      doc.text(n.matiere, 16, y);
+      doc.text(n.enseignant_nom || '—', 80, y);
+      doc.text(String(n.coefficient), 128, y);
+      doc.text(moyenne != null ? moyenne.toFixed(1) : '—', 148, y);
+      doc.text(moyenne != null ? mention(moyenne) : 'En attente', 172, y);
+      y += 9;
+    });
+
+    const moyenneGenerale = totalCoeff > 0 ? (totalPoints / totalCoeff) : 0;
+    y += 6;
+    doc.setDrawColor(226, 232, 240); doc.line(14, y, 196, y);
+    y += 12;
+    doc.setFont('helvetica', 'bold'); doc.setFontSize(12); doc.setTextColor(26, 86, 219);
+    doc.text(`Moyenne générale : ${moyenneGenerale.toFixed(1)}/20 — ${mention(moyenneGenerale)}`, 14, y);
+    y += 8;
+    doc.setFontSize(10); doc.setTextColor(100, 116, 139); doc.setFont('helvetica', 'normal');
+    doc.text(`Crédits validés : ${creditsValides}/60`, 14, y);
+
+    doc.setFontSize(8); doc.setTextColor(148, 163, 184);
+    doc.text('Document généré électroniquement le ' + new Date().toLocaleDateString('fr-FR') + ' via UniManage.', 14, 280);
+
+    doc.save(`releve_notes_${monDossier.matricule}.pdf`);
+  }
+
+  // ── Charger le vrai taux de présence (Supabase) ──
+  async function loadTauxPresence(studentRecord) {
+    const { data: records, error } = await supabaseClient
+      .from('attendance').select('statut').eq('student_id', studentRecord.id);
+    if (error) { console.error(error); return; }
+    const el = document.getElementById('kpi-presence');
+    if (!records || records.length === 0) { el.textContent = '—'; return; }
+    const present = records.filter(r => r.statut === 'Présent').length;
+    el.textContent = Math.round(present / records.length * 100) + '%';
+  }
+
+  // ── Charger le vrai emploi du temps (Supabase) ──
+  const ET_JOURS = ['Lundi','Mardi','Mercredi','Jeudi','Vendredi'];
+  const ET_CRENEAUX = ['07h–09h','09h–11h','11h–13h','14h–16h','16h–18h'];
+  const ET_COLORS = { 'Cours':['rgba(26,86,219,0.1)','var(--blue)'], 'TD':['rgba(245,158,11,0.1)','var(--gold)'], 'TP':['rgba(16,185,129,0.1)','var(--success)'], 'Examen':['rgba(239,68,68,0.1)','var(--danger)'] };
+
+  async function loadEmploiDuTemps(studentRecord) {
+    const sub = document.getElementById('et-sub');
+    const tbody = document.getElementById('et-tbody');
+    if (!studentRecord.department || !studentRecord.level) {
+      sub.textContent = 'Département/niveau non renseigné';
+      tbody.innerHTML = '<tr><td colspan="6" style="text-align:center;color:var(--gray);padding:2rem">Emploi du temps indisponible.</td></tr>';
+      return;
+    }
+    sub.textContent = `${studentRecord.department} ${studentRecord.level} · Année 2024–2025`;
+
+    const { data: slots, error } = await supabaseClient
+      .from('schedule_slots').select('*')
+      .eq('department', studentRecord.department).eq('level', studentRecord.level);
+    if (error) { console.error(error); return; }
+
+    const byKey = {};
+    (slots || []).forEach(s => { byKey[s.jour + '|' + s.creneau] = s; });
+
+    tbody.innerHTML = ET_CRENEAUX.map(creneau => {
+      const cells = ET_JOURS.map(jour => {
+        const s = byKey[jour + '|' + creneau];
+        if (!s) return '<td style="border:1px solid var(--border);padding:.5rem;height:65px"></td>';
+        const [bg, border] = ET_COLORS[s.type] || ET_COLORS['Cours'];
+        return `<td style="border:1px solid var(--border);padding:.5rem;height:65px"><div style="background:${bg};border-left:3px solid ${border};border-radius:5px;padding:.4rem .5rem;height:100%"><div style="font-weight:600;font-size:.75rem">${s.matiere}</div><div style="color:var(--gray);font-size:.7rem">${s.enseignant_nom||'—'} · ${s.salle||'—'}</div></div></td>`;
+      }).join('');
+      return `<tr><td style="background:#F8FAFC;color:var(--gray);font-size:.75rem;font-weight:600;text-align:center;padding:.5rem;border:1px solid var(--border)">${creneau}</td>${cells}</tr>`;
+    }).join('');
+  }
+
+  window.authReady.then(async user => {
+    if (!user) return;
+    loadMonDossier(user);
+    const { data: rec } = await supabaseClient.from('students').select('*').eq('profile_id', user.id).maybeSingle();
+    if (rec) { loadNotes(rec); loadPaiements(rec); loadTauxPresence(rec); loadEmploiDuTemps(rec); }
+  });
 </script>
 </body>
 </html>

@@ -125,6 +125,7 @@
     .role-option.selected.gold-sel{border-color:var(--gold);background:rgba(245,158,11,0.07);}
     .role-option.selected.green-sel{border-color:var(--success);background:rgba(16,185,129,0.07);}
     .role-option.selected.purple-sel{border-color:var(--purple);background:rgba(139,92,246,0.07);}
+    .role-option.selected.sky-sel{border-color:var(--sky);background:rgba(59,130,246,0.07);}
     .role-opt-icon{
       width:42px;height:42px;border-radius:10px;
       display:flex;align-items:center;justify-content:center;
@@ -143,6 +144,7 @@
     .role-option.selected.gold-sel .role-opt-check{background:var(--gold);border-color:var(--gold);}
     .role-option.selected.green-sel .role-opt-check{background:var(--success);border-color:var(--success);}
     .role-option.selected.purple-sel .role-opt-check{background:var(--purple);border-color:var(--purple);}
+    .role-option.selected.sky-sel .role-opt-check{background:var(--sky);border-color:var(--sky);}
 
     .btn-next{
       width:100%;padding:.9rem;border-radius:11px;
@@ -186,6 +188,7 @@
     .form-input.gold-focus:focus{border-color:var(--gold);}
     .form-input.green-focus:focus{border-color:var(--success);}
     .form-input.purple-focus:focus{border-color:var(--purple);}
+    .form-input.sky-focus:focus{border-color:var(--sky);}
 
     .forgot-link{
       font-size:.78rem;color:var(--blue);text-decoration:none;
@@ -317,6 +320,14 @@
         </div>
         <div class="role-arrow">→</div>
       </div>
+      <div class="role-card-preview highlight" id="preview-parent" style="background:rgba(59,130,246,0.1);border-color:rgba(59,130,246,0.25)">
+        <div class="role-icon-wrap" style="background:rgba(59,130,246,0.15)">👨‍👩‍👧</div>
+        <div class="role-info">
+          <div class="role-name">Parent</div>
+          <div class="role-desc">Suivi de vos enfants</div>
+        </div>
+        <div class="role-arrow">→</div>
+      </div>
     </div>
   </div>
 
@@ -364,6 +375,14 @@
           <div class="role-opt-desc">Accès global · Toutes les universités</div>
         </div>
         <div class="role-opt-check" id="check-superadmin">✓</div>
+      </div>
+      <div class="role-option" id="opt-parent" onclick="selectRole('parent')">
+        <div class="role-opt-icon" style="background:rgba(59,130,246,0.1)">👨‍👩‍👧</div>
+        <div class="role-opt-body">
+          <div class="role-opt-name">Parent</div>
+          <div class="role-opt-desc">Suivi de vos enfants</div>
+        </div>
+        <div class="role-opt-check" id="check-parent">✓</div>
       </div>
     </div>
 
@@ -455,6 +474,8 @@
 
 </div><!-- /right-panel -->
 
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script src="supabase-config.js"></script>
 <script>
   // ── État global ──
   let selectedRole = null;
@@ -495,6 +516,15 @@
       sub: 'Plateforme UniManage · Accès restreint',
       redirect: 'superadmin.html',
       demo: { email: 'superadmin@unimanage.app', pass: 'super1234', label: 'Super Admin Plateforme' }
+    },
+    parent: {
+      label: '👨‍👩‍👧 Parent',
+      color: 'var(--sky)', bgColor: 'rgba(59,130,246,0.1)',
+      selClass: 'sky-sel', focusClass: 'sky-focus',
+      title: 'Connexion Parent',
+      sub: 'Suivez la scolarité de vos enfants',
+      redirect: 'parents.html',
+      demo: { email: 'parent@univ-lome.tg', pass: 'parent1234', label: 'Parent — Famille Adzoa' }
     }
   };
 
@@ -502,7 +532,7 @@
   function selectRole(role) {
     selectedRole = role;
     // Reset tous
-    ['admin','enseignant','etudiant','superadmin'].forEach(r => {
+    ['admin','enseignant','etudiant','superadmin','parent'].forEach(r => {
       const opt = document.getElementById('opt-'+r);
       opt.classList.remove('selected','gold-sel','green-sel','purple-sel');
     });
@@ -516,7 +546,7 @@
     btn.style.background = roles[role].color;
 
     // Highlight left panel
-    ['admin','enseignant','etudiant','superadmin'].forEach(r => {
+    ['admin','enseignant','etudiant','superadmin','parent'].forEach(r => {
       const p = document.getElementById('preview-'+r);
       if(p) p.style.opacity = r === role ? '1' : '0.4';
     });
@@ -566,7 +596,7 @@
     showStep('step1');
     document.getElementById('alertBox').className = 'alert';
     // Reset left panel opacities
-    ['admin','enseignant','etudiant','superadmin'].forEach(r => {
+    ['admin','enseignant','etudiant','superadmin','parent'].forEach(r => {
       const p = document.getElementById('preview-'+r);
       if(p) p.style.opacity = '1';
     });
@@ -581,51 +611,62 @@
   }
 
   // ── STEP 2 : Login ──
-  function handleLogin() {
+  async function handleLogin() {
     const email = document.getElementById('emailInput').value.trim();
     const pass  = document.getElementById('passInput').value;
     const alertBox = document.getElementById('alertBox');
+    const btn = document.getElementById('btnLogin');
 
     alertBox.className = 'alert';
     if(!email || !pass) {
       alertBox.textContent = '⚠️ Veuillez remplir tous les champs.';
       alertBox.classList.add('error'); return;
     }
-    if(pass.length < 6) {
-      alertBox.textContent = '⚠️ Mot de passe incorrect.';
-      alertBox.classList.add('error'); return;
+
+    btn.disabled = true;
+    const { data, error } = await supabaseClient.auth.signInWithPassword({ email, password: pass });
+    btn.disabled = false;
+
+    if (error) {
+      alertBox.textContent = '⚠️ Email ou mot de passe incorrect.';
+      alertBox.classList.add('error');
+      return;
     }
 
-    // Sauvegarde session
-    const r = roles[selectedRole];
-    sessionStorage.setItem('unimanage_user', JSON.stringify({
-      role: selectedRole, email,
-      univ: document.getElementById('univInput')?.value || 'Université de Lomé',
-      redirect: r.redirect, loggedIn: true
-    }));
+    // Charge le profil réel pour connaître son vrai rôle
+    const { data: profile, error: profileError } = await supabaseClient
+      .from('profiles').select('*').eq('id', data.user.id).single();
 
-    // Go loading
-    startLoading();
+    if (profileError || !profile) {
+      alertBox.textContent = '⚠️ Impossible de charger votre profil.';
+      alertBox.classList.add('error');
+      await supabaseClient.auth.signOut();
+      return;
+    }
+
+    if (profile.role !== selectedRole) {
+      alertBox.textContent = `⚠️ Ce compte n'a pas le rôle "${roles[selectedRole].label}". Sélectionnez le bon rôle.`;
+      alertBox.classList.add('error');
+      await supabaseClient.auth.signOut();
+      return;
+    }
+
+    startLoading(roles[profile.role].redirect);
   }
 
   function handleGoogle() {
-    const r = roles[selectedRole];
-    sessionStorage.setItem('unimanage_user', JSON.stringify({
-      role: selectedRole, email: 'google@demo.com',
-      univ: 'Université de Lomé', redirect: r.redirect, loggedIn: true
-    }));
-    startLoading();
+    document.getElementById('alertBox').className = 'alert error';
+    document.getElementById('alertBox').textContent = 'ℹ️ Connexion Google bientôt disponible — utilisez email + mot de passe pour le moment.';
   }
 
   // ── STEP 3 : Loading animation ──
-  function startLoading() {
+  function startLoading(redirect) {
     showStep('step3');
     const r = roles[selectedRole];
     document.getElementById('loaderCircle').style.borderTopColor = r.color;
     document.getElementById('loadingTitle').textContent = 'Connexion ' + r.label + '...';
 
     const steps = ['ls1','ls2','ls3','ls4'];
-    const redirect = r.redirect;
     let i = 0;
 
     function nextStep() {

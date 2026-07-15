@@ -1,6 +1,7 @@
 <!DOCTYPE html>
 <html lang="fr">
 <head>
+<style>html{visibility:hidden}</style>
   <meta charset="UTF-8"/>
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
   <title>UniManage — Tableau de bord</title>
@@ -319,6 +320,17 @@
       cursor:pointer;
     }
 
+    /* ─── MODALES ─── */
+    .modal-overlay{position:fixed;inset:0;z-index:2000;background:rgba(13,27,42,0.5);display:none;align-items:center;justify-content:center;backdrop-filter:blur(4px);padding:1rem;}
+    .modal-overlay.active{display:flex;}
+    .modal{background:white;border-radius:18px;width:100%;max-width:520px;padding:2rem;position:relative;box-shadow:0 30px 80px rgba(0,0,0,0.2);max-height:90vh;overflow-y:auto;}
+    .modal-close{position:absolute;top:1rem;right:1rem;background:#F8FAFC;border:none;cursor:pointer;width:30px;height:30px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:.85rem;color:var(--gray);}
+    .form-group{margin-bottom:.85rem;}
+    .form-group label{display:block;font-size:.8rem;font-weight:600;margin-bottom:.3rem;}
+    .form-row{display:grid;grid-template-columns:1fr 1fr;gap:.85rem;}
+    .btn-submit{width:100%;padding:.8rem;border-radius:10px;background:var(--blue);color:white;font-size:.9rem;font-weight:700;cursor:pointer;border:none;margin-top:.5rem;transition:all .2s;}
+    .btn-submit:hover{background:#1344b8;}
+
     /* ─── EMPLOI DU TEMPS ─── */
     .timetable { width:100%; border-collapse:collapse; }
     .timetable th {
@@ -377,6 +389,11 @@
   </style>
 </head>
 <body>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script src="https://cdn.jsdelivr.net/npm/jspdf@2.5.2/dist/jspdf.umd.min.js"></script>
+<script src="supabase-config.js"></script>
+<script src="auth-guard.js"></script>
+<script>window.authReady = requireAuth('admin');</script>
 
 <!-- ─── SIDEBAR ─── -->
 <aside class="sidebar" id="sidebar">
@@ -642,23 +659,8 @@
         <button class="card-action" onclick="showPage('comptabilite')">Détails financiers →</button>
       </div>
       <div class="card-body">
-        <div class="progress-list">
-          <div class="progress-item">
-            <div class="progress-top"><span class="progress-name">Informatique & IA</span><span class="progress-pct">91%</span></div>
-            <div class="progress-bar"><div class="progress-fill" style="width:91%;background:linear-gradient(90deg,var(--blue),var(--sky))"></div></div>
-          </div>
-          <div class="progress-item">
-            <div class="progress-top"><span class="progress-name">Gestion & Finance</span><span class="progress-pct">78%</span></div>
-            <div class="progress-bar"><div class="progress-fill" style="width:78%;background:linear-gradient(90deg,var(--gold),#fbbf24)"></div></div>
-          </div>
-          <div class="progress-item">
-            <div class="progress-top"><span class="progress-name">Droit & Sciences Politiques</span><span class="progress-pct">85%</span></div>
-            <div class="progress-bar"><div class="progress-fill" style="width:85%;background:linear-gradient(90deg,var(--success),#34d399)"></div></div>
-          </div>
-          <div class="progress-item">
-            <div class="progress-top"><span class="progress-name">Sciences & Ingénierie</span><span class="progress-pct">62%</span></div>
-            <div class="progress-bar"><div class="progress-fill" style="width:62%;background:linear-gradient(90deg,var(--danger),#f87171)"></div></div>
-          </div>
+        <div class="progress-list" id="dash-recouvrement">
+          <div style="text-align:center;color:var(--gray);padding:1rem;font-size:.85rem">Chargement…</div>
         </div>
       </div>
     </div>
@@ -671,29 +673,57 @@
     <div class="page-header">
       <div>
         <h2>Étudiants</h2>
-        <div style="font-size:.85rem;color:var(--gray);margin-top:.2rem">1 248 inscrits · Année 2024–2025</div>
+        <div style="font-size:.85rem;color:var(--gray);margin-top:.2rem" id="etudiantsCount">Chargement...</div>
       </div>
-      <button class="btn-add" onclick="showToast('📋 Formulaire d\'inscription ouvert')">+ Nouvel étudiant</button>
+      <button class="btn-add" onclick="openAddEtudiantModal()">+ Nouvel étudiant</button>
     </div>
     <div class="search-bar">
-      <input class="search-input" placeholder="🔍  Rechercher par nom, matricule..."/>
-      <select class="filter-select"><option>Tous les départements</option><option>Informatique</option><option>Gestion</option><option>Droit</option></select>
-      <select class="filter-select"><option>Tous les niveaux</option><option>L1</option><option>L2</option><option>L3</option><option>M1</option><option>M2</option></select>
-      <select class="filter-select"><option>Tous les statuts</option><option>Actif</option><option>Inactif</option><option>Suspendu</option></select>
+      <input class="search-input" id="etudiantsSearch" placeholder="🔍  Rechercher par nom, matricule..." oninput="renderEtudiants()"/>
+      <select class="filter-select" id="etudiantsFilterDept" onchange="renderEtudiants()"><option value="">Tous les départements</option><option>Informatique</option><option>Gestion</option><option>Droit</option><option>Sciences</option></select>
+      <select class="filter-select" id="etudiantsFilterNiveau" onchange="renderEtudiants()"><option value="">Tous les niveaux</option><option>L1</option><option>L2</option><option>L3</option><option>M1</option><option>M2</option></select>
+      <select class="filter-select" id="etudiantsFilterStatut" onchange="renderEtudiants()"><option value="">Tous les statuts</option><option>Actif</option><option>En cours</option><option>Incomplet</option><option>Suspendu</option></select>
     </div>
     <div class="card">
       <table class="data-table">
         <thead><tr>
           <th>Étudiant</th><th>Matricule</th><th>Département</th><th>Niveau</th><th>Scolarité</th><th>Statut</th><th>Actions</th>
         </tr></thead>
-        <tbody>
-          <tr><td><div style="display:flex;align-items:center;gap:.6rem"><div class="td-avatar">KA</div><div><div class="td-name">Kofi Adzoa</div><div class="td-sub">kofi@email.com</div></div></div></td><td>UL-2025-001</td><td>Informatique</td><td>L2</td><td><span class="badge badge-success">Payé</span></td><td><span class="badge badge-success">Actif</span></td><td><button class="card-action" onclick="showToast('👁️ Profil de Kofi Adzoa')">Voir</button></td></tr>
-          <tr><td><div style="display:flex;align-items:center;gap:.6rem"><div class="td-avatar" style="background:linear-gradient(135deg,var(--gold),#f59e0b)">AM</div><div><div class="td-name">Afia Mensah</div><div class="td-sub">afia@email.com</div></div></div></td><td>UL-2025-002</td><td>Gestion</td><td>M1</td><td><span class="badge badge-gold">Partiel</span></td><td><span class="badge badge-blue">En cours</span></td><td><button class="card-action" onclick="showToast('👁️ Profil de Afia Mensah')">Voir</button></td></tr>
-          <tr><td><div style="display:flex;align-items:center;gap:.6rem"><div class="td-avatar" style="background:linear-gradient(135deg,var(--success),#34d399)">YD</div><div><div class="td-name">Yao Dodzi</div><div class="td-sub">yao@email.com</div></div></div></td><td>UL-2025-003</td><td>Droit</td><td>L3</td><td><span class="badge badge-success">Payé</span></td><td><span class="badge badge-success">Actif</span></td><td><button class="card-action" onclick="showToast('👁️ Profil de Yao Dodzi')">Voir</button></td></tr>
-          <tr><td><div style="display:flex;align-items:center;gap:.6rem"><div class="td-avatar" style="background:linear-gradient(135deg,#8b5cf6,#a78bfa)">SE</div><div><div class="td-name">Selom Edem</div><div class="td-sub">selom@email.com</div></div></div></td><td>UL-2025-004</td><td>Sciences</td><td>L1</td><td><span class="badge badge-danger">Impayé</span></td><td><span class="badge badge-gold">Incomplet</span></td><td><button class="card-action" onclick="showToast('👁️ Profil de Selom Edem')">Voir</button></td></tr>
-          <tr><td><div style="display:flex;align-items:center;gap:.6rem"><div class="td-avatar" style="background:linear-gradient(135deg,#ec4899,#f472b6)">BK</div><div><div class="td-name">Béatrice Komi</div><div class="td-sub">bea@email.com</div></div></div></td><td>UL-2025-005</td><td>Informatique</td><td>M2</td><td><span class="badge badge-success">Payé</span></td><td><span class="badge badge-success">Actif</span></td><td><button class="card-action" onclick="showToast('👁️ Profil de Béatrice Komi')">Voir</button></td></tr>
+        <tbody id="tbodyEtudiants">
+          <tr><td colspan="7" style="text-align:center;color:var(--gray);padding:2rem">Chargement des étudiants...</td></tr>
         </tbody>
       </table>
+    </div>
+  </div>
+
+  <!-- ══ MODAL : AJOUTER ÉTUDIANT ══ -->
+  <div class="modal-overlay" id="modalAddEtudiant" onclick="if(event.target===this)closeAddEtudiantModal()">
+    <div class="modal" style="max-width:480px">
+      <button class="modal-close" onclick="closeAddEtudiantModal()">✕</button>
+      <div style="font-family:'Syne',sans-serif;font-weight:800;font-size:1.2rem;margin-bottom:1.25rem">+ Nouvel étudiant</div>
+      <div id="addEtudiantError" style="display:none;background:rgba(239,68,68,0.08);color:var(--danger);border:1px solid rgba(239,68,68,0.2);padding:.6rem 1rem;border-radius:8px;font-size:.83rem;margin-bottom:1rem"></div>
+      <div style="display:flex;flex-direction:column;gap:.85rem">
+        <div><label style="font-size:.8rem;font-weight:600;display:block;margin-bottom:.3rem">Nom complet</label><input id="ae_nom" class="search-input" style="width:100%" placeholder="Ex: Kofi Adzoa"/></div>
+        <div><label style="font-size:.8rem;font-weight:600;display:block;margin-bottom:.3rem">Email</label><input id="ae_email" class="search-input" style="width:100%" placeholder="kofi@email.com"/></div>
+        <div><label style="font-size:.8rem;font-weight:600;display:block;margin-bottom:.3rem">Matricule</label><input id="ae_matricule" class="search-input" style="width:100%" placeholder="Ex: UL-2025-006"/></div>
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:.75rem">
+          <div><label style="font-size:.8rem;font-weight:600;display:block;margin-bottom:.3rem">Département</label>
+            <select id="ae_dept" class="filter-select" style="width:100%"><option>Informatique</option><option>Gestion</option><option>Droit</option><option>Sciences</option></select>
+          </div>
+          <div><label style="font-size:.8rem;font-weight:600;display:block;margin-bottom:.3rem">Niveau</label>
+            <select id="ae_niveau" class="filter-select" style="width:100%"><option>L1</option><option>L2</option><option>L3</option><option>M1</option><option>M2</option></select>
+          </div>
+        </div>
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:.75rem">
+          <div><label style="font-size:.8rem;font-weight:600;display:block;margin-bottom:.3rem">Frais scolarité (FCFA)</label>
+            <input id="ae_frais" type="number" class="search-input" style="width:100%" placeholder="250 000" value="250000"/>
+          </div>
+          <div><label style="font-size:.8rem;font-weight:600;display:block;margin-bottom:.3rem">Statut</label>
+            <select id="ae_statut" class="filter-select" style="width:100%"><option>Actif</option><option>En cours</option><option>Incomplet</option><option>Suspendu</option></select>
+          </div>
+        </div>
+        <div style="font-size:.75rem;color:var(--gray)">Le statut de paiement (Payé/Partiel/Impayé) sera calculé automatiquement selon les paiements enregistrés dans l'onglet Paiements.</div>
+        <button class="btn-add" style="justify-content:center;margin-top:.5rem" id="ae_submit" onclick="submitAddEtudiant()">Ajouter l'étudiant</button>
+      </div>
     </div>
   </div>
 
@@ -704,58 +734,43 @@
     <div class="page-header">
       <div>
         <h2>Emploi du temps</h2>
-        <div style="font-size:.85rem;color:var(--gray);margin-top:.2rem">Semaine du 20 au 24 Janvier 2025 · Informatique L2</div>
+        <div style="font-size:.85rem;color:var(--gray);margin-top:.2rem" id="et-sub">Chargement…</div>
       </div>
-      <button class="btn-add" onclick="showToast('📅 Créer un nouveau créneau')">+ Ajouter créneau</button>
+      <div style="display:flex;gap:.75rem;flex-wrap:wrap">
+        <select id="et_dept" class="filter-select" onchange="onEtDeptChange()"></select>
+        <select id="et_niveau" class="filter-select" onchange="loadEmploiDuTemps()"></select>
+        <button class="btn-add" onclick="openCreneauModal()">+ Ajouter créneau</button>
+      </div>
     </div>
     <div class="card" style="overflow-x:auto">
       <table class="timetable">
         <thead><tr>
           <th>Heure</th><th>Lundi</th><th>Mardi</th><th>Mercredi</th><th>Jeudi</th><th>Vendredi</th>
         </tr></thead>
-        <tbody>
-          <tr>
-            <td class="time-col">07h–09h</td>
-            <td><div class="cours-block"><div class="cours-name">Algorithmes</div><div class="cours-prof">Dr. Mensah · Salle A1</div></div></td>
-            <td></td>
-            <td><div class="cours-block green"><div class="cours-name">Bases de données</div><div class="cours-prof">Prof. Komi · Salle B3</div></div></td>
-            <td></td>
-            <td><div class="cours-block gold"><div class="cours-name">Mathématiques</div><div class="cours-prof">Dr. Agbo · Amph. 1</div></div></td>
-          </tr>
-          <tr>
-            <td class="time-col">09h–11h</td>
-            <td></td>
-            <td><div class="cours-block gold"><div class="cours-name">Réseaux</div><div class="cours-prof">Prof. Dodzi · Labo Info</div></div></td>
-            <td></td>
-            <td><div class="cours-block"><div class="cours-name">POO Java</div><div class="cours-prof">Dr. Atchoe · Salle A2</div></div></td>
-            <td></td>
-          </tr>
-          <tr>
-            <td class="time-col">11h–13h</td>
-            <td><div class="cours-block green"><div class="cours-name">TP Algo</div><div class="cours-prof">Dr. Mensah · Labo</div></div></td>
-            <td></td>
-            <td><div class="cours-block red"><div class="cours-name">Examen blanc</div><div class="cours-prof">Toutes matières · Amph.</div></div></td>
-            <td></td>
-            <td></td>
-          </tr>
-          <tr>
-            <td class="time-col">14h–16h</td>
-            <td></td>
-            <td><div class="cours-block"><div class="cours-name">Syst. d'exploitation</div><div class="cours-prof">Prof. Edem · Salle C1</div></div></td>
-            <td></td>
-            <td><div class="cours-block green"><div class="cours-name">TP Réseaux</div><div class="cours-prof">Prof. Dodzi · Labo</div></div></td>
-            <td><div class="cours-block gold"><div class="cours-name">Anglais tech.</div><div class="cours-prof">Mme. Johnson · B2</div></div></td>
-          </tr>
-          <tr>
-            <td class="time-col">16h–18h</td>
-            <td><div class="cours-block red"><div class="cours-name">Projet tutoré</div><div class="cours-prof">Équipes · Salle Projet</div></div></td>
-            <td></td>
-            <td></td>
-            <td></td>
-            <td></td>
-          </tr>
+        <tbody id="et-tbody">
+          <tr><td colspan="6" style="text-align:center;color:var(--gray);padding:2rem">Chargement...</td></tr>
         </tbody>
       </table>
+    </div>
+  </div>
+
+  <!-- ══ MODAL AJOUTER CRÉNEAU ══ -->
+  <div class="modal-overlay" id="creneauModal" onclick="if(event.target===this)closeCreneauModal()">
+    <div class="modal" style="max-width:480px">
+      <button class="modal-close" onclick="closeCreneauModal()">✕</button>
+      <div style="font-family:'Syne',sans-serif;font-weight:800;font-size:1.2rem;margin-bottom:1.25rem">+ Nouveau créneau</div>
+      <div id="creneauError" style="display:none;background:rgba(239,68,68,0.08);color:var(--danger);border:1px solid rgba(239,68,68,0.2);padding:.6rem 1rem;border-radius:8px;font-size:.83rem;margin-bottom:1rem"></div>
+      <div class="form-row">
+        <div class="form-group"><label>Jour</label><select id="cr_jour" class="filter-select" style="width:100%"><option>Lundi</option><option>Mardi</option><option>Mercredi</option><option>Jeudi</option><option>Vendredi</option></select></div>
+        <div class="form-group"><label>Créneau</label><select id="cr_creneau" class="filter-select" style="width:100%"><option>07h–09h</option><option>09h–11h</option><option>11h–13h</option><option>14h–16h</option><option>16h–18h</option></select></div>
+      </div>
+      <div class="form-group"><label>Matière</label><input id="cr_matiere" class="search-input" style="width:100%" placeholder="Ex: Algorithmique Avancée"/></div>
+      <div class="form-row">
+        <div class="form-group"><label>Enseignant</label><select id="cr_teacher" class="filter-select" style="width:100%"></select></div>
+        <div class="form-group"><label>Type</label><select id="cr_type" class="filter-select" style="width:100%"><option>Cours</option><option>TD</option><option>TP</option><option>Examen</option></select></div>
+      </div>
+      <div class="form-group"><label>Salle</label><input id="cr_salle" class="search-input" style="width:100%" placeholder="Ex: Salle A1"/></div>
+      <button class="btn-submit" id="cr_submit" onclick="submitCreneau()">Ajouter le créneau →</button>
     </div>
   </div>
 
@@ -771,25 +786,25 @@
       <div class="kpi-card">
         <div class="kpi-icon" style="background:rgba(16,185,129,0.1)">💵</div>
         <div class="kpi-body">
-          <div class="kpi-value" style="color:var(--success)">48.2M</div>
+          <div class="kpi-value" style="color:var(--success)" id="cpt-encaisse">—</div>
           <div class="kpi-label">FCFA encaissés (total)</div>
-          <div class="kpi-trend trend-up">▲ +12% vs 2023</div>
+          <div class="kpi-trend trend-up" id="cpt-nbpaiements"></div>
         </div>
       </div>
       <div class="kpi-card">
         <div class="kpi-icon" style="background:rgba(239,68,68,0.1)">⏳</div>
         <div class="kpi-body">
-          <div class="kpi-value" style="color:var(--danger)">8.6M</div>
+          <div class="kpi-value" style="color:var(--danger)" id="cpt-impaye">—</div>
           <div class="kpi-label">FCFA impayés</div>
-          <div class="kpi-trend trend-down">▼ 15% des étudiants</div>
+          <div class="kpi-trend trend-down" id="cpt-nbimpayes"></div>
         </div>
       </div>
       <div class="kpi-card">
         <div class="kpi-icon" style="background:rgba(245,158,11,0.1)">👨‍🏫</div>
         <div class="kpi-body">
-          <div class="kpi-value" style="color:var(--gold)">12.1M</div>
-          <div class="kpi-label">FCFA payés aux enseignants</div>
-          <div class="kpi-trend trend-up">▲ Janvier soldé</div>
+          <div class="kpi-value" style="color:var(--gold)" id="cpt-enseignants">—</div>
+          <div class="kpi-label">FCFA dus aux enseignants (heures effectuées)</div>
+          <div class="kpi-trend trend-up" id="cpt-nbenseignants"></div>
         </div>
       </div>
     </div>
@@ -798,23 +813,13 @@
         <div class="card-header"><div class="card-title">Derniers paiements reçus</div></div>
         <table class="data-table">
           <thead><tr><th>Étudiant</th><th>Montant</th><th>Moyen</th><th>Date</th><th>Statut</th></tr></thead>
-          <tbody>
-            <tr><td><div class="td-name">Kofi Adzoa</div></td><td><strong>250 000 FCFA</strong></td><td>Wave</td><td>20 Jan 2025</td><td><span class="badge badge-success">Confirmé</span></td></tr>
-            <tr><td><div class="td-name">Afia Mensah</div></td><td><strong>125 000 FCFA</strong></td><td>Orange Money</td><td>19 Jan 2025</td><td><span class="badge badge-success">Confirmé</span></td></tr>
-            <tr><td><div class="td-name">Yao Dodzi</div></td><td><strong>250 000 FCFA</strong></td><td>Virement</td><td>18 Jan 2025</td><td><span class="badge badge-success">Confirmé</span></td></tr>
-            <tr><td><div class="td-name">Selom Edem</div></td><td><strong>75 000 FCFA</strong></td><td>Espèces</td><td>15 Jan 2025</td><td><span class="badge badge-gold">Partiel</span></td></tr>
-          </tbody>
+          <tbody id="cpt-derniers-paiements"><tr><td colspan="5" style="text-align:center;color:var(--gray);padding:1.5rem">Chargement…</td></tr></tbody>
         </table>
       </div>
       <div class="card">
         <div class="card-header"><div class="card-title">Recouvrement par mois</div></div>
         <div class="card-body">
-          <div class="bar-chart">
-            <div class="bar-col"><div class="bar-fill" style="height:55%"></div><div class="bar-label">Oct</div><div class="bar-val">8.2M</div></div>
-            <div class="bar-col"><div class="bar-fill" style="height:80%"></div><div class="bar-label">Nov</div><div class="bar-val">12M</div></div>
-            <div class="bar-col"><div class="bar-fill gold" style="height:100%"></div><div class="bar-label">Déc</div><div class="bar-val">15M</div></div>
-            <div class="bar-col"><div class="bar-fill green" style="height:85%"></div><div class="bar-label">Jan</div><div class="bar-val">13M</div></div>
-          </div>
+          <div class="bar-chart" id="cpt-bar-chart"></div>
         </div>
       </div>
     </div>
@@ -848,7 +853,7 @@
   </div>
 
   <div class="page" id="page-enseignants">
-    <div class="page-header"><div><h2>Enseignants</h2><div style="font-size:.85rem;color:var(--gray)">87 enseignants · 12 vacataires</div></div><button class="btn-add" onclick="showToast('👨‍🏫 Formulaire d\'ajout ouvert')">+ Ajouter enseignant</button></div>
+    <div class="page-header"><div><h2>Enseignants</h2><div style="font-size:.85rem;color:var(--gray)" id="enseignantsCount">Chargement...</div></div><button class="btn-add" onclick="openAddEnseignantModal()">+ Ajouter enseignant</button></div>
     <!-- KPIs enseignants -->
     <div class="kpi-grid" style="grid-template-columns:repeat(4,1fr);margin-bottom:1.5rem">
       <div class="kpi-card"><div class="kpi-icon" style="background:rgba(26,86,219,0.1)">👨‍🏫</div><div class="kpi-body"><div class="kpi-value" style="color:var(--blue)">87</div><div class="kpi-label">Enseignants actifs</div></div></div>
@@ -875,46 +880,7 @@
         <table class="data-table">
           <thead><tr><th>Enseignant</th><th>Spécialité</th><th>Département</th><th>Contrat</th><th>Heures</th><th>Taux/h</th><th>Statut</th><th>Actions</th></tr></thead>
           <tbody id="enseignants-tbody">
-            <tr>
-              <td><div style="display:flex;align-items:center;gap:.6rem"><div class="td-avatar">KM</div><div><div class="td-name">Dr. Kodjo Mensah</div><div class="td-sub">kodjo@univ.tg</div></div></div></td>
-              <td>Algorithmique</td><td>Informatique</td>
-              <td><span class="badge badge-blue">Permanent</span></td>
-              <td><strong>120h</strong> / 180h</td><td>8 000 FCFA</td>
-              <td><span class="badge badge-success">Actif</span></td>
-              <td><button class="card-action" onclick="openEnseignantModal('Dr. Kodjo Mensah','Algorithmique','Informatique','Permanent','120','180','8000','Actif','KM')">Voir fiche</button></td>
-            </tr>
-            <tr>
-              <td><div style="display:flex;align-items:center;gap:.6rem"><div class="td-avatar" style="background:linear-gradient(135deg,var(--gold),#f59e0b)">AK</div><div><div class="td-name">Prof. Akosua Komi</div><div class="td-sub">akosua@univ.tg</div></div></div></td>
-              <td>Réseaux & Sécurité</td><td>Informatique</td>
-              <td><span class="badge badge-gold">Vacataire</span></td>
-              <td><strong>64h</strong> / 80h</td><td>10 000 FCFA</td>
-              <td><span class="badge badge-success">Actif</span></td>
-              <td><button class="card-action" onclick="openEnseignantModal('Prof. Akosua Komi','Réseaux & Sécurité','Informatique','Vacataire','64','80','10000','Actif','AK')">Voir fiche</button></td>
-            </tr>
-            <tr>
-              <td><div style="display:flex;align-items:center;gap:.6rem"><div class="td-avatar" style="background:linear-gradient(135deg,var(--success),#34d399)">YA</div><div><div class="td-name">Dr. Yawa Agbo</div><div class="td-sub">yawa@univ.tg</div></div></div></td>
-              <td>Mathématiques</td><td>Sciences</td>
-              <td><span class="badge badge-blue">Permanent</span></td>
-              <td><strong>145h</strong> / 180h</td><td>7 500 FCFA</td>
-              <td><span class="badge badge-success">Actif</span></td>
-              <td><button class="card-action" onclick="openEnseignantModal('Dr. Yawa Agbo','Mathématiques','Sciences','Permanent','145','180','7500','Actif','YA')">Voir fiche</button></td>
-            </tr>
-            <tr>
-              <td><div style="display:flex;align-items:center;gap:.6rem"><div class="td-avatar" style="background:linear-gradient(135deg,#8b5cf6,#a78bfa)">BE</div><div><div class="td-name">Me. Brice Edem</div><div class="td-sub">brice@univ.tg</div></div></div></td>
-              <td>Droit des Affaires</td><td>Droit</td>
-              <td><span class="badge badge-gold">Vacataire</span></td>
-              <td><strong>40h</strong> / 60h</td><td>12 000 FCFA</td>
-              <td><span class="badge badge-gold">En congé</span></td>
-              <td><button class="card-action" onclick="openEnseignantModal('Me. Brice Edem','Droit des Affaires','Droit','Vacataire','40','60','12000','En congé','BE')">Voir fiche</button></td>
-            </tr>
-            <tr>
-              <td><div style="display:flex;align-items:center;gap:.6rem"><div class="td-avatar" style="background:linear-gradient(135deg,#ec4899,#f472b6)">ND</div><div><div class="td-name">Dr. Nana Dodzi</div><div class="td-sub">nana@univ.tg</div></div></div></td>
-              <td>Comptabilité</td><td>Gestion</td>
-              <td><span class="badge badge-blue">Permanent</span></td>
-              <td><strong>160h</strong> / 180h</td><td>8 500 FCFA</td>
-              <td><span class="badge badge-success">Actif</span></td>
-              <td><button class="card-action" onclick="openEnseignantModal('Dr. Nana Dodzi','Comptabilité','Gestion','Permanent','160','180','8500','Actif','ND')">Voir fiche</button></td>
-            </tr>
+            <tr><td colspan="8" style="text-align:center;color:var(--gray);padding:2rem">Chargement des enseignants...</td></tr>
           </tbody>
         </table>
       </div>
@@ -983,8 +949,35 @@
         <div id="ens-statut"></div>
       </div>
       <div style="display:flex;gap:.75rem">
-        <button class="btn-add" style="flex:1;justify-content:center" onclick="showToast('📄 Fiche de paie générée en PDF');closeEnseignantModal()">📄 Fiche de paie</button>
+        <button class="btn-add" style="flex:1;justify-content:center" onclick="downloadFichePaieAdmin()">📄 Fiche de paie</button>
         <button class="btn-outline" style="flex:1;padding:.6rem;border-radius:9px;font-size:.875rem;font-weight:600;cursor:pointer;border:1.5px solid var(--border);color:var(--navy);background:white" onclick="showToast('✉️ Email envoyé à l\'enseignant');closeEnseignantModal()">✉️ Contacter</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ══ MODAL : AJOUTER ENSEIGNANT ══ -->
+  <div class="modal-overlay" id="modalAddEnseignant" onclick="if(event.target===this)closeAddEnseignantModal()">
+    <div class="modal" style="max-width:480px">
+      <button class="modal-close" onclick="closeAddEnseignantModal()">✕</button>
+      <div style="font-family:'Syne',sans-serif;font-weight:800;font-size:1.2rem;margin-bottom:1.25rem">+ Ajouter enseignant</div>
+      <div id="addEnseignantError" style="display:none;background:rgba(239,68,68,0.08);color:var(--danger);border:1px solid rgba(239,68,68,0.2);padding:.6rem 1rem;border-radius:8px;font-size:.83rem;margin-bottom:1rem"></div>
+      <div style="display:flex;flex-direction:column;gap:.85rem">
+        <div><label style="font-size:.8rem;font-weight:600;display:block;margin-bottom:.3rem">Nom complet</label><input id="aen_nom" class="search-input" style="width:100%" placeholder="Ex: Dr. Kodjo Mensah"/></div>
+        <div><label style="font-size:.8rem;font-weight:600;display:block;margin-bottom:.3rem">Email</label><input id="aen_email" class="search-input" style="width:100%" placeholder="kodjo@univ.tg"/></div>
+        <div><label style="font-size:.8rem;font-weight:600;display:block;margin-bottom:.3rem">Spécialité</label><input id="aen_specialite" class="search-input" style="width:100%" placeholder="Ex: Algorithmique"/></div>
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:.75rem">
+          <div><label style="font-size:.8rem;font-weight:600;display:block;margin-bottom:.3rem">Département</label>
+            <select id="aen_dept" class="filter-select" style="width:100%"><option>Informatique</option><option>Gestion</option><option>Droit</option><option>Sciences</option></select>
+          </div>
+          <div><label style="font-size:.8rem;font-weight:600;display:block;margin-bottom:.3rem">Contrat</label>
+            <select id="aen_contrat" class="filter-select" style="width:100%"><option>Permanent</option><option>Vacataire</option><option>Contractuel</option></select>
+          </div>
+        </div>
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:.75rem">
+          <div><label style="font-size:.8rem;font-weight:600;display:block;margin-bottom:.3rem">Heures max</label><input id="aen_heuresmax" type="number" class="search-input" style="width:100%" value="180"/></div>
+          <div><label style="font-size:.8rem;font-weight:600;display:block;margin-bottom:.3rem">Taux/h (FCFA)</label><input id="aen_taux" type="number" class="search-input" style="width:100%" value="8000"/></div>
+        </div>
+        <button class="btn-add" style="justify-content:center;margin-top:.5rem" id="aen_submit" onclick="submitAddEnseignant()">Ajouter l'enseignant</button>
       </div>
     </div>
   </div>
@@ -1085,19 +1078,19 @@
     <div class="kpi-grid" style="margin-bottom:1.5rem">
       <div class="kpi-card">
         <div class="kpi-icon" style="background:rgba(16,185,129,0.1)">✅</div>
-        <div class="kpi-body"><div class="kpi-value" style="color:var(--success)">48.2M</div><div class="kpi-label">FCFA encaissés</div><div class="kpi-trend trend-up">▲ 847 paiements</div></div>
+        <div class="kpi-body"><div class="kpi-value" style="color:var(--success)" id="pay-kpi-encaisse">—</div><div class="kpi-label">FCFA encaissés</div><div class="kpi-trend trend-up" id="pay-kpi-nb"></div></div>
       </div>
       <div class="kpi-card">
         <div class="kpi-icon" style="background:rgba(239,68,68,0.1)">⏳</div>
-        <div class="kpi-body"><div class="kpi-value" style="color:var(--danger)">8.6M</div><div class="kpi-label">FCFA impayés</div><div class="kpi-trend trend-down">▼ 187 étudiants</div></div>
+        <div class="kpi-body"><div class="kpi-value" style="color:var(--danger)" id="pay-kpi-impaye">—</div><div class="kpi-label">FCFA impayés</div><div class="kpi-trend trend-down" id="pay-kpi-nbimpayes"></div></div>
       </div>
       <div class="kpi-card">
         <div class="kpi-icon" style="background:rgba(26,86,219,0.1)">📱</div>
-        <div class="kpi-body"><div class="kpi-value" style="color:var(--blue)">62%</div><div class="kpi-label">Paiements mobile</div><div class="kpi-trend trend-up">▲ Wave + Orange</div></div>
+        <div class="kpi-body"><div class="kpi-value" style="color:var(--blue)" id="pay-kpi-mobile">—</div><div class="kpi-label">Paiements mobile</div><div class="kpi-trend trend-up">▲ Wave + Orange</div></div>
       </div>
       <div class="kpi-card">
-        <div class="kpi-icon" style="background:rgba(245,158,11,0.1)">📆</div>
-        <div class="kpi-body"><div class="kpi-value" style="color:var(--gold)">3</div><div class="kpi-label">Échéances ce mois</div><div class="kpi-trend trend-down">▼ Dont 1 dépassée</div></div>
+        <div class="kpi-icon" style="background:rgba(245,158,11,0.1)">🎓</div>
+        <div class="kpi-body"><div class="kpi-value" style="color:var(--gold)" id="pay-kpi-ajour">—</div><div class="kpi-label">Étudiants à jour</div><div class="kpi-trend trend-down" id="pay-kpi-total"></div></div>
       </div>
     </div>
 
@@ -1107,81 +1100,18 @@
       <div class="card">
         <div class="card-header"><div class="card-title">Répartition par moyen de paiement</div></div>
         <div class="card-body">
-          <div style="display:flex;flex-direction:column;gap:1rem">
-            <div>
-              <div style="display:flex;justify-content:space-between;margin-bottom:.4rem;font-size:.85rem">
-                <span style="display:flex;align-items:center;gap:.5rem"><span style="font-size:1.1rem">🌊</span><strong>Wave</strong></span>
-                <span style="font-weight:700;color:var(--blue)">38% — 18.3M FCFA</span>
-              </div>
-              <div class="progress-bar"><div class="progress-fill" style="width:38%;background:linear-gradient(90deg,#1A56DB,#3B82F6)"></div></div>
-            </div>
-            <div>
-              <div style="display:flex;justify-content:space-between;margin-bottom:.4rem;font-size:.85rem">
-                <span style="display:flex;align-items:center;gap:.5rem"><span style="font-size:1.1rem">🟠</span><strong>Orange Money</strong></span>
-                <span style="font-weight:700;color:#f97316">24% — 11.6M FCFA</span>
-              </div>
-              <div class="progress-bar"><div class="progress-fill" style="width:24%;background:linear-gradient(90deg,#f97316,#fb923c)"></div></div>
-            </div>
-            <div>
-              <div style="display:flex;justify-content:space-between;margin-bottom:.4rem;font-size:.85rem">
-                <span style="display:flex;align-items:center;gap:.5rem"><span style="font-size:1.1rem">🏦</span><strong>Virement bancaire</strong></span>
-                <span style="font-weight:700;color:var(--success)">22% — 10.6M FCFA</span>
-              </div>
-              <div class="progress-bar"><div class="progress-fill" style="width:22%;background:linear-gradient(90deg,var(--success),#34d399)"></div></div>
-            </div>
-            <div>
-              <div style="display:flex;justify-content:space-between;margin-bottom:.4rem;font-size:.85rem">
-                <span style="display:flex;align-items:center;gap:.5rem"><span style="font-size:1.1rem">💵</span><strong>Espèces</strong></span>
-                <span style="font-weight:700;color:var(--gold)">16% — 7.7M FCFA</span>
-              </div>
-              <div class="progress-bar"><div class="progress-fill" style="width:16%;background:linear-gradient(90deg,var(--gold),#fbbf24)"></div></div>
-            </div>
-          </div>
-          <!-- Boutons mobile -->
-          <div style="display:grid;grid-template-columns:1fr 1fr;gap:.75rem;margin-top:1.5rem">
-            <button onclick="showToast('🌊 Lien de paiement Wave copié !')" style="padding:.75rem;border-radius:10px;border:none;background:linear-gradient(135deg,#1A56DB,#3B82F6);color:white;font-weight:700;font-size:.875rem;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:.5rem">🌊 Payer via Wave</button>
-            <button onclick="showToast('🟠 Lien Orange Money copié !')" style="padding:.75rem;border-radius:10px;border:none;background:linear-gradient(135deg,#f97316,#fb923c);color:white;font-weight:700;font-size:.875rem;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:.5rem">🟠 Orange Money</button>
+          <div style="display:flex;flex-direction:column;gap:1rem" id="pay-repartition">
+            <div style="text-align:center;color:var(--gray);padding:1rem;font-size:.85rem">Chargement…</div>
           </div>
         </div>
       </div>
 
       <!-- Alertes impayés -->
       <div class="card">
-        <div class="card-header"><div class="card-title">⚠️ Alertes impayés</div><button class="card-action" onclick="showToast('📩 SMS envoyés aux 187 étudiants')">Notifier tous</button></div>
+        <div class="card-header"><div class="card-title">⚠️ Alertes impayés</div></div>
         <div class="card-body">
-          <div class="activity-list">
-            <div class="activity-item">
-              <div class="activity-dot" style="background:rgba(239,68,68,0.1)">🔴</div>
-              <div class="activity-body">
-                <div class="activity-text"><strong>Selom Edem</strong> — 250 000 FCFA</div>
-                <div class="activity-time">En retard de 45 jours · Sciences L1</div>
-              </div>
-              <button class="card-action" onclick="showToast('📩 Rappel envoyé à Selom Edem')">Relancer</button>
-            </div>
-            <div class="activity-item">
-              <div class="activity-dot" style="background:rgba(245,158,11,0.1)">🟡</div>
-              <div class="activity-body">
-                <div class="activity-text"><strong>Koffi Atta</strong> — 125 000 FCFA</div>
-                <div class="activity-time">En retard de 12 jours · Gestion M1</div>
-              </div>
-              <button class="card-action" onclick="showToast('📩 Rappel envoyé à Koffi Atta')">Relancer</button>
-            </div>
-            <div class="activity-item">
-              <div class="activity-dot" style="background:rgba(245,158,11,0.1)">🟡</div>
-              <div class="activity-body">
-                <div class="activity-text"><strong>Abla Dosseh</strong> — 75 000 FCFA</div>
-                <div class="activity-time">En retard de 8 jours · Droit L2</div>
-              </div>
-              <button class="card-action" onclick="showToast('📩 Rappel envoyé à Abla Dosseh')">Relancer</button>
-            </div>
-            <div class="activity-item">
-              <div class="activity-dot" style="background:rgba(239,68,68,0.1)">🔴</div>
-              <div class="activity-body">
-                <div class="activity-text"><strong>Mawuli Kokou</strong> — 250 000 FCFA</div>
-                <div class="activity-time">En retard de 60 jours · Info L3 — Accès bloqué</div>
-              </div>
-              <button class="card-action" onclick="showToast('🔓 Accès débloqué temporairement')">Débloquer</button>
-            </div>
+          <div class="activity-list" id="pay-alertes">
+            <div style="text-align:center;color:var(--gray);padding:1rem;font-size:.85rem">Chargement…</div>
           </div>
         </div>
       </div>
@@ -1189,16 +1119,10 @@
 
     <!-- Historique paiements -->
     <div class="card">
-      <div class="card-header"><div class="card-title">Historique des paiements</div><button class="card-action" onclick="showToast('🔍 Filtre appliqué')">Filtrer</button></div>
+      <div class="card-header"><div class="card-title">Historique des paiements</div></div>
       <table class="data-table">
         <thead><tr><th>Étudiant</th><th>Montant</th><th>Type</th><th>Moyen</th><th>Référence</th><th>Date</th><th>Statut</th><th>Reçu</th></tr></thead>
-        <tbody>
-          <tr><td><div class="td-name">Kofi Adzoa</div><div class="td-sub">UL-2025-001</div></td><td><strong>250 000 FCFA</strong></td><td>Scolarité S1</td><td>🌊 Wave</td><td><code style="font-size:.75rem;background:var(--light);padding:.1rem .4rem;border-radius:4px">WV-20250120-4821</code></td><td>20 Jan 2025</td><td><span class="badge badge-success">Confirmé</span></td><td><button class="card-action" onclick="showToast('📄 Reçu PDF généré')">PDF</button></td></tr>
-          <tr><td><div class="td-name">Afia Mensah</div><div class="td-sub">UL-2025-002</div></td><td><strong>125 000 FCFA</strong></td><td>Tranche 2/3</td><td>🟠 Orange</td><td><code style="font-size:.75rem;background:var(--light);padding:.1rem .4rem;border-radius:4px">OM-20250119-3317</code></td><td>19 Jan 2025</td><td><span class="badge badge-success">Confirmé</span></td><td><button class="card-action" onclick="showToast('📄 Reçu PDF généré')">PDF</button></td></tr>
-          <tr><td><div class="td-name">Yao Dodzi</div><div class="td-sub">UL-2025-003</div></td><td><strong>250 000 FCFA</strong></td><td>Scolarité S1</td><td>🏦 Virement</td><td><code style="font-size:.75rem;background:var(--light);padding:.1rem .4rem;border-radius:4px">VIR-20250118-0042</code></td><td>18 Jan 2025</td><td><span class="badge badge-success">Confirmé</span></td><td><button class="card-action" onclick="showToast('📄 Reçu PDF généré')">PDF</button></td></tr>
-          <tr><td><div class="td-name">Selom Edem</div><div class="td-sub">UL-2025-004</div></td><td><strong>75 000 FCFA</strong></td><td>Tranche 1/3</td><td>💵 Espèces</td><td><code style="font-size:.75rem;background:var(--light);padding:.1rem .4rem;border-radius:4px">ESP-20250115-0901</code></td><td>15 Jan 2025</td><td><span class="badge badge-gold">Partiel</span></td><td><button class="card-action" onclick="showToast('📄 Reçu PDF généré')">PDF</button></td></tr>
-          <tr><td><div class="td-name">Béatrice Komi</div><div class="td-sub">UL-2025-005</div></td><td><strong>250 000 FCFA</strong></td><td>Scolarité S1</td><td>🌊 Wave</td><td><code style="font-size:.75rem;background:var(--light);padding:.1rem .4rem;border-radius:4px">WV-20250114-2204</code></td><td>14 Jan 2025</td><td><span class="badge badge-success">Confirmé</span></td><td><button class="card-action" onclick="showToast('📄 Reçu PDF généré')">PDF</button></td></tr>
-        </tbody>
+        <tbody id="pay-historique"><tr><td colspan="8" style="text-align:center;color:var(--gray);padding:1.5rem">Chargement…</td></tr></tbody>
       </table>
     </div>
   </div>
@@ -1209,10 +1133,11 @@
       <button class="modal-close" onclick="closePaiementModal()">✕</button>
       <div style="font-family:'Syne',sans-serif;font-weight:800;font-size:1.2rem;margin-bottom:.25rem">Enregistrer un paiement</div>
       <p style="font-size:.85rem;color:var(--gray);margin-bottom:1.5rem">Saisir un encaissement manuel</p>
-      <div class="form-group"><label>Étudiant *</label><select class="filter-select" style="width:100%"><option>Sélectionner un étudiant...</option><option>Kofi Adzoa — UL-2025-001</option><option>Afia Mensah — UL-2025-002</option><option>Selom Edem — UL-2025-004</option></select></div>
+      <div id="paiementError" style="display:none;background:rgba(239,68,68,0.08);color:var(--danger);border:1px solid rgba(239,68,68,0.2);padding:.6rem 1rem;border-radius:8px;font-size:.83rem;margin-bottom:1rem"></div>
+      <div class="form-group"><label>Étudiant *</label><select id="pm_student" class="filter-select" style="width:100%"><option value="">Sélectionner un étudiant...</option></select></div>
       <div class="form-row">
-        <div class="form-group"><label>Montant (FCFA) *</label><input type="number" class="search-input" style="width:100%" placeholder="250 000"/></div>
-        <div class="form-group"><label>Type *</label><select class="filter-select" style="width:100%"><option>Scolarité complète</option><option>Tranche 1/3</option><option>Tranche 2/3</option><option>Tranche 3/3</option></select></div>
+        <div class="form-group"><label>Montant (FCFA) *</label><input id="pm_amount" type="number" class="search-input" style="width:100%" placeholder="250 000"/></div>
+        <div class="form-group"><label>Type *</label><select id="pm_type" class="filter-select" style="width:100%"><option>Scolarité complète</option><option>Tranche 1/3</option><option>Tranche 2/3</option><option>Tranche 3/3</option><option>Inscription</option></select></div>
       </div>
       <div class="form-group"><label>Moyen de paiement *</label>
         <div style="display:grid;grid-template-columns:repeat(2,1fr);gap:.6rem;margin-top:.4rem">
@@ -1222,8 +1147,8 @@
           <div id="pay-especes" onclick="selectPay('especes')" style="padding:.7rem;border:2px solid var(--border);border-radius:9px;cursor:pointer;text-align:center;font-size:.85rem;font-weight:600;transition:all .2s">💵 Espèces</div>
         </div>
       </div>
-      <div class="form-group" style="margin-top:.5rem"><label>Référence transaction</label><input type="text" class="search-input" style="width:100%" placeholder="Ex: WV-20250120-XXXX"/></div>
-      <button class="btn-submit" onclick="showToast('✅ Paiement enregistré ! Reçu PDF généré.');closePaiementModal()">Enregistrer le paiement →</button>
+      <div class="form-group" style="margin-top:.5rem"><label>Référence transaction</label><input id="pm_reference" type="text" class="search-input" style="width:100%" placeholder="Ex: WV-20250120-XXXX (auto si vide)"/></div>
+      <button class="btn-submit" id="pm_submit" onclick="submitPaiement()">Enregistrer le paiement →</button>
     </div>
   </div>
 
@@ -1382,32 +1307,340 @@
 <div class="toast" id="toast"></div>
 
 <script>
-  // ── Charger les données de session ──
-  const userData = JSON.parse(sessionStorage.getItem('unimanage_user') || 'null');
-
+  // ── Charger les données de session (window.currentUser posé par requireAuth() dans auth-guard.js) ──
   window.addEventListener('DOMContentLoaded', () => {
+    const userData = window.currentUser;
     if (userData) {
       // Nom université dans la sidebar
       const univEl = document.getElementById('sidebarUniv');
-      if (univEl) univEl.textContent = userData.univ || 'Université';
+      if (univEl) univEl.textContent = userData.university || 'Université';
 
       // Nom & rôle utilisateur
       const nameEl = document.getElementById('sidebarUserName');
       const roleEl = document.getElementById('sidebarUserRole');
       const avatarEl = document.getElementById('sidebarAvatar');
-      if (nameEl) nameEl.textContent = (userData.fname + ' ' + userData.lname).trim();
+      const initials = (userData.full_name || '').split(' ').filter(Boolean).map(s => s[0]).join('').slice(0, 2).toUpperCase();
+      if (nameEl) nameEl.textContent = userData.full_name || userData.email;
       if (roleEl) roleEl.textContent = userData.role || 'Administrateur';
-      if (avatarEl) avatarEl.textContent = userData.initials || '??';
+      if (avatarEl) avatarEl.textContent = initials || '??';
 
       // Breadcrumb topbar
       const breadEl = document.getElementById('pageBreadcrumb');
-      if (breadEl) breadEl.textContent = (userData.univ || 'Université') + ' · 2024–2025';
+      if (breadEl) breadEl.textContent = (userData.university || 'Université') + ' · 2024–2025';
     }
   });
 
-  function logout() {
-    sessionStorage.removeItem('unimanage_user');
-    window.location.href = 'index.html';
+  // logout() est fourni par auth-guard.js (déconnexion Supabase réelle)
+
+  // ── Étudiants (données réelles Supabase) ──
+  let allEtudiants = [];
+
+  async function loadEtudiants() {
+    const user = window.currentUser;
+    if (!user) return;
+    let query = supabaseClient.from('students').select('*').order('created_at', { ascending: false });
+    if (user.role !== 'superadmin') query = query.eq('university', user.university);
+    const { data, error } = await query;
+    if (error) { console.error(error); return; }
+    allEtudiants = data || [];
+    renderEtudiants();
+  }
+
+  function renderEtudiants() {
+    const search = (document.getElementById('etudiantsSearch')?.value || '').toLowerCase();
+    const dept = document.getElementById('etudiantsFilterDept')?.value || '';
+    const niveau = document.getElementById('etudiantsFilterNiveau')?.value || '';
+    const statut = document.getElementById('etudiantsFilterStatut')?.value || '';
+
+    const filtered = allEtudiants.filter(e => {
+      if (search && !(e.full_name.toLowerCase().includes(search) || (e.matricule||'').toLowerCase().includes(search))) return false;
+      if (dept && e.department !== dept) return false;
+      if (niveau && e.level !== niveau) return false;
+      if (statut && e.status !== statut) return false;
+      return true;
+    });
+
+    document.getElementById('etudiantsCount').textContent = `${allEtudiants.length} inscrits · Année 2024–2025`;
+
+    const tbody = document.getElementById('tbodyEtudiants');
+    if (filtered.length === 0) {
+      tbody.innerHTML = '<tr><td colspan="7" style="text-align:center;color:var(--gray);padding:2rem">Aucun étudiant trouvé.</td></tr>';
+      return;
+    }
+
+    const paiementBadge = { 'Payé':'badge-success', 'Partiel':'badge-gold', 'Impayé':'badge-danger' };
+    const statutBadge = { 'Actif':'badge-success', 'En cours':'badge-blue', 'Incomplet':'badge-gold', 'Suspendu':'badge-danger' };
+
+    tbody.innerHTML = filtered.map(e => {
+      const initials = e.full_name.split(' ').filter(Boolean).map(s=>s[0]).join('').slice(0,2).toUpperCase();
+      return `<tr>
+        <td><div style="display:flex;align-items:center;gap:.6rem"><div class="td-avatar">${initials}</div><div><div class="td-name">${e.full_name}</div><div class="td-sub">${e.email || ''}</div></div></div></td>
+        <td>${e.matricule}</td>
+        <td>${e.department || '—'}</td>
+        <td>${e.level || '—'}</td>
+        <td><span class="badge ${paiementBadge[e.payment_status]||''}">${e.payment_status}</span></td>
+        <td><span class="badge ${statutBadge[e.status]||''}">${e.status}</span></td>
+        <td><button class="card-action" onclick="showToast('👁️ Profil de ${e.full_name}')">Voir</button></td>
+      </tr>`;
+    }).join('');
+  }
+
+  function openAddEtudiantModal() {
+    ['ae_nom','ae_email','ae_matricule'].forEach(id => document.getElementById(id).value = '');
+    document.getElementById('ae_frais').value = 250000;
+    document.getElementById('addEtudiantError').style.display = 'none';
+    document.getElementById('modalAddEtudiant').classList.add('active');
+  }
+  function closeAddEtudiantModal() {
+    document.getElementById('modalAddEtudiant').classList.remove('active');
+  }
+
+  async function submitAddEtudiant() {
+    const errBox = document.getElementById('addEtudiantError');
+    errBox.style.display = 'none';
+
+    const full_name = document.getElementById('ae_nom').value.trim();
+    const email = document.getElementById('ae_email').value.trim();
+    const matricule = document.getElementById('ae_matricule').value.trim();
+    const department = document.getElementById('ae_dept').value;
+    const level = document.getElementById('ae_niveau').value;
+    const frais_total = Number(document.getElementById('ae_frais').value) || 250000;
+    const status = document.getElementById('ae_statut').value;
+
+    if (!full_name || !matricule) {
+      errBox.textContent = '⚠️ Le nom et le matricule sont obligatoires.';
+      errBox.style.display = 'block';
+      return;
+    }
+
+    const btn = document.getElementById('ae_submit');
+    btn.disabled = true;
+    const { error } = await supabaseClient.from('students').insert({
+      full_name, email, matricule, department, level, frais_total, status,
+      university: window.currentUser.university
+    });
+    btn.disabled = false;
+
+    if (error) {
+      errBox.textContent = error.message.includes('duplicate') ? '⚠️ Ce matricule existe déjà.' : '⚠️ ' + error.message;
+      errBox.style.display = 'block';
+      return;
+    }
+
+    closeAddEtudiantModal();
+    showToast('✅ Étudiant ajouté avec succès');
+    loadEtudiants();
+  }
+
+  // ── Enseignants (données réelles Supabase) ──
+  let allEnseignants = [];
+
+  async function loadEnseignants() {
+    const user = window.currentUser;
+    if (!user) return;
+    let query = supabaseClient.from('teachers').select('*').order('created_at', { ascending: false });
+    if (user.role !== 'superadmin') query = query.eq('university', user.university);
+    const { data, error } = await query;
+    if (error) { console.error(error); return; }
+    allEnseignants = data || [];
+    renderEnseignants();
+  }
+
+  function renderEnseignants() {
+    document.getElementById('enseignantsCount').textContent = `${allEnseignants.length} enseignants · ${allEnseignants.filter(e=>e.contrat_type==='Vacataire').length} vacataires`;
+
+    const tbody = document.getElementById('enseignants-tbody');
+    if (allEnseignants.length === 0) {
+      tbody.innerHTML = '<tr><td colspan="8" style="text-align:center;color:var(--gray);padding:2rem">Aucun enseignant trouvé.</td></tr>';
+      return;
+    }
+
+    const contratBadge = { 'Permanent':'badge-blue', 'Vacataire':'badge-gold', 'Contractuel':'badge-success' };
+    const statutBadge = { 'Actif':'badge-success', 'En congé':'badge-gold', 'Inactif':'badge-danger' };
+
+    tbody.innerHTML = allEnseignants.map(e => {
+      const initials = e.full_name.split(' ').filter(Boolean).map(s=>s[0]).join('').slice(0,2).toUpperCase();
+      const tauxFmt = Number(e.taux_horaire).toLocaleString('fr-FR') + ' FCFA';
+      return `<tr>
+        <td><div style="display:flex;align-items:center;gap:.6rem"><div class="td-avatar">${initials}</div><div><div class="td-name">${e.full_name}</div><div class="td-sub">${e.email || ''}</div></div></div></td>
+        <td>${e.specialite || '—'}</td><td>${e.department || '—'}</td>
+        <td><span class="badge ${contratBadge[e.contrat_type]||''}">${e.contrat_type}</span></td>
+        <td><strong>${e.heures_effectuees}h</strong> / ${e.heures_max}h</td><td>${tauxFmt}</td>
+        <td><span class="badge ${statutBadge[e.status]||''}">${e.status}</span></td>
+        <td><button class="card-action" onclick="openEnseignantModal('${e.full_name.replace(/'/g,"\\'")}','${(e.specialite||'').replace(/'/g,"\\'")}','${e.department||''}','${e.contrat_type}','${e.heures_effectuees}','${e.heures_max}','${e.taux_horaire}','${e.status}','${initials}')">Voir fiche</button></td>
+      </tr>`;
+    }).join('');
+  }
+
+  function openAddEnseignantModal() {
+    ['aen_nom','aen_email','aen_specialite'].forEach(id => document.getElementById(id).value = '');
+    document.getElementById('aen_heuresmax').value = 180;
+    document.getElementById('aen_taux').value = 8000;
+    document.getElementById('addEnseignantError').style.display = 'none';
+    document.getElementById('modalAddEnseignant').classList.add('active');
+  }
+  function closeAddEnseignantModal() {
+    document.getElementById('modalAddEnseignant').classList.remove('active');
+  }
+
+  async function submitAddEnseignant() {
+    const errBox = document.getElementById('addEnseignantError');
+    errBox.style.display = 'none';
+
+    const full_name = document.getElementById('aen_nom').value.trim();
+    const email = document.getElementById('aen_email').value.trim();
+    const specialite = document.getElementById('aen_specialite').value.trim();
+    const department = document.getElementById('aen_dept').value;
+    const contrat_type = document.getElementById('aen_contrat').value;
+    const heures_max = parseInt(document.getElementById('aen_heuresmax').value) || 180;
+    const taux_horaire = parseInt(document.getElementById('aen_taux').value) || 0;
+
+    if (!full_name) {
+      errBox.textContent = '⚠️ Le nom est obligatoire.';
+      errBox.style.display = 'block';
+      return;
+    }
+
+    const btn = document.getElementById('aen_submit');
+    btn.disabled = true;
+    const { error } = await supabaseClient.from('teachers').insert({
+      full_name, email, specialite, department, contrat_type, heures_max, taux_horaire,
+      heures_effectuees: 0, status: 'Actif',
+      university: window.currentUser.university
+    });
+    btn.disabled = false;
+
+    if (error) {
+      errBox.textContent = '⚠️ ' + error.message;
+      errBox.style.display = 'block';
+      return;
+    }
+
+    closeAddEnseignantModal();
+    showToast('✅ Enseignant ajouté avec succès');
+    loadEnseignants();
+  }
+
+  window.authReady.then(user => { if (user) { loadEtudiants(); loadEnseignants(); loadPaymentsData(); loadEmploiSetup(); } });
+
+  // ── Emploi du temps (données réelles Supabase) ──
+  const ET_JOURS = ['Lundi','Mardi','Mercredi','Jeudi','Vendredi'];
+  const ET_CRENEAUX = ['07h–09h','09h–11h','11h–13h','14h–16h','16h–18h'];
+  let deptLevels = {};
+  let allTeachersForEt = [];
+
+  function typeClass(type) {
+    return { 'TD':'gold', 'TP':'green', 'Examen':'red' }[type] || '';
+  }
+
+  async function loadEmploiSetup() {
+    const user = window.currentUser;
+    if (!user) return;
+
+    let studQuery = supabaseClient.from('students').select('department, level');
+    if (user.role !== 'superadmin') studQuery = studQuery.eq('university', user.university);
+    const { data: studs } = await studQuery;
+    deptLevels = {};
+    (studs || []).forEach(s => {
+      if (!s.department || !s.level) return;
+      if (!deptLevels[s.department]) deptLevels[s.department] = new Set();
+      deptLevels[s.department].add(s.level);
+    });
+
+    let teachQuery = supabaseClient.from('teachers').select('id, full_name');
+    if (user.role !== 'superadmin') teachQuery = teachQuery.eq('university', user.university);
+    const { data: teachs } = await teachQuery;
+    allTeachersForEt = teachs || [];
+    document.getElementById('cr_teacher').innerHTML = allTeachersForEt.map(t => `<option value="${t.id}">${t.full_name}</option>`).join('');
+
+    const depts = Object.keys(deptLevels);
+    document.getElementById('et_dept').innerHTML = depts.map(d => `<option value="${d}">${d}</option>`).join('');
+    onEtDeptChange();
+  }
+
+  function onEtDeptChange() {
+    const dept = document.getElementById('et_dept').value;
+    const levels = [...(deptLevels[dept] || [])].sort();
+    document.getElementById('et_niveau').innerHTML = levels.map(l => `<option value="${l}">${l}</option>`).join('');
+    loadEmploiDuTemps();
+  }
+
+  async function loadEmploiDuTemps() {
+    const user = window.currentUser;
+    const dept = document.getElementById('et_dept').value;
+    const niveau = document.getElementById('et_niveau').value;
+    const tbody = document.getElementById('et-tbody');
+    if (!user || !dept || !niveau) return;
+    document.getElementById('et-sub').textContent = `${dept} ${niveau} · Année 2024–2025`;
+
+    let query = supabaseClient.from('schedule_slots').select('*').eq('department', dept).eq('level', niveau);
+    if (user.role !== 'superadmin') query = query.eq('university', user.university);
+    const { data: slots, error } = await query;
+    if (error) { console.error(error); return; }
+
+    const byKey = {};
+    (slots || []).forEach(s => { byKey[s.jour + '|' + s.creneau] = s; });
+
+    tbody.innerHTML = ET_CRENEAUX.map(creneau => {
+      const cells = ET_JOURS.map(jour => {
+        const s = byKey[jour + '|' + creneau];
+        if (!s) return '<td></td>';
+        return `<td><div class="cours-block ${typeClass(s.type)}"><div class="cours-name">${s.matiere}</div><div class="cours-prof">${s.enseignant_nom || '—'} · ${s.salle || '—'}</div></div></td>`;
+      }).join('');
+      return `<tr><td class="time-col">${creneau}</td>${cells}</tr>`;
+    }).join('');
+  }
+
+  function openCreneauModal() {
+    document.getElementById('cr_matiere').value = '';
+    document.getElementById('cr_salle').value = '';
+    document.getElementById('creneauError').style.display = 'none';
+    document.getElementById('creneauModal').classList.add('active');
+    document.body.style.overflow = 'hidden';
+  }
+  function closeCreneauModal() {
+    document.getElementById('creneauModal').classList.remove('active');
+    document.body.style.overflow = '';
+  }
+
+  async function submitCreneau() {
+    const errBox = document.getElementById('creneauError');
+    errBox.style.display = 'none';
+
+    const user = window.currentUser;
+    const department = document.getElementById('et_dept').value;
+    const level = document.getElementById('et_niveau').value;
+    const jour = document.getElementById('cr_jour').value;
+    const creneau = document.getElementById('cr_creneau').value;
+    const matiere = document.getElementById('cr_matiere').value.trim();
+    const teacher_id = document.getElementById('cr_teacher').value;
+    const type = document.getElementById('cr_type').value;
+    const salle = document.getElementById('cr_salle').value.trim();
+    const teacher = allTeachersForEt.find(t => t.id === teacher_id);
+
+    if (!matiere || !teacher_id) {
+      errBox.textContent = '⚠️ La matière et l\'enseignant sont obligatoires.';
+      errBox.style.display = 'block';
+      return;
+    }
+
+    const btn = document.getElementById('cr_submit');
+    btn.disabled = true;
+    const { error } = await supabaseClient.from('schedule_slots').insert({
+      university: user.university, department, level, jour, creneau,
+      matiere, teacher_id, enseignant_nom: teacher?.full_name, type, salle
+    });
+    btn.disabled = false;
+
+    if (error) {
+      errBox.textContent = error.message.includes('duplicate') ? '⚠️ Un créneau existe déjà à ce jour/horaire pour cette classe.' : '⚠️ ' + error.message;
+      errBox.style.display = 'block';
+      return;
+    }
+
+    closeCreneauModal();
+    showToast('✅ Créneau ajouté avec succès');
+    loadEmploiDuTemps();
   }
 
   // ── Navigation ──
@@ -1442,6 +1675,15 @@
 
   // ── Modal Paiement ──
   function openPaiementModal() {
+    document.getElementById('pm_student').value = '';
+    document.getElementById('pm_amount').value = '';
+    document.getElementById('pm_reference').value = '';
+    document.getElementById('paiementError').style.display = 'none';
+    selectedPayMethod = null;
+    ['wave','orange','virement','especes'].forEach(t => {
+      const el = document.getElementById('pay-'+t);
+      if (el) el.style.borderColor = 'var(--border)', el.style.background = 'white', el.style.color = 'var(--navy)';
+    });
     document.getElementById('paiementModal').classList.add('active');
     document.body.style.overflow = 'hidden';
   }
@@ -1449,7 +1691,10 @@
     document.getElementById('paiementModal').classList.remove('active');
     document.body.style.overflow = '';
   }
+  const payMethodMap = { wave:'Wave', orange:'Orange Money', virement:'Virement', especes:'Espèces' };
+  let selectedPayMethod = null;
   function selectPay(type) {
+    selectedPayMethod = payMethodMap[type];
     ['wave','orange','virement','especes'].forEach(t => {
       const el = document.getElementById('pay-'+t);
       if (el) el.style.borderColor = 'var(--border)', el.style.background = 'white', el.style.color = 'var(--navy)';
@@ -1458,7 +1703,299 @@
     if (sel) { sel.style.borderColor = 'var(--blue)'; sel.style.background = 'rgba(26,86,219,0.07)'; sel.style.color = 'var(--blue)'; }
   }
 
+  // ── Paiements & Comptabilité (données réelles Supabase) ──
+  let allPayments = [];
+
+  function fmtFCFA(n) { return Math.round(n).toLocaleString('fr-FR'); }
+  function fmtDate(d) { return new Date(d).toLocaleDateString('fr-FR', { day:'2-digit', month:'short', year:'numeric' }); }
+
+  async function loadPaymentsData() {
+    const user = window.currentUser;
+    if (!user) return;
+
+    let payQuery = supabaseClient.from('payments').select('*, students(full_name, matricule, department, level)').eq('statut', 'Confirmé').order('paid_at', { ascending: false });
+    if (user.role !== 'superadmin') payQuery = payQuery.eq('university', user.university);
+    const { data: pays, error: payErr } = await payQuery;
+    if (payErr) { console.error(payErr); return; }
+    allPayments = pays || [];
+
+    let studQuery = supabaseClient.from('students').select('id, full_name, matricule, department, level, frais_total, payment_status');
+    if (user.role !== 'superadmin') studQuery = studQuery.eq('university', user.university);
+    const { data: studs, error: studErr } = await studQuery;
+    if (studErr) { console.error(studErr); return; }
+
+    let teachQuery = supabaseClient.from('teachers').select('heures_effectuees, taux_horaire');
+    if (user.role !== 'superadmin') teachQuery = teachQuery.eq('university', user.university);
+    const { data: teachs } = await teachQuery;
+
+    renderComptabilite(allPayments, studs || [], teachs || []);
+    renderPaiementsPage(allPayments, studs || []);
+  }
+
+  function renderComptabilite(pays, studs, teachs) {
+    const totalEncaisse = pays.reduce((s, p) => s + Number(p.amount), 0);
+    const paidByStudent = {};
+    pays.forEach(p => { paidByStudent[p.student_id] = (paidByStudent[p.student_id] || 0) + Number(p.amount); });
+    const totalImpaye = studs.reduce((s, st) => s + Math.max(0, st.frais_total - (paidByStudent[st.id] || 0)), 0);
+    const nbImpayes = studs.filter(st => (paidByStudent[st.id] || 0) < st.frais_total).length;
+    const totalEnseignants = (teachs || []).reduce((s, t) => s + (t.heures_effectuees || 0) * (t.taux_horaire || 0), 0);
+
+    document.getElementById('cpt-encaisse').textContent = fmtFCFA(totalEncaisse);
+    document.getElementById('cpt-nbpaiements').textContent = `▲ ${pays.length} paiement${pays.length>1?'s':''}`;
+    document.getElementById('cpt-impaye').textContent = fmtFCFA(totalImpaye);
+    document.getElementById('cpt-nbimpayes').textContent = `▼ ${nbImpayes} étudiant${nbImpayes>1?'s':''}`;
+    document.getElementById('cpt-enseignants').textContent = fmtFCFA(totalEnseignants);
+    document.getElementById('cpt-nbenseignants').textContent = `▲ ${(teachs||[]).length} enseignant${(teachs||[]).length>1?'s':''}`;
+
+    const derniersBody = document.getElementById('cpt-derniers-paiements');
+    if (derniersBody) {
+      const derniers = pays.slice(0, 5);
+      derniersBody.innerHTML = derniers.length === 0
+        ? '<tr><td colspan="5" style="text-align:center;color:var(--gray);padding:1.5rem">Aucun paiement enregistré.</td></tr>'
+        : derniers.map(p => `<tr>
+            <td><div class="td-name">${p.students?.full_name || '—'}</div></td>
+            <td><strong>${fmtFCFA(p.amount)} FCFA</strong></td>
+            <td>${p.method}</td>
+            <td>${fmtDate(p.paid_at)}</td>
+            <td><span class="badge badge-success">Confirmé</span></td>
+          </tr>`).join('');
+    }
+
+    const barChart = document.getElementById('cpt-bar-chart');
+    if (barChart) {
+      const byMonth = {};
+      pays.forEach(p => {
+        const d = new Date(p.paid_at);
+        const key = d.toLocaleDateString('fr-FR', { month: 'short', year: '2-digit' });
+        byMonth[key] = (byMonth[key] || 0) + Number(p.amount);
+      });
+      const entries = Object.entries(byMonth).sort((a, b) => new Date('01 ' + a[0]) - new Date('01 ' + b[0])).slice(-6);
+      const max = Math.max(1, ...entries.map(e => e[1]));
+      barChart.innerHTML = entries.length === 0
+        ? '<div style="text-align:center;color:var(--gray);padding:1rem;font-size:.85rem">Aucune donnée.</div>'
+        : entries.map(([label, val]) => `<div class="bar-col"><div class="bar-fill green" style="height:${Math.max(5, Math.round(val/max*100))}%"></div><div class="bar-label">${label}</div><div class="bar-val">${(val/1000).toFixed(0)}K</div></div>`).join('');
+    }
+
+    const recouvEl = document.getElementById('dash-recouvrement');
+    if (recouvEl) {
+      const byDept = {};
+      studs.forEach(st => {
+        const dept = st.department || 'Non renseigné';
+        if (!byDept[dept]) byDept[dept] = { du: 0, paye: 0 };
+        byDept[dept].du += st.frais_total;
+        byDept[dept].paye += Math.min(st.frais_total, paidByStudent[st.id] || 0);
+      });
+      const colors = ['linear-gradient(90deg,var(--blue),var(--sky))','linear-gradient(90deg,var(--gold),#fbbf24)','linear-gradient(90deg,var(--success),#34d399)','linear-gradient(90deg,var(--danger),#f87171)'];
+      const depts = Object.entries(byDept);
+      recouvEl.innerHTML = depts.length === 0
+        ? '<div style="text-align:center;color:var(--gray);padding:1rem;font-size:.85rem">Aucun étudiant enregistré.</div>'
+        : depts.map(([dept, v], i) => {
+          const pct = v.du > 0 ? Math.round(v.paye / v.du * 100) : 0;
+          return `<div class="progress-item">
+            <div class="progress-top"><span class="progress-name">${dept}</span><span class="progress-pct">${pct}%</span></div>
+            <div class="progress-bar"><div class="progress-fill" style="width:${pct}%;background:${colors[i % colors.length]}"></div></div>
+          </div>`;
+        }).join('');
+    }
+  }
+
+  function renderPaiementsPage(pays, studs) {
+    const totalEncaisse = pays.reduce((s, p) => s + Number(p.amount), 0);
+    const paidByStudent = {};
+    pays.forEach(p => { paidByStudent[p.student_id] = (paidByStudent[p.student_id] || 0) + Number(p.amount); });
+    const totalImpaye = studs.reduce((s, st) => s + Math.max(0, st.frais_total - (paidByStudent[st.id] || 0)), 0);
+    const impayes = studs.filter(st => (paidByStudent[st.id] || 0) < st.frais_total)
+      .map(st => ({ ...st, restant: st.frais_total - (paidByStudent[st.id] || 0) }))
+      .sort((a, b) => b.restant - a.restant);
+    const nbAjour = studs.filter(st => st.payment_status === 'Payé').length;
+    const mobileTotal = pays.filter(p => p.method === 'Wave' || p.method === 'Orange Money').reduce((s, p) => s + Number(p.amount), 0);
+    const mobilePct = totalEncaisse > 0 ? Math.round(mobileTotal / totalEncaisse * 100) : 0;
+
+    document.getElementById('pay-kpi-encaisse').textContent = fmtFCFA(totalEncaisse);
+    document.getElementById('pay-kpi-nb').textContent = `▲ ${pays.length} paiement${pays.length>1?'s':''}`;
+    document.getElementById('pay-kpi-impaye').textContent = fmtFCFA(totalImpaye);
+    document.getElementById('pay-kpi-nbimpayes').textContent = `▼ ${impayes.length} étudiant${impayes.length>1?'s':''}`;
+    document.getElementById('pay-kpi-mobile').textContent = mobilePct + '%';
+    document.getElementById('pay-kpi-ajour').textContent = `${nbAjour}/${studs.length}`;
+    document.getElementById('pay-kpi-total').textContent = `▼ ${studs.length} étudiant${studs.length>1?'s':''} au total`;
+
+    const repartEl = document.getElementById('pay-repartition');
+    if (repartEl) {
+      const byMethod = {};
+      pays.forEach(p => { byMethod[p.method] = (byMethod[p.method] || 0) + Number(p.amount); });
+      const icons = { 'Wave':'🌊', 'Orange Money':'🟠', 'Virement':'🏦', 'Espèces':'💵' };
+      const colors = { 'Wave':'linear-gradient(90deg,#1A56DB,#3B82F6)', 'Orange Money':'linear-gradient(90deg,#f97316,#fb923c)', 'Virement':'linear-gradient(90deg,var(--success),#34d399)', 'Espèces':'linear-gradient(90deg,var(--gold),#fbbf24)' };
+      const methods = Object.keys(byMethod);
+      repartEl.innerHTML = methods.length === 0
+        ? '<div style="text-align:center;color:var(--gray);padding:1rem;font-size:.85rem">Aucun paiement enregistré.</div>'
+        : methods.map(m => {
+          const pct = totalEncaisse > 0 ? Math.round(byMethod[m] / totalEncaisse * 100) : 0;
+          return `<div>
+            <div style="display:flex;justify-content:space-between;margin-bottom:.4rem;font-size:.85rem">
+              <span style="display:flex;align-items:center;gap:.5rem"><span style="font-size:1.1rem">${icons[m]||'💳'}</span><strong>${m}</strong></span>
+              <span style="font-weight:700">${pct}% — ${fmtFCFA(byMethod[m])} FCFA</span>
+            </div>
+            <div class="progress-bar"><div class="progress-fill" style="width:${pct}%;background:${colors[m]||'var(--blue)'}"></div></div>
+          </div>`;
+        }).join('');
+    }
+
+    const alertesEl = document.getElementById('pay-alertes');
+    if (alertesEl) {
+      alertesEl.innerHTML = impayes.length === 0
+        ? '<div style="text-align:center;color:var(--gray);padding:1rem;font-size:.85rem">Tous les étudiants sont à jour ✅</div>'
+        : impayes.slice(0, 8).map(st => `<div class="activity-item">
+            <div class="activity-dot" style="background:rgba(239,68,68,0.1)">${st.restant === st.frais_total ? '🔴' : '🟡'}</div>
+            <div class="activity-body">
+              <div class="activity-text"><strong>${st.full_name}</strong> — ${fmtFCFA(st.restant)} FCFA restants</div>
+              <div class="activity-time">${st.department||''} ${st.level||''} · ${st.matricule}</div>
+            </div>
+            <button class="card-action" onclick="showToast('📩 Rappel envoyé à ${st.full_name}')">Relancer</button>
+          </div>`).join('');
+    }
+
+    const histEl = document.getElementById('pay-historique');
+    if (histEl) {
+      histEl.innerHTML = pays.length === 0
+        ? '<tr><td colspan="8" style="text-align:center;color:var(--gray);padding:1.5rem">Aucun paiement enregistré.</td></tr>'
+        : pays.map(p => `<tr>
+            <td><div class="td-name">${p.students?.full_name || '—'}</div><div class="td-sub">${p.students?.matricule || ''}</div></td>
+            <td><strong>${fmtFCFA(p.amount)} FCFA</strong></td>
+            <td>${p.type}</td>
+            <td>${p.method}</td>
+            <td><code style="font-size:.75rem;background:var(--light);padding:.1rem .4rem;border-radius:4px">${p.reference || '—'}</code></td>
+            <td>${fmtDate(p.paid_at)}</td>
+            <td><span class="badge badge-success">Confirmé</span></td>
+            <td><button class="card-action" onclick="downloadRecuAdminById('${p.id}')">📄 PDF</button></td>
+          </tr>`).join('');
+    }
+
+    const sel = document.getElementById('pm_student');
+    if (sel) {
+      sel.innerHTML = '<option value="">Sélectionner un étudiant...</option>' +
+        studs.map(st => `<option value="${st.id}">${st.full_name} — ${st.matricule}</option>`).join('');
+    }
+  }
+
+  // ── Génération PDF (reçu de paiement, admin) ──
+  function downloadRecuAdminById(paymentId) {
+    const p = allPayments.find(x => x.id === paymentId);
+    if (!p) { showToast('⚠️ Paiement introuvable'); return; }
+    downloadRecuAdmin({
+      amount: p.amount, type: p.type, method: p.method, reference: p.reference, paid_at: p.paid_at,
+      student_name: p.students?.full_name, student_matricule: p.students?.matricule,
+      student_dept: `${p.students?.department||''} ${p.students?.level||''}`.trim()
+    });
+  }
+
+  function downloadRecuAdmin(p) {
+    let studentName = p.student_name, studentMatricule = p.student_matricule, studentDept = p.student_dept;
+    if (!studentName && p.student_id) {
+      const st = allEtudiants.find(s => s.id === p.student_id);
+      if (st) { studentName = st.full_name; studentMatricule = st.matricule; studentDept = `${st.department||''} ${st.level||''}`.trim(); }
+    }
+    const { jsPDF } = window.jspdf;
+    const doc = new jsPDF();
+    const reference = p.reference || 'REC-' + Date.now().toString(36).toUpperCase();
+    const dateStr = new Date(p.paid_at).toLocaleDateString('fr-FR', { day:'2-digit', month:'long', year:'numeric' });
+
+    doc.setFont('helvetica', 'bold'); doc.setFontSize(20); doc.setTextColor(13, 27, 42);
+    doc.text('UniManage', 14, 20);
+    doc.setFontSize(11); doc.setTextColor(100, 116, 139); doc.setFont('helvetica', 'normal');
+    doc.text(window.currentUser?.university || '', 14, 27);
+    doc.setDrawColor(226, 232, 240); doc.line(14, 33, 196, 33);
+
+    doc.setFont('helvetica', 'bold'); doc.setFontSize(16); doc.setTextColor(13, 27, 42);
+    doc.text('REÇU DE PAIEMENT', 14, 45);
+    doc.setFont('helvetica', 'normal'); doc.setFontSize(10); doc.setTextColor(100, 116, 139);
+    doc.text('N° ' + reference, 14, 52);
+
+    const rows = [
+      ['Étudiant', studentName || '—'],
+      ['Matricule', studentMatricule || '—'],
+      ['Département', studentDept || '—'],
+      ['Type de versement', p.type],
+      ['Moyen de paiement', p.method],
+      ['Date', dateStr],
+      ['Statut', 'Confirmé'],
+    ];
+    let y = 65;
+    doc.setFontSize(10);
+    rows.forEach(([label, val]) => {
+      doc.setTextColor(100, 116, 139); doc.text(label, 14, y);
+      doc.setTextColor(13, 27, 42); doc.setFont('helvetica', 'bold'); doc.text(String(val), 80, y);
+      doc.setFont('helvetica', 'normal');
+      y += 8;
+    });
+
+    y += 6;
+    doc.setDrawColor(226, 232, 240); doc.line(14, y, 196, y);
+    y += 12;
+    doc.setFont('helvetica', 'bold'); doc.setFontSize(14); doc.setTextColor(16, 185, 129);
+    doc.text('Montant : ' + Number(p.amount).toLocaleString('fr-FR') + ' FCFA', 14, y);
+
+    doc.setFont('helvetica', 'normal'); doc.setFontSize(8); doc.setTextColor(148, 163, 184);
+    doc.text('Document généré électroniquement le ' + new Date().toLocaleDateString('fr-FR') + ' via UniManage.', 14, 280);
+
+    doc.save(`recu_${reference}.pdf`);
+  }
+
+  function genReference(method) {
+    const prefix = { 'Wave':'WV', 'Orange Money':'OM', 'Virement':'VIR', 'Espèces':'ESP' }[method] || 'PAY';
+    const now = new Date();
+    const ymd = now.toISOString().slice(0,10).replace(/-/g,'');
+    const rand = Math.floor(1000 + Math.random()*9000);
+    return `${prefix}-${ymd}-${rand}`;
+  }
+
+  async function submitPaiement() {
+    const errBox = document.getElementById('paiementError');
+    errBox.style.display = 'none';
+
+    const student_id = document.getElementById('pm_student').value;
+    const amount = Number(document.getElementById('pm_amount').value);
+    const type = document.getElementById('pm_type').value;
+    let reference = document.getElementById('pm_reference').value.trim();
+    const user = window.currentUser;
+
+    if (!student_id || !amount || amount <= 0 || !selectedPayMethod) {
+      errBox.textContent = '⚠️ Étudiant, montant et moyen de paiement sont obligatoires.';
+      errBox.style.display = 'block';
+      return;
+    }
+    if (!reference) reference = genReference(selectedPayMethod);
+
+    const btn = document.getElementById('pm_submit');
+    btn.disabled = true;
+    const { error } = await supabaseClient.from('payments').insert({
+      student_id, amount, type, method: selectedPayMethod, reference,
+      university: user.university, recorded_by: user.id
+    });
+    btn.disabled = false;
+
+    if (error) {
+      errBox.textContent = '⚠️ ' + error.message;
+      errBox.style.display = 'block';
+      return;
+    }
+
+    closePaiementModal();
+    showToast('✅ Paiement enregistré !');
+    downloadRecuAdmin({ student_id, amount, type, method: selectedPayMethod, reference, paid_at: new Date().toISOString() });
+    document.getElementById('pm_amount').value = '';
+    document.getElementById('pm_reference').value = '';
+    document.getElementById('pm_student').value = '';
+    selectedPayMethod = null;
+    ['wave','orange','virement','especes'].forEach(t => {
+      const el = document.getElementById('pay-'+t);
+      if (el) el.style.borderColor = 'var(--border)', el.style.background = 'white', el.style.color = 'var(--navy)';
+    });
+    loadPaymentsData();
+    loadEtudiants();
+  }
+
   // ── Modal Fiche Enseignant ──
+  let activeTeacherModal = null;
   function openEnseignantModal(nom, spec, dept, contrat, heures, maxH, taux, statut, initiales) {
     document.getElementById('ens-avatar').textContent = initiales;
     document.getElementById('ens-nom').textContent = nom;
@@ -1471,12 +2008,63 @@
     document.getElementById('ens-salaire').textContent = salaire.toLocaleString('fr') + ' FCFA';
     const badgeClass = statut === 'Actif' ? 'badge-success' : statut === 'En congé' ? 'badge-gold' : 'badge-danger';
     document.getElementById('ens-statut').innerHTML = '<span class="badge ' + badgeClass + '">' + statut + '</span>';
+    activeTeacherModal = { nom, spec, dept, contrat, heures: parseInt(heures)||0, maxH: parseInt(maxH)||0, taux: parseInt(taux)||0, statut };
     document.getElementById('enseignantModal').classList.add('active');
     document.body.style.overflow = 'hidden';
   }
   function closeEnseignantModal() {
     document.getElementById('enseignantModal').classList.remove('active');
     document.body.style.overflow = '';
+  }
+
+  function downloadFichePaieAdmin() {
+    if (!activeTeacherModal) return;
+    const t = activeTeacherModal;
+    const total = t.heures * t.taux;
+    const { jsPDF } = window.jspdf;
+    const doc = new jsPDF();
+
+    doc.setFont('helvetica', 'bold'); doc.setFontSize(20); doc.setTextColor(13, 27, 42);
+    doc.text('UniManage', 14, 20);
+    doc.setFontSize(11); doc.setTextColor(100, 116, 139); doc.setFont('helvetica', 'normal');
+    doc.text(window.currentUser?.university || '', 14, 27);
+    doc.setDrawColor(226, 232, 240); doc.line(14, 33, 196, 33);
+
+    doc.setFont('helvetica', 'bold'); doc.setFontSize(16); doc.setTextColor(13, 27, 42);
+    doc.text('RÉCAPITULATIF DE RÉMUNÉRATION', 14, 45);
+
+    const rows = [
+      ['Enseignant', t.nom],
+      ['Spécialité', t.spec || '—'],
+      ['Département', t.dept || '—'],
+      ['Type de contrat', t.contrat || '—'],
+      ['Heures effectuées', t.heures + 'h'],
+      ['Heures contractuelles max', t.maxH + 'h'],
+      ['Taux horaire', t.taux.toLocaleString('fr-FR') + ' FCFA/h'],
+    ];
+    let y = 60;
+    doc.setFontSize(10);
+    rows.forEach(([label, val]) => {
+      doc.setTextColor(100, 116, 139); doc.text(label, 14, y);
+      doc.setTextColor(13, 27, 42); doc.setFont('helvetica', 'bold'); doc.text(String(val), 90, y);
+      doc.setFont('helvetica', 'normal');
+      y += 8;
+    });
+
+    y += 6;
+    doc.setDrawColor(226, 232, 240); doc.line(14, y, 196, y);
+    y += 12;
+    doc.setFont('helvetica', 'bold'); doc.setFontSize(14); doc.setTextColor(245, 158, 11);
+    doc.text('Total estimé : ' + total.toLocaleString('fr-FR') + ' FCFA', 14, y);
+
+    y += 14;
+    doc.setFont('helvetica', 'normal'); doc.setFontSize(8); doc.setTextColor(148, 163, 184);
+    doc.text('Calcul basé sur les heures effectuées enregistrées dans le profil enseignant. Ce document est un', 14, y);
+    doc.text('récapitulatif estimatif et ne remplace pas un bulletin de paie officiel.', 14, y + 4);
+    doc.text('Document généré électroniquement le ' + new Date().toLocaleDateString('fr-FR') + ' via UniManage.', 14, y + 12);
+
+    doc.save(`remuneration_${(t.nom||'enseignant').replace(/\s+/g,'_')}.pdf`);
+    closeEnseignantModal();
   }
 </script>
 </body>

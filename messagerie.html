@@ -1,6 +1,7 @@
 <!DOCTYPE html>
 <html lang="fr">
 <head>
+<style>html{visibility:hidden}</style>
   <meta charset="UTF-8"/>
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
   <title>UniManage — Messagerie</title>
@@ -406,6 +407,10 @@
   </style>
 </head>
 <body>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script src="supabase-config.js"></script>
+<script src="auth-guard.js"></script>
+<script>window.authReady = requireAuth();</script>
 
 <!-- TOPBAR -->
 <header class="topbar">
@@ -415,7 +420,7 @@
     <div class="topbar-title">💬 Messagerie</div>
   </div>
   <div class="topbar-right">
-    <a href="dashboard.html" class="back-btn">← Tableau de bord</a>
+    <a href="dashboard.html" id="backBtn" class="back-btn">← Tableau de bord</a>
     <button class="compose-btn" onclick="openCompose()">✏️ Nouveau message</button>
   </div>
 </header>
@@ -426,65 +431,18 @@
   <aside class="sidebar-left">
     <div class="sidebar-user">
       <div class="user-pill">
-        <div class="user-av">DA</div>
+        <div class="user-av" id="myAv">--</div>
         <div>
-          <div class="user-nm">Dr. Amavi Kokou</div>
-          <div class="user-rl">Directeur Académique</div>
+          <div class="user-nm" id="myName">…</div>
+          <div class="user-rl" id="myRole">…</div>
         </div>
-        <div class="online-dot"></div>
       </div>
     </div>
 
-    <nav class="sidebar-nav">
-      <div class="nav-label">Boîte de réception</div>
-      <div class="nav-it active" onclick="setNav(this)">
-        <span class="nav-it-icon">📥</span> Reçus
-        <span class="nav-it-count">5</span>
-      </div>
-      <div class="nav-it" onclick="setNav(this)">
-        <span class="nav-it-icon">📤</span> Envoyés
-      </div>
-      <div class="nav-it" onclick="setNav(this)">
-        <span class="nav-it-icon">⭐</span> Favoris
-        <span class="nav-it-count">2</span>
-      </div>
-      <div class="nav-it" onclick="setNav(this)">
-        <span class="nav-it-icon">📢</span> Annonces
-        <span class="nav-it-count">3</span>
-      </div>
-      <div class="nav-it" onclick="setNav(this)">
-        <span class="nav-it-icon">🗂️</span> Archives
-      </div>
-
-      <div class="nav-label">Groupes</div>
-      <div class="nav-it" onclick="setNav(this)">
-        <span class="nav-it-icon">💻</span> Info L2 — Groupe
-      </div>
-      <div class="nav-it" onclick="setNav(this)">
-        <span class="nav-it-icon">👨‍🏫</span> Dept. Informatique
-      </div>
-      <div class="nav-it" onclick="setNav(this)">
-        <span class="nav-it-icon">🏛️</span> Direction Générale
-      </div>
-    </nav>
-
     <div class="sidebar-contacts">
-      <div class="nav-label">Contacts en ligne</div>
-      <div class="contact-item" onclick="openChat('KA','Kofi Adzoa','Étudiant L2')">
-        <div class="contact-av" style="background:linear-gradient(135deg,var(--blue),var(--sky))">KA<div class="online"></div></div>
-        <div><div class="contact-nm">Kofi Adzoa</div><div class="contact-role">Étudiant</div></div>
-      </div>
-      <div class="contact-item" onclick="openChat('KM','Dr. Kodjo Mensah','Enseignant')">
-        <div class="contact-av" style="background:linear-gradient(135deg,var(--gold),#f59e0b)">KM<div class="online"></div></div>
-        <div><div class="contact-nm">Dr. K. Mensah</div><div class="contact-role">Enseignant</div></div>
-      </div>
-      <div class="contact-item" onclick="openChat('SC','Sœur Clémentine','Scolarité')">
-        <div class="contact-av" style="background:linear-gradient(135deg,var(--success),#34d399)">SC</div>
-        <div><div class="contact-nm">S. Clémentine</div><div class="contact-role">Scolarité</div></div>
-      </div>
-      <div class="contact-item" onclick="openChat('ND','Dr. Nana Dodzi','Enseignant')">
-        <div class="contact-av" style="background:linear-gradient(135deg,#ec4899,#f472b6)">ND<div class="online"></div></div>
-        <div><div class="contact-nm">Dr. N. Dodzi</div><div class="contact-role">Enseignant</div></div>
+      <div class="nav-label">Contacts</div>
+      <div id="contactsList">
+        <div style="padding:.5rem 1rem;font-size:.72rem;color:rgba(255,255,255,0.35)">Chargement…</div>
       </div>
     </div>
   </aside>
@@ -495,113 +453,12 @@
       <input class="search-inp" placeholder="🔍 Rechercher une conversation..."/>
     </div>
     <div class="conv-tabs">
-      <div class="conv-tab active" onclick="setConvTab(this)">Tous</div>
-      <div class="conv-tab" onclick="setConvTab(this)">Non lus (5)</div>
-      <div class="conv-tab" onclick="setConvTab(this)">Groupes</div>
+      <div class="conv-tab active" data-filter="tous" onclick="setConvTab(this)">Tous</div>
+      <div class="conv-tab" data-filter="nonlus" onclick="setConvTab(this)">Non lus <span id="convTabUnread"></span></div>
+      <div class="conv-tab" data-filter="groupes" onclick="setConvTab(this)">Groupes</div>
     </div>
-    <div class="conv-items">
-
-      <!-- Conv 1 — active -->
-      <div class="conv-item active" onclick="selectConv(this,'KM','Dr. Kodjo Mensah','Enseignant · Algorithmique','gold')">
-        <div class="conv-av" style="background:linear-gradient(135deg,var(--gold),#f59e0b)">
-          KM<div class="status-dot" style="background:var(--success)"></div>
-        </div>
-        <div class="conv-body">
-          <div class="conv-top">
-            <div class="conv-name">Dr. Kodjo Mensah</div>
-            <div class="conv-time">09:32</div>
-          </div>
-          <div class="conv-preview">Les notes du TD3 ont été saisies ✓</div>
-        </div>
-      </div>
-
-      <!-- Conv 2 — unread -->
-      <div class="conv-item unread" onclick="selectConv(this,'KA','Kofi Adzoa','Étudiant · Info L2','blue')">
-        <div class="conv-av" style="background:linear-gradient(135deg,var(--blue),var(--sky))">
-          KA<div class="status-dot" style="background:var(--success)"></div>
-        </div>
-        <div class="conv-body">
-          <div class="conv-top">
-            <div class="conv-name">Kofi Adzoa</div>
-            <div class="conv-time">08:15</div>
-          </div>
-          <div class="conv-preview">Bonjour, ma convocation est disponible ?</div>
-        </div>
-        <div class="conv-unread-dot"></div>
-      </div>
-
-      <!-- Conv 3 — groupe -->
-      <div class="conv-item" onclick="selectConv(this,'IL2','Info L2 — Groupe','287 membres','purple')">
-        <div class="conv-av" style="background:linear-gradient(135deg,var(--purple),#7c3aed)">
-          IL2
-        </div>
-        <div class="conv-body">
-          <div class="conv-top">
-            <div class="conv-name">Info L2 — Groupe</div>
-            <div class="conv-time">Hier</div>
-          </div>
-          <div class="conv-preview">📢 Examen reporté au 04 Fév 2025</div>
-        </div>
-        <div class="conv-unread-dot" style="background:var(--purple)"></div>
-      </div>
-
-      <!-- Conv 4 -->
-      <div class="conv-item" onclick="selectConv(this,'SC','Sœur Clémentine','Responsable Scolarité','green')">
-        <div class="conv-av" style="background:linear-gradient(135deg,var(--success),#34d399)">
-          SC
-        </div>
-        <div class="conv-body">
-          <div class="conv-top">
-            <div class="conv-name">Sœur Clémentine</div>
-            <div class="conv-time">Hier</div>
-          </div>
-          <div class="conv-preview">Le calendrier S2 est prêt pour validation</div>
-        </div>
-      </div>
-
-      <!-- Conv 5 -->
-      <div class="conv-item" onclick="selectConv(this,'MK','M. Mawuli Kpodo','Comptable','navy')">
-        <div class="conv-av" style="background:linear-gradient(135deg,#0D1B2A,#1a2d42)">
-          MK
-        </div>
-        <div class="conv-body">
-          <div class="conv-top">
-            <div class="conv-name">M. Mawuli Kpodo</div>
-            <div class="conv-time">20 Jan</div>
-          </div>
-          <div class="conv-preview">Rapport financier Jan transmis</div>
-        </div>
-      </div>
-
-      <!-- Conv 6 — annonce -->
-      <div class="conv-item" onclick="selectConv(this,'DG','Direction Générale','Groupe · 8 membres','navy')">
-        <div class="conv-av" style="background:linear-gradient(135deg,#0D1B2A,#1a2d42)">
-          DG
-        </div>
-        <div class="conv-body">
-          <div class="conv-top">
-            <div class="conv-name">Direction Générale</div>
-            <div class="conv-time">19 Jan</div>
-          </div>
-          <div class="conv-preview">📢 Réunion de direction — 25 Jan 2025</div>
-        </div>
-        <div class="conv-unread-dot" style="background:var(--gold)"></div>
-      </div>
-
-      <!-- Conv 7 -->
-      <div class="conv-item" onclick="selectConv(this,'YD','Yao Dodzi','Étudiant · Droit L3','blue')">
-        <div class="conv-av" style="background:linear-gradient(135deg,#ec4899,#f472b6)">
-          YD
-        </div>
-        <div class="conv-body">
-          <div class="conv-top">
-            <div class="conv-name">Yao Dodzi</div>
-            <div class="conv-time">18 Jan</div>
-          </div>
-          <div class="conv-preview">Merci pour la correction du devoir 📚</div>
-        </div>
-      </div>
-
+    <div class="conv-items" id="convItems">
+      <div style="padding:1.5rem;text-align:center;color:var(--gray);font-size:.8rem">Chargement…</div>
     </div>
   </div>
 
@@ -615,7 +472,7 @@
           <div class="chat-header-name" id="chatName">Dr. Kodjo Mensah</div>
           <div class="chat-header-sub" id="chatSub">Enseignant · Algorithmique</div>
         </div>
-        <div class="chat-header-status" id="chatStatus">En ligne</div>
+        <div class="chat-header-status" id="chatStatus" style="display:none"></div>
       </div>
       <div class="chat-actions">
         <div class="chat-action-btn" onclick="showToast('📞 Appel en cours...')">📞</div>
@@ -627,95 +484,7 @@
 
     <!-- Messages -->
     <div class="chat-messages" id="chatMessages">
-
-      <div class="date-divider">Aujourd'hui — 22 Janvier 2025</div>
-
-      <!-- Msg reçu -->
-      <div class="msg-row">
-        <div class="msg-av-sm" style="background:linear-gradient(135deg,var(--gold),#f59e0b)">KM</div>
-        <div class="msg-bubble other">
-          Bonjour Directeur, j'ai terminé la saisie des notes du TD3 pour le groupe A d'Algorithmique L2.
-          <div class="msg-meta"><span>09:14</span></div>
-        </div>
-      </div>
-
-      <!-- Msg reçu avec fichier -->
-      <div class="msg-row">
-        <div class="msg-av-sm" style="background:linear-gradient(135deg,var(--gold),#f59e0b)">KM</div>
-        <div class="msg-bubble other">
-          Voici le récapitulatif des notes :
-          <div class="msg-file" onclick="showToast('📄 Notes_TD3_AlgoL2.pdf téléchargé')">
-            <div class="msg-file-icon">📄</div>
-            <div><div class="msg-file-name">Notes_TD3_AlgoL2.pdf</div><div class="msg-file-size">248 KB</div></div>
-          </div>
-          <div class="msg-meta"><span>09:15</span></div>
-        </div>
-      </div>
-
-      <!-- Msg envoyé -->
-      <div class="msg-row mine">
-        <div class="msg-av-sm" style="background:linear-gradient(135deg,var(--blue),var(--sky))">DA</div>
-        <div class="msg-bubble mine">
-          Parfait ! J'ai bien reçu le document. La moyenne de classe est correcte ?
-          <div class="msg-meta"><span>09:18</span><span class="msg-check">✓✓</span></div>
-        </div>
-      </div>
-
-      <!-- Msg reçu -->
-      <div class="msg-row">
-        <div class="msg-av-sm" style="background:linear-gradient(135deg,var(--gold),#f59e0b)">KM</div>
-        <div class="msg-bubble other">
-          Oui, la moyenne est de <strong>13.4/20</strong>. 89% de réussite sur le groupe. Deux étudiants sont en difficulté, je prévois une séance de rattrapage vendredi.
-          <div class="msg-meta"><span>09:22</span></div>
-        </div>
-      </div>
-
-      <!-- Annonce -->
-      <div class="msg-annonce">
-        <div class="msg-annonce-title">📢 Annonce officielle</div>
-        <div class="msg-annonce-body">L'examen de Réseaux Informatiques prévu le 28 Janvier est reporté au <strong>04 Février 2025</strong> à 08h00 — Amphithéâtre A. Merci de diffuser l'information aux étudiants concernés.</div>
-        <div class="msg-annonce-meta">Direction Académique · 09:28 · Envoyé à 287 étudiants</div>
-      </div>
-
-      <!-- Msg envoyé -->
-      <div class="msg-row mine">
-        <div class="msg-av-sm" style="background:linear-gradient(135deg,var(--blue),var(--sky))">DA</div>
-        <div class="msg-bubble mine">
-          Très bien. Pour la séance de rattrapage, utilisez la Salle B2 — elle est libre vendredi 14h–16h.
-          <div class="msg-meta"><span>09:29</span><span class="msg-check">✓✓</span></div>
-        </div>
-      </div>
-
-      <!-- Msg reçu -->
-      <div class="msg-row">
-        <div class="msg-av-sm" style="background:linear-gradient(135deg,var(--gold),#f59e0b)">KM</div>
-        <div class="msg-bubble other">
-          Noté ! Je prépare aussi le sujet pour la session de rattrapage. Je vous l'envoie pour validation avant vendredi.
-          <div class="msg-meta"><span>09:31</span></div>
-        </div>
-      </div>
-
-      <!-- Msg envoyé -->
-      <div class="msg-row mine">
-        <div class="msg-av-sm" style="background:linear-gradient(135deg,var(--blue),var(--sky))">DA</div>
-        <div class="msg-bubble mine">
-          Les notes du TD3 ont été saisies ✓
-          <div class="msg-meta"><span>09:32</span><span class="msg-check">✓✓</span></div>
-        </div>
-      </div>
-
-      <!-- Typing -->
-      <div class="typing-indicator" id="typingIndicator" style="display:none">
-        <div class="msg-av-sm" style="background:linear-gradient(135deg,var(--gold),#f59e0b)">KM</div>
-        <div class="msg-bubble other" style="padding:.6rem .85rem">
-          <div class="typing-dots">
-            <div class="typing-dot"></div>
-            <div class="typing-dot"></div>
-            <div class="typing-dot"></div>
-          </div>
-        </div>
-      </div>
-
+      <div style="text-align:center;color:var(--gray);padding:2rem;font-size:.85rem">Sélectionnez une conversation ou un contact pour commencer.</div>
     </div>
 
     <!-- Input zone -->
@@ -743,46 +512,14 @@
   <!-- ── INFO PANEL ── -->
   <aside class="info-panel">
     <div class="info-header">
-      <div class="info-av" id="infoAv" style="background:linear-gradient(135deg,var(--gold),#f59e0b)">KM</div>
-      <div class="info-name" id="infoName">Dr. Kodjo Mensah</div>
-      <div class="info-role" id="infoRole">Enseignant permanent</div>
-      <div class="info-status">En ligne</div>
+      <div class="info-av" id="infoAv" style="background:linear-gradient(135deg,var(--gold),#f59e0b)">--</div>
+      <div class="info-name" id="infoName">—</div>
+      <div class="info-role" id="infoRole">—</div>
     </div>
 
     <div class="info-section">
       <div class="info-section-title">Informations</div>
-      <div class="info-field"><span>Spécialité :</span> Algorithmique</div>
-      <div class="info-field"><span>Département :</span> Informatique</div>
-      <div class="info-field"><span>Email :</span> kodjo@univ.tg</div>
-      <div class="info-field"><span>Tél :</span> +228 90 XX XX XX</div>
-    </div>
-
-    <div class="info-section">
-      <div class="info-section-title">Actions rapides</div>
-      <div style="display:flex;flex-direction:column;gap:.5rem">
-        <button onclick="showToast('👤 Profil complet ouvert')" style="width:100%;padding:.55rem;border-radius:8px;border:1px solid var(--border);background:white;font-size:.78rem;cursor:pointer;font-weight:500;transition:all .2s" onmouseover="this.style.borderColor='var(--blue)'" onmouseout="this.style.borderColor='var(--border)'">👤 Voir profil</button>
-        <button onclick="showToast('📅 Emploi du temps ouvert')" style="width:100%;padding:.55rem;border-radius:8px;border:1px solid var(--border);background:white;font-size:.78rem;cursor:pointer;font-weight:500;transition:all .2s" onmouseover="this.style.borderColor='var(--blue)'" onmouseout="this.style.borderColor='var(--border)'">📅 Son planning</button>
-        <button onclick="showToast('📊 Notes ouvertes')" style="width:100%;padding:.55rem;border-radius:8px;border:1px solid var(--border);background:white;font-size:.78rem;cursor:pointer;font-weight:500;transition:all .2s" onmouseover="this.style.borderColor='var(--blue)'" onmouseout="this.style.borderColor='var(--border)'">📊 Ses notes saisies</button>
-        <button onclick="showToast('💰 Salaire ouvert')" style="width:100%;padding:.55rem;border-radius:8px;border:1px solid var(--border);background:white;font-size:.78rem;cursor:pointer;font-weight:500;transition:all .2s" onmouseover="this.style.borderColor='var(--blue)'" onmouseout="this.style.borderColor='var(--border)'">💰 Sa fiche de paie</button>
-      </div>
-    </div>
-
-    <div class="info-section">
-      <div class="info-section-title">Fichiers partagés</div>
-      <div class="shared-files">
-        <div class="shared-file" onclick="showToast('📄 Notes_TD3_AlgoL2.pdf téléchargé')">
-          <div class="shared-file-icon">📄</div>
-          <div><div class="shared-file-name">Notes_TD3_AlgoL2.pdf</div><div class="shared-file-date">Aujourd'hui</div></div>
-        </div>
-        <div class="shared-file" onclick="showToast('📊 Rapport_S1_2024.xlsx téléchargé')">
-          <div class="shared-file-icon">📊</div>
-          <div><div class="shared-file-name">Rapport_S1_2024.xlsx</div><div class="shared-file-date">15 Jan 2025</div></div>
-        </div>
-        <div class="shared-file" onclick="showToast('📄 Sujet_Exam_AlgoL2.pdf téléchargé')">
-          <div class="shared-file-icon">📄</div>
-          <div><div class="shared-file-name">Sujet_Exam_AlgoL2.pdf</div><div class="shared-file-date">10 Jan 2025</div></div>
-        </div>
-      </div>
+      <div id="infoFields"><div class="info-field"><span>—</span></div></div>
     </div>
   </aside>
 
@@ -793,148 +530,286 @@
   <div class="modal">
     <button class="modal-close" onclick="closeCompose()">✕</button>
     <div class="modal-title">✏️ Nouveau message</div>
+    <div id="composeError" style="display:none;background:rgba(239,68,68,0.08);color:var(--danger);border:1px solid rgba(239,68,68,0.2);padding:.6rem 1rem;border-radius:8px;font-size:.83rem;margin-bottom:1rem"></div>
     <div class="form-group">
       <label>Destinataire(s)</label>
-      <select class="form-select">
-        <option>Sélectionner...</option>
-        <option>Dr. Kodjo Mensah (Enseignant)</option>
-        <option>Kofi Adzoa (Étudiant)</option>
-        <option>Sœur Clémentine (Scolarité)</option>
-        <option>M. Mawuli Kpodo (Comptable)</option>
-        <option>📢 Tous les enseignants</option>
-        <option>📢 Tous les étudiants L2</option>
-        <option>📢 Département Informatique</option>
-        <option>📢 Direction Générale</option>
-      </select>
+      <select class="form-select" id="composeTo"><option value="">Sélectionner...</option></select>
     </div>
     <div class="form-group">
       <label>Type de message</label>
       <select class="form-select" id="msgType">
-        <option>💬 Message privé</option>
-        <option>📢 Annonce officielle</option>
-        <option>⚠️ Alerte urgente</option>
-        <option>📅 Convocation</option>
+        <option>Message privé</option>
+        <option>Annonce officielle</option>
+        <option>Alerte urgente</option>
+        <option>Convocation</option>
       </select>
     </div>
     <div class="form-group">
-      <label>Objet</label>
-      <input class="form-input" placeholder="Objet du message"/>
-    </div>
-    <div class="form-group">
       <label>Message</label>
-      <textarea class="form-textarea" placeholder="Rédigez votre message..."></textarea>
+      <textarea class="form-textarea" id="composeBody" placeholder="Rédigez votre message..."></textarea>
     </div>
-    <div style="display:flex;align-items:center;gap:.75rem;margin-bottom:.75rem">
-      <button onclick="showToast('📎 Fichier joint')" style="padding:.5rem 1rem;border-radius:8px;border:1px solid var(--border);background:white;font-size:.78rem;cursor:pointer;font-weight:500">📎 Joindre un fichier</button>
-      <span style="font-size:.75rem;color:var(--gray)">Max 10MB par fichier</span>
-    </div>
-    <button class="btn-send-modal" onclick="showToast('✅ Message envoyé avec succès !');closeCompose()">📤 Envoyer le message</button>
+    <button class="btn-send-modal" id="composeSubmit" onclick="submitCompose()">📤 Envoyer le message</button>
   </div>
 </div>
 
 <div class="toast" id="toast"></div>
 
 <script>
-  // ── Navigation sidebar ──
-  function setNav(el){
-    document.querySelectorAll('.nav-it').forEach(n=>n.classList.remove('active'));
-    el.classList.add('active');
+  // ── Toast ──
+  let tt;
+  function showToast(msg){
+    const t=document.getElementById('toast');
+    t.textContent=msg;t.classList.add('show');
+    clearTimeout(tt);tt=setTimeout(()=>t.classList.remove('show'),3000);
   }
+
+  const ROLE_HOME = { admin:'dashboard.html', enseignant:'enseignant.html', etudiant:'etudiant.html', superadmin:'superadmin.html', parent:'parents.html' };
+  const ROLE_LABEL = { admin:'Administration', superadmin:'Super Admin', enseignant:'Enseignant', etudiant:'Étudiant', parent:'Parent' };
+  const gradients = ['linear-gradient(135deg,#1A56DB,#3B82F6)','linear-gradient(135deg,#F59E0B,#f59e0b)','linear-gradient(135deg,#10B981,#34d399)','linear-gradient(135deg,#8B5CF6,#7c3aed)','linear-gradient(135deg,#ec4899,#f472b6)','linear-gradient(135deg,#0D1B2A,#1a2d42)'];
+  function gradientFor(id){ let h=0; for(const c of (id||'')) h=(h*31+c.charCodeAt(0))>>>0; return gradients[h % gradients.length]; }
+  function initialsOf(name){
+    const words = (name||'?').replace(/\p{Extended_Pictographic}/gu, '').trim().split(' ').filter(Boolean);
+    return (words.map(s => s[0]).join('').slice(0,2) || '?').toUpperCase();
+  }
+
+  let me = null;
+  let allContacts = [];           // [{id, full_name, role, subtitle}]
+  let contactsById = {};
+  let allConversations = [];      // enriched conversation objects
+  let activeConversationId = null;
+  let convTabFilter = 'tous';
+
+  // ── Contacts (vrais profils de l'université) ──
+  async function loadContacts() {
+    let query = supabaseClient.from('profiles').select('id, full_name, email, role, university').neq('id', me.id);
+    if (me.role !== 'superadmin') query = query.eq('university', me.university);
+    const { data: profiles, error } = await query;
+    if (error) { console.error(error); return; }
+
+    const { data: studs } = await supabaseClient.from('students').select('profile_id, department, level').not('profile_id', 'is', null);
+    const { data: teachs } = await supabaseClient.from('teachers').select('profile_id, department, specialite').not('profile_id', 'is', null);
+    const studByProfile = {}; (studs || []).forEach(s => studByProfile[s.profile_id] = s);
+    const teachByProfile = {}; (teachs || []).forEach(t => teachByProfile[t.profile_id] = t);
+
+    allContacts = (profiles || []).map(p => {
+      let subtitle = ROLE_LABEL[p.role] || p.role;
+      if (p.role === 'etudiant' && studByProfile[p.id]) subtitle = `Étudiant · ${studByProfile[p.id].department||''} ${studByProfile[p.id].level||''}`.trim();
+      if (p.role === 'enseignant' && teachByProfile[p.id]) subtitle = `Enseignant · ${teachByProfile[p.id].specialite||''}`.trim();
+      return { id: p.id, full_name: p.full_name || p.email, email: p.email, role: p.role, subtitle };
+    });
+    contactsById = {}; allContacts.forEach(c => contactsById[c.id] = c);
+
+    document.getElementById('contactsList').innerHTML = allContacts.length === 0
+      ? '<div style="padding:.5rem 1rem;font-size:.72rem;color:rgba(255,255,255,0.35)">Aucun autre contact.</div>'
+      : allContacts.map(c => `
+        <div class="contact-item" onclick="openOrCreateDM('${c.id}')">
+          <div class="contact-av" style="background:${gradientFor(c.id)}">${initialsOf(c.full_name)}</div>
+          <div><div class="contact-nm">${c.full_name}</div><div class="contact-role">${c.subtitle}</div></div>
+        </div>`).join('');
+
+    document.getElementById('composeTo').innerHTML = '<option value="">Sélectionner...</option>' +
+      allContacts.map(c => `<option value="dm:${c.id}">${c.full_name} (${c.subtitle})</option>`).join('') +
+      `<option value="bcast:enseignant">📢 Tous les enseignants</option>
+       <option value="bcast:etudiant">📢 Tous les étudiants</option>
+       <option value="bcast:parent">📢 Tous les parents</option>`;
+  }
+
+  // ── Conversations ──
+  async function loadConversations() {
+    const { data: myParts, error: e1 } = await supabaseClient
+      .from('conversation_participants').select('conversation_id, last_read_at').eq('profile_id', me.id);
+    if (e1) { console.error(e1); return; }
+    if (!myParts || myParts.length === 0) { allConversations = []; renderConversationList(); return; }
+
+    const convIds = myParts.map(p => p.conversation_id);
+    const myReadMap = {}; myParts.forEach(p => myReadMap[p.conversation_id] = p.last_read_at);
+
+    const { data: convs } = await supabaseClient.from('conversations').select('*').in('id', convIds);
+    const { data: parts } = await supabaseClient
+      .from('conversation_participants').select('conversation_id, profile_id, profiles(id, full_name, role)').in('conversation_id', convIds);
+    const { data: msgs } = await supabaseClient
+      .from('messages').select('conversation_id, body, sender_id, created_at').in('conversation_id', convIds).order('created_at', { ascending: true });
+
+    const partsByConv = {}; (parts || []).forEach(p => { (partsByConv[p.conversation_id] ||= []).push(p); });
+    const msgsByConv = {}; (msgs || []).forEach(m => { (msgsByConv[m.conversation_id] ||= []).push(m); });
+
+    allConversations = (convs || []).map(c => {
+      const participants = (partsByConv[c.id] || []).map(p => p.profiles).filter(Boolean);
+      const others = participants.filter(p => p.id !== me.id);
+      const convMsgs = msgsByConv[c.id] || [];
+      const lastMsg = convMsgs[convMsgs.length - 1] || null;
+      const title = c.is_group ? (c.title || 'Groupe') : (others[0]?.full_name || '—');
+      const unread = lastMsg && new Date(lastMsg.created_at) > new Date(myReadMap[c.id]);
+      return { ...c, participants, others, messages: convMsgs, lastMsg, title, unread };
+    }).sort((a, b) => {
+      const ta = a.lastMsg ? new Date(a.lastMsg.created_at) : new Date(a.created_at);
+      const tb = b.lastMsg ? new Date(b.lastMsg.created_at) : new Date(b.created_at);
+      return tb - ta;
+    });
+
+    renderConversationList();
+  }
+
+  function fmtConvTime(dateStr) {
+    const d = new Date(dateStr);
+    const now = new Date();
+    const sameDay = d.toDateString() === now.toDateString();
+    if (sameDay) return d.toLocaleTimeString('fr-FR', { hour:'2-digit', minute:'2-digit' });
+    const yesterday = new Date(now); yesterday.setDate(now.getDate() - 1);
+    if (d.toDateString() === yesterday.toDateString()) return 'Hier';
+    return d.toLocaleDateString('fr-FR', { day:'2-digit', month:'short' });
+  }
+
+  function renderConversationList() {
+    const el = document.getElementById('convItems');
+    const unreadCount = allConversations.filter(c => c.unread).length;
+    document.getElementById('convTabUnread').textContent = unreadCount > 0 ? `(${unreadCount})` : '';
+
+    let list = allConversations;
+    if (convTabFilter === 'nonlus') list = list.filter(c => c.unread);
+    if (convTabFilter === 'groupes') list = list.filter(c => c.is_group);
+
+    if (list.length === 0) {
+      el.innerHTML = '<div style="padding:1.5rem;text-align:center;color:var(--gray);font-size:.8rem">Aucune conversation.</div>';
+      return;
+    }
+
+    el.innerHTML = list.map(c => {
+      const av = c.is_group ? initialsOf(c.title) : initialsOf(c.title);
+      const grad = gradientFor(c.id);
+      const preview = c.lastMsg ? (c.lastMsg.sender_id === me.id ? 'Vous : ' : '') + c.lastMsg.body : 'Aucun message';
+      const time = c.lastMsg ? fmtConvTime(c.lastMsg.created_at) : '';
+      return `<div class="conv-item ${c.id===activeConversationId?'active':''} ${c.unread?'unread':''}" onclick="selectConversation('${c.id}')">
+        <div class="conv-av" style="background:${grad}">${av}</div>
+        <div class="conv-body">
+          <div class="conv-top"><div class="conv-name">${c.title}</div><div class="conv-time">${time}</div></div>
+          <div class="conv-preview">${preview}</div>
+        </div>
+        ${c.unread ? '<div class="conv-unread-dot"></div>' : ''}
+      </div>`;
+    }).join('');
+  }
+
   function setConvTab(el){
     document.querySelectorAll('.conv-tab').forEach(t=>t.classList.remove('active'));
     el.classList.add('active');
+    convTabFilter = el.dataset.filter;
+    renderConversationList();
   }
 
-  // ── Sélection conversation ──
-  const gradients = {
-    blue:'linear-gradient(135deg,#1A56DB,#3B82F6)',
-    gold:'linear-gradient(135deg,#F59E0B,#f59e0b)',
-    green:'linear-gradient(135deg,#10B981,#34d399)',
-    purple:'linear-gradient(135deg,#8B5CF6,#7c3aed)',
-    navy:'linear-gradient(135deg,#0D1B2A,#1a2d42)'
-  };
+  // ── Sélection / ouverture d'une conversation ──
+  async function selectConversation(conversationId) {
+    activeConversationId = conversationId;
+    renderConversationList();
 
-  function selectConv(el, initials, name, sub, color){
-    document.querySelectorAll('.conv-item').forEach(c=>c.classList.remove('active'));
-    el.classList.add('active');
-    el.classList.remove('unread');
-    el.querySelector('.conv-unread-dot')?.remove();
+    const conv = allConversations.find(c => c.id === conversationId);
+    if (!conv) return;
 
-    const g = gradients[color] || gradients.blue;
-    document.getElementById('chatAv').textContent = initials;
-    document.getElementById('chatAv').style.background = g;
-    document.getElementById('chatName').textContent = name;
-    document.getElementById('chatSub').textContent = sub;
-    document.getElementById('infoAv').textContent = initials;
-    document.getElementById('infoAv').style.background = g;
-    document.getElementById('infoName').textContent = name;
-    document.getElementById('infoRole').textContent = sub;
+    const grad = gradientFor(conv.id);
+    const av = initialsOf(conv.title);
+    document.getElementById('chatAv').textContent = av;
+    document.getElementById('chatAv').style.background = grad;
+    document.getElementById('chatName').textContent = conv.title;
+    document.getElementById('infoAv').textContent = av;
+    document.getElementById('infoAv').style.background = grad;
+    document.getElementById('infoName').textContent = conv.title;
 
-    // Simulate typing
-    showTyping();
+    const statusEl = document.getElementById('chatStatus');
+    const infoFields = document.getElementById('infoFields');
+    if (conv.is_group) {
+      document.getElementById('chatSub').textContent = `Groupe · ${conv.participants.length} membres`;
+      document.getElementById('infoRole').textContent = `Groupe · ${conv.participants.length} membres`;
+      statusEl.style.display = 'none';
+      infoFields.innerHTML = conv.participants.map(p => `<div class="info-field">${p.full_name} <span>(${ROLE_LABEL[p.role]||p.role})</span></div>`).join('');
+    } else {
+      const other = conv.others[0];
+      const contact = contactsById[other?.id];
+      document.getElementById('chatSub').textContent = contact?.subtitle || (ROLE_LABEL[other?.role]||'');
+      document.getElementById('infoRole').textContent = contact?.subtitle || '';
+      statusEl.style.display = 'none';
+      infoFields.innerHTML = contact ? `
+        <div class="info-field"><span>Rôle :</span> ${ROLE_LABEL[contact.role]||contact.role}</div>
+        <div class="info-field"><span>Email :</span> ${contact.email||'—'}</div>` : '';
+    }
+
+    renderMessages(conv.messages);
+
+    // Marquer comme lu
+    conv.unread = false;
+    renderConversationList();
+    await supabaseClient.from('conversation_participants')
+      .update({ last_read_at: new Date().toISOString() })
+      .eq('conversation_id', conversationId).eq('profile_id', me.id);
   }
 
-  function openChat(initials, name, sub){
-    showToast('💬 Conversation ouverte avec '+name);
+  function renderMessages(messages) {
+    const el = document.getElementById('chatMessages');
+    if (!messages || messages.length === 0) {
+      el.innerHTML = '<div style="text-align:center;color:var(--gray);padding:2rem;font-size:.85rem">Aucun message pour le moment. Écrivez le premier !</div>';
+      return;
+    }
+    let lastDate = null;
+    let html = '';
+    messages.forEach(m => {
+      const d = new Date(m.created_at);
+      const dateKey = d.toDateString();
+      if (dateKey !== lastDate) {
+        html += `<div class="date-divider">${d.toLocaleDateString('fr-FR', { weekday:'long', day:'2-digit', month:'long', year:'numeric' })}</div>`;
+        lastDate = dateKey;
+      }
+      const mine = m.sender_id === me.id;
+      const time = d.toLocaleTimeString('fr-FR', { hour:'2-digit', minute:'2-digit' });
+      const senderName = mine ? (me.full_name||'Moi') : (contactsById[m.sender_id]?.full_name || '?');
+      html += `<div class="msg-row ${mine?'mine':''}">
+        <div class="msg-av-sm" style="background:${gradientFor(m.sender_id)}">${initialsOf(senderName)}</div>
+        <div class="msg-bubble ${mine?'mine':'other'}">
+          ${escapeHtml(m.body).replace(/\n/g,'<br/>')}
+          <div class="msg-meta"><span>${time}</span>${mine?'<span class="msg-check">✓</span>':''}</div>
+        </div>
+      </div>`;
+    });
+    el.innerHTML = html;
+    el.scrollTop = el.scrollHeight;
   }
 
-  // ── Typing indicator ──
-  function showTyping(){
-    const t = document.getElementById('typingIndicator');
-    t.style.display = 'flex';
-    setTimeout(()=>{ t.style.display = 'none'; }, 3000);
+  function escapeHtml(s) {
+    const d = document.createElement('div'); d.textContent = s; return d.innerHTML;
   }
 
-  // ── Send message ──
-  function sendMessage(){
+  // ── Ouvrir ou créer un DM depuis les contacts ──
+  async function openOrCreateDM(contactId) {
+    const existing = allConversations.find(c => !c.is_group && c.others.length === 1 && c.others[0].id === contactId);
+    if (existing) { selectConversation(existing.id); return; }
+
+    const newId = crypto.randomUUID();
+    const { error } = await supabaseClient.from('conversations')
+      .insert({ id: newId, university: me.university, is_group: false, created_by: me.id });
+    if (error) { showToast('⚠️ ' + error.message); return; }
+
+    await supabaseClient.from('conversation_participants').insert([
+      { conversation_id: newId, profile_id: me.id },
+      { conversation_id: newId, profile_id: contactId }
+    ]);
+
+    await loadConversations();
+    selectConversation(newId);
+  }
+
+  // ── Envoyer un message ──
+  async function sendMessage(){
     const inp = document.getElementById('msgInput');
     const text = inp.value.trim();
-    if(!text) return;
+    if (!text || !activeConversationId) return;
 
-    const msgs = document.getElementById('chatMessages');
-    const typing = document.getElementById('typingIndicator');
-
-    const row = document.createElement('div');
-    row.className = 'msg-row mine';
-    const now = new Date();
-    const time = now.getHours()+':'+(now.getMinutes()+'').padStart(2,'0');
-    row.innerHTML = `
-      <div class="msg-av-sm" style="background:linear-gradient(135deg,var(--blue),var(--sky))">DA</div>
-      <div class="msg-bubble mine">
-        ${text.replace(/\n/g,'<br/>')}
-        <div class="msg-meta"><span>${time}</span><span class="msg-check">✓</span></div>
-      </div>`;
-
-    msgs.insertBefore(row, typing);
     inp.value = '';
     inp.style.height = 'auto';
-    msgs.scrollTop = msgs.scrollHeight;
 
-    // Simulate reply
-    setTimeout(()=>{
-      typing.style.display = 'flex';
-      msgs.scrollTop = msgs.scrollHeight;
-    }, 800);
-    setTimeout(()=>{
-      typing.style.display = 'none';
-      const replies = [
-        'Merci pour votre message ! Je reviens vers vous rapidement.',
-        'Bien reçu, je m\'en occupe.',
-        'D\'accord, je transmets l\'information.',
-        'Parfait ! À bientôt.'
-      ];
-      const reply = document.createElement('div');
-      reply.className = 'msg-row';
-      const av = document.getElementById('chatAv');
-      reply.innerHTML = `
-        <div class="msg-av-sm" style="background:${av.style.background}">${av.textContent}</div>
-        <div class="msg-bubble other">
-          ${replies[Math.floor(Math.random()*replies.length)]}
-          <div class="msg-meta"><span>${time}</span></div>
-        </div>`;
-      msgs.insertBefore(reply, typing);
-      msgs.scrollTop = msgs.scrollHeight;
-    }, 2500);
+    const { error } = await supabaseClient.from('messages')
+      .insert({ conversation_id: activeConversationId, sender_id: me.id, body: text });
+    if (error) { showToast('⚠️ ' + error.message); return; }
+
+    await loadConversations();
+    selectConversation(activeConversationId);
   }
 
   function handleKey(e){
@@ -947,6 +822,9 @@
 
   // ── Modal composer ──
   function openCompose(){
+    document.getElementById('composeTo').value = '';
+    document.getElementById('composeBody').value = '';
+    document.getElementById('composeError').style.display = 'none';
     document.getElementById('composeModal').classList.add('active');
     document.body.style.overflow='hidden';
   }
@@ -955,19 +833,81 @@
     document.body.style.overflow='';
   }
 
-  // ── Toast ──
-  let tt;
-  function showToast(msg){
-    const t=document.getElementById('toast');
-    t.textContent=msg;t.classList.add('show');
-    clearTimeout(tt);tt=setTimeout(()=>t.classList.remove('show'),3000);
+  async function submitCompose() {
+    const errBox = document.getElementById('composeError');
+    errBox.style.display = 'none';
+
+    const to = document.getElementById('composeTo').value;
+    const type = document.getElementById('msgType').value;
+    const body = document.getElementById('composeBody').value.trim();
+
+    if (!to || !body) {
+      errBox.textContent = '⚠️ Destinataire et message sont obligatoires.';
+      errBox.style.display = 'block';
+      return;
+    }
+
+    const btn = document.getElementById('composeSubmit');
+    btn.disabled = true;
+
+    if (to.startsWith('dm:')) {
+      const contactId = to.slice(3);
+      const existing = allConversations.find(c => !c.is_group && c.others.length === 1 && c.others[0].id === contactId);
+      let convId;
+      if (existing) { convId = existing.id; }
+      else {
+        convId = crypto.randomUUID();
+        const { error } = await supabaseClient.from('conversations')
+          .insert({ id: convId, university: me.university, is_group: false, type, created_by: me.id });
+        if (error) { errBox.textContent = '⚠️ ' + error.message; errBox.style.display='block'; btn.disabled=false; return; }
+        await supabaseClient.from('conversation_participants').insert([
+          { conversation_id: convId, profile_id: me.id },
+          { conversation_id: convId, profile_id: contactId }
+        ]);
+      }
+      await supabaseClient.from('messages').insert({ conversation_id: convId, sender_id: me.id, body });
+      await loadConversations();
+      selectConversation(convId);
+    } else if (to.startsWith('bcast:')) {
+      const role = to.slice(6);
+      const targets = allContacts.filter(c => c.role === role);
+      if (targets.length === 0) {
+        errBox.textContent = '⚠️ Aucun destinataire trouvé pour cette diffusion.';
+        errBox.style.display = 'block'; btn.disabled = false; return;
+      }
+      const title = `📢 Diffusion — ${ROLE_LABEL[role]||role}s`;
+      const groupId = crypto.randomUUID();
+      const { error } = await supabaseClient.from('conversations')
+        .insert({ id: groupId, university: me.university, is_group: true, title, type, created_by: me.id });
+      if (error) { errBox.textContent = '⚠️ ' + error.message; errBox.style.display='block'; btn.disabled=false; return; }
+      await supabaseClient.from('conversation_participants').insert(
+        [{ conversation_id: groupId, profile_id: me.id }, ...targets.map(t => ({ conversation_id: groupId, profile_id: t.id }))]
+      );
+      await supabaseClient.from('messages').insert({ conversation_id: groupId, sender_id: me.id, body });
+      await loadConversations();
+      selectConversation(groupId);
+    }
+
+    btn.disabled = false;
+    closeCompose();
+    showToast('✅ Message envoyé avec succès !');
   }
 
   document.addEventListener('keydown',e=>{if(e.key==='Escape')closeCompose();});
 
-  // Auto scroll
-  const msgs = document.getElementById('chatMessages');
-  msgs.scrollTop = msgs.scrollHeight;
+  // ── Démarrage ──
+  window.authReady.then(async user => {
+    if (!user) return;
+    me = user;
+    document.getElementById('backBtn').href = ROLE_HOME[user.role] || 'login.html';
+    document.getElementById('myAv').textContent = initialsOf(user.full_name);
+    document.getElementById('myAv').style.background = gradientFor(user.id);
+    document.getElementById('myName').textContent = user.full_name || user.email;
+    document.getElementById('myRole').textContent = ROLE_LABEL[user.role] || user.role;
+
+    await loadContacts();
+    await loadConversations();
+  });
 </script>
 </body>
 </html>

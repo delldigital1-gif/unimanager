@@ -1,6 +1,7 @@
 <!DOCTYPE html>
 <html lang="fr">
 <head>
+<style>html{visibility:hidden}</style>
   <meta charset="UTF-8"/>
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
   <title>UniManage — Calendrier Académique</title>
@@ -123,6 +124,10 @@
   </style>
 </head>
 <body>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script src="supabase-config.js"></script>
+<script src="auth-guard.js"></script>
+<script>window.authReady = requireAuth();</script>
 
 <header class="topbar">
   <div style="display:flex;align-items:center;gap:1rem">
@@ -131,9 +136,9 @@
     <span style="font-family:'Syne',sans-serif;font-weight:700;font-size:.95rem">📆 Calendrier Académique</span>
   </div>
   <div class="topbar-right">
-    <a href="dashboard.html" class="back-link">← Dashboard</a>
+    <a href="dashboard.html" id="backLink" class="back-link">← Dashboard</a>
     <button class="btn-outline" onclick="showToast('📅 Synchronisé avec Google Calendar !')">📅 Sync</button>
-    <button class="btn-primary" onclick="openModal()">+ Événement</button>
+    <button class="btn-primary" id="btnAddEvent" style="display:none" onclick="openModal()">+ Événement</button>
   </div>
 </header>
 
@@ -153,22 +158,19 @@
 
     <!-- Event types -->
     <div class="cal-sidebar-title">Types d'événements</div>
-    <div class="event-types">
-      <div class="event-type-item"><div class="event-type-dot" style="background:var(--blue)"></div><span class="event-type-label">Cours</span><span class="event-type-count">156</span></div>
-      <div class="event-type-item"><div class="event-type-dot" style="background:var(--danger)"></div><span class="event-type-label">Examens</span><span class="event-type-count">24</span></div>
-      <div class="event-type-item"><div class="event-type-dot" style="background:var(--gold)"></div><span class="event-type-label">TP / TD</span><span class="event-type-count">48</span></div>
-      <div class="event-type-item"><div class="event-type-dot" style="background:var(--success)"></div><span class="event-type-label">Réunions</span><span class="event-type-count">12</span></div>
-      <div class="event-type-item"><div class="event-type-dot" style="background:var(--purple)"></div><span class="event-type-label">Événements</span><span class="event-type-count">8</span></div>
-      <div class="event-type-item"><div class="event-type-dot" style="background:var(--navy)"></div><span class="event-type-label">Vacances</span><span class="event-type-count">6</span></div>
+    <div class="event-types" id="eventTypesLegend">
+      <div class="event-type-item"><div class="event-type-dot" style="background:var(--blue)"></div><span class="event-type-label">Cours</span><span class="event-type-count" data-type="Cours">0</span></div>
+      <div class="event-type-item"><div class="event-type-dot" style="background:var(--danger)"></div><span class="event-type-label">Examens</span><span class="event-type-count" data-type="Examen">0</span></div>
+      <div class="event-type-item"><div class="event-type-dot" style="background:var(--gold)"></div><span class="event-type-label">TP / TD</span><span class="event-type-count" data-type="TP/TD">0</span></div>
+      <div class="event-type-item"><div class="event-type-dot" style="background:var(--success)"></div><span class="event-type-label">Réunions</span><span class="event-type-count" data-type="Réunion">0</span></div>
+      <div class="event-type-item"><div class="event-type-dot" style="background:var(--purple)"></div><span class="event-type-label">Événements</span><span class="event-type-count" data-type="Événement">0</span></div>
+      <div class="event-type-item"><div class="event-type-dot" style="background:var(--navy)"></div><span class="event-type-label">Vacances</span><span class="event-type-count" data-type="Vacances">0</span></div>
     </div>
 
     <!-- Upcoming events -->
     <div class="cal-sidebar-title">Prochains événements</div>
-    <div class="upcoming-list">
-      <div class="upcoming-item" style="background:rgba(239,68,68,0.06);border-left-color:var(--danger)" onclick="showEventPopup(event,'📝 Examen Algorithmique L2','03 Fév 2025 · 08h00–10h00','Amphithéâtre A · 287 étudiants','var(--danger)')"><div class="upcoming-date">Lun 03 Fév 2025</div><div class="upcoming-name">📝 Examen Algorithmique</div><div class="upcoming-sub">08h00 · Amph. A · Info L2</div></div>
-      <div class="upcoming-item" style="background:rgba(245,158,11,0.06);border-left-color:var(--gold)" onclick="showEventPopup(event,'📋 Réunion Direction','05 Fév 2025 · 10h00–12h00','Salle de conférence · 8 membres','var(--gold)')"><div class="upcoming-date">Mer 05 Fév 2025</div><div class="upcoming-name">📋 Réunion de direction</div><div class="upcoming-sub">10h00 · Salle conf.</div></div>
-      <div class="upcoming-item" style="background:rgba(239,68,68,0.06);border-left-color:var(--danger)" onclick="showEventPopup(event,'📝 Examen Réseaux Info L2','06 Fév 2025 · 08h00–10h00','Labo Informatique · 287 étudiants','var(--danger)')"><div class="upcoming-date">Jeu 06 Fév 2025</div><div class="upcoming-name">📝 Examen Réseaux</div><div class="upcoming-sub">08h00 · Labo Info · Info L2</div></div>
-      <div class="upcoming-item" style="background:rgba(139,92,246,0.06);border-left-color:var(--purple)" onclick="showEventPopup(event,'🎓 Cérémonie remise diplômes','15 Fév 2025 · 10h00–13h00','Amphithéâtre principal · Tous','var(--purple)')"><div class="upcoming-date">Sam 15 Fév 2025</div><div class="upcoming-name">🎓 Remise des diplômes</div><div class="upcoming-sub">10h00 · Amphithéâtre principal</div></div>
+    <div class="upcoming-list" id="upcomingList">
+      <div style="text-align:center;color:var(--gray);font-size:.78rem;padding:.5rem">Chargement…</div>
     </div>
   </aside>
 
@@ -203,13 +205,13 @@
       <div class="week-grid">
         <div class="week-head">
           <div style="padding:.65rem;border-right:1px solid var(--border);background:#F8FAFC"></div>
-          <div class="week-head-cell" style="background:#F8FAFC"><div class="week-head-day">Lun</div><div class="week-head-date">20 Jan</div></div>
-          <div class="week-head-cell" style="background:#F8FAFC"><div class="week-head-day">Mar</div><div class="week-head-date">21 Jan</div></div>
-          <div class="week-head-cell" style="background:#F8FAFC"><div class="week-head-day">Mer</div><div class="week-head-date today">22 Jan</div></div>
-          <div class="week-head-cell" style="background:#F8FAFC"><div class="week-head-day">Jeu</div><div class="week-head-date">23 Jan</div></div>
-          <div class="week-head-cell" style="background:#F8FAFC"><div class="week-head-day">Ven</div><div class="week-head-date">24 Jan</div></div>
-          <div class="week-head-cell" style="background:#F8FAFC;color:var(--danger)"><div class="week-head-day">Sam</div><div class="week-head-date">25 Jan</div></div>
-          <div class="week-head-cell" style="background:#F8FAFC;color:var(--danger)"><div class="week-head-day">Dim</div><div class="week-head-date">26 Jan</div></div>
+          <div class="week-head-cell" style="background:#F8FAFC"><div class="week-head-day">Lun</div><div class="week-head-date" id="whd-0"></div></div>
+          <div class="week-head-cell" style="background:#F8FAFC"><div class="week-head-day">Mar</div><div class="week-head-date" id="whd-1"></div></div>
+          <div class="week-head-cell" style="background:#F8FAFC"><div class="week-head-day">Mer</div><div class="week-head-date" id="whd-2"></div></div>
+          <div class="week-head-cell" style="background:#F8FAFC"><div class="week-head-day">Jeu</div><div class="week-head-date" id="whd-3"></div></div>
+          <div class="week-head-cell" style="background:#F8FAFC"><div class="week-head-day">Ven</div><div class="week-head-date" id="whd-4"></div></div>
+          <div class="week-head-cell" style="background:#F8FAFC;color:var(--danger)"><div class="week-head-day">Sam</div><div class="week-head-date" id="whd-5"></div></div>
+          <div class="week-head-cell" style="background:#F8FAFC;color:var(--danger)"><div class="week-head-day">Dim</div><div class="week-head-date" id="whd-6"></div></div>
         </div>
         <div class="week-body" id="weekBody"></div>
       </div>
@@ -231,9 +233,9 @@
   <div class="popup-type-bar" id="popupBar"></div>
   <div class="popup-title" id="popupTitle"></div>
   <div class="popup-meta" id="popupMeta"></div>
-  <div class="popup-actions">
-    <button style="flex:1;padding:.45rem;border-radius:7px;border:none;background:var(--blue);color:white;font-size:.78rem;font-weight:600;cursor:pointer" onclick="showToast('✏️ Événement modifié');closePopup()">Modifier</button>
-    <button style="padding:.45rem .85rem;border-radius:7px;border:1px solid var(--border);background:white;font-size:.78rem;cursor:pointer" onclick="showToast('🗑️ Événement supprimé');closePopup()">Supprimer</button>
+  <div class="popup-actions" id="popupActions" style="display:none">
+    <button style="flex:1;padding:.45rem;border-radius:7px;border:none;background:var(--blue);color:white;font-size:.78rem;font-weight:600;cursor:pointer" onclick="showToast('✏️ Modification à venir')">Modifier</button>
+    <button style="padding:.45rem .85rem;border-radius:7px;border:1px solid var(--border);background:white;font-size:.78rem;cursor:pointer" onclick="deleteEvent()">Supprimer</button>
   </div>
 </div>
 
@@ -242,54 +244,119 @@
   <div class="modal">
     <button class="modal-close" onclick="closeModal()">✕</button>
     <div class="modal-title">📆 Ajouter un événement</div>
-    <div class="form-group"><label>Titre de l'événement *</label><input class="form-input" placeholder="Ex: Examen Algorithmique L2"/></div>
+    <div id="eventFormError" style="display:none;background:rgba(239,68,68,0.08);color:var(--danger);border:1px solid rgba(239,68,68,0.2);padding:.6rem 1rem;border-radius:8px;font-size:.83rem;margin-bottom:1rem"></div>
+    <div class="form-group"><label>Titre de l'événement *</label><input id="ev_titre" class="form-input" placeholder="Ex: Examen Algorithmique L2"/></div>
     <div class="form-group">
       <label>Type *</label>
-      <select class="form-select">
-        <option>📚 Cours</option><option>📝 Examen</option><option>🔧 TP / TD</option>
-        <option>📋 Réunion</option><option>🎓 Événement</option><option>🏖️ Vacances</option>
+      <select id="ev_type" class="form-select">
+        <option>Cours</option><option>Examen</option><option>TP/TD</option>
+        <option>Réunion</option><option>Événement</option><option>Vacances</option>
       </select>
     </div>
     <div class="form-row">
-      <div class="form-group"><label>Date début *</label><input class="form-input" type="date" value="2025-02-03"/></div>
-      <div class="form-group"><label>Date fin</label><input class="form-input" type="date" value="2025-02-03"/></div>
+      <div class="form-group"><label>Date début *</label><input id="ev_debut" class="form-input" type="date"/></div>
+      <div class="form-group"><label>Date fin</label><input id="ev_fin" class="form-input" type="date"/></div>
     </div>
     <div class="form-row">
-      <div class="form-group"><label>Heure début</label><input class="form-input" type="time" value="08:00"/></div>
-      <div class="form-group"><label>Heure fin</label><input class="form-input" type="time" value="10:00"/></div>
+      <div class="form-group"><label>Heure début</label><input id="ev_heure_debut" class="form-input" type="time" value="08:00"/></div>
+      <div class="form-group"><label>Heure fin</label><input id="ev_heure_fin" class="form-input" type="time" value="10:00"/></div>
     </div>
-    <div class="form-group"><label>Lieu / Salle</label><select class="form-select"><option>Amphithéâtre A</option><option>Amphithéâtre B</option><option>Salle B2</option><option>Labo Info</option><option>Salle de conférence</option></select></div>
-    <div class="form-group"><label>Concerne</label><select class="form-select"><option>Tous</option><option>Informatique L2</option><option>Gestion M1</option><option>Droit L3</option><option>Direction</option></select></div>
-    <div class="form-group"><label>Description</label><input class="form-input" placeholder="Informations complémentaires..."/></div>
-    <button class="btn-submit" onclick="showToast('✅ Événement créé et publié !');closeModal()">Créer l'événement →</button>
+    <div class="form-group"><label>Lieu / Salle</label><input id="ev_lieu" class="form-input" placeholder="Ex: Amphithéâtre A"/></div>
+    <div class="form-group"><label>Concerne</label><input id="ev_audience" class="form-input" placeholder="Ex: Informatique L2, Direction, Tous" value="Tous"/></div>
+    <div class="form-group"><label>Description</label><input id="ev_description" class="form-input" placeholder="Informations complémentaires..."/></div>
+    <button class="btn-submit" id="ev_submit" onclick="submitEvent()">Créer l'événement →</button>
   </div>
 </div>
 
 <div class="toast" id="toast"></div>
 
 <script>
-  // ── Données événements ──
-  const events = {
-    '2025-02-03':[{title:'📝 Examen Algorithmique',color:'#EF4444',bg:'rgba(239,68,68,0.1)',time:'08h–10h'},{title:'📚 Cours BD L1',color:'#1A56DB',bg:'rgba(26,86,219,0.1)',time:'14h–16h'}],
-    '2025-02-04':[{title:'📋 Réunion pédagogique',color:'#10B981',bg:'rgba(16,185,129,0.1)',time:'10h–12h'}],
-    '2025-02-05':[{title:'📋 Direction générale',color:'#F59E0B',bg:'rgba(245,158,11,0.1)',time:'10h–12h'},{title:'🔧 TP Réseaux L2',color:'#F59E0B',bg:'rgba(245,158,11,0.1)',time:'14h–16h'}],
-    '2025-02-06':[{title:'📝 Examen Réseaux',color:'#EF4444',bg:'rgba(239,68,69,0.1)',time:'08h–10h'}],
-    '2025-02-10':[{title:'🔄 Rattrapage Sécurité',color:'#EF4444',bg:'rgba(239,68,68,0.1)',time:'14h–16h'}],
-    '2025-02-12':[{title:'📝 Examen BD',color:'#EF4444',bg:'rgba(239,68,69,0.1)',time:'10h–12h'}],
-    '2025-02-15':[{title:'🎓 Remise des diplômes',color:'#8B5CF6',bg:'rgba(139,92,246,0.1)',time:'10h–13h'}],
-    '2025-02-17':[{title:'🏖️ Vacances de mi-sem.',color:'#0D1B2A',bg:'rgba(13,27,42,0.07)',time:'Journée'}],
-    '2025-02-18':[{title:'🏖️ Vacances de mi-sem.',color:'#0D1B2A',bg:'rgba(13,27,42,0.07)',time:'Journée'}],
-    '2025-02-19':[{title:'🏖️ Vacances de mi-sem.',color:'#0D1B2A',bg:'rgba(13,27,42,0.07)',time:'Journée'}],
-    '2025-02-20':[{title:'🏖️ Vacances de mi-sem.',color:'#0D1B2A',bg:'rgba(13,27,42,0.07)',time:'Journée'}],
-    '2025-02-22':[{title:'📚 Reprise des cours',color:'#1A56DB',bg:'rgba(26,86,219,0.1)',time:'07h–18h'}],
-    '2025-02-24':[{title:'📝 Examen Java',color:'#EF4444',bg:'rgba(239,68,69,0.1)',time:'08h–10h'}],
+  // ── Types d'événements ──
+  const TYPE_META = {
+    'Cours':      { color:'#1A56DB', bg:'rgba(26,86,219,0.1)',   icon:'📚' },
+    'Examen':     { color:'#EF4444', bg:'rgba(239,68,68,0.1)',   icon:'📝' },
+    'TP/TD':      { color:'#F59E0B', bg:'rgba(245,158,11,0.1)',  icon:'🔧' },
+    'Réunion':    { color:'#10B981', bg:'rgba(16,185,129,0.1)',  icon:'📋' },
+    'Événement':  { color:'#8B5CF6', bg:'rgba(139,92,246,0.1)',  icon:'🎓' },
+    'Vacances':   { color:'#0D1B2A', bg:'rgba(13,27,42,0.07)',   icon:'🏖️' },
   };
 
-  let currentYear=2025,currentMonth=1; // 0-indexed: 1=Feb
-  let miniYear=2025,miniMonth=0; // 0-indexed: 0=Jan
+  let me = null;
+  let allEvents = [];       // lignes brutes calendar_events
+  let eventsByDate = {};    // 'YYYY-MM-DD' -> [{id,title,color,bg,time,type,location,audience,start_time,end_time}]
+  let activePopupEventId = null;
+
+  const today = new Date();
+  let currentYear = today.getFullYear(), currentMonth = today.getMonth();
+  let miniYear = today.getFullYear(), miniMonth = today.getMonth();
 
   const months=['Janvier','Février','Mars','Avril','Mai','Juin','Juillet','Août','Septembre','Octobre','Novembre','Décembre'];
   const days=['L','M','M','J','V','S','D'];
+
+  function pad2(n){ return String(n).padStart(2,'0'); }
+  function dateKey(d){ return `${d.getFullYear()}-${pad2(d.getMonth()+1)}-${pad2(d.getDate())}`; }
+  function fmtHM(t){ return t ? t.slice(0,5).replace(':','h') : ''; }
+
+  // ── Charger les vrais événements (Supabase) ──
+  async function loadCalendarEvents() {
+    let query = supabaseClient.from('calendar_events').select('*').order('start_date');
+    if (me.role !== 'superadmin') query = query.eq('university', me.university);
+    const { data, error } = await query;
+    if (error) { console.error(error); return; }
+    allEvents = data || [];
+
+    eventsByDate = {};
+    allEvents.forEach(ev => {
+      const meta = TYPE_META[ev.type] || TYPE_META['Événement'];
+      const timeLabel = ev.start_time ? `${fmtHM(ev.start_time)}–${fmtHM(ev.end_time)}` : 'Journée';
+      let cursor = new Date(ev.start_date + 'T00:00:00');
+      const end = new Date(ev.end_date + 'T00:00:00');
+      while (cursor <= end) {
+        const key = dateKey(cursor);
+        (eventsByDate[key] ||= []).push({
+          id: ev.id, title: `${meta.icon} ${ev.title}`, color: meta.color, bg: meta.bg,
+          time: timeLabel, type: ev.type, location: ev.location, audience: ev.audience,
+          start_time: ev.start_time, end_time: ev.end_time
+        });
+        cursor.setDate(cursor.getDate() + 1);
+      }
+    });
+
+    renderLegendCounts();
+    renderUpcoming();
+    renderMiniCal();
+    renderMainCal();
+    if (document.getElementById('view-week').classList.contains('active')) renderWeek();
+  }
+
+  function renderLegendCounts() {
+    const counts = {};
+    allEvents.forEach(ev => { counts[ev.type] = (counts[ev.type]||0) + 1; });
+    document.querySelectorAll('#eventTypesLegend .event-type-count').forEach(el => {
+      el.textContent = counts[el.dataset.type] || 0;
+    });
+  }
+
+  function renderUpcoming() {
+    const el = document.getElementById('upcomingList');
+    const todayKey = dateKey(new Date());
+    const upcoming = allEvents.filter(ev => ev.end_date >= todayKey).sort((a,b) => a.start_date.localeCompare(b.start_date)).slice(0, 5);
+    if (upcoming.length === 0) {
+      el.innerHTML = '<div style="text-align:center;color:var(--gray);font-size:.78rem;padding:.5rem">Aucun événement à venir.</div>';
+      return;
+    }
+    el.innerHTML = upcoming.map(ev => {
+      const meta = TYPE_META[ev.type] || TYPE_META['Événement'];
+      const d = new Date(ev.start_date + 'T00:00:00');
+      const dateLabel = d.toLocaleDateString('fr-FR', { weekday:'short', day:'2-digit', month:'short', year:'numeric' });
+      const timeLabel = ev.start_time ? fmtHM(ev.start_time) : 'Journée';
+      return `<div class="upcoming-item" style="background:${meta.bg};border-left-color:${meta.color}" onclick="showEventPopupFor(event,'${ev.id}')">
+        <div class="upcoming-date">${dateLabel}</div>
+        <div class="upcoming-name">${meta.icon} ${ev.title}</div>
+        <div class="upcoming-sub">${timeLabel}${ev.location ? ' · '+ev.location : ''}</div>
+      </div>`;
+    }).join('');
+  }
 
   function renderMiniCal(){
     const el=document.getElementById('miniCalGrid');
@@ -302,18 +369,19 @@
     for(let i=offset-1;i>=0;i--){
       el.innerHTML+=`<div class="mini-day other-month">${prevDays-i}</div>`;
     }
-    const today=new Date();
+    const now=new Date();
     for(let d=1;d<=daysInMonth;d++){
-      const dateStr=`${miniYear}-${String(miniMonth+1).padStart(2,'0')}-${String(d).padStart(2,'0')}`;
-      const isToday=today.getDate()===d&&today.getMonth()===miniMonth&&today.getFullYear()===miniYear;
-      const hasEv=events[dateStr];
-      el.innerHTML+=`<div class="mini-day${isToday?' today':''}${hasEv?' has-event':''}" onclick="showToast('📅 ${months[miniMonth]} ${d}')">${d}</div>`;
+      const dateStr=`${miniYear}-${pad2(miniMonth+1)}-${pad2(d)}`;
+      const isToday=now.getDate()===d&&now.getMonth()===miniMonth&&now.getFullYear()===miniYear;
+      const hasEv=eventsByDate[dateStr];
+      el.innerHTML+=`<div class="mini-day${isToday?' today':''}${hasEv?' has-event':''}" onclick="jumpToDate(${miniYear},${miniMonth})">${d}</div>`;
     }
     const remaining=(7-((offset+daysInMonth)%7))%7;
     for(let d=1;d<=remaining;d++) el.innerHTML+=`<div class="mini-day other-month">${d}</div>`;
   }
 
   function changeMonth(dir){miniMonth+=dir;if(miniMonth>11){miniMonth=0;miniYear++;}else if(miniMonth<0){miniMonth=11;miniYear--;}renderMiniCal();}
+  function jumpToDate(y,m){ currentYear=y; currentMonth=m; renderMainCal(); switchView('month'); }
 
   function renderMainCal(){
     const el=document.getElementById('monthBody');
@@ -323,36 +391,36 @@
     const offset=(first===0?6:first-1);
     const daysInMonth=new Date(currentYear,currentMonth+1,0).getDate();
     const prevDays=new Date(currentYear,currentMonth,0).getDate();
-    const today=new Date();
+    const now=new Date();
     for(let i=offset-1;i>=0;i--){
       el.innerHTML+=`<div class="month-cell other"><div class="cell-date" style="color:var(--border)">${prevDays-i}</div></div>`;
     }
     for(let d=1;d<=daysInMonth;d++){
-      const dateStr=`${currentYear}-${String(currentMonth+1).padStart(2,'0')}-${String(d).padStart(2,'0')}`;
-      const isToday=today.getDate()===d&&today.getMonth()===currentMonth&&today.getFullYear()===currentYear;
-      const dayEvents=events[dateStr]||[];
-      let evHtml=dayEvents.slice(0,2).map(e=>`<div class="cell-event" style="background:${e.bg};color:${e.color}" onclick="event.stopPropagation();showEventPopup(event,'${e.title}','${months[currentMonth]} ${d} · ${e.time}','','${e.color}')">${e.title}</div>`).join('');
+      const dateStr=`${currentYear}-${pad2(currentMonth+1)}-${pad2(d)}`;
+      const isToday=now.getDate()===d&&now.getMonth()===currentMonth&&now.getFullYear()===currentYear;
+      const dayEvents=eventsByDate[dateStr]||[];
+      let evHtml=dayEvents.slice(0,2).map(e=>`<div class="cell-event" style="background:${e.bg};color:${e.color}" onclick="event.stopPropagation();showEventPopupFor(event,'${e.id}')">${e.title}</div>`).join('');
       if(dayEvents.length>2) evHtml+=`<div style="font-size:.65rem;color:var(--gray);padding:.1rem .3rem">+${dayEvents.length-2} autres</div>`;
-      el.innerHTML+=`<div class="month-cell${isToday?' today-cell':''}" onclick="showToast('📅 ${months[currentMonth]} ${d}')"><div class="cell-date">${d}</div>${evHtml}</div>`;
+      el.innerHTML+=`<div class="month-cell${isToday?' today-cell':''}"><div class="cell-date">${d}</div>${evHtml}</div>`;
     }
     const total=offset+daysInMonth;
     const remaining=(7-(total%7))%7;
     for(let d=1;d<=remaining;d++) el.innerHTML+=`<div class="month-cell other"><div class="cell-date" style="color:var(--border)">${d}</div></div>`;
 
-    // Render list
     renderList();
   }
 
   function renderList(){
     const el=document.getElementById('listEvents');
     el.innerHTML='';
-    const sorted=Object.entries(events).filter(([k])=>k.startsWith(`${currentYear}-${String(currentMonth+1).padStart(2,'0')}`)).sort(([a],[b])=>a.localeCompare(b));
+    const prefix = `${currentYear}-${pad2(currentMonth+1)}`;
+    const sorted=Object.entries(eventsByDate).filter(([k])=>k.startsWith(prefix)).sort(([a],[b])=>a.localeCompare(b));
     sorted.forEach(([date,evs])=>{
-      const d=new Date(date);
+      const d=new Date(date+'T00:00:00');
       const label=d.toLocaleDateString('fr-FR',{weekday:'long',day:'numeric',month:'long'});
       el.innerHTML+=`<div style="padding:.6rem 1.25rem;background:#F8FAFC;border-bottom:1px solid var(--border);font-size:.78rem;font-weight:700;color:var(--gray);text-transform:uppercase;letter-spacing:.04em">${label}</div>`;
       evs.forEach(e=>{
-        el.innerHTML+=`<div style="display:flex;align-items:center;gap:1rem;padding:.75rem 1.25rem;border-bottom:1px solid var(--border);cursor:pointer;transition:background .2s" onmouseover="this.style.background='#F8FAFC'" onmouseout="this.style.background='white'" onclick="showEventPopup(event,'${e.title}','${label} · ${e.time}','','${e.color}')"><div style="width:12px;height:12px;border-radius:3px;background:${e.color};flex-shrink:0"></div><div style="flex:1"><div style="font-size:.85rem;font-weight:600">${e.title}</div><div style="font-size:.72rem;color:var(--gray);margin-top:.1rem">⏰ ${e.time}</div></div></div>`;
+        el.innerHTML+=`<div style="display:flex;align-items:center;gap:1rem;padding:.75rem 1.25rem;border-bottom:1px solid var(--border);cursor:pointer;transition:background .2s" onmouseover="this.style.background='#F8FAFC'" onmouseout="this.style.background='white'" onclick="showEventPopupFor(event,'${e.id}')"><div style="width:12px;height:12px;border-radius:3px;background:${e.color};flex-shrink:0"></div><div style="flex:1"><div style="font-size:.85rem;font-weight:600">${e.title}</div><div style="font-size:.72rem;color:var(--gray);margin-top:.1rem">⏰ ${e.time}</div></div></div>`;
       });
     });
     if(!sorted.length) el.innerHTML='<div style="text-align:center;padding:2rem;color:var(--gray);font-size:.85rem">Aucun événement ce mois-ci</div>';
@@ -362,20 +430,28 @@
     const el=document.getElementById('weekBody');
     el.innerHTML='';
     const times=['07h','08h','09h','10h','11h','12h','13h','14h','15h','16h','17h','18h'];
-    const dayEvents=[
-      [{title:'Algorithmique L2',color:'#1A56DB',bg:'rgba(26,86,219,0.1)',row:0,span:2}],
-      [],
-      [{title:'Bases de données L1',color:'#10B981',bg:'rgba(16,185,129,0.1)',row:0,span:2},{title:'TP Réseaux',color:'#F59E0B',bg:'rgba(245,158,11,0.1)',row:6,span:2}],
-      [{title:'POO Java L2',color:'#1A56DB',bg:'rgba(26,86,219,0.1)',row:2,span:2}],
-      [{title:'Maths L2',color:'#F59E0B',bg:'rgba(245,158,11,0.1)',row:0,span:2},{title:'Anglais Tech.',color:'#8B5CF6',bg:'rgba(139,92,246,0.1)',row:6,span:2}],
-      [],[],
-    ];
+
+    // Semaine réelle (lundi -> dimanche) contenant aujourd'hui
+    const now=new Date();
+    const dow=(now.getDay()===0?6:now.getDay()-1);
+    const monday=new Date(now); monday.setDate(now.getDate()-dow);
+    const weekDates=[...Array(7)].map((_,i)=>{ const d=new Date(monday); d.setDate(monday.getDate()+i); return d; });
+
+    weekDates.forEach((d,i)=>{
+      const label=document.getElementById('whd-'+i);
+      label.textContent = `${pad2(d.getDate())} ${months[d.getMonth()].slice(0,3)}`;
+      label.classList.toggle('today', dateKey(d)===dateKey(now));
+    });
+
+    const dayEvents = weekDates.map(d => (eventsByDate[dateKey(d)]||[]).filter(e => e.start_time));
+
     times.forEach((t,ti)=>{
       el.innerHTML+=`<div class="week-time">${t}</div>`;
+      const hour = 7+ti;
       for(let d=0;d<7;d++){
-        const ev=dayEvents[d].find(e=>e.row===ti);
+        const ev=dayEvents[d].find(e=> parseInt(e.start_time.slice(0,2),10)===hour);
         let evHtml='';
-        if(ev) evHtml=`<div class="slot-event" style="background:${ev.bg};color:${ev.color};border-left:3px solid ${ev.color}" onclick="showToast('📚 ${ev.title}')">${ev.title}</div>`;
+        if(ev) evHtml=`<div class="slot-event" style="background:${ev.bg};color:${ev.color};border-left:3px solid ${ev.color}" onclick="event.stopPropagation();showEventPopupFor(event,'${ev.id}')">${ev.title}</div>`;
         el.innerHTML+=`<div class="week-slot">${evHtml}</div>`;
       }
     });
@@ -391,31 +467,108 @@
     if(v==='week')renderWeek();
   }
 
-  function showEventPopup(e,title,meta1,meta2,color){
+  // ── Popup détail événement (réel) ──
+  function showEventPopupFor(e,eventId){
+    const ev = allEvents.find(x => x.id === eventId);
+    if (!ev) return;
+    activePopupEventId = eventId;
+    const meta = TYPE_META[ev.type] || TYPE_META['Événement'];
     const popup=document.getElementById('eventPopup');
-    document.getElementById('popupBar').style.background=color;
-    document.getElementById('popupTitle').textContent=title;
-    document.getElementById('popupMeta').innerHTML=`<span>📅 ${meta1}</span>${meta2?`<span>📍 ${meta2}</span>`:''}`;
+    document.getElementById('popupBar').style.background=meta.color;
+    document.getElementById('popupTitle').textContent=`${meta.icon} ${ev.title}`;
+    const d1=new Date(ev.start_date+'T00:00:00');
+    const dateLabel = ev.start_date===ev.end_date
+      ? d1.toLocaleDateString('fr-FR',{day:'2-digit',month:'long',year:'numeric'})
+      : `${d1.toLocaleDateString('fr-FR',{day:'2-digit',month:'short'})} → ${new Date(ev.end_date+'T00:00:00').toLocaleDateString('fr-FR',{day:'2-digit',month:'short',year:'numeric'})}`;
+    const timeLabel = ev.start_time ? `${fmtHM(ev.start_time)}–${fmtHM(ev.end_time)}` : 'Journée';
+    document.getElementById('popupMeta').innerHTML =
+      `<span>📅 ${dateLabel} · ${timeLabel}</span>${ev.location?`<span>📍 ${ev.location}</span>`:''}${ev.audience?`<span>👥 ${ev.audience}</span>`:''}${ev.description?`<span>${ev.description}</span>`:''}`;
+    document.getElementById('popupActions').style.display = (me.role==='admin'||me.role==='superadmin') ? 'flex' : 'none';
     const x=Math.min(e.clientX,window.innerWidth-300);
     const y=Math.min(e.clientY,window.innerHeight-200);
     popup.style.left=x+'px';popup.style.top=y+'px';
     popup.classList.add('show');
     e.stopPropagation();
   }
-  function closePopup(){document.getElementById('eventPopup').classList.remove('show');}
+  function closePopup(){document.getElementById('eventPopup').classList.remove('show');activePopupEventId=null;}
   document.addEventListener('click',()=>closePopup());
 
-  function openModal(){document.getElementById('eventModal').classList.add('active');document.body.style.overflow='hidden';}
+  async function deleteEvent(){
+    if (!activePopupEventId) return;
+    const { error } = await supabaseClient.from('calendar_events').delete().eq('id', activePopupEventId);
+    closePopup();
+    if (error) { showToast('⚠️ ' + error.message); return; }
+    showToast('🗑️ Événement supprimé');
+    await loadCalendarEvents();
+  }
+
+  // ── Modal création (réel) ──
+  function openModal(){
+    document.getElementById('ev_titre').value='';
+    document.getElementById('ev_type').value='Cours';
+    const todayStr = dateKey(new Date());
+    document.getElementById('ev_debut').value = todayStr;
+    document.getElementById('ev_fin').value = todayStr;
+    document.getElementById('ev_heure_debut').value='08:00';
+    document.getElementById('ev_heure_fin').value='10:00';
+    document.getElementById('ev_lieu').value='';
+    document.getElementById('ev_audience').value='Tous';
+    document.getElementById('ev_description').value='';
+    document.getElementById('eventFormError').style.display='none';
+    document.getElementById('eventModal').classList.add('active');document.body.style.overflow='hidden';
+  }
   function closeModal(){document.getElementById('eventModal').classList.remove('active');document.body.style.overflow='';}
+
+  async function submitEvent(){
+    const errBox = document.getElementById('eventFormError');
+    errBox.style.display = 'none';
+
+    const title = document.getElementById('ev_titre').value.trim();
+    const type = document.getElementById('ev_type').value;
+    const start_date = document.getElementById('ev_debut').value;
+    const end_date = document.getElementById('ev_fin').value || start_date;
+    const allDay = type === 'Vacances';
+    const start_time = allDay ? null : document.getElementById('ev_heure_debut').value;
+    const end_time = allDay ? null : document.getElementById('ev_heure_fin').value;
+    const location = document.getElementById('ev_lieu').value.trim() || null;
+    const audience = document.getElementById('ev_audience').value.trim() || 'Tous';
+    const description = document.getElementById('ev_description').value.trim() || null;
+
+    if (!title || !start_date || end_date < start_date) {
+      errBox.textContent = '⚠️ Titre et dates valides sont obligatoires.';
+      errBox.style.display = 'block';
+      return;
+    }
+
+    const btn = document.getElementById('ev_submit');
+    btn.disabled = true;
+    const { error } = await supabaseClient.from('calendar_events').insert({
+      university: me.university, title, type, start_date, end_date, start_time, end_time,
+      location, audience, description, created_by: me.id
+    });
+    btn.disabled = false;
+
+    if (error) { errBox.textContent = '⚠️ ' + error.message; errBox.style.display = 'block'; return; }
+
+    closeModal();
+    showToast('✅ Événement créé et publié !');
+    await loadCalendarEvents();
+  }
 
   let tt;
   function showToast(msg){const t=document.getElementById('toast');t.textContent=msg;t.classList.add('show');clearTimeout(tt);tt=setTimeout(()=>t.classList.remove('show'),3000);}
 
   document.addEventListener('keydown',e=>{if(e.key==='Escape'){closeModal();closePopup();}});
 
-  // Init
-  renderMiniCal();
-  renderMainCal();
+  const ROLE_HOME = { admin:'dashboard.html', enseignant:'enseignant.html', etudiant:'etudiant.html', superadmin:'superadmin.html', parent:'parents.html' };
+
+  window.authReady.then(async user => {
+    if (!user) return;
+    me = user;
+    document.getElementById('backLink').href = ROLE_HOME[user.role] || 'login.html';
+    if (user.role === 'admin' || user.role === 'superadmin') document.getElementById('btnAddEvent').style.display = '';
+    await loadCalendarEvents();
+  });
 </script>
 </body>
 </html>

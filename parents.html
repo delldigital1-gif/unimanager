@@ -1,6 +1,7 @@
 <!DOCTYPE html>
 <html lang="fr">
 <head>
+<style>html{visibility:hidden}</style>
   <meta charset="UTF-8"/>
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
   <title>UniManage — Portail Parents</title>
@@ -100,6 +101,11 @@
     .form-textarea:focus{border-color:var(--purple);}
     .btn-submit{padding:.75rem 1.5rem;border-radius:10px;background:var(--purple);color:white;font-size:.9rem;font-weight:700;cursor:pointer;border:none;transition:all .2s;}
     .btn-submit:hover{background:#7c3aed;}
+    /* Modales */
+    .modal-overlay{position:fixed;inset:0;z-index:2000;background:rgba(13,27,42,0.5);display:none;align-items:center;justify-content:center;backdrop-filter:blur(4px);padding:1rem;}
+    .modal-overlay.active{display:flex;}
+    .modal{background:white;border-radius:18px;width:100%;max-width:520px;padding:2rem;position:relative;box-shadow:0 30px 80px rgba(0,0,0,0.2);max-height:90vh;overflow-y:auto;}
+    .modal-close{position:absolute;top:1rem;right:1rem;background:#F8FAFC;border:none;cursor:pointer;width:30px;height:30px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:.85rem;color:var(--gray);}
     /* Child selector tabs */
     .child-tabs{display:flex;gap:.5rem;margin-bottom:1.5rem;flex-wrap:wrap;}
     .child-tab{display:flex;align-items:center;gap:.5rem;padding:.55rem 1rem;border-radius:9px;border:1.5px solid var(--border);background:white;cursor:pointer;font-size:.83rem;font-weight:600;color:var(--gray);transition:all .2s;}
@@ -112,6 +118,11 @@
   </style>
 </head>
 <body>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script src="https://cdn.jsdelivr.net/npm/jspdf@2.5.2/dist/jspdf.umd.min.js"></script>
+<script src="supabase-config.js"></script>
+<script src="auth-guard.js"></script>
+<script>window.authReady = requireAuth('parent');</script>
 
 <aside class="sidebar">
   <div class="sidebar-brand">
@@ -119,20 +130,11 @@
     <div class="brand-sub">👨‍👩‍👧 Portail Parents</div>
   </div>
   <div class="parent-card">
-    <div class="parent-avatar">MA</div>
-    <div class="parent-name">M. & Mme Adzoa</div>
+    <div class="parent-avatar" id="pc-avatar">--</div>
+    <div class="parent-name" id="pc-nom">Chargement...</div>
     <div class="parent-sub">Parent / Tuteur légal</div>
     <div style="font-size:.7rem;color:rgba(255,255,255,0.3);margin-top:.5rem;margin-bottom:.4rem">Mes enfants</div>
-    <div class="children-list">
-      <div class="child-pill active" onclick="selectChild('kofi')">
-        <div class="child-av" style="background:linear-gradient(135deg,var(--blue),var(--sky))">KA</div>
-        <div class="child-info"><div class="child-nm">Kofi Adzoa</div><div class="child-lvl">Info L2 · UL-2025-001</div></div>
-      </div>
-      <div class="child-pill" onclick="selectChild('ama')">
-        <div class="child-av" style="background:linear-gradient(135deg,var(--success),#34d399)">AA</div>
-        <div class="child-info"><div class="child-nm">Ama Adzoa</div><div class="child-lvl">Gestion L1 · UL-2025-089</div></div>
-      </div>
-    </div>
+    <div class="children-list" id="childrenList"></div>
   </div>
   <nav class="sidebar-nav">
     <div class="nav-group">Suivi</div>
@@ -155,7 +157,7 @@
 <header class="topbar">
   <div>
     <div class="page-title" id="pageTitle">Tableau de bord</div>
-    <div style="font-size:.78rem;color:var(--gray)">Université de Lomé · Suivi de <span id="childName">Kofi Adzoa</span></div>
+    <div style="font-size:.78rem;color:var(--gray)">Université de Lomé · Suivi de <span id="childName">—</span></div>
   </div>
   <div class="topbar-right">
     <button class="btn-primary" onclick="showPage('messages')">✉️ Contacter l'université</button>
@@ -165,14 +167,7 @@
 <main class="main"><div class="content">
 
   <!-- Child tabs -->
-  <div class="child-tabs">
-    <div class="child-tab active" id="tab-kofi" onclick="selectChild('kofi')">
-      <div class="child-tab-av" style="background:linear-gradient(135deg,var(--blue),var(--sky))">KA</div>Kofi Adzoa — Info L2
-    </div>
-    <div class="child-tab" id="tab-ama" onclick="selectChild('ama')">
-      <div class="child-tab-av" style="background:linear-gradient(135deg,var(--success),#34d399)">AA</div>Ama Adzoa — Gestion L1
-    </div>
-  </div>
+  <div class="child-tabs" id="childTabs"></div>
 
   <!-- ══ ACCUEIL ══ -->
   <div class="page active" id="page-accueil">
@@ -225,7 +220,7 @@
   <div class="page" id="page-notes">
     <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:1.5rem">
       <div><h2 style="font-family:'Syne',sans-serif;font-weight:800;font-size:1.3rem">📊 Notes & Résultats</h2><div style="font-size:.85rem;color:var(--gray);margin-top:.2rem" id="notes-sub">Kofi Adzoa · Informatique L2 · Semestre 1</div></div>
-      <button class="btn-primary" onclick="showToast('📄 Relevé de notes PDF téléchargé !')">📄 Relevé PDF</button>
+      <button class="btn-primary" onclick="downloadReleveNotes()">📄 Relevé PDF</button>
     </div>
     <div class="kpi-grid" style="grid-template-columns:repeat(4,1fr)">
       <div class="kpi-card"><div class="kpi-icon" style="background:rgba(26,86,219,0.1)">📊</div><div class="kpi-value" style="color:var(--blue)" id="n-moy">13.8/20</div><div class="kpi-label">Moyenne générale</div></div>
@@ -238,13 +233,7 @@
       <table class="data-table">
         <thead><tr><th>Matière</th><th>Enseignant</th><th>Coeff.</th><th>CC</th><th>Examen</th><th>Moyenne</th><th>Mention</th><th>Statut</th></tr></thead>
         <tbody id="notesTable">
-          <tr><td><strong>Algorithmique Avancée</strong></td><td>Dr. Mensah</td><td>4</td><td>17</td><td>15</td><td><span class="note-good">16.0</span></td><td><span class="badge badge-success">Très Bien</span></td><td><span class="badge badge-success">✓ Validé</span></td></tr>
-          <tr><td><strong>POO Java</strong></td><td>Dr. Atchoe</td><td>4</td><td>16</td><td>14</td><td><span class="note-good">15.0</span></td><td><span class="badge badge-blue">Bien</span></td><td><span class="badge badge-success">✓ Validé</span></td></tr>
-          <tr><td><strong>Bases de données</strong></td><td>Prof. Komi</td><td>3</td><td>15</td><td>14</td><td><span class="note-good">14.5</span></td><td><span class="badge badge-blue">Bien</span></td><td><span class="badge badge-success">✓ Validé</span></td></tr>
-          <tr><td><strong>Réseaux Informatiques</strong></td><td>Prof. Dodzi</td><td>3</td><td>13</td><td>11</td><td><span class="note-avg">12.0</span></td><td><span class="badge badge-gold">Assez Bien</span></td><td><span class="badge badge-success">✓ Validé</span></td></tr>
-          <tr><td><strong>Mathématiques</strong></td><td>Dr. Agbo</td><td>3</td><td>12</td><td>11</td><td><span class="note-avg">11.5</span></td><td><span class="badge badge-gold">Passable</span></td><td><span class="badge badge-success">✓ Validé</span></td></tr>
-          <tr><td><strong>Sécurité Informatique</strong></td><td>Prof. Komi</td><td>3</td><td>9</td><td>7</td><td><span class="note-bad">8.0</span></td><td><span class="badge badge-danger">Insuffisant</span></td><td><span class="badge badge-danger">Rattrapage</span></td></tr>
-          <tr><td><strong>Projet Tutoré</strong></td><td>Dr. Mensah</td><td>4</td><td>16</td><td>15</td><td><span class="note-good">15.5</span></td><td><span class="badge badge-blue">Bien</span></td><td><span class="badge badge-success">✓ Validé</span></td></tr>
+          <tr><td colspan="8" style="text-align:center;color:var(--gray);padding:2rem">Chargement...</td></tr>
         </tbody>
       </table>
     </div>
@@ -252,22 +241,17 @@
 
   <!-- ══ PRÉSENCES ══ -->
   <div class="page" id="page-presences">
-    <div style="margin-bottom:1.5rem"><h2 style="font-family:'Syne',sans-serif;font-weight:800;font-size:1.3rem">✅ Présences & Absences</h2><div style="font-size:.85rem;color:var(--gray)">Semestre 1 · Janvier 2025</div></div>
+    <div style="margin-bottom:1.5rem"><h2 style="font-family:'Syne',sans-serif;font-weight:800;font-size:1.3rem">✅ Présences & Absences</h2><div style="font-size:.85rem;color:var(--gray)" id="pres-sub">Semestre 1</div></div>
     <div class="kpi-grid" style="grid-template-columns:repeat(3,1fr)">
-      <div class="kpi-card"><div class="kpi-icon" style="background:rgba(16,185,129,0.1)">✅</div><div class="kpi-value" style="color:var(--success)">94%</div><div class="kpi-label">Taux de présence</div></div>
-      <div class="kpi-card"><div class="kpi-icon" style="background:rgba(239,68,68,0.1)">❌</div><div class="kpi-value" style="color:var(--danger)">3</div><div class="kpi-label">Absences ce mois</div></div>
-      <div class="kpi-card"><div class="kpi-icon" style="background:rgba(245,158,11,0.1)">⏰</div><div class="kpi-value" style="color:var(--gold)">1</div><div class="kpi-label">Retards signalés</div></div>
+      <div class="kpi-card"><div class="kpi-icon" style="background:rgba(16,185,129,0.1)">✅</div><div class="kpi-value" style="color:var(--success)" id="pres-kpi-taux">—</div><div class="kpi-label">Taux de présence</div></div>
+      <div class="kpi-card"><div class="kpi-icon" style="background:rgba(239,68,68,0.1)">❌</div><div class="kpi-value" style="color:var(--danger)" id="pres-kpi-absences">—</div><div class="kpi-label">Absences</div></div>
+      <div class="kpi-card"><div class="kpi-icon" style="background:rgba(245,158,11,0.1)">⏰</div><div class="kpi-value" style="color:var(--gold)" id="pres-kpi-retards">—</div><div class="kpi-label">Retards signalés</div></div>
     </div>
     <div class="card">
-      <div class="card-header"><div class="card-title">Calendrier de présence — Janvier 2025</div></div>
+      <div class="card-header"><div class="card-title">Calendrier de présence</div></div>
       <div class="card-body">
-        <div class="absence-grid" style="margin-bottom:.75rem">
+        <div class="absence-grid" style="margin-bottom:.75rem" id="pres-calendar">
           <div class="abs-day header">L</div><div class="abs-day header">M</div><div class="abs-day header">M</div><div class="abs-day header">J</div><div class="abs-day header">V</div><div class="abs-day header weekend">S</div><div class="abs-day header weekend">D</div>
-          <div class="abs-day weekend"></div><div class="abs-day weekend"></div><div class="abs-day present">01✓</div><div class="abs-day present">02✓</div><div class="abs-day present">03✓</div><div class="abs-day weekend">04</div><div class="abs-day weekend">05</div>
-          <div class="abs-day present">06✓</div><div class="abs-day present">07✓</div><div class="abs-day present">08✓</div><div class="abs-day present">09✓</div><div class="abs-day present">10✓</div><div class="abs-day weekend">11</div><div class="abs-day weekend">12</div>
-          <div class="abs-day present">13✓</div><div class="abs-day present">14✓</div><div class="abs-day absent">15✗</div><div class="abs-day present">16✓</div><div class="abs-day retard">17⏰</div><div class="abs-day weekend">18</div><div class="abs-day weekend">19</div>
-          <div class="abs-day present">20✓</div><div class="abs-day present">21✓</div><div class="abs-day present">22✓</div><div class="abs-day present">23✓</div><div class="abs-day present">24✓</div><div class="abs-day weekend">25</div><div class="abs-day weekend">26</div>
-          <div class="abs-day present">27✓</div><div class="abs-day present">28✓</div><div class="abs-day absent">29✗</div><div class="abs-day present">30✓</div><div class="abs-day absent">31✗</div><div class="abs-day weekend"></div><div class="abs-day weekend"></div>
         </div>
         <div style="display:flex;gap:1rem;font-size:.75rem;flex-wrap:wrap">
           <span style="display:flex;align-items:center;gap:.35rem"><span style="width:12px;height:12px;border-radius:3px;background:rgba(16,185,129,0.1);border:1px solid var(--success);display:inline-block"></span>Présent</span>
@@ -277,14 +261,11 @@
       </div>
     </div>
     <div class="card">
-      <div class="card-header"><div class="card-title">Détail des absences</div></div>
+      <div class="card-header"><div class="card-title">Détail des absences et retards</div></div>
       <table class="data-table">
         <thead><tr><th>Date</th><th>Cours concerné</th><th>Enseignant</th><th>Type</th><th>Justifiée</th></tr></thead>
-        <tbody>
-          <tr><td>15 Jan 2025</td><td>Réseaux Informatiques</td><td>Prof. Dodzi</td><td><span class="badge badge-danger">Absence</span></td><td><span class="badge badge-gold">En attente</span></td></tr>
-          <tr><td>17 Jan 2025</td><td>Algorithmique — TP</td><td>Dr. Mensah</td><td><span class="badge badge-gold">Retard</span></td><td><span class="badge badge-success">Justifié</span></td></tr>
-          <tr><td>29 Jan 2025</td><td>Mathématiques</td><td>Dr. Agbo</td><td><span class="badge badge-danger">Absence</span></td><td><span class="badge badge-danger">Non justifiée</span></td></tr>
-          <tr><td>31 Jan 2025</td><td>Sécurité Informatique</td><td>Prof. Komi</td><td><span class="badge badge-danger">Absence</span></td><td><span class="badge badge-gold">En attente</span></td></tr>
+        <tbody id="pres-detail">
+          <tr><td colspan="5" style="text-align:center;color:var(--gray);padding:2rem">Chargement...</td></tr>
         </tbody>
       </table>
     </div>
@@ -293,32 +274,40 @@
   <!-- ══ PAIEMENTS ══ -->
   <div class="page" id="page-paiements">
     <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:1.5rem">
-      <div><h2 style="font-family:'Syne',sans-serif;font-weight:800;font-size:1.3rem">💳 Paiements scolarité</h2></div>
-      <button class="btn-primary" onclick="showToast('🌊 Lien Wave de paiement généré !')">🌊 Payer via Wave</button>
+      <div><h2 style="font-family:'Syne',sans-serif;font-weight:800;font-size:1.3rem">💳 Paiements scolarité</h2><div style="font-size:.85rem;color:var(--gray);margin-top:.2rem" id="pp-sub">—</div></div>
+      <button class="btn-primary" id="pp-payer-btn" onclick="ouvrirPaiementEnLigne()">🌊 Payer maintenant</button>
     </div>
     <div class="kpi-grid" style="grid-template-columns:repeat(3,1fr)">
-      <div class="kpi-card"><div class="kpi-icon" style="background:rgba(16,185,129,0.1)">✅</div><div class="kpi-value" style="color:var(--success)">250 000</div><div class="kpi-label">FCFA payés (total)</div></div>
-      <div class="kpi-card"><div class="kpi-icon" style="background:rgba(239,68,68,0.1)">⏳</div><div class="kpi-value" style="color:var(--success)">0</div><div class="kpi-label">FCFA restants</div></div>
-      <div class="kpi-card"><div class="kpi-icon" style="background:rgba(26,86,219,0.1)">📋</div><div class="kpi-value" style="color:var(--blue)">3/3</div><div class="kpi-label">Tranches soldées</div></div>
+      <div class="kpi-card"><div class="kpi-icon" style="background:rgba(16,185,129,0.1)">✅</div><div class="kpi-value" style="color:var(--success)" id="pp-kpi-paye">—</div><div class="kpi-label">FCFA payés (total)</div></div>
+      <div class="kpi-card"><div class="kpi-icon" style="background:rgba(239,68,68,0.1)">⏳</div><div class="kpi-value" style="color:var(--danger)" id="pp-kpi-restant">—</div><div class="kpi-label">FCFA restants</div></div>
+      <div class="kpi-card"><div class="kpi-icon" style="background:rgba(26,86,219,0.1)">📋</div><div class="kpi-value" style="color:var(--blue)" id="pp-kpi-versements">—</div><div class="kpi-label">Versements</div></div>
     </div>
     <div class="dash-grid">
       <div class="card">
-        <div class="card-header"><div class="card-title">Plan de paiement — Kofi Adzoa</div></div>
-        <div class="card-body">
-          <div class="pay-item"><div><div class="pay-label">Tranche 1 — Inscription</div><div class="pay-sub">Payé le 02 Oct 2024 · Wave</div></div><div style="text-align:right"><div class="pay-amount" style="color:var(--success)">83 333 FCFA</div><span class="badge badge-success">✓ Payé</span></div></div>
-          <div class="pay-item"><div><div class="pay-label">Tranche 2 — Milieu S1</div><div class="pay-sub">Payé le 15 Nov 2024 · Orange Money</div></div><div style="text-align:right"><div class="pay-amount" style="color:var(--success)">83 333 FCFA</div><span class="badge badge-success">✓ Payé</span></div></div>
-          <div class="pay-item"><div><div class="pay-label">Tranche 3 — Fin S1</div><div class="pay-sub">Payé le 20 Jan 2025 · Wave</div></div><div style="text-align:right"><div class="pay-amount" style="color:var(--success)">83 334 FCFA</div><span class="badge badge-success">✓ Payé</span></div></div>
-          <div style="padding:1rem;background:rgba(16,185,129,0.07);border-radius:10px;text-align:center;margin-top:.75rem"><div style="font-size:.78rem;color:var(--gray)">Scolarité 2024–2025</div><div style="font-family:'Syne',sans-serif;font-weight:800;font-size:1.2rem;color:var(--success)">ENTIÈREMENT SOLDÉE ✓</div></div>
+        <div class="card-header"><div class="card-title">Plan de paiement</div></div>
+        <div class="card-body" id="pp-plan">
+          <div style="text-align:center;color:var(--gray);padding:1.5rem;font-size:.85rem">Chargement…</div>
         </div>
       </div>
       <div class="card">
         <div class="card-header"><div class="card-title">Reçus de paiement</div></div>
-        <div class="card-body">
-          <div class="pay-item"><div><div class="pay-label">Reçu REC-2024-0892</div><div class="pay-sub">Tranche 1 · 02 Oct 2024</div></div><button onclick="showToast('📄 Reçu téléchargé')" style="padding:.4rem .9rem;border-radius:7px;border:1px solid var(--border);background:white;font-size:.78rem;cursor:pointer;font-weight:600">📄 PDF</button></div>
-          <div class="pay-item"><div><div class="pay-label">Reçu REC-2024-1145</div><div class="pay-sub">Tranche 2 · 15 Nov 2024</div></div><button onclick="showToast('📄 Reçu téléchargé')" style="padding:.4rem .9rem;border-radius:7px;border:1px solid var(--border);background:white;font-size:.78rem;cursor:pointer;font-weight:600">📄 PDF</button></div>
-          <div class="pay-item"><div><div class="pay-label">Reçu REC-2025-0041</div><div class="pay-sub">Tranche 3 · 20 Jan 2025</div></div><button onclick="showToast('📄 Reçu téléchargé')" style="padding:.4rem .9rem;border-radius:7px;border:1px solid var(--border);background:white;font-size:.78rem;cursor:pointer;font-weight:600">📄 PDF</button></div>
+        <div class="card-body" id="pp-recus">
+          <div style="text-align:center;color:var(--gray);padding:1.5rem;font-size:.85rem">Chargement…</div>
         </div>
       </div>
+    </div>
+  </div>
+
+  <!-- ══ MODAL PAIEMENT EN LIGNE ══ -->
+  <div class="modal-overlay" id="payOnlineModal" onclick="if(event.target===this)fermerPaiementEnLigne()">
+    <div class="modal" style="max-width:420px">
+      <button class="modal-close" onclick="fermerPaiementEnLigne()">✕</button>
+      <div style="font-family:'Syne',sans-serif;font-weight:800;font-size:1.15rem;margin-bottom:.25rem">🌊 Payer en ligne</div>
+      <p style="font-size:.85rem;color:var(--gray);margin-bottom:1.25rem">Paiement sécurisé via CinetPay (Wave, Orange Money, carte…)</p>
+      <div id="payOnlineError" style="display:none;background:rgba(239,68,68,0.08);color:var(--danger);border:1px solid rgba(239,68,68,0.2);padding:.6rem 1rem;border-radius:8px;font-size:.83rem;margin-bottom:1rem"></div>
+      <div class="form-group"><label>Montant (FCFA)</label><input id="po_amount" type="number" class="form-input" placeholder="Ex: 50000"/></div>
+      <div class="form-group"><label>Numéro de téléphone (mobile money)</label><input id="po_phone" type="tel" class="form-input" placeholder="Ex: 90000000"/></div>
+      <button class="btn-submit" id="po_submit" onclick="lancerPaiementEnLigne()">Continuer vers le paiement →</button>
     </div>
   </div>
 
@@ -326,7 +315,7 @@
   <div class="page" id="page-documents">
     <div style="margin-bottom:1.5rem"><h2 style="font-family:'Syne',sans-serif;font-weight:800;font-size:1.3rem">📄 Documents officiels</h2></div>
     <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(260px,1fr));gap:1rem">
-      <div class="card" style="cursor:pointer" onclick="showToast('📄 Relevé de notes S1 téléchargé')"><div class="card-body"><div style="font-size:2rem;margin-bottom:.75rem">📊</div><div style="font-weight:700;margin-bottom:.25rem">Relevé de notes S1</div><div style="font-size:.78rem;color:var(--gray);margin-bottom:.75rem">2024–2025 · Avec QR code de vérification</div><span class="badge badge-success">Disponible</span></div></div>
+      <div class="card" style="cursor:pointer" onclick="downloadReleveNotes()"><div class="card-body"><div style="font-size:2rem;margin-bottom:.75rem">📊</div><div style="font-weight:700;margin-bottom:.25rem">Relevé de notes S1</div><div style="font-size:.78rem;color:var(--gray);margin-bottom:.75rem">2024–2025</div><span class="badge badge-success">Disponible</span></div></div>
       <div class="card" style="cursor:pointer" onclick="showToast('📄 Attestation d\'inscription téléchargée')"><div class="card-body"><div style="font-size:2rem;margin-bottom:.75rem">📋</div><div style="font-weight:700;margin-bottom:.25rem">Attestation d'inscription</div><div style="font-size:.78rem;color:var(--gray);margin-bottom:.75rem">Année 2024–2025 · Université de Lomé</div><span class="badge badge-success">Disponible</span></div></div>
       <div class="card" style="cursor:pointer" onclick="showToast('🎓 Carte étudiant téléchargée')"><div class="card-body"><div style="font-size:2rem;margin-bottom:.75rem">🎓</div><div style="font-weight:700;margin-bottom:.25rem">Carte étudiant</div><div style="font-size:.78rem;color:var(--gray);margin-bottom:.75rem">Validité 2024–2025</div><span class="badge badge-success">Disponible</span></div></div>
       <div class="card" style="cursor:pointer" onclick="showToast('📋 Convocation téléchargée')"><div class="card-body"><div style="font-size:2rem;margin-bottom:.75rem">📋</div><div style="font-weight:700;margin-bottom:.25rem">Convocation examens S1</div><div style="font-size:.78rem;color:var(--gray);margin-bottom:.75rem">Amphithéâtre A · Place N°24</div><span class="badge badge-blue">Session 1</span></div></div>
@@ -405,13 +394,12 @@
 
   <!-- EMPLOI DU TEMPS -->
   <div class="page" id="page-emploi">
-    <div style="margin-bottom:1.5rem"><h2 style="font-family:'Syne',sans-serif;font-weight:800;font-size:1.3rem">📅 Emploi du temps</h2><div style="font-size:.85rem;color:var(--gray)">Kofi Adzoa · Informatique L2 · Semaine du 20–24 Jan</div></div>
+    <div style="margin-bottom:1.5rem"><h2 style="font-family:'Syne',sans-serif;font-weight:800;font-size:1.3rem">📅 Emploi du temps</h2><div style="font-size:.85rem;color:var(--gray)" id="et-sub">Chargement…</div></div>
     <div class="card" style="overflow-x:auto">
       <table style="width:100%;border-collapse:collapse">
         <thead><tr><th style="background:var(--navy);color:white;padding:.7rem 1rem;font-size:.8rem;text-align:center">Heure</th><th style="background:var(--navy);color:white;padding:.7rem 1rem;font-size:.8rem;text-align:center">Lundi</th><th style="background:var(--navy);color:white;padding:.7rem 1rem;font-size:.8rem;text-align:center">Mardi</th><th style="background:var(--navy);color:white;padding:.7rem 1rem;font-size:.8rem;text-align:center">Mercredi</th><th style="background:var(--navy);color:white;padding:.7rem 1rem;font-size:.8rem;text-align:center">Jeudi</th><th style="background:var(--navy);color:white;padding:.7rem 1rem;font-size:.8rem;text-align:center">Vendredi</th></tr></thead>
-        <tbody>
-          <tr><td style="background:#F8FAFC;color:var(--gray);font-size:.75rem;font-weight:600;text-align:center;padding:.5rem;border:1px solid var(--border)">07h–09h</td><td style="border:1px solid var(--border);padding:.5rem;height:65px"><div style="background:rgba(26,86,219,0.1);border-left:3px solid var(--blue);border-radius:5px;padding:.4rem .5rem;height:100%"><div style="font-weight:600;font-size:.75rem">Algorithmes</div><div style="color:var(--gray);font-size:.7rem">Dr. Mensah · A1</div></div></td><td style="border:1px solid var(--border);padding:.5rem;height:65px"></td><td style="border:1px solid var(--border);padding:.5rem;height:65px"><div style="background:rgba(16,185,129,0.1);border-left:3px solid var(--success);border-radius:5px;padding:.4rem .5rem;height:100%"><div style="font-weight:600;font-size:.75rem">Bases de données</div><div style="color:var(--gray);font-size:.7rem">Prof. Komi · B3</div></div></td><td style="border:1px solid var(--border);padding:.5rem;height:65px"></td><td style="border:1px solid var(--border);padding:.5rem;height:65px"><div style="background:rgba(245,158,11,0.1);border-left:3px solid var(--gold);border-radius:5px;padding:.4rem .5rem;height:100%"><div style="font-weight:600;font-size:.75rem">Mathématiques</div><div style="color:var(--gray);font-size:.7rem">Dr. Agbo · Amph.1</div></div></td></tr>
-          <tr><td style="background:#F8FAFC;color:var(--gray);font-size:.75rem;font-weight:600;text-align:center;padding:.5rem;border:1px solid var(--border)">14h–16h</td><td style="border:1px solid var(--border);padding:.5rem;height:65px"></td><td style="border:1px solid var(--border);padding:.5rem;height:65px"><div style="background:rgba(26,86,219,0.1);border-left:3px solid var(--blue);border-radius:5px;padding:.4rem .5rem;height:100%"><div style="font-weight:600;font-size:.75rem">Syst. exploitation</div><div style="color:var(--gray);font-size:.7rem">Prof. Edem · C1</div></div></td><td style="border:1px solid var(--border);padding:.5rem;height:65px"></td><td style="border:1px solid var(--border);padding:.5rem;height:65px"><div style="background:rgba(16,185,129,0.1);border-left:3px solid var(--success);border-radius:5px;padding:.4rem .5rem;height:100%"><div style="font-weight:600;font-size:.75rem">TP Réseaux</div><div style="color:var(--gray);font-size:.7rem">Prof. Dodzi · Labo</div></div></td><td style="border:1px solid var(--border);padding:.5rem;height:65px"><div style="background:rgba(245,158,11,0.1);border-left:3px solid var(--gold);border-radius:5px;padding:.4rem .5rem;height:100%"><div style="font-weight:600;font-size:.75rem">Anglais Tech.</div><div style="color:var(--gray);font-size:.7rem">Mme. Johnson · B2</div></div></td></tr>
+        <tbody id="et-tbody">
+          <tr><td colspan="6" style="text-align:center;color:var(--gray);padding:2rem">Chargement...</td></tr>
         </tbody>
       </table>
     </div>
@@ -425,10 +413,9 @@
   const pages=['accueil','notes','presences','emploi','paiements','documents','messages','notifications'];
   const titles={'accueil':'Tableau de bord','notes':'Notes & Résultats','presences':'Présences & Absences','emploi':'Emploi du temps','paiements':'Paiements scolarité','documents':'Documents officiels','messages':'Messages','notifications':'Notifications'};
 
-  const childData={
-    kofi:{name:'Kofi Adzoa',moy:'13.8',pres:'94%',pay:'Payé',rang:'2ème',mention:'Assez Bien',credits:'44/60',rang2:'2ème/287'},
-    ama:{name:'Ama Adzoa',moy:'11.2',pres:'98%',pay:'Partiel',rang:'12ème',mention:'Passable',credits:'28/60',rang2:'12ème/245'}
-  };
+  let mesEnfants = [];
+  let enfantActifId = null;
+  let notesEnfantActif = [];
 
   function showPage(id){
     pages.forEach(p=>{document.getElementById('page-'+p)?.classList.remove('active');document.querySelectorAll('.nav-it').forEach(n=>{if(n.getAttribute('onclick')?.includes("'"+p+"'"))n.classList.remove('active');});});
@@ -437,22 +424,425 @@
     document.getElementById('pageTitle').textContent=titles[id]||id;
   }
 
-  function selectChild(id){
-    const d=childData[id];
-    document.getElementById('childName').textContent=d.name;
-    document.getElementById('kpi-moy').textContent=d.moy;
-    document.getElementById('kpi-pres').textContent=d.pres;
-    document.getElementById('kpi-pay').textContent=d.pay;
-    document.getElementById('kpi-rang').textContent=d.rang;
-    document.getElementById('n-moy').textContent=d.moy+'/20';
-    document.getElementById('n-mention').textContent=d.mention;
-    document.getElementById('n-credits').textContent=d.credits;
-    document.getElementById('n-rang').textContent=d.rang2;
+  function mention(m) {
+    if (m >= 16) return 'Très Bien';
+    if (m >= 14) return 'Bien';
+    if (m >= 12) return 'Assez Bien';
+    if (m >= 10) return 'Passable';
+    return 'Insuffisant';
+  }
+  function mentionBadge(m) {
+    if (m >= 14) return 'badge-success';
+    if (m >= 10) return 'badge-gold';
+    return 'badge-danger';
+  }
+  function initials(name) {
+    return name.split(' ').filter(Boolean).map(s=>s[0]).join('').slice(0,2).toUpperCase();
+  }
+
+  // ── Charger mes enfants (Supabase) ──
+  async function loadMesEnfants(user) {
+    const { data: links, error } = await supabaseClient
+      .from('parent_students').select('student_id, students(*)').eq('parent_profile_id', user.id);
+    if (error || !links || links.length === 0) {
+      console.warn('Aucun enfant lié à ce compte parent.');
+      return;
+    }
+    mesEnfants = links.map(l => l.students);
+
+    document.getElementById('pc-avatar').textContent = initials(user.full_name || 'P');
+    document.getElementById('pc-nom').textContent = user.full_name || user.email;
+
+    document.getElementById('childrenList').innerHTML = mesEnfants.map(c => `
+      <div class="child-pill" id="pill-${c.id}" onclick="selectChild('${c.id}')">
+        <div class="child-av" style="background:linear-gradient(135deg,var(--blue),var(--sky))">${initials(c.full_name)}</div>
+        <div class="child-info"><div class="child-nm">${c.full_name}</div><div class="child-lvl">${c.department||''} ${c.level||''} · ${c.matricule}</div></div>
+      </div>`).join('');
+
+    document.getElementById('childTabs').innerHTML = mesEnfants.map(c => `
+      <div class="child-tab" id="tab-${c.id}" onclick="selectChild('${c.id}')">
+        <div class="child-tab-av" style="background:linear-gradient(135deg,var(--blue),var(--sky))">${initials(c.full_name)}</div>${c.full_name} — ${c.department||''} ${c.level||''}
+      </div>`).join('');
+
+    selectChild(mesEnfants[0].id);
+  }
+
+  async function selectChild(studentId) {
+    enfantActifId = studentId;
+    const child = mesEnfants.find(c => c.id === studentId);
+    if (!child) return;
+
+    document.getElementById('childName').textContent = child.full_name;
+    document.getElementById('kpi-pay').textContent = child.payment_status;
+    document.getElementById('kpi-rang').textContent = '—';
+    document.getElementById('n-rang').textContent = '—';
+
+    loadPresences(studentId);
+    loadEmploiDuTemps(child);
+    loadPaiementsEnfant(child);
+
     document.querySelectorAll('.child-pill').forEach(p=>p.classList.remove('active'));
     document.querySelectorAll('.child-tab').forEach(t=>t.classList.remove('active'));
-    document.getElementById('tab-'+id)?.classList.add('active');
-    showToast('👤 Affichage : '+d.name);
+    document.getElementById('pill-'+studentId)?.classList.add('active');
+    document.getElementById('tab-'+studentId)?.classList.add('active');
+
+    document.getElementById('notes-sub').textContent = `${child.full_name} · ${child.department||''} ${child.level||''} · Semestre 1`;
+
+    const { data: notes, error } = await supabaseClient
+      .from('grades').select('*').eq('student_id', studentId).order('matiere');
+    if (error) { console.error(error); return; }
+    notesEnfantActif = notes || [];
+
+    const tbody = document.getElementById('notesTable');
+    if (!notes || notes.length === 0) {
+      tbody.innerHTML = '<tr><td colspan="8" style="text-align:center;color:var(--gray);padding:2rem">Aucune note saisie pour le moment.</td></tr>';
+      document.getElementById('kpi-moy').textContent = '—';
+      document.getElementById('n-moy').textContent = '—';
+      document.getElementById('n-mention').textContent = '—';
+      document.getElementById('n-credits').textContent = '—';
+      return;
+    }
+
+    let totalPoints = 0, totalCoeff = 0, creditsValides = 0;
+    tbody.innerHTML = notes.map(n => {
+      const moyenne = (n.note_cc != null && n.note_exam != null) ? (n.note_cc * 0.3 + n.note_exam * 0.7) : null;
+      if (moyenne != null) {
+        totalPoints += moyenne * n.coefficient;
+        totalCoeff += n.coefficient;
+        if (moyenne >= 10) creditsValides += n.credits;
+      }
+      const noteClass = moyenne == null ? '' : (moyenne >= 14 ? 'note-good' : moyenne >= 10 ? 'note-avg' : 'note-bad');
+      return `<tr>
+        <td><strong>${n.matiere}</strong></td><td>${n.enseignant_nom||'—'}</td><td>${n.coefficient}</td>
+        <td>${n.note_cc ?? '—'}</td><td>${n.note_exam ?? '—'}</td>
+        <td>${moyenne!=null ? `<span class="${noteClass}">${moyenne.toFixed(1)}</span>` : '—'}</td>
+        <td>${moyenne!=null ? `<span class="badge ${mentionBadge(moyenne)}">${mention(moyenne)}</span>` : '—'}</td>
+        <td>${moyenne==null ? '<span class="badge badge-gray">En attente</span>' : moyenne>=10 ? '<span class="badge badge-success">✓ Validé</span>' : '<span class="badge badge-danger">Rattrapage</span>'}</td>
+      </tr>`;
+    }).join('');
+
+    const moyGen = totalCoeff > 0 ? totalPoints/totalCoeff : 0;
+    document.getElementById('kpi-moy').textContent = moyGen.toFixed(1);
+    document.getElementById('n-moy').textContent = moyGen.toFixed(1)+'/20';
+    document.getElementById('n-mention').textContent = mention(moyGen);
+    document.getElementById('n-credits').textContent = `${creditsValides}/60`;
+
+    showToast('👤 Affichage : '+child.full_name);
   }
+
+  // ── Charger les vrais paiements de l'enfant sélectionné (Supabase) ──
+  let paiementsEnfantActif = [];
+  async function loadPaiementsEnfant(child) {
+    const { data: pays, error } = await supabaseClient
+      .from('payments').select('*').eq('student_id', child.id).eq('statut', 'Confirmé').order('paid_at');
+    if (error) { console.error(error); return; }
+    paiementsEnfantActif = pays || [];
+
+    const totalPaye = paiementsEnfantActif.reduce((s, p) => s + Number(p.amount), 0);
+    const restant = Math.max(0, (child.frais_total || 0) - totalPaye);
+
+    document.getElementById('pp-sub').textContent = child.full_name;
+    document.getElementById('pp-kpi-paye').textContent = totalPaye.toLocaleString('fr-FR');
+    document.getElementById('pp-kpi-restant').textContent = restant.toLocaleString('fr-FR');
+    document.getElementById('pp-kpi-versements').textContent = paiementsEnfantActif.length;
+
+    const planEl = document.getElementById('pp-plan');
+    const recusEl = document.getElementById('pp-recus');
+    const fmtDate = d => new Date(d).toLocaleDateString('fr-FR', { day:'2-digit', month:'short', year:'numeric' });
+
+    if (paiementsEnfantActif.length === 0) {
+      planEl.innerHTML = '<div style="text-align:center;color:var(--gray);padding:1.5rem;font-size:.85rem">Aucun paiement enregistré pour le moment.</div>';
+      recusEl.innerHTML = '<div style="text-align:center;color:var(--gray);padding:1.5rem;font-size:.85rem">Aucun reçu disponible.</div>';
+      return;
+    }
+
+    planEl.innerHTML = paiementsEnfantActif.map(p => `
+      <div class="pay-item"><div><div class="pay-label">${p.type}</div><div class="pay-sub">Payé le ${fmtDate(p.paid_at)} · ${p.method}</div></div><div style="text-align:right"><div class="pay-amount" style="color:var(--success)">${Number(p.amount).toLocaleString('fr-FR')} FCFA</div><span class="badge badge-success">✓ Payé</span></div></div>`).join('');
+    if (restant <= 0) {
+      planEl.innerHTML += `<div style="padding:1rem;background:rgba(16,185,129,0.07);border-radius:10px;text-align:center;margin-top:.75rem"><div style="font-size:.78rem;color:var(--gray)">Scolarité ${child.university||''}</div><div style="font-family:'Syne',sans-serif;font-weight:800;font-size:1.2rem;color:var(--success)">ENTIÈREMENT SOLDÉE ✓</div></div>`;
+    }
+
+    recusEl.innerHTML = paiementsEnfantActif.map(p => `
+      <div class="pay-item"><div><div class="pay-label">Reçu ${p.reference || ('REC-'+p.id.slice(0,8).toUpperCase())}</div><div class="pay-sub">${p.type} · ${fmtDate(p.paid_at)}</div></div><button onclick="downloadRecuEnfant('${p.id}')" style="padding:.4rem .9rem;border-radius:7px;border:1px solid var(--border);background:white;font-size:.78rem;cursor:pointer;font-weight:600">📄 PDF</button></div>`).join('');
+  }
+
+  function downloadRecuEnfant(paymentId) {
+    const p = paiementsEnfantActif.find(x => x.id === paymentId);
+    const child = mesEnfants.find(c => c.id === enfantActifId);
+    if (!p || !child) { showToast('⚠️ Reçu introuvable'); return; }
+    const { jsPDF } = window.jspdf;
+    const doc = new jsPDF();
+    const reference = p.reference || ('REC-' + p.id.slice(0, 8).toUpperCase());
+    const dateStr = new Date(p.paid_at).toLocaleDateString('fr-FR', { day:'2-digit', month:'long', year:'numeric' });
+
+    doc.setFont('helvetica', 'bold'); doc.setFontSize(20); doc.setTextColor(13, 27, 42);
+    doc.text('UniManage', 14, 20);
+    doc.setFontSize(11); doc.setTextColor(100, 116, 139); doc.setFont('helvetica', 'normal');
+    doc.text(child.university || '', 14, 27);
+    doc.setDrawColor(226, 232, 240); doc.line(14, 33, 196, 33);
+
+    doc.setFont('helvetica', 'bold'); doc.setFontSize(16); doc.setTextColor(13, 27, 42);
+    doc.text('REÇU DE PAIEMENT', 14, 45);
+    doc.setFont('helvetica', 'normal'); doc.setFontSize(10); doc.setTextColor(100, 116, 139);
+    doc.text('N° ' + reference, 14, 52);
+
+    const rows = [
+      ['Étudiant', child.full_name],
+      ['Matricule', child.matricule],
+      ['Département', `${child.department||''} ${child.level||''}`.trim()],
+      ['Type de versement', p.type],
+      ['Moyen de paiement', p.method],
+      ['Date', dateStr],
+      ['Statut', 'Confirmé'],
+    ];
+    let y = 65;
+    doc.setFontSize(10);
+    rows.forEach(([label, val]) => {
+      doc.setTextColor(100, 116, 139); doc.text(label, 14, y);
+      doc.setTextColor(13, 27, 42); doc.setFont('helvetica', 'bold'); doc.text(String(val), 80, y);
+      doc.setFont('helvetica', 'normal');
+      y += 8;
+    });
+
+    y += 6;
+    doc.setDrawColor(226, 232, 240); doc.line(14, y, 196, y);
+    y += 12;
+    doc.setFont('helvetica', 'bold'); doc.setFontSize(14); doc.setTextColor(16, 185, 129);
+    doc.text('Montant : ' + Number(p.amount).toLocaleString('fr-FR') + ' FCFA', 14, y);
+
+    doc.setFont('helvetica', 'normal'); doc.setFontSize(8); doc.setTextColor(148, 163, 184);
+    doc.text('Document généré électroniquement le ' + new Date().toLocaleDateString('fr-FR') + ' via UniManage.', 14, 280);
+
+    doc.save(`recu_${reference}.pdf`);
+  }
+
+  // ── Paiement en ligne (CinetPay) ──
+  function ouvrirPaiementEnLigne() {
+    const child = mesEnfants.find(c => c.id === enfantActifId);
+    if (!child) { showToast('⚠️ Sélectionnez un enfant'); return; }
+    document.getElementById('po_amount').value = '';
+    document.getElementById('po_phone').value = '';
+    document.getElementById('payOnlineError').style.display = 'none';
+    document.getElementById('payOnlineModal').classList.add('active');
+    document.body.style.overflow = 'hidden';
+  }
+  function fermerPaiementEnLigne() {
+    document.getElementById('payOnlineModal').classList.remove('active');
+    document.body.style.overflow = '';
+  }
+
+  async function lancerPaiementEnLigne() {
+    const errBox = document.getElementById('payOnlineError');
+    errBox.style.display = 'none';
+
+    const child = mesEnfants.find(c => c.id === enfantActifId);
+    const amount = Number(document.getElementById('po_amount').value);
+    const phone = document.getElementById('po_phone').value.trim();
+
+    if (!child || !amount || amount <= 0 || !phone) {
+      errBox.textContent = '⚠️ Montant et numéro de téléphone sont obligatoires.';
+      errBox.style.display = 'block';
+      return;
+    }
+
+    const btn = document.getElementById('po_submit');
+    btn.disabled = true;
+    btn.textContent = 'Redirection en cours…';
+
+    const returnUrl = window.location.origin + '/paiement-retour.html';
+    const { data, error } = await supabaseClient.functions.invoke('cinetpay-initiate', {
+      body: { student_id: child.id, amount, type: 'Scolarité', phone, return_url: returnUrl },
+    });
+
+    btn.disabled = false;
+    btn.textContent = 'Continuer vers le paiement →';
+
+    if (error || !data?.payment_url) {
+      let msg = 'Le paiement en ligne est momentanément indisponible.';
+      try { const body = await error?.context?.json?.(); if (body?.error) msg = body.error; } catch (e) {}
+      errBox.textContent = '⚠️ ' + msg;
+      errBox.style.display = 'block';
+      return;
+    }
+
+    window.location.href = data.payment_url;
+  }
+
+  // ── Génération PDF (relevé de notes de l'enfant sélectionné) ──
+  function downloadReleveNotes() {
+    const child = mesEnfants.find(c => c.id === enfantActifId);
+    if (!child) { showToast('⚠️ Sélectionnez un enfant'); return; }
+    if (notesEnfantActif.length === 0) { showToast('⚠️ Aucune note à exporter'); return; }
+    const { jsPDF } = window.jspdf;
+    const doc = new jsPDF();
+
+    doc.setFont('helvetica', 'bold'); doc.setFontSize(20); doc.setTextColor(13, 27, 42);
+    doc.text('UniManage', 14, 20);
+    doc.setFontSize(11); doc.setTextColor(100, 116, 139); doc.setFont('helvetica', 'normal');
+    doc.text(window.currentUser?.university || '', 14, 27);
+    doc.setDrawColor(226, 232, 240); doc.line(14, 33, 196, 33);
+
+    doc.setFont('helvetica', 'bold'); doc.setFontSize(16); doc.setTextColor(13, 27, 42);
+    doc.text('RELEVÉ DE NOTES', 14, 45);
+    doc.setFont('helvetica', 'normal'); doc.setFontSize(10); doc.setTextColor(100, 116, 139);
+    doc.text(`${child.full_name}  ·  ${child.matricule}`, 14, 53);
+    doc.text(`${child.department || '—'} ${child.level || ''}`.trim(), 14, 59);
+
+    let y = 72;
+    doc.setFont('helvetica', 'bold'); doc.setFontSize(9); doc.setTextColor(255,255,255);
+    doc.setFillColor(13, 27, 42);
+    doc.rect(14, y - 5, 182, 8, 'F');
+    doc.text('Matière', 16, y);
+    doc.text('Enseignant', 80, y);
+    doc.text('Coeff.', 128, y);
+    doc.text('Note/20', 148, y);
+    doc.text('Mention', 172, y);
+    y += 9;
+
+    let totalPoints = 0, totalCoeff = 0, creditsValides = 0;
+    doc.setFont('helvetica', 'normal'); doc.setTextColor(13, 27, 42);
+    notesEnfantActif.forEach((n, i) => {
+      const moyenne = (n.note_cc != null && n.note_exam != null) ? (n.note_cc * 0.3 + n.note_exam * 0.7) : null;
+      if (moyenne != null) {
+        totalPoints += moyenne * n.coefficient; totalCoeff += n.coefficient;
+        if (moyenne >= 10) creditsValides += n.credits;
+      }
+      if (i % 2 === 0) { doc.setFillColor(248, 250, 252); doc.rect(14, y - 5, 182, 8, 'F'); }
+      doc.setFontSize(9);
+      doc.text(n.matiere, 16, y);
+      doc.text(n.enseignant_nom || '—', 80, y);
+      doc.text(String(n.coefficient), 128, y);
+      doc.text(moyenne != null ? moyenne.toFixed(1) : '—', 148, y);
+      doc.text(moyenne != null ? mention(moyenne) : 'En attente', 172, y);
+      y += 9;
+    });
+
+    const moyenneGenerale = totalCoeff > 0 ? (totalPoints / totalCoeff) : 0;
+    y += 6;
+    doc.setDrawColor(226, 232, 240); doc.line(14, y, 196, y);
+    y += 12;
+    doc.setFont('helvetica', 'bold'); doc.setFontSize(12); doc.setTextColor(26, 86, 219);
+    doc.text(`Moyenne générale : ${moyenneGenerale.toFixed(1)}/20 — ${mention(moyenneGenerale)}`, 14, y);
+    y += 8;
+    doc.setFontSize(10); doc.setTextColor(100, 116, 139); doc.setFont('helvetica', 'normal');
+    doc.text(`Crédits validés : ${creditsValides}/60`, 14, y);
+
+    doc.setFontSize(8); doc.setTextColor(148, 163, 184);
+    doc.text('Document généré électroniquement le ' + new Date().toLocaleDateString('fr-FR') + ' via UniManage.', 14, 280);
+
+    doc.save(`releve_notes_${child.matricule}.pdf`);
+  }
+
+  // ── Charger les vraies présences (Supabase) ──
+  const moisNoms = ['Janvier','Février','Mars','Avril','Mai','Juin','Juillet','Août','Septembre','Octobre','Novembre','Décembre'];
+
+  async function loadPresences(studentId) {
+    const { data: records, error } = await supabaseClient
+      .from('attendance').select('*').eq('student_id', studentId).order('session_date');
+    if (error) { console.error(error); return; }
+
+    const kpiTaux = document.getElementById('pres-kpi-taux');
+    const kpiAbs = document.getElementById('pres-kpi-absences');
+    const kpiRet = document.getElementById('pres-kpi-retards');
+    const detailBody = document.getElementById('pres-detail');
+    const calendar = document.getElementById('pres-calendar');
+    const sub = document.getElementById('pres-sub');
+
+    if (!records || records.length === 0) {
+      kpiTaux.textContent = '—'; kpiAbs.textContent = '0'; kpiRet.textContent = '0';
+      detailBody.innerHTML = '<tr><td colspan="5" style="text-align:center;color:var(--gray);padding:2rem">Aucune présence enregistrée pour le moment.</td></tr>';
+      calendar.innerHTML = '<div class="abs-day header">L</div><div class="abs-day header">M</div><div class="abs-day header">M</div><div class="abs-day header">J</div><div class="abs-day header">V</div><div class="abs-day header weekend">S</div><div class="abs-day header weekend">D</div>';
+      sub.textContent = 'Semestre 1';
+      return;
+    }
+
+    const present = records.filter(r => r.statut === 'Présent').length;
+    const absents = records.filter(r => r.statut === 'Absent');
+    const retards = records.filter(r => r.statut === 'Retard');
+    kpiTaux.textContent = Math.round(present / records.length * 100) + '%';
+    kpiAbs.textContent = absents.length;
+    kpiRet.textContent = retards.length;
+
+    const anomalies = [...absents, ...retards].sort((a, b) => new Date(b.session_date) - new Date(a.session_date));
+    detailBody.innerHTML = anomalies.length === 0
+      ? '<tr><td colspan="5" style="text-align:center;color:var(--gray);padding:2rem">Aucune absence ni retard 🎉</td></tr>'
+      : anomalies.map(r => {
+        const d = new Date(r.session_date);
+        const dateStr = `${String(d.getDate()).padStart(2,'0')} ${moisNoms[d.getMonth()].slice(0,3)} ${d.getFullYear()}`;
+        const typeBadge = r.statut === 'Absent' ? '<span class="badge badge-danger">Absence</span>' : '<span class="badge badge-gold">Retard</span>';
+        const justifBadge = r.justification === 'Justifiée' ? '<span class="badge badge-success">Justifiée</span>'
+          : r.justification === 'Non justifiée' ? '<span class="badge badge-danger">Non justifiée</span>'
+          : '<span class="badge badge-gold">En attente</span>';
+        return `<tr><td>${dateStr}</td><td>${r.matiere}</td><td>${r.enseignant_nom||'—'}</td><td>${typeBadge}</td><td>${justifBadge}</td></tr>`;
+      }).join('');
+
+    // Calendrier du mois le plus récent avec des données
+    const lastDate = new Date(records[records.length - 1].session_date);
+    const year = lastDate.getFullYear(), month = lastDate.getMonth();
+    sub.textContent = `${moisNoms[month]} ${year}`;
+    const byDate = {};
+    records.forEach(r => {
+      const d = new Date(r.session_date);
+      if (d.getFullYear() === year && d.getMonth() === month) {
+        const key = d.getDate();
+        const rank = { 'Absent': 2, 'Retard': 1, 'Présent': 0 };
+        if (!byDate[key] || rank[r.statut] > rank[byDate[key]]) byDate[key] = r.statut;
+      }
+    });
+    const firstDay = new Date(year, month, 1);
+    const firstWeekday = (firstDay.getDay() + 6) % 7; // 0 = lundi
+    const daysInMonth = new Date(year, month + 1, 0).getDate();
+    let cells = '<div class="abs-day header">L</div><div class="abs-day header">M</div><div class="abs-day header">M</div><div class="abs-day header">J</div><div class="abs-day header">V</div><div class="abs-day header weekend">S</div><div class="abs-day header weekend">D</div>';
+    for (let i = 0; i < firstWeekday; i++) cells += '<div class="abs-day weekend"></div>';
+    for (let day = 1; day <= daysInMonth; day++) {
+      const weekday = (firstWeekday + day - 1) % 7;
+      const isWeekend = weekday >= 5;
+      const statut = byDate[day];
+      let cls = isWeekend ? 'weekend' : '';
+      let label = String(day).padStart(2, '0');
+      if (statut === 'Présent') { cls = 'present'; label += '✓'; }
+      else if (statut === 'Absent') { cls = 'absent'; label += '✗'; }
+      else if (statut === 'Retard') { cls = 'retard'; label += '⏰'; }
+      cells += `<div class="abs-day ${cls}">${label}</div>`;
+    }
+    calendar.innerHTML = cells;
+  }
+
+  // ── Charger le vrai emploi du temps (Supabase) ──
+  const ET_JOURS = ['Lundi','Mardi','Mercredi','Jeudi','Vendredi'];
+  const ET_CRENEAUX = ['07h–09h','09h–11h','11h–13h','14h–16h','16h–18h'];
+  const ET_COLORS = { 'Cours':['rgba(26,86,219,0.1)','var(--blue)'], 'TD':['rgba(245,158,11,0.1)','var(--gold)'], 'TP':['rgba(16,185,129,0.1)','var(--success)'], 'Examen':['rgba(239,68,68,0.1)','var(--danger)'] };
+
+  async function loadEmploiDuTemps(child) {
+    const sub = document.getElementById('et-sub');
+    const tbody = document.getElementById('et-tbody');
+    if (!child.department || !child.level) {
+      sub.textContent = 'Département/niveau non renseigné';
+      tbody.innerHTML = '<tr><td colspan="6" style="text-align:center;color:var(--gray);padding:2rem">Emploi du temps indisponible.</td></tr>';
+      return;
+    }
+    sub.textContent = `${child.full_name} · ${child.department} ${child.level}`;
+
+    const { data: slots, error } = await supabaseClient
+      .from('schedule_slots').select('*')
+      .eq('department', child.department).eq('level', child.level);
+    if (error) { console.error(error); return; }
+
+    const byKey = {};
+    (slots || []).forEach(s => { byKey[s.jour + '|' + s.creneau] = s; });
+
+    tbody.innerHTML = ET_CRENEAUX.map(creneau => {
+      const cells = ET_JOURS.map(jour => {
+        const s = byKey[jour + '|' + creneau];
+        if (!s) return '<td style="border:1px solid var(--border);padding:.5rem;height:65px"></td>';
+        const [bg, border] = ET_COLORS[s.type] || ET_COLORS['Cours'];
+        return `<td style="border:1px solid var(--border);padding:.5rem;height:65px"><div style="background:${bg};border-left:3px solid ${border};border-radius:5px;padding:.4rem .5rem;height:100%"><div style="font-weight:600;font-size:.75rem">${s.matiere}</div><div style="color:var(--gray);font-size:.7rem">${s.enseignant_nom||'—'} · ${s.salle||'—'}</div></div></td>`;
+      }).join('');
+      return `<tr><td style="background:#F8FAFC;color:var(--gray);font-size:.75rem;font-weight:600;text-align:center;padding:.5rem;border:1px solid var(--border)">${creneau}</td>${cells}</tr>`;
+    }).join('');
+  }
+
+  window.authReady.then(user => { if (user) loadMesEnfants(user); });
 
   let tt;
   function showToast(msg){const t=document.getElementById('toast');t.textContent=msg;t.classList.add('show');clearTimeout(tt);tt=setTimeout(()=>t.classList.remove('show'),3000);}

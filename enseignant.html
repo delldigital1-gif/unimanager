@@ -1,6 +1,7 @@
 <!DOCTYPE html>
 <html lang="fr">
 <head>
+<style>html{visibility:hidden}</style>
   <meta charset="UTF-8"/>
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
   <title>UniManage — Espace Enseignant</title>
@@ -76,6 +77,11 @@
   </style>
 </head>
 <body>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script src="https://cdn.jsdelivr.net/npm/jspdf@2.5.2/dist/jspdf.umd.min.js"></script>
+<script src="supabase-config.js"></script>
+<script src="auth-guard.js"></script>
+<script>window.authReady = requireAuth('enseignant');</script>
 
 <aside class="sidebar">
   <div class="sidebar-brand">
@@ -83,10 +89,10 @@
     <div class="brand-sub">Espace Enseignant</div>
   </div>
   <div class="prof-card">
-    <div class="prof-avatar">KM</div>
-    <div class="prof-name">Dr. Kodjo Mensah</div>
-    <div class="prof-spec">Docteur en Informatique</div>
-    <div class="prof-dept">💻 Algorithmique · Permanent</div>
+    <div class="prof-avatar" id="ec-avatar">KM</div>
+    <div class="prof-name" id="ec-nom">Dr. Kodjo Mensah</div>
+    <div class="prof-spec" id="ec-spec">Docteur en Informatique</div>
+    <div class="prof-dept" id="ec-dept">💻 Algorithmique · Permanent</div>
   </div>
   <nav class="sidebar-nav">
     <div class="nav-group-label">Mon espace</div>
@@ -96,6 +102,7 @@
     <div class="nav-item" onclick="showPage('etudiants')"><span class="nav-icon">🎓</span> Mes étudiants</div>
     <div class="nav-group-label">Évaluation</div>
     <div class="nav-item" onclick="showPage('notes')"><span class="nav-icon">📝</span> Saisie des notes</div>
+    <div class="nav-item" onclick="showPage('presences')"><span class="nav-icon">✅</span> Prise de présence</div>
     <div class="nav-item" onclick="showPage('examens')"><span class="nav-icon">📋</span> Mes examens</div>
     <div class="nav-group-label">Finance</div>
     <div class="nav-item" onclick="showPage('salaire')"><span class="nav-icon">💰</span> Mon salaire</div>
@@ -128,10 +135,8 @@
     <div class="dash-grid">
       <div class="card">
         <div class="card-header"><div class="card-title">📅 Mon planning — Aujourd'hui</div><button class="card-action" onclick="showPage('emploidutemps')">Voir tout →</button></div>
-        <div class="card-body">
-          <div class="cal-item"><div class="cal-time">07h–09h</div><div><div class="cal-name">Algorithmique L2 — CM</div><div class="cal-sub">287 étudiants · Amphithéâtre A</div></div></div>
-          <div class="cal-item" style="border-left-color:var(--success);background:rgba(16,185,129,0.07)"><div class="cal-time">11h–13h</div><div><div class="cal-name">TP Algorithmique L2</div><div class="cal-sub">32 étudiants · Labo Informatique</div></div></div>
-          <div class="cal-item" style="border-left-color:var(--blue);background:rgba(26,86,219,0.07)"><div class="cal-time">14h–16h</div><div><div class="cal-name">Projet tutoré — Suivi</div><div class="cal-sub">8 groupes · Salle Projet</div></div></div>
+        <div class="card-body" id="planning-aujourdhui">
+          <div style="text-align:center;color:var(--gray);padding:1rem;font-size:.85rem">Chargement...</div>
         </div>
       </div>
       <div class="card">
@@ -176,7 +181,7 @@
     <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:1.5rem">
       <div><h2 style="font-family:'Syne',sans-serif;font-weight:800;font-size:1.3rem">Saisie des notes</h2><div style="font-size:.85rem;color:var(--gray);margin-top:.2rem">Algorithmique Avancée · Informatique L2 · Session 1</div></div>
       <div style="display:flex;gap:.75rem">
-        <button class="btn-primary" onclick="showToast('✅ Notes enregistrées avec succès !')">💾 Enregistrer</button>
+        <button class="btn-primary" onclick="enregistrerNotes()">💾 Enregistrer</button>
         <button onclick="showToast('📤 Notes soumises pour validation !')" style="padding:.65rem 1.2rem;border-radius:9px;background:var(--success);color:white;font-size:.875rem;font-weight:600;cursor:pointer;border:none">📤 Soumettre</button>
       </div>
     </div>
@@ -193,13 +198,29 @@
       <div class="card-header"><div class="card-title">Liste des étudiants — Saisie de notes</div></div>
       <table class="data-table">
         <thead><tr><th>#</th><th>Étudiant</th><th>Matricule</th><th>Note CC /20</th><th>Note Exam /20</th><th>Moyenne /20</th><th>Statut</th></tr></thead>
-        <tbody>
-          <tr><td style="color:var(--gray)">001</td><td><strong>Kofi Adzoa</strong></td><td style="color:var(--gray)">UL-2025-001</td><td><input class="note-input" value="17" onchange="showToast('💾 Note mise à jour')"/></td><td><input class="note-input" value="16" onchange="showToast('💾 Note mise à jour')"/></td><td><span style="font-family:'Syne',sans-serif;font-weight:800;color:var(--success)">16.3</span></td><td><span class="badge badge-success">Validé</span></td></tr>
-          <tr><td style="color:var(--gray)">002</td><td><strong>Afia Mensah</strong></td><td style="color:var(--gray)">UL-2025-002</td><td><input class="note-input" value="14" onchange="showToast('💾 Note mise à jour')"/></td><td><input class="note-input" value="13" onchange="showToast('💾 Note mise à jour')"/></td><td><span style="font-family:'Syne',sans-serif;font-weight:800;color:var(--blue)">13.3</span></td><td><span class="badge badge-success">Validé</span></td></tr>
-          <tr><td style="color:var(--gray)">003</td><td><strong>Yao Dodzi</strong></td><td style="color:var(--gray)">UL-2025-003</td><td><input class="note-input" value="12" onchange="showToast('💾 Note mise à jour')"/></td><td><input class="note-input" value="11" onchange="showToast('💾 Note mise à jour')"/></td><td><span style="font-family:'Syne',sans-serif;font-weight:800;color:var(--gold)">11.3</span></td><td><span class="badge badge-gold">Passable</span></td></tr>
-          <tr><td style="color:var(--gray)">004</td><td><strong>Selom Edem</strong></td><td style="color:var(--gray)">UL-2025-004</td><td><input class="note-input" value="8" onchange="showToast('💾 Note mise à jour')"/></td><td><input class="note-input" value="7" onchange="showToast('💾 Note mise à jour')"/></td><td><span style="font-family:'Syne',sans-serif;font-weight:800;color:var(--danger)">7.3</span></td><td><span class="badge badge-danger">Rattrapage</span></td></tr>
-          <tr><td style="color:var(--gray)">005</td><td><strong>Béatrice Komi</strong></td><td style="color:var(--gray)">UL-2025-005</td><td><input class="note-input" value="18" onchange="showToast('💾 Note mise à jour')"/></td><td><input class="note-input" value="17" onchange="showToast('💾 Note mise à jour')"/></td><td><span style="font-family:'Syne',sans-serif;font-weight:800;color:var(--success)">17.3</span></td><td><span class="badge badge-success">Validé</span></td></tr>
-          <tr><td style="color:var(--gray)">006</td><td><strong>Mawuli Kokou</strong></td><td style="color:var(--gray)">UL-2025-006</td><td><input class="note-input" placeholder="—" onchange="showToast('💾 Note mise à jour')"/></td><td><input class="note-input" placeholder="—" onchange="showToast('💾 Note mise à jour')"/></td><td><span style="font-family:'Syne',sans-serif;font-weight:800;color:var(--gray)">—</span></td><td><span class="badge badge-gray">En attente</span></td></tr>
+        <tbody id="tbodySaisieNotes">
+          <tr><td colspan="7" style="text-align:center;color:var(--gray);padding:2rem">Chargement...</td></tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+  <!-- PRISE DE PRÉSENCE -->
+  <div class="page" id="page-presences">
+    <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:1.5rem;flex-wrap:wrap;gap:1rem">
+      <div><h2 style="font-family:'Syne',sans-serif;font-weight:800;font-size:1.3rem">Prise de présence</h2><div style="font-size:.85rem;color:var(--gray);margin-top:.2rem">Sélectionnez une matière et une date</div></div>
+      <div style="display:flex;gap:.75rem;align-items:center;flex-wrap:wrap">
+        <select id="pr_matiere" style="padding:.6rem .9rem;border:1.5px solid var(--border);border-radius:9px;font-size:.85rem;font-family:'Inter',sans-serif" onchange="loadRosterPresence()"></select>
+        <input id="pr_date" type="date" style="padding:.6rem .9rem;border:1.5px solid var(--border);border-radius:9px;font-size:.85rem;font-family:'Inter',sans-serif" onchange="loadRosterPresence()"/>
+        <button class="btn-primary" onclick="enregistrerPresences()">💾 Enregistrer</button>
+      </div>
+    </div>
+    <div class="card">
+      <div class="card-header"><div class="card-title">Liste des étudiants</div></div>
+      <table class="data-table">
+        <thead><tr><th>#</th><th>Étudiant</th><th>Matricule</th><th>Statut</th><th>Justification</th></tr></thead>
+        <tbody id="tbodyPresences">
+          <tr><td colspan="5" style="text-align:center;color:var(--gray);padding:2rem">Chargement...</td></tr>
         </tbody>
       </table>
     </div>
@@ -209,34 +230,20 @@
   <div class="page" id="page-salaire">
     <div style="margin-bottom:1.5rem"><h2 style="font-family:'Syne',sans-serif;font-weight:800;font-size:1.3rem">Mon salaire</h2><div style="font-size:.85rem;color:var(--gray);margin-top:.2rem">Rémunération basée sur les heures effectuées</div></div>
     <div class="kpi-grid" style="grid-template-columns:repeat(3,1fr);margin-bottom:1.5rem">
-      <div class="kpi-card"><div class="kpi-icon" style="background:rgba(245,158,11,0.1)">💵</div><div class="kpi-value" style="color:var(--gold)">960 000</div><div class="kpi-label">FCFA ce mois (Jan)</div></div>
-      <div class="kpi-card"><div class="kpi-icon" style="background:rgba(16,185,129,0.1)">📊</div><div class="kpi-value" style="color:var(--success)">120h</div><div class="kpi-label">Heures effectuées</div></div>
-      <div class="kpi-card"><div class="kpi-icon" style="background:rgba(26,86,219,0.1)">💳</div><div class="kpi-value" style="color:var(--blue)">8 000</div><div class="kpi-label">FCFA / heure</div></div>
+      <div class="kpi-card"><div class="kpi-icon" style="background:rgba(245,158,11,0.1)">💵</div><div class="kpi-value" style="color:var(--gold)" id="sal-montant">—</div><div class="kpi-label">FCFA (heures effectuées)</div></div>
+      <div class="kpi-card"><div class="kpi-icon" style="background:rgba(16,185,129,0.1)">📊</div><div class="kpi-value" style="color:var(--success)" id="sal-heures">—</div><div class="kpi-label">Heures effectuées</div></div>
+      <div class="kpi-card"><div class="kpi-icon" style="background:rgba(26,86,219,0.1)">💳</div><div class="kpi-value" style="color:var(--blue)" id="sal-taux">—</div><div class="kpi-label">FCFA / heure</div></div>
     </div>
-    <div class="dash-grid">
-      <div class="card">
-        <div class="card-header"><div class="card-title">Historique des paiements</div></div>
-        <table class="data-table">
-          <thead><tr><th>Mois</th><th>Heures</th><th>Montant</th><th>Statut</th><th>Fiche</th></tr></thead>
-          <tbody>
-            <tr><td><strong>Janvier 2025</strong></td><td>120h</td><td><strong style="color:var(--gold)">960 000 FCFA</strong></td><td><span class="badge badge-gold">En cours</span></td><td><button onclick="showToast('📄 Fiche de paie téléchargée')" style="padding:.35rem .8rem;border-radius:6px;border:1px solid var(--border);background:white;font-size:.75rem;cursor:pointer">PDF</button></td></tr>
-            <tr><td><strong>Décembre 2024</strong></td><td>108h</td><td><strong style="color:var(--success)">864 000 FCFA</strong></td><td><span class="badge badge-success">Payé</span></td><td><button onclick="showToast('📄 Fiche de paie téléchargée')" style="padding:.35rem .8rem;border-radius:6px;border:1px solid var(--border);background:white;font-size:.75rem;cursor:pointer">PDF</button></td></tr>
-            <tr><td><strong>Novembre 2024</strong></td><td>96h</td><td><strong style="color:var(--success)">768 000 FCFA</strong></td><td><span class="badge badge-success">Payé</span></td><td><button onclick="showToast('📄 Fiche de paie téléchargée')" style="padding:.35rem .8rem;border-radius:6px;border:1px solid var(--border);background:white;font-size:.75rem;cursor:pointer">PDF</button></td></tr>
-            <tr><td><strong>Octobre 2024</strong></td><td>72h</td><td><strong style="color:var(--success)">576 000 FCFA</strong></td><td><span class="badge badge-success">Payé</span></td><td><button onclick="showToast('📄 Fiche de paie téléchargée')" style="padding:.35rem .8rem;border-radius:6px;border:1px solid var(--border);background:white;font-size:.75rem;cursor:pointer">PDF</button></td></tr>
-          </tbody>
-        </table>
-      </div>
-      <div class="card">
-        <div class="card-header"><div class="card-title">Détail Janvier 2025</div></div>
-        <div class="card-body">
-          <div style="display:flex;flex-direction:column;gap:.6rem">
-            <div style="display:flex;justify-content:space-between;padding:.5rem 0;border-bottom:1px solid var(--border);font-size:.85rem"><span>Algorithmique L2 — CM (48h)</span><span style="font-weight:600">384 000 FCFA</span></div>
-            <div style="display:flex;justify-content:space-between;padding:.5rem 0;border-bottom:1px solid var(--border);font-size:.85rem"><span>TP Algorithmique (32h)</span><span style="font-weight:600">256 000 FCFA</span></div>
-            <div style="display:flex;justify-content:space-between;padding:.5rem 0;border-bottom:1px solid var(--border);font-size:.85rem"><span>Projet tutoré (24h)</span><span style="font-weight:600">192 000 FCFA</span></div>
-            <div style="display:flex;justify-content:space-between;padding:.5rem 0;border-bottom:1px solid var(--border);font-size:.85rem"><span>Algorithmique L3 (16h)</span><span style="font-weight:600">128 000 FCFA</span></div>
-            <div style="display:flex;justify-content:space-between;padding:.75rem 0 0;font-size:.95rem"><span style="font-weight:700">Total brut</span><span style="font-family:'Syne',sans-serif;font-weight:800;color:var(--gold)">960 000 FCFA</span></div>
-          </div>
+    <div class="card">
+      <div class="card-header"><div class="card-title">Rémunération — période en cours</div><button class="btn-primary" onclick="downloadFichePaie()">📄 Télécharger la fiche</button></div>
+      <div class="card-body">
+        <div style="display:flex;flex-direction:column;gap:.6rem">
+          <div style="display:flex;justify-content:space-between;padding:.5rem 0;border-bottom:1px solid var(--border);font-size:.85rem"><span>Heures effectuées</span><span style="font-weight:600" id="sal-detail-heures">—</span></div>
+          <div style="display:flex;justify-content:space-between;padding:.5rem 0;border-bottom:1px solid var(--border);font-size:.85rem"><span>Heures contractuelles max</span><span style="font-weight:600" id="sal-detail-max">—</span></div>
+          <div style="display:flex;justify-content:space-between;padding:.5rem 0;border-bottom:1px solid var(--border);font-size:.85rem"><span>Taux horaire</span><span style="font-weight:600" id="sal-detail-taux">—</span></div>
+          <div style="display:flex;justify-content:space-between;padding:.75rem 0 0;font-size:.95rem"><span style="font-weight:700">Total estimé</span><span style="font-family:'Syne',sans-serif;font-weight:800;color:var(--gold)" id="sal-detail-total">—</span></div>
         </div>
+        <div style="margin-top:1rem;font-size:.72rem;color:var(--gray)">Calcul basé sur les heures effectuées enregistrées dans votre profil. Ce récapitulatif est estimatif et ne remplace pas un bulletin de paie officiel.</div>
       </div>
     </div>
   </div>
@@ -250,7 +257,24 @@
       <div class="card" onclick="showToast('📚 Cours Projet Tutoré ouvert')" style="cursor:pointer"><div style="height:5px;background:linear-gradient(90deg,var(--blue),var(--sky))"></div><div class="card-body"><div style="font-size:1.3rem;margin-bottom:.5rem">🚀</div><div style="font-family:'Syne',sans-serif;font-weight:700;margin-bottom:.3rem">Projet Tutoré L2</div><div style="font-size:.78rem;color:var(--gray);margin-bottom:.75rem">8 groupes · 40h · Encadrement</div><div style="display:flex;gap:.5rem"><span class="badge badge-blue">24h / 40h</span><button onclick="event.stopPropagation();showToast('📤 Fichier déposé !')" style="padding:.25rem .7rem;border-radius:6px;border:1px solid var(--border);background:white;font-size:.72rem;cursor:pointer">+ Déposer</button></div></div></div>
     </div>
   </div>
-  <div class="page" id="page-emploidutemps"><div style="margin-bottom:1.5rem"><h2 style="font-family:'Syne',sans-serif;font-weight:800;font-size:1.3rem">Mon planning</h2></div><div class="card"><div class="card-body" style="text-align:center;padding:3rem"><div style="font-size:3rem;margin-bottom:1rem">📅</div><div style="font-family:'Syne',sans-serif;font-weight:700;font-size:1.1rem">Vue planning disponible dans le module principal</div><button class="btn-primary" onclick="showToast('📅 Planning chargé')">Voir mon planning</button></div></div></div>
+  <div class="page" id="page-emploidutemps">
+    <div style="margin-bottom:1.5rem"><h2 style="font-family:'Syne',sans-serif;font-weight:800;font-size:1.3rem">Mon planning</h2><div style="font-size:.85rem;color:var(--gray);margin-top:.2rem">Tous mes cours, toutes classes confondues</div></div>
+    <div class="card" style="overflow-x:auto">
+      <table style="width:100%;border-collapse:collapse">
+        <thead><tr>
+          <th style="background:var(--navy);color:white;padding:.7rem 1rem;font-size:.8rem;font-weight:600;text-align:center">Heure</th>
+          <th style="background:var(--navy);color:white;padding:.7rem 1rem;font-size:.8rem;font-weight:600;text-align:center">Lundi</th>
+          <th style="background:var(--navy);color:white;padding:.7rem 1rem;font-size:.8rem;font-weight:600;text-align:center">Mardi</th>
+          <th style="background:var(--navy);color:white;padding:.7rem 1rem;font-size:.8rem;font-weight:600;text-align:center">Mercredi</th>
+          <th style="background:var(--navy);color:white;padding:.7rem 1rem;font-size:.8rem;font-weight:600;text-align:center">Jeudi</th>
+          <th style="background:var(--navy);color:white;padding:.7rem 1rem;font-size:.8rem;font-weight:600;text-align:center">Vendredi</th>
+        </tr></thead>
+        <tbody id="et-tbody">
+          <tr><td colspan="6" style="text-align:center;color:var(--gray);padding:2rem">Chargement...</td></tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
   <div class="page" id="page-etudiants"><div style="margin-bottom:1.5rem"><h2 style="font-family:'Syne',sans-serif;font-weight:800;font-size:1.3rem">Mes étudiants</h2></div><div class="card"><div class="card-body" style="text-align:center;padding:3rem"><div style="font-size:3rem;margin-bottom:1rem">🎓</div><div style="font-family:'Syne',sans-serif;font-weight:700;font-size:1.1rem">287 étudiants encadrés ce semestre</div></div></div></div>
   <div class="page" id="page-examens"><div style="margin-bottom:1.5rem"><h2 style="font-family:'Syne',sans-serif;font-weight:800;font-size:1.3rem">Mes examens</h2></div><div class="card"><div class="card-body" style="text-align:center;padding:3rem"><div style="font-size:3rem;margin-bottom:1rem">📋</div><div style="font-family:'Syne',sans-serif;font-weight:700;font-size:1.1rem">3 examens programmés · Session 2</div></div></div></div>
 
@@ -258,8 +282,8 @@
 
 <div class="toast" id="toast"></div>
 <script>
-  const pages=['accueil','mescours','emploidutemps','etudiants','notes','examens','salaire'];
-  const titles={'accueil':'Tableau de bord','mescours':'Mes cours','emploidutemps':'Mon planning','etudiants':'Mes étudiants','notes':'Saisie des notes','examens':'Mes examens','salaire':'Mon salaire'};
+  const pages=['accueil','mescours','emploidutemps','etudiants','notes','presences','examens','salaire'];
+  const titles={'accueil':'Tableau de bord','mescours':'Mes cours','emploidutemps':'Mon planning','etudiants':'Mes étudiants','notes':'Saisie des notes','presences':'Prise de présence','examens':'Mes examens','salaire':'Mon salaire'};
   function showPage(id){
     pages.forEach(p=>{document.getElementById('page-'+p)?.classList.remove('active');document.querySelectorAll('.nav-item').forEach(n=>{if(n.getAttribute('onclick')?.includes("'"+p+"'"))n.classList.remove('active');});});
     document.getElementById('page-'+id)?.classList.add('active');
@@ -268,6 +292,304 @@
   }
   let tt;
   function showToast(msg){const t=document.getElementById('toast');t.textContent=msg;t.classList.add('show');clearTimeout(tt);tt=setTimeout(()=>t.classList.remove('show'),3000);}
+
+  // ── Charger le vrai profil enseignant (Supabase) ──
+  async function loadMonProfilEnseignant(user) {
+    const { data: rec, error } = await supabaseClient
+      .from('teachers').select('*').eq('profile_id', user.id).maybeSingle();
+    if (error || !rec) { console.warn('Fiche enseignant introuvable pour ce compte.'); return; }
+
+    const initials = rec.full_name.split(' ').filter(Boolean).map(s=>s[0]).join('').slice(0,2).toUpperCase();
+    document.getElementById('ec-avatar').textContent = initials;
+    document.getElementById('ec-nom').textContent = rec.full_name;
+    document.getElementById('ec-spec').textContent = rec.specialite || '—';
+    document.getElementById('ec-dept').textContent = `💻 ${rec.department || '—'} · ${rec.contrat_type}`;
+  }
+
+  // ── Saisie des notes (Supabase) ──
+  let monTeacherId = null;
+  let notesEnCache = [];
+
+  function computeMoyenne(cc, exam) {
+    if (cc === '' || exam === '' || cc == null || exam == null) return null;
+    return parseFloat(cc) * 0.3 + parseFloat(exam) * 0.7;
+  }
+
+  async function loadSaisieNotes(teacherRecord) {
+    monTeacherId = teacherRecord.id;
+    const { data: notes, error } = await supabaseClient
+      .from('grades').select('*, students(full_name, matricule)')
+      .eq('teacher_id', teacherRecord.id).eq('matiere', 'Algorithmique Avancée')
+      .order('created_at');
+    if (error) { console.error(error); return; }
+    notesEnCache = notes || [];
+    renderSaisieNotes();
+  }
+
+  function renderSaisieNotes() {
+    const tbody = document.getElementById('tbodySaisieNotes');
+    if (notesEnCache.length === 0) {
+      tbody.innerHTML = '<tr><td colspan="7" style="text-align:center;color:var(--gray);padding:2rem">Aucun étudiant inscrit à ce cours.</td></tr>';
+      return;
+    }
+    tbody.innerHTML = notesEnCache.map((n, i) => {
+      const moyenne = computeMoyenne(n.note_cc, n.note_exam);
+      const color = moyenne == null ? 'var(--gray)' : moyenne >= 14 ? 'var(--success)' : moyenne >= 10 ? 'var(--blue)' : 'var(--danger)';
+      const badge = moyenne == null ? '<span class="badge badge-gray">En attente</span>' : moyenne >= 10 ? '<span class="badge badge-success">Validé</span>' : '<span class="badge badge-danger">Rattrapage</span>';
+      const num = String(i + 1).padStart(3, '0');
+      return `<tr data-grade-id="${n.id}">
+        <td style="color:var(--gray)">${num}</td>
+        <td><strong>${n.students?.full_name || '—'}</strong></td>
+        <td style="color:var(--gray)">${n.students?.matricule || '—'}</td>
+        <td><input class="note-input" data-field="note_cc" value="${n.note_cc ?? ''}" onchange="onNoteChange(this)"/></td>
+        <td><input class="note-input" data-field="note_exam" value="${n.note_exam ?? ''}" onchange="onNoteChange(this)"/></td>
+        <td><span class="grade-moyenne" style="font-family:'Syne',sans-serif;font-weight:800;color:${color}">${moyenne != null ? moyenne.toFixed(1) : '—'}</span></td>
+        <td class="grade-statut">${badge}</td>
+      </tr>`;
+    }).join('');
+  }
+
+  function onNoteChange(input) {
+    const tr = input.closest('tr');
+    const gradeId = tr.dataset.gradeId;
+    const grade = notesEnCache.find(n => n.id === gradeId);
+    if (!grade) return;
+    grade[input.dataset.field] = input.value === '' ? null : input.value;
+
+    const moyenne = computeMoyenne(grade.note_cc, grade.note_exam);
+    const color = moyenne == null ? 'var(--gray)' : moyenne >= 14 ? 'var(--success)' : moyenne >= 10 ? 'var(--blue)' : 'var(--danger)';
+    tr.querySelector('.grade-moyenne').textContent = moyenne != null ? moyenne.toFixed(1) : '—';
+    tr.querySelector('.grade-moyenne').style.color = color;
+    tr.querySelector('.grade-statut').innerHTML = moyenne == null ? '<span class="badge badge-gray">En attente</span>' : moyenne >= 10 ? '<span class="badge badge-success">Validé</span>' : '<span class="badge badge-danger">Rattrapage</span>';
+  }
+
+  async function enregistrerNotes() {
+    const updates = notesEnCache.map(n =>
+      supabaseClient.from('grades').update({ note_cc: n.note_cc, note_exam: n.note_exam }).eq('id', n.id)
+    );
+    const results = await Promise.all(updates);
+    const failed = results.filter(r => r.error);
+    if (failed.length > 0) {
+      showToast('⚠️ Erreur lors de l\'enregistrement de ' + failed.length + ' note(s)');
+    } else {
+      showToast('✅ Notes enregistrées avec succès !');
+    }
+  }
+
+  // ── Prise de présence (Supabase) ──
+  let monTeacherRecord = null;
+  let rosterPresence = [];
+
+  async function setupPresences(teacherRecord) {
+    monTeacherRecord = teacherRecord;
+    const { data: grades, error } = await supabaseClient
+      .from('grades').select('matiere').eq('teacher_id', teacherRecord.id);
+    if (error) { console.error(error); return; }
+    const matieres = [...new Set((grades || []).map(g => g.matiere))];
+    document.getElementById('pr_matiere').innerHTML = matieres.map(m => `<option value="${m}">${m}</option>`).join('');
+    document.getElementById('pr_date').value = new Date().toISOString().slice(0, 10);
+    if (matieres.length > 0) loadRosterPresence();
+
+    renderSalaire(teacherRecord);
+  }
+
+  // ── Rémunération (données réelles) ──
+  function renderSalaire(t) {
+    const heures = t.heures_effectuees || 0;
+    const taux = t.taux_horaire || 0;
+    const total = heures * taux;
+    document.getElementById('sal-montant').textContent = total.toLocaleString('fr-FR');
+    document.getElementById('sal-heures').textContent = heures + 'h';
+    document.getElementById('sal-taux').textContent = taux.toLocaleString('fr-FR');
+    document.getElementById('sal-detail-heures').textContent = heures + 'h';
+    document.getElementById('sal-detail-max').textContent = (t.heures_max || 0) + 'h';
+    document.getElementById('sal-detail-taux').textContent = taux.toLocaleString('fr-FR') + ' FCFA/h';
+    document.getElementById('sal-detail-total').textContent = total.toLocaleString('fr-FR') + ' FCFA';
+  }
+
+  function downloadFichePaie() {
+    if (!monTeacherRecord) { showToast('⚠️ Profil introuvable'); return; }
+    const t = monTeacherRecord;
+    const heures = t.heures_effectuees || 0;
+    const taux = t.taux_horaire || 0;
+    const total = heures * taux;
+    const { jsPDF } = window.jspdf;
+    const doc = new jsPDF();
+
+    doc.setFont('helvetica', 'bold'); doc.setFontSize(20); doc.setTextColor(13, 27, 42);
+    doc.text('UniManage', 14, 20);
+    doc.setFontSize(11); doc.setTextColor(100, 116, 139); doc.setFont('helvetica', 'normal');
+    doc.text(t.university || '', 14, 27);
+    doc.setDrawColor(226, 232, 240); doc.line(14, 33, 196, 33);
+
+    doc.setFont('helvetica', 'bold'); doc.setFontSize(16); doc.setTextColor(13, 27, 42);
+    doc.text('RÉCAPITULATIF DE RÉMUNÉRATION', 14, 45);
+
+    const rows = [
+      ['Enseignant', t.full_name],
+      ['Spécialité', t.specialite || '—'],
+      ['Département', t.department || '—'],
+      ['Type de contrat', t.contrat_type || '—'],
+      ['Heures effectuées', heures + 'h'],
+      ['Heures contractuelles max', (t.heures_max || 0) + 'h'],
+      ['Taux horaire', taux.toLocaleString('fr-FR') + ' FCFA/h'],
+    ];
+    let y = 60;
+    doc.setFontSize(10);
+    rows.forEach(([label, val]) => {
+      doc.setTextColor(100, 116, 139); doc.text(label, 14, y);
+      doc.setTextColor(13, 27, 42); doc.setFont('helvetica', 'bold'); doc.text(String(val), 90, y);
+      doc.setFont('helvetica', 'normal');
+      y += 8;
+    });
+
+    y += 6;
+    doc.setDrawColor(226, 232, 240); doc.line(14, y, 196, y);
+    y += 12;
+    doc.setFont('helvetica', 'bold'); doc.setFontSize(14); doc.setTextColor(245, 158, 11);
+    doc.text('Total estimé : ' + total.toLocaleString('fr-FR') + ' FCFA', 14, y);
+
+    y += 14;
+    doc.setFont('helvetica', 'normal'); doc.setFontSize(8); doc.setTextColor(148, 163, 184);
+    doc.text('Calcul basé sur les heures effectuées enregistrées dans le profil enseignant. Ce document est un', 14, y);
+    doc.text('récapitulatif estimatif et ne remplace pas un bulletin de paie officiel.', 14, y + 4);
+    doc.text('Document généré électroniquement le ' + new Date().toLocaleDateString('fr-FR') + ' via UniManage.', 14, y + 12);
+
+    doc.save(`remuneration_${(t.full_name||'enseignant').replace(/\s+/g,'_')}.pdf`);
+  }
+
+  async function loadRosterPresence() {
+    if (!monTeacherRecord) return;
+    const matiere = document.getElementById('pr_matiere').value;
+    const date = document.getElementById('pr_date').value;
+    const tbody = document.getElementById('tbodyPresences');
+    if (!matiere || !date) return;
+    tbody.innerHTML = '<tr><td colspan="5" style="text-align:center;color:var(--gray);padding:2rem">Chargement...</td></tr>';
+
+    const { data: grades, error: gErr } = await supabaseClient
+      .from('grades').select('student_id, students(full_name, matricule)')
+      .eq('teacher_id', monTeacherRecord.id).eq('matiere', matiere);
+    if (gErr) { console.error(gErr); return; }
+
+    const { data: existing, error: aErr } = await supabaseClient
+      .from('attendance').select('*')
+      .eq('teacher_id', monTeacherRecord.id).eq('matiere', matiere).eq('session_date', date);
+    if (aErr) { console.error(aErr); return; }
+    const existingByStudent = {};
+    (existing || []).forEach(a => { existingByStudent[a.student_id] = a; });
+
+    rosterPresence = (grades || []).map(g => ({
+      student_id: g.student_id,
+      full_name: g.students?.full_name || '—',
+      matricule: g.students?.matricule || '—',
+      statut: existingByStudent[g.student_id]?.statut || 'Présent',
+      justification: existingByStudent[g.student_id]?.justification || null
+    }));
+    renderRosterPresence();
+  }
+
+  function renderRosterPresence() {
+    const tbody = document.getElementById('tbodyPresences');
+    if (rosterPresence.length === 0) {
+      tbody.innerHTML = '<tr><td colspan="5" style="text-align:center;color:var(--gray);padding:2rem">Aucun étudiant inscrit à cette matière.</td></tr>';
+      return;
+    }
+    const statutOptions = ['Présent', 'Absent', 'Retard'];
+    const justifOptions = ['En attente', 'Justifiée', 'Non justifiée'];
+    tbody.innerHTML = rosterPresence.map((r, i) => `
+      <tr>
+        <td style="color:var(--gray)">${String(i + 1).padStart(3, '0')}</td>
+        <td><strong>${r.full_name}</strong></td>
+        <td style="color:var(--gray)">${r.matricule}</td>
+        <td>
+          <select onchange="onStatutChange(${i}, this.value)" style="padding:.35rem .6rem;border:1.5px solid var(--border);border-radius:7px;font-size:.8rem">
+            ${statutOptions.map(s => `<option value="${s}" ${r.statut===s?'selected':''}>${s}</option>`).join('')}
+          </select>
+        </td>
+        <td>
+          <select onchange="onJustifChange(${i}, this.value)" ${r.statut === 'Présent' ? 'disabled' : ''} style="padding:.35rem .6rem;border:1.5px solid var(--border);border-radius:7px;font-size:.8rem">
+            <option value="">—</option>
+            ${justifOptions.map(j => `<option value="${j}" ${r.justification===j?'selected':''}>${j}</option>`).join('')}
+          </select>
+        </td>
+      </tr>`).join('');
+  }
+
+  function onStatutChange(i, value) {
+    rosterPresence[i].statut = value;
+    if (value === 'Présent') rosterPresence[i].justification = null;
+    else if (!rosterPresence[i].justification) rosterPresence[i].justification = 'En attente';
+    renderRosterPresence();
+  }
+  function onJustifChange(i, value) {
+    rosterPresence[i].justification = value || null;
+  }
+
+  async function enregistrerPresences() {
+    const matiere = document.getElementById('pr_matiere').value;
+    const date = document.getElementById('pr_date').value;
+    if (!matiere || !date || rosterPresence.length === 0) return;
+
+    const rows = rosterPresence.map(r => ({
+      student_id: r.student_id,
+      teacher_id: monTeacherRecord.id,
+      enseignant_nom: monTeacherRecord.full_name,
+      university: monTeacherRecord.university,
+      matiere, session_date: date,
+      statut: r.statut,
+      justification: r.statut === 'Présent' ? null : r.justification
+    }));
+
+    const { error } = await supabaseClient.from('attendance')
+      .upsert(rows, { onConflict: 'student_id,teacher_id,matiere,session_date' });
+
+    if (error) { showToast('⚠️ ' + error.message); return; }
+    showToast('✅ Présences enregistrées !');
+  }
+
+  // ── Emploi du temps (Supabase) ──
+  const ET_JOURS = ['Lundi','Mardi','Mercredi','Jeudi','Vendredi'];
+  const ET_CRENEAUX = ['07h–09h','09h–11h','11h–13h','14h–16h','16h–18h'];
+  const ET_COLORS = { 'Cours':['rgba(26,86,219,0.1)','var(--blue)'], 'TD':['rgba(245,158,11,0.1)','var(--gold)'], 'TP':['rgba(16,185,129,0.1)','var(--success)'], 'Examen':['rgba(239,68,68,0.1)','var(--danger)'] };
+  const CAL_COLORS = { 'Cours':['var(--gold)','rgba(245,158,11,0.07)'], 'TD':['var(--gold)','rgba(245,158,11,0.07)'], 'TP':['var(--success)','rgba(16,185,129,0.07)'], 'Examen':['var(--danger)','rgba(239,68,68,0.07)'] };
+
+  async function loadMonPlanning(teacherRecord) {
+    const { data: slots, error } = await supabaseClient
+      .from('schedule_slots').select('*').eq('teacher_id', teacherRecord.id);
+    if (error) { console.error(error); return; }
+
+    const byKey = {};
+    (slots || []).forEach(s => { byKey[s.jour + '|' + s.creneau] = s; });
+
+    const tbody = document.getElementById('et-tbody');
+    tbody.innerHTML = ET_CRENEAUX.map(creneau => {
+      const cells = ET_JOURS.map(jour => {
+        const s = byKey[jour + '|' + creneau];
+        if (!s) return '<td style="border:1px solid var(--border);padding:.5rem;height:65px"></td>';
+        const [bg, border] = ET_COLORS[s.type] || ET_COLORS['Cours'];
+        return `<td style="border:1px solid var(--border);padding:.5rem;height:65px"><div style="background:${bg};border-left:3px solid ${border};border-radius:5px;padding:.4rem .5rem;height:100%"><div style="font-weight:600;font-size:.75rem">${s.matiere}</div><div style="color:var(--gray);font-size:.7rem">${s.department} ${s.level} · ${s.salle||'—'}</div></div></td>`;
+      }).join('');
+      return `<tr><td style="background:#F8FAFC;color:var(--gray);font-size:.75rem;font-weight:600;text-align:center;padding:.5rem;border:1px solid var(--border)">${creneau}</td>${cells}</tr>`;
+    }).join('');
+
+    const jourAujourdhui = ET_JOURS[new Date().getDay() - 1]; // getDay(): 0=dimanche
+    const todaySlots = (slots || []).filter(s => s.jour === jourAujourdhui)
+      .sort((a, b) => ET_CRENEAUX.indexOf(a.creneau) - ET_CRENEAUX.indexOf(b.creneau));
+    const todayEl = document.getElementById('planning-aujourdhui');
+    todayEl.innerHTML = !jourAujourdhui || todaySlots.length === 0
+      ? '<div style="text-align:center;color:var(--gray);padding:1rem;font-size:.85rem">Aucun cours aujourd\'hui.</div>'
+      : todaySlots.map(s => {
+          const [border, bg] = CAL_COLORS[s.type] || CAL_COLORS['Cours'];
+          return `<div class="cal-item" style="border-left-color:${border};background:${bg}"><div class="cal-time">${s.creneau}</div><div><div class="cal-name">${s.matiere} — ${s.department} ${s.level}</div><div class="cal-sub">${s.type} · ${s.salle||'—'}</div></div></div>`;
+        }).join('');
+  }
+
+  window.authReady.then(async user => {
+    if (!user) return;
+    loadMonProfilEnseignant(user);
+    const { data: rec } = await supabaseClient.from('teachers').select('*').eq('profile_id', user.id).maybeSingle();
+    if (rec) { loadSaisieNotes(rec); setupPresences(rec); loadMonPlanning(rec); }
+  });
 </script>
 </body>
 </html>

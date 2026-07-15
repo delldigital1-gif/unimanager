@@ -632,7 +632,7 @@
         </div>
         <div style="margin-top:.75rem;display:flex;align-items:center;gap:.75rem;padding:.75rem;background:var(--light);border-radius:9px;border:1px solid var(--border)">
           <input type="checkbox" id="f_cgu" style="width:16px;height:16px;accent-color:var(--blue)"/>
-          <label for="f_cgu" style="font-size:.82rem;cursor:pointer">J'accepte les <a href="#" style="color:var(--blue)">Conditions Générales d'Utilisation</a> et la <a href="#" style="color:var(--blue)">Politique de confidentialité</a> <span class="required">*</span></label>
+          <label for="f_cgu" style="font-size:.82rem;cursor:pointer">J'accepte les <a href="cgu.html" target="_blank" style="color:var(--blue)">Conditions Générales d'Utilisation</a> et la <a href="confidentialite.html" target="_blank" style="color:var(--blue)">Politique de confidentialité</a> <span class="required">*</span></label>
         </div>
       </div>
 
@@ -994,6 +994,8 @@
 
 <div class="toast" id="toast"></div>
 
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script src="supabase-config.js"></script>
 <script>
   let currentStep = 1;
   let selectedPlan = 'pro';
@@ -1169,15 +1171,33 @@
   }
 
   // ── Create account ──
-  function createAccount() {
-    // Save to session
-    sessionStorage.setItem('unimanage_user', JSON.stringify({
-      univ: document.getElementById('f_nom').value || 'Mon Université',
-      email: document.getElementById('f_email_admin').value,
-      fname: document.getElementById('f_prenom').value,
-      lname: document.getElementById('f_lnom').value,
-      role: 'admin', plan: selectedPlan, loggedIn: true
-    }));
+  async function createAccount() {
+    const university = document.getElementById('f_nom').value || 'Mon Université';
+    const email = document.getElementById('f_email_admin').value.trim();
+    const fname = document.getElementById('f_prenom').value;
+    const lname = document.getElementById('f_lnom').value;
+    const pass = document.getElementById('f_pass').value;
+
+    if (!email || !pass) {
+      showToast('⚠️ Email et mot de passe requis.');
+      return;
+    }
+
+    const { data, error } = await supabaseClient.auth.signUp({
+      email, password: pass,
+      options: {
+        data: {
+          role: 'admin',
+          university,
+          full_name: `${fname} ${lname}`.trim()
+        }
+      }
+    });
+
+    if (error) {
+      showToast('⚠️ ' + error.message);
+      return;
+    }
 
     // Show success
     for(let i=1;i<=6;i++) document.getElementById('panel'+i).classList.remove('active');

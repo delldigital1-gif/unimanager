@@ -1,0 +1,112 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<style>html{visibility:hidden}</style>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>UniManage — Retour de paiement</title>
+  <link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=Inter:wght@300;400;500;600&display=swap" rel="stylesheet"/>
+  <style>
+    :root{--navy:#0D1B2A;--blue:#1A56DB;--sky:#3B82F6;--gold:#F59E0B;--light:#F0F4FF;--gray:#64748B;--border:#E2E8F0;--success:#10B981;--danger:#EF4444;}
+    *{margin:0;padding:0;box-sizing:border-box;}
+    body{font-family:'Inter',sans-serif;background:#F8FAFC;color:var(--navy);min-height:100vh;display:flex;align-items:center;justify-content:center;padding:1.5rem;}
+    .card{background:white;border:1px solid var(--border);border-radius:18px;padding:2.5rem;max-width:440px;width:100%;text-align:center;box-shadow:0 20px 60px rgba(13,27,42,0.08);}
+    .logo{font-family:'Syne',sans-serif;font-weight:800;font-size:1.1rem;color:var(--navy);margin-bottom:1.5rem;}
+    .logo span{color:var(--blue);}
+    .icon{width:72px;height:72px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:2rem;margin:0 auto 1.25rem;}
+    .icon.pending{background:rgba(245,158,11,0.1);}
+    .icon.success{background:rgba(16,185,129,0.1);}
+    .icon.failed{background:rgba(239,68,68,0.1);}
+    h1{font-family:'Syne',sans-serif;font-weight:800;font-size:1.3rem;margin-bottom:.5rem;}
+    p{font-size:.9rem;color:var(--gray);line-height:1.7;margin-bottom:1.5rem;}
+    .amount{font-family:'Syne',sans-serif;font-weight:800;font-size:1.6rem;margin-bottom:1.5rem;}
+    .amount.success{color:var(--success);}
+    .amount.failed{color:var(--danger);}
+    .spinner{width:20px;height:20px;border:3px solid var(--border);border-top-color:var(--gold);border-radius:50%;display:inline-block;animation:spin 1s linear infinite;margin-right:.5rem;vertical-align:middle;}
+    @keyframes spin{to{transform:rotate(360deg)}}
+    .btn{display:inline-block;padding:.75rem 1.75rem;border-radius:10px;background:var(--blue);color:white;font-size:.9rem;font-weight:700;cursor:pointer;border:none;text-decoration:none;transition:all .2s;}
+    .btn:hover{background:#1344b8;}
+    .btn-outline{background:white;color:var(--navy);border:1.5px solid var(--border);margin-left:.5rem;}
+    .btn-outline:hover{border-color:var(--blue);color:var(--blue);}
+  </style>
+</head>
+<body>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script src="supabase-config.js"></script>
+<script src="auth-guard.js"></script>
+<script>window.authReady = requireAuth();</script>
+
+<div class="card">
+  <div class="logo">Uni<span>Manage</span></div>
+  <div id="content">
+    <div class="icon pending">⏳</div>
+    <h1>Vérification du paiement…</h1>
+    <p>Merci de patienter pendant que nous confirmons votre transaction auprès de CinetPay.</p>
+  </div>
+</div>
+
+<script>
+  const ROLE_HOME = { admin:'dashboard.html', enseignant:'enseignant.html', etudiant:'etudiant.html', superadmin:'superadmin.html', parent:'parents.html' };
+
+  function params() {
+    return new URLSearchParams(window.location.search);
+  }
+
+  function render(state, payment) {
+    const el = document.getElementById('content');
+    if (state === 'success') {
+      el.innerHTML = `
+        <div class="icon success">✅</div>
+        <h1>Paiement confirmé</h1>
+        <div class="amount success">${Number(payment.amount).toLocaleString('fr-FR')} FCFA</div>
+        <p>Votre paiement (${payment.type}) a été confirmé avec succès via ${payment.method}.</p>
+        <a class="btn" href="${ROLE_HOME[window.currentUser?.role] || 'login.html'}">Retour au tableau de bord</a>`;
+    } else if (state === 'failed') {
+      el.innerHTML = `
+        <div class="icon failed">✕</div>
+        <h1>Paiement non confirmé</h1>
+        <p>La transaction a été refusée ou annulée. Aucun montant n'a été débité côté UniManage. Vous pouvez réessayer.</p>
+        <a class="btn" href="${ROLE_HOME[window.currentUser?.role] || 'login.html'}">Retour au tableau de bord</a>`;
+    } else if (state === 'notfound') {
+      el.innerHTML = `
+        <div class="icon failed">?</div>
+        <h1>Transaction introuvable</h1>
+        <p>Nous n'avons pas retrouvé cette transaction. Si un montant a été débité, contactez l'établissement.</p>
+        <a class="btn" href="${ROLE_HOME[window.currentUser?.role] || 'login.html'}">Retour au tableau de bord</a>`;
+    } else {
+      el.innerHTML = `
+        <div class="icon pending"><span class="spinner"></span></div>
+        <h1>Vérification du paiement…</h1>
+        <p>Merci de patienter pendant que nous confirmons votre transaction auprès de CinetPay. Cela peut prendre quelques secondes.</p>
+        <a class="btn btn-outline" onclick="checkStatus(true)">🔄 Vérifier maintenant</a>`;
+    }
+  }
+
+  let attempts = 0;
+  async function checkStatus(manual) {
+    const transactionId = params().get('transaction_id') || params().get('token');
+    if (!transactionId) { render('notfound'); return; }
+
+    const { data: payment, error } = await supabaseClient
+      .from('payments').select('*').eq('transaction_id', transactionId).maybeSingle();
+
+    if (error || !payment) { render('notfound'); return; }
+
+    if (payment.statut === 'Confirmé') { render('success', payment); return; }
+    if (payment.statut === 'Annulé') { render('failed', payment); return; }
+
+    // Toujours "En attente" : le webhook CinetPay n'a peut-être pas encore été traité.
+    attempts++;
+    render('pending');
+    if (!manual && attempts < 12) {
+      setTimeout(() => checkStatus(false), 3000);
+    }
+  }
+
+  window.authReady.then(user => {
+    if (!user) return;
+    checkStatus(false);
+  });
+</script>
+</body>
+</html>

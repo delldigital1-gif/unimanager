@@ -288,106 +288,6 @@
     .btn-plan-fill { background: var(--blue); color: white; }
     .btn-plan-fill:hover { background: #1344b8; }
 
-    /* ─── MODAL ─── */
-    .modal-overlay {
-      position: fixed; inset: 0; z-index: 2000;
-      background: rgba(13,27,42,0.6);
-      display: none; align-items: center; justify-content: center;
-      backdrop-filter: blur(4px);
-      padding: 1rem;
-    }
-    .modal-overlay.active { display: flex; }
-    .modal {
-      background: white; border-radius: 20px;
-      width: 100%; max-width: 480px;
-      padding: 2.5rem; position: relative;
-      box-shadow: 0 40px 100px rgba(13,27,42,0.25);
-      animation: modalIn .3s ease;
-    }
-    @keyframes modalIn {
-      from { opacity:0; transform: translateY(20px) scale(.97); }
-      to   { opacity:1; transform: translateY(0) scale(1); }
-    }
-    .modal-close {
-      position: absolute; top: 1.25rem; right: 1.25rem;
-      background: var(--light); border: none; cursor: pointer;
-      width: 32px; height: 32px; border-radius: 50%;
-      display: flex; align-items: center; justify-content: center;
-      font-size: 1rem; color: var(--gray); transition: all .2s;
-    }
-    .modal-close:hover { background: var(--border); }
-    .modal-logo {
-      font-family: 'Syne', sans-serif;
-      font-weight: 800; font-size: 1.2rem; color: var(--navy);
-      margin-bottom: .25rem;
-    }
-    .modal-logo span { color: var(--blue); }
-    .modal-title {
-      font-family: 'Syne', sans-serif;
-      font-size: 1.5rem; font-weight: 800;
-      margin-bottom: .4rem;
-    }
-    .modal-sub { font-size: .875rem; color: var(--gray); margin-bottom: 2rem; }
-    .tabs {
-      display: flex; gap: 0;
-      background: var(--light); border-radius: 10px;
-      padding: .25rem; margin-bottom: 1.75rem;
-    }
-    .tab {
-      flex: 1; padding: .6rem; border-radius: 8px;
-      border: none; background: transparent;
-      font-size: .875rem; font-weight: 600; cursor: pointer;
-      color: var(--gray); transition: all .2s;
-    }
-    .tab.active { background: white; color: var(--blue); box-shadow: 0 1px 4px rgba(0,0,0,0.1); }
-    .form-panel { display: none; }
-    .form-panel.active { display: block; }
-    .form-row { display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; }
-    .form-group { margin-bottom: 1.1rem; }
-    .form-group label {
-      display: block; font-size: .8rem; font-weight: 600;
-      color: var(--navy); margin-bottom: .4rem;
-    }
-    .form-group input, .form-group select {
-      width: 100%; padding: .75rem 1rem; border-radius: 8px;
-      border: 1.5px solid var(--border); font-size: .9rem;
-      font-family: 'Inter', sans-serif; color: var(--navy);
-      background: white; transition: border-color .2s; outline: none;
-    }
-    .form-group input:focus, .form-group select:focus { border-color: var(--blue); }
-    .form-group input::placeholder { color: #aab; }
-    .btn-submit {
-      width: 100%; padding: .9rem; border-radius: 10px;
-      background: var(--blue); color: white;
-      font-size: 1rem; font-weight: 700; cursor: pointer;
-      border: none; transition: all .2s; margin-top: .5rem;
-      font-family: 'Inter', sans-serif;
-    }
-    .btn-submit:hover { background: #1344b8; transform: translateY(-1px); }
-    .divider {
-      display: flex; align-items: center; gap: 1rem;
-      margin: 1.25rem 0; color: var(--gray); font-size: .8rem;
-    }
-    .divider::before, .divider::after {
-      content: ''; flex: 1; height: 1px; background: var(--border);
-    }
-    .btn-google {
-      width: 100%; padding: .8rem; border-radius: 10px;
-      background: white; border: 1.5px solid var(--border);
-      display: flex; align-items: center; justify-content: center; gap: .75rem;
-      font-size: .9rem; font-weight: 600; cursor: pointer;
-      transition: all .2s; color: var(--navy); font-family: 'Inter', sans-serif;
-    }
-    .btn-google:hover { border-color: #4285F4; background: #f8f9ff; }
-    .google-icon { width: 18px; height: 18px; }
-    .alert {
-      padding: .75rem 1rem; border-radius: 8px;
-      font-size: .85rem; font-weight: 500; margin-bottom: 1rem;
-      display: none;
-    }
-    .alert.success { background: rgba(16,185,129,0.1); color: var(--success); display: block; }
-    .alert.error   { background: rgba(239,68,68,0.1);   color: var(--danger);  display: block; }
-
     /* ─── FOOTER ─── */
     footer {
       background: var(--navy); color: rgba(255,255,255,0.7);
@@ -449,19 +349,19 @@
     <li><a href="#contact">Contact</a></li>
   </ul>
   <div class="nav-cta">
-    <a href="#" class="btn-outline" onclick="openModal('login')">Se connecter</a>
-    <a href="#" class="btn-primary" onclick="openModal('register')">Essai gratuit</a>
+    <a href="login.html" class="btn-outline">Se connecter</a>
+    <a href="onboarding.html" class="btn-primary">Essai gratuit</a>
   </div>
 </nav>
 
 <!-- ─── HERO ─── -->
 <section class="hero">
   <div class="hero-content">
-    <div class="hero-badge">Plateforme SaaS Universitaire N°1 en Afrique</div>
+    <div class="hero-badge">Conçue pour les universités d'Afrique francophone</div>
     <h1>Gérez votre <em>université</em> depuis une seule plateforme</h1>
     <p>Administration scolaire, emplois du temps, résultats, comptabilité — tout ce dont votre établissement a besoin, en un seul endroit sécurisé.</p>
     <div class="hero-actions">
-      <a href="#" class="btn-hero btn-hero-primary" onclick="openModal('register')">
+      <a href="onboarding.html" class="btn-hero btn-hero-primary">
         🎓 Créer un compte université
       </a>
       <a href="#features" class="btn-hero btn-hero-secondary">
@@ -470,16 +370,16 @@
     </div>
     <div class="hero-stats">
       <div class="stat-item">
-        <h3>50+</h3>
-        <p>Universités actives</p>
+        <h3>9</h3>
+        <p>Modules intégrés</p>
       </div>
       <div class="stat-item">
-        <h3>12K+</h3>
-        <p>Étudiants gérés</p>
+        <h3>100%</h3>
+        <p>Web, aucune installation</p>
       </div>
       <div class="stat-item">
-        <h3>99.9%</h3>
-        <p>Disponibilité</p>
+        <h3>FCFA</h3>
+        <p>Devise native</p>
       </div>
     </div>
   </div>
@@ -608,7 +508,7 @@
         <li><span class="check">✓</span> 5 comptes administrateurs</li>
         <li><span class="check">✓</span> Support email</li>
       </ul>
-      <button class="btn-plan btn-plan-outline" onclick="openModal('register')">Commencer →</button>
+      <a href="onboarding.html" class="btn-plan btn-plan-outline" style="display:block;text-align:center;text-decoration:none">Commencer →</a>
     </div>
     <!-- Pro -->
     <div class="price-card featured">
@@ -627,7 +527,7 @@
         <li><span class="check">✓</span> 20 comptes administrateurs</li>
         <li><span class="check">✓</span> Support prioritaire</li>
       </ul>
-      <button class="btn-plan btn-plan-fill" onclick="openModal('register')">Commencer →</button>
+      <a href="onboarding.html" class="btn-plan btn-plan-fill" style="display:block;text-align:center;text-decoration:none">Commencer →</a>
     </div>
     <!-- Enterprise -->
     <div class="price-card">
@@ -645,7 +545,7 @@
         <li><span class="check">✓</span> Account manager dédié</li>
         <li><span class="check">✓</span> SLA 99.9% garanti</li>
       </ul>
-      <button class="btn-plan btn-plan-outline" onclick="openModal('register')">Nous contacter →</button>
+      <a href="#contact" class="btn-plan btn-plan-outline" style="display:block;text-align:center;text-decoration:none">Nous contacter →</a>
     </div>
   </div>
 </section>
@@ -678,9 +578,9 @@
     <div class="footer-col">
       <h4>Légal</h4>
       <ul>
-        <li><a href="#">Confidentialité</a></li>
-        <li><a href="#">Conditions d'utilisation</a></li>
-        <li><a href="#">Sécurité</a></li>
+        <li><a href="confidentialite.html">Confidentialité</a></li>
+        <li><a href="cgu.html">Conditions d'utilisation</a></li>
+        <li><a href="confidentialite.html#securite">Sécurité</a></li>
       </ul>
     </div>
   </div>
@@ -690,215 +590,5 @@
   </div>
 </footer>
 
-<!-- ─── MODAL AUTH ─── -->
-<div class="modal-overlay" id="authModal" onclick="closeModalOutside(event)">
-  <div class="modal">
-    <button class="modal-close" onclick="closeModal()">✕</button>
-    <div class="modal-logo">Uni<span>Manage</span></div>
-    <h2 class="modal-title" id="modalTitle">Créer un compte</h2>
-    <p class="modal-sub" id="modalSub">Inscrivez votre université en quelques minutes</p>
-
-    <div class="tabs">
-      <button class="tab active" id="tabRegister" onclick="switchTab('register')">Inscription</button>
-      <button class="tab" id="tabLogin" onclick="switchTab('login')">Connexion</button>
-    </div>
-
-    <!-- REGISTER -->
-    <div class="form-panel active" id="panelRegister">
-      <div id="alertRegister" class="alert"></div>
-      <div class="form-row">
-        <div class="form-group">
-          <label>Nom de l'université *</label>
-          <input type="text" id="reg_univ" placeholder="Ex: Université de Lomé"/>
-        </div>
-        <div class="form-group">
-          <label>Pays *</label>
-          <select id="reg_country">
-            <option value="">Choisir...</option>
-            <option>Togo</option>
-            <option>Bénin</option>
-            <option>Côte d'Ivoire</option>
-            <option>Sénégal</option>
-            <option>Cameroun</option>
-            <option>Mali</option>
-            <option>Burkina Faso</option>
-            <option>Autre</option>
-          </select>
-        </div>
-      </div>
-      <div class="form-row">
-        <div class="form-group">
-          <label>Prénom du directeur *</label>
-          <input type="text" id="reg_fname" placeholder="Jean"/>
-        </div>
-        <div class="form-group">
-          <label>Nom *</label>
-          <input type="text" id="reg_lname" placeholder="Dupont"/>
-        </div>
-      </div>
-      <div class="form-group">
-        <label>Email professionnel *</label>
-        <input type="email" id="reg_email" placeholder="directeur@universite.tg"/>
-      </div>
-      <div class="form-row">
-        <div class="form-group">
-          <label>Mot de passe *</label>
-          <input type="password" id="reg_pass" placeholder="Min. 8 caractères"/>
-        </div>
-        <div class="form-group">
-          <label>Plan *</label>
-          <select id="reg_plan">
-            <option value="starter">Starter — 25 000 FCFA</option>
-            <option value="pro" selected>Pro — 75 000 FCFA</option>
-            <option value="enterprise">Enterprise — Sur devis</option>
-          </select>
-        </div>
-      </div>
-      <button class="btn-submit" onclick="handleRegister()">Créer mon compte université →</button>
-      <div class="divider">ou</div>
-      <button class="btn-google" onclick="handleGoogleAuth()">
-        <svg class="google-icon" viewBox="0 0 24 24"><path fill="#4285F4" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"/><path fill="#34A853" d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z"/><path fill="#FBBC05" d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z"/><path fill="#EA4335" d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z"/></svg>
-        Continuer avec Google
-      </button>
-    </div>
-
-    <!-- LOGIN -->
-    <div class="form-panel" id="panelLogin">
-      <div id="alertLogin" class="alert"></div>
-      <div class="form-group">
-        <label>Email *</label>
-        <input type="email" id="log_email" placeholder="directeur@universite.tg"/>
-      </div>
-      <div class="form-group">
-        <label>Mot de passe *</label>
-        <input type="password" id="log_pass" placeholder="Votre mot de passe"/>
-      </div>
-      <div style="text-align:right;margin-bottom:1rem">
-        <a href="#" style="font-size:.8rem;color:var(--blue);text-decoration:none">Mot de passe oublié ?</a>
-      </div>
-      <button class="btn-submit" onclick="handleLogin()">Se connecter →</button>
-      <div class="divider">ou</div>
-      <button class="btn-google" onclick="handleGoogleAuth()">
-        <svg class="google-icon" viewBox="0 0 24 24"><path fill="#4285F4" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"/><path fill="#34A853" d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z"/><path fill="#FBBC05" d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z"/><path fill="#EA4335" d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z"/></svg>
-        Continuer avec Google
-      </button>
-    </div>
-  </div>
-</div>
-
-<script>
-  // ── Modal ──
-  function openModal(tab) {
-    document.getElementById('authModal').classList.add('active');
-    switchTab(tab);
-    document.body.style.overflow = 'hidden';
-  }
-  function closeModal() {
-    document.getElementById('authModal').classList.remove('active');
-    document.body.style.overflow = '';
-  }
-  function closeModalOutside(e) {
-    if (e.target === document.getElementById('authModal')) closeModal();
-  }
-
-  function switchTab(tab) {
-    const isReg = tab === 'register';
-    document.getElementById('tabRegister').classList.toggle('active', isReg);
-    document.getElementById('tabLogin').classList.toggle('active', !isReg);
-    document.getElementById('panelRegister').classList.toggle('active', isReg);
-    document.getElementById('panelLogin').classList.toggle('active', !isReg);
-    document.getElementById('modalTitle').textContent = isReg ? 'Créer un compte' : 'Bon retour 👋';
-    document.getElementById('modalSub').textContent = isReg
-      ? 'Inscrivez votre université en quelques minutes'
-      : 'Connectez-vous à votre espace université';
-  }
-
-  // ── Register ──
-  function handleRegister() {
-    const univ  = document.getElementById('reg_univ').value.trim();
-    const email = document.getElementById('reg_email').value.trim();
-    const pass  = document.getElementById('reg_pass').value;
-    const fname = document.getElementById('reg_fname').value.trim();
-    const lname = document.getElementById('reg_lname').value.trim();
-    const country = document.getElementById('reg_country').value;
-    const plan  = document.getElementById('reg_plan').value;
-    const alertEl = document.getElementById('alertRegister');
-
-    alertEl.className = 'alert';
-    if (!univ || !email || !pass || !fname) {
-      alertEl.textContent = '⚠️ Veuillez remplir tous les champs obligatoires.';
-      alertEl.classList.add('error'); return;
-    }
-    if (pass.length < 8) {
-      alertEl.textContent = '⚠️ Le mot de passe doit contenir au moins 8 caractères.';
-      alertEl.classList.add('error'); return;
-    }
-
-    // Sauvegarder les infos dans sessionStorage
-    const userData = {
-      univ, email, fname, lname, country, plan,
-      role: 'Directeur Général',
-      initials: (fname[0] + (lname[0] || '')).toUpperCase(),
-      loggedIn: true
-    };
-    sessionStorage.setItem('unimanage_user', JSON.stringify(userData));
-
-    alertEl.textContent = '✅ Compte créé ! Redirection vers votre tableau de bord...';
-    alertEl.classList.add('success');
-    setTimeout(() => { window.location.href = 'dashboard.html'; }, 1800);
-  }
-
-  // ── Login ──
-  function handleLogin() {
-    const email = document.getElementById('log_email').value.trim();
-    const pass  = document.getElementById('log_pass').value;
-    const alertEl = document.getElementById('alertLogin');
-
-    alertEl.className = 'alert';
-    if (!email || !pass) {
-      alertEl.textContent = '⚠️ Veuillez saisir votre email et mot de passe.';
-      alertEl.classList.add('error'); return;
-    }
-
-    // Récupérer compte existant ou créer session démo
-    let userData = JSON.parse(sessionStorage.getItem('unimanage_user') || 'null');
-    if (!userData || userData.email !== email) {
-      // Session démo si pas de compte enregistré
-      userData = {
-        univ: 'Université de Lomé',
-        email, fname: 'Dr. Amavi', lname: 'Kokou',
-        role: 'Directeur Académique', initials: 'DA',
-        plan: 'pro', loggedIn: true
-      };
-    }
-    userData.loggedIn = true;
-    sessionStorage.setItem('unimanage_user', JSON.stringify(userData));
-
-    alertEl.textContent = '✅ Connexion réussie ! Redirection...';
-    alertEl.classList.add('success');
-    setTimeout(() => { window.location.href = 'dashboard.html'; }, 1500);
-  }
-
-  function handleGoogleAuth() {
-    const alertEl = document.getElementById(
-      document.getElementById('panelRegister').classList.contains('active')
-        ? 'alertRegister' : 'alertLogin'
-    );
-    // Session Google démo
-    const userData = {
-      univ: 'Université de Lomé', email: 'admin@univ-lome.tg',
-      fname: 'Admin', lname: 'Google', role: 'Directeur Général',
-      initials: 'AG', plan: 'pro', loggedIn: true
-    };
-    sessionStorage.setItem('unimanage_user', JSON.stringify(userData));
-    alertEl.className = 'alert';
-    alertEl.textContent = '🔗 Connexion Google réussie ! Redirection...';
-    alertEl.classList.add('success');
-    setTimeout(() => { window.location.href = 'dashboard.html'; }, 1500);
-  }
-
-  // Keyboard ESC
-  document.addEventListener('keydown', e => { if (e.key === 'Escape') closeModal(); });
-</script>
 </body>
 </html>
