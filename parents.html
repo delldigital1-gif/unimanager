@@ -150,7 +150,7 @@
     <div class="nav-it" onclick="showPage('notifications')">🔔 Notifications</div>
   </nav>
   <div class="sidebar-footer">
-    <button class="btn-logout" onclick="window.location.href='login.html'">🚪 Déconnexion</button>
+    <button class="btn-logout" onclick="handleLogout()">🚪 Déconnexion</button>
   </div>
 </aside>
 
@@ -275,7 +275,7 @@
   <div class="page" id="page-paiements">
     <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:1.5rem">
       <div><h2 style="font-family:'Syne',sans-serif;font-weight:800;font-size:1.3rem">💳 Paiements scolarité</h2><div style="font-size:.85rem;color:var(--gray);margin-top:.2rem" id="pp-sub">—</div></div>
-      <button class="btn-primary" id="pp-payer-btn" onclick="ouvrirPaiementEnLigne()">🌊 Payer maintenant</button>
+      <button class="btn-primary" id="pp-payer-btn" onclick="ouvrirPaiementEnLigne()">💳 Payer maintenant</button>
     </div>
     <div class="kpi-grid" style="grid-template-columns:repeat(3,1fr)">
       <div class="kpi-card"><div class="kpi-icon" style="background:rgba(16,185,129,0.1)">✅</div><div class="kpi-value" style="color:var(--success)" id="pp-kpi-paye">—</div><div class="kpi-label">FCFA payés (total)</div></div>
@@ -302,8 +302,8 @@
   <div class="modal-overlay" id="payOnlineModal" onclick="if(event.target===this)fermerPaiementEnLigne()">
     <div class="modal" style="max-width:420px">
       <button class="modal-close" onclick="fermerPaiementEnLigne()">✕</button>
-      <div style="font-family:'Syne',sans-serif;font-weight:800;font-size:1.15rem;margin-bottom:.25rem">🌊 Payer en ligne</div>
-      <p style="font-size:.85rem;color:var(--gray);margin-bottom:1.25rem">Paiement sécurisé via CinetPay (Wave, Orange Money, carte…)</p>
+      <div style="font-family:'Syne',sans-serif;font-weight:800;font-size:1.15rem;margin-bottom:.25rem">💳 Payer en ligne</div>
+      <p style="font-size:.85rem;color:var(--gray);margin-bottom:1.25rem">Paiement sécurisé via CinetPay (Wave, Orange Money, T-Money, Moov Money, carte…)</p>
       <div id="payOnlineError" style="display:none;background:rgba(239,68,68,0.08);color:var(--danger);border:1px solid rgba(239,68,68,0.2);padding:.6rem 1rem;border-radius:8px;font-size:.83rem;margin-bottom:1rem"></div>
       <div class="form-group"><label>Montant (FCFA)</label><input id="po_amount" type="number" class="form-input" placeholder="Ex: 50000"/></div>
       <div class="form-group"><label>Numéro de téléphone (mobile money)</label><input id="po_phone" type="tel" class="form-input" placeholder="Ex: 90000000"/></div>
@@ -331,7 +331,7 @@
         <div class="card-body">
           <div class="form-group"><label>Destinataire</label><select style="width:100%;padding:.65rem .9rem;border-radius:8px;border:1.5px solid var(--border);font-size:.875rem;font-family:'Inter',sans-serif;outline:none"><option>Direction Académique</option><option>Responsable Scolarité</option><option>Dr. Kodjo Mensah (Enseignant)</option><option>Service Comptabilité</option></select></div>
           <div class="form-group"><label>Objet *</label><input class="form-input" placeholder="Objet de votre message"/></div>
-          <div class="form-group"><label>Concerne l'enfant</label><select style="width:100%;padding:.65rem .9rem;border-radius:8px;border:1.5px solid var(--border);font-size:.875rem;font-family:'Inter',sans-serif;outline:none"><option>Kofi Adzoa — Info L2</option><option>Ama Adzoa — Gestion L1</option></select></div>
+          <div class="form-group"><label>Concerne l'enfant</label><select id="messageChildSelect" style="width:100%;padding:.65rem .9rem;border-radius:8px;border:1.5px solid var(--border);font-size:.875rem;font-family:'Inter',sans-serif;outline:none"></select></div>
           <div class="form-group"><label>Message *</label><textarea class="form-textarea" placeholder="Décrivez votre demande ou préoccupation..."></textarea></div>
           <button class="btn-submit" onclick="showToast('✅ Message envoyé à la Direction Académique !')">📤 Envoyer le message</button>
         </div>
@@ -424,6 +424,9 @@
     document.getElementById('pageTitle').textContent=titles[id]||id;
   }
 
+  // Déconnexion réelle (partagée avec toutes les pages protégées, cf. auth-guard.js)
+  async function handleLogout() { await logout(); }
+
   function mention(m) {
     if (m >= 16) return 'Très Bien';
     if (m >= 14) return 'Bien';
@@ -463,6 +466,9 @@
       <div class="child-tab" id="tab-${c.id}" onclick="selectChild('${c.id}')">
         <div class="child-tab-av" style="background:linear-gradient(135deg,var(--blue),var(--sky))">${initials(c.full_name)}</div>${c.full_name} — ${c.department||''} ${c.level||''}
       </div>`).join('');
+
+    document.getElementById('messageChildSelect').innerHTML = mesEnfants.map(c => `
+      <option value="${c.id}">${c.full_name} — ${c.department||''} ${c.level||''}</option>`).join('');
 
     selectChild(mesEnfants[0].id);
   }

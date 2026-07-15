@@ -379,8 +379,8 @@
       <div class="role-option" id="opt-parent" onclick="selectRole('parent')">
         <div class="role-opt-icon" style="background:rgba(59,130,246,0.1)">👨‍👩‍👧</div>
         <div class="role-opt-body">
-          <div class="role-opt-name">Parent</div>
-          <div class="role-opt-desc">Suivi de vos enfants</div>
+          <div class="role-opt-name">Parent / Tuteur</div>
+          <div class="role-opt-desc">Suivi scolaire et paiements de vos enfants</div>
         </div>
         <div class="role-opt-check" id="check-parent">✓</div>
       </div>
@@ -477,6 +477,9 @@
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <script src="supabase-config.js"></script>
 <script>
+  // Client Supabase + SUPABASE_URL/ANON_KEY fournis globalement par supabase-config.js
+  // (partagé avec toutes les pages protégées, cf. auth-guard.js).
+
   // ── État global ──
   let selectedRole = null;
 
@@ -506,7 +509,7 @@
       title: 'Connexion Étudiant',
       sub: 'Accédez à vos notes, emploi du temps et documents',
       redirect: 'etudiant.html',
-      demo: { email: 'kofi.adzoa@student.univ-lome.tg', pass: 'etudiant1234', label: 'Kofi Adzoa — UL-2025-001' }
+      demo: { email: 'kofi.adzoa@student.univ-lome.tg', pass: 'UnimanageTest2026!', label: 'Kofi Adzoa — UL-2025-001' }
     },
     superadmin: {
       label: '⚡ Super Admin',
@@ -522,9 +525,9 @@
       color: 'var(--sky)', bgColor: 'rgba(59,130,246,0.1)',
       selClass: 'sky-sel', focusClass: 'sky-focus',
       title: 'Connexion Parent',
-      sub: 'Suivez la scolarité de vos enfants',
+      sub: 'Suivez la scolarité et les paiements de vos enfants',
       redirect: 'parents.html',
-      demo: { email: 'parent@univ-lome.tg', pass: 'parent1234', label: 'Parent — Famille Adzoa' }
+      demo: { email: 'parent@univ-lome.tg', pass: 'UnimanageTest2026!', label: 'Parent de Kofi Adzoa' }
     }
   };
 
@@ -576,7 +579,7 @@
     // Focus class inputs
     ['emailInput','passInput'].forEach(id => {
       const el = document.getElementById(id);
-      el.classList.remove('gold-focus','green-focus','purple-focus');
+      el.classList.remove('gold-focus','green-focus','purple-focus','sky-focus');
       if(r.focusClass) el.classList.add(r.focusClass);
     });
 
@@ -610,7 +613,7 @@
     if(selectedRole === 'admin') document.getElementById('univInput').value = 'Université de Lomé';
   }
 
-  // ── STEP 2 : Login ──
+  // ── STEP 2 : Login (vraie authentification Supabase) ──
   async function handleLogin() {
     const email = document.getElementById('emailInput').value.trim();
     const pass  = document.getElementById('passInput').value;
@@ -624,12 +627,16 @@
     }
 
     btn.disabled = true;
-    const { data, error } = await supabaseClient.auth.signInWithPassword({ email, password: pass });
-    btn.disabled = false;
+    const originalText = document.getElementById('loginBtnText').textContent;
+    document.getElementById('loginBtnText').textContent = 'Connexion...';
 
-    if (error) {
+    const { data, error } = await supabaseClient.auth.signInWithPassword({ email, password: pass });
+
+    if (error || !data?.user) {
       alertBox.textContent = '⚠️ Email ou mot de passe incorrect.';
       alertBox.classList.add('error');
+      btn.disabled = false;
+      document.getElementById('loginBtnText').textContent = originalText;
       return;
     }
 
@@ -641,6 +648,8 @@
       alertBox.textContent = '⚠️ Impossible de charger votre profil.';
       alertBox.classList.add('error');
       await supabaseClient.auth.signOut();
+      btn.disabled = false;
+      document.getElementById('loginBtnText').textContent = originalText;
       return;
     }
 
@@ -648,6 +657,8 @@
       alertBox.textContent = `⚠️ Ce compte n'a pas le rôle "${roles[selectedRole].label}". Sélectionnez le bon rôle.`;
       alertBox.classList.add('error');
       await supabaseClient.auth.signOut();
+      btn.disabled = false;
+      document.getElementById('loginBtnText').textContent = originalText;
       return;
     }
 
