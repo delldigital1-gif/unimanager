@@ -100,9 +100,9 @@
     <div class="brand-sub">Espace Étudiant</div>
   </div>
   <div class="student-card">
-    <div class="student-avatar">KA</div>
-    <div class="student-name">Kofi Adzoa</div>
-    <div class="student-mat">UL-2025-001</div>
+    <div class="student-avatar" id="studentAvatarSidebar">--</div>
+    <div class="student-name" id="studentNameSidebar">Chargement...</div>
+    <div class="student-mat" id="studentMatSidebar">—</div>
     <div class="student-dept">💻 Informatique L2</div>
   </div>
   <nav class="sidebar-nav">
@@ -119,7 +119,7 @@
     <div class="nav-item" onclick="showPage('profil')"><span class="nav-icon">👤</span> Mon profil</div>
   </nav>
   <div class="sidebar-footer">
-    <button class="btn-logout" onclick="window.location.href='index.html'">🚪 Se déconnecter</button>
+    <button class="btn-logout" onclick="handleLogout()">🚪 Se déconnecter</button>
   </div>
 </aside>
 
@@ -275,29 +275,46 @@
   <div class="page" id="page-paiements">
     <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:1.5rem">
       <div><h2 style="font-family:'Syne',sans-serif;font-weight:800;font-size:1.3rem">Mes paiements</h2><div style="font-size:.85rem;color:var(--gray);margin-top:.2rem">Année académique 2024–2025</div></div>
-      <button onclick="showToast('🌊 Lien de paiement Wave généré !')" style="display:flex;align-items:center;gap:.5rem;padding:.65rem 1.2rem;border-radius:9px;background:var(--blue);color:white;font-size:.875rem;font-weight:600;cursor:pointer;border:none">🌊 Payer maintenant</button>
+      <button onclick="payerEnLigne()" style="display:flex;align-items:center;gap:.5rem;padding:.65rem 1.2rem;border-radius:9px;background:var(--blue);color:white;font-size:.875rem;font-weight:600;cursor:pointer;border:none">💳 Payer maintenant</button>
     </div>
     <div class="kpi-grid" style="grid-template-columns:repeat(3,1fr);margin-bottom:1.5rem">
-      <div class="kpi-card"><div class="kpi-icon" style="background:rgba(16,185,129,0.1)">✅</div><div class="kpi-value" style="color:var(--success)">250 000</div><div class="kpi-label">FCFA payés</div></div>
-      <div class="kpi-card"><div class="kpi-icon" style="background:rgba(239,68,68,0.1)">⏳</div><div class="kpi-value" style="color:var(--danger)">0</div><div class="kpi-label">FCFA restants</div></div>
-      <div class="kpi-card"><div class="kpi-icon" style="background:rgba(26,86,219,0.1)">📋</div><div class="kpi-value" style="color:var(--blue)">3/3</div><div class="kpi-label">Tranches payées</div></div>
+      <div class="kpi-card"><div class="kpi-icon" style="background:rgba(16,185,129,0.1)">✅</div><div class="kpi-value" style="color:var(--success)" id="kpiPaye">—</div><div class="kpi-label">FCFA payés</div></div>
+      <div class="kpi-card"><div class="kpi-icon" style="background:rgba(239,68,68,0.1)">⏳</div><div class="kpi-value" style="color:var(--danger)" id="kpiRestant">—</div><div class="kpi-label">FCFA restants</div></div>
+      <div class="kpi-card"><div class="kpi-icon" style="background:rgba(26,86,219,0.1)">📋</div><div class="kpi-value" style="color:var(--blue)" id="kpiTranches">—</div><div class="kpi-label">Paiements confirmés</div></div>
     </div>
     <div class="dash-grid">
       <div class="card">
         <div class="card-header"><div class="card-title">Plan de paiement scolarité</div></div>
-        <div class="card-body">
-          <div class="pay-item"><div><div class="pay-label">Tranche 1 — Inscription</div><div class="pay-sub">Payé le 02 Oct 2024 · Wave</div></div><div style="text-align:right"><div class="pay-amount" style="color:var(--success)">83 333 FCFA</div><span class="badge badge-success">✓ Payé</span></div></div>
-          <div class="pay-item"><div><div class="pay-label">Tranche 2 — Milieu S1</div><div class="pay-sub">Payé le 15 Nov 2024 · Orange Money</div></div><div style="text-align:right"><div class="pay-amount" style="color:var(--success)">83 333 FCFA</div><span class="badge badge-success">✓ Payé</span></div></div>
-          <div class="pay-item"><div><div class="pay-label">Tranche 3 — Fin S1</div><div class="pay-sub">Payé le 20 Jan 2025 · Wave</div></div><div style="text-align:right"><div class="pay-amount" style="color:var(--success)">83 334 FCFA</div><span class="badge badge-success">✓ Payé</span></div></div>
+        <div class="card-body" id="payPlanList">
+          <div style="padding:1rem;color:var(--gray);font-size:.85rem">Chargement...</div>
         </div>
       </div>
       <div class="card">
         <div class="card-header"><div class="card-title">Reçus de paiement</div></div>
-        <div class="card-body">
-          <div class="pay-item"><div><div class="pay-label">Reçu N° REC-2024-0892</div><div class="pay-sub">Tranche 1 · 02 Oct 2024</div></div><button onclick="showToast('📄 Reçu PDF téléchargé')" style="padding:.4rem .9rem;border-radius:7px;border:1px solid var(--border);background:white;font-size:.78rem;cursor:pointer;font-weight:600">📄 PDF</button></div>
-          <div class="pay-item"><div><div class="pay-label">Reçu N° REC-2024-1145</div><div class="pay-sub">Tranche 2 · 15 Nov 2024</div></div><button onclick="showToast('📄 Reçu PDF téléchargé')" style="padding:.4rem .9rem;border-radius:7px;border:1px solid var(--border);background:white;font-size:.78rem;cursor:pointer;font-weight:600">📄 PDF</button></div>
-          <div class="pay-item"><div><div class="pay-label">Reçu N° REC-2025-0041</div><div class="pay-sub">Tranche 3 · 20 Jan 2025</div></div><button onclick="showToast('📄 Reçu PDF téléchargé')" style="padding:.4rem .9rem;border-radius:7px;border:1px solid var(--border);background:white;font-size:.78rem;cursor:pointer;font-weight:600">📄 PDF</button></div>
+        <div class="card-body" id="payReceiptsList">
+          <div style="padding:1rem;color:var(--gray);font-size:.85rem">Chargement...</div>
         </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- MODAL PAIEMENT EN LIGNE -->
+  <div id="payModal" style="display:none;position:fixed;inset:0;background:rgba(13,27,42,0.55);z-index:9998;align-items:center;justify-content:center">
+    <div style="background:white;border-radius:14px;padding:1.75rem;width:380px;max-width:90vw">
+      <div style="font-family:'Syne',sans-serif;font-weight:800;font-size:1.1rem;margin-bottom:.25rem">💳 Paiement en ligne</div>
+      <div style="font-size:.8rem;color:var(--gray);margin-bottom:1.25rem">Wave, Orange Money, T-Money, Moov Money ou carte bancaire — via CinetPay.</div>
+      <div class="form-group" style="margin-bottom:.9rem">
+        <label style="display:block;font-size:.8rem;font-weight:600;margin-bottom:.35rem">Montant (FCFA)</label>
+        <input id="payModalAmount" type="number" min="100" step="1" placeholder="Ex: 50000" style="width:100%;padding:.65rem .85rem;border-radius:8px;border:1.5px solid var(--border);font-size:.9rem;font-family:'Inter',sans-serif;outline:none"/>
+      </div>
+      <div class="form-group" style="margin-bottom:.5rem">
+        <label style="display:block;font-size:.8rem;font-weight:600;margin-bottom:.35rem">Numéro de téléphone</label>
+        <input id="payModalPhone" type="tel" placeholder="Ex: 90 00 00 00" style="width:100%;padding:.65rem .85rem;border-radius:8px;border:1.5px solid var(--border);font-size:.9rem;font-family:'Inter',sans-serif;outline:none"/>
+      </div>
+      <div id="payModalError" style="color:var(--danger);font-size:.78rem;min-height:1.1rem;margin-bottom:.5rem"></div>
+      <div style="display:flex;gap:.6rem;margin-top:.75rem">
+        <button onclick="document.getElementById('payModal').style.display='none'" style="flex:1;padding:.65rem;border-radius:9px;border:1.5px solid var(--border);background:white;font-weight:600;cursor:pointer;font-size:.875rem">Annuler</button>
+        <button id="payModalSubmit" onclick="confirmerPaiement()" style="flex:1;padding:.65rem;border-radius:9px;border:none;background:var(--blue);color:white;font-weight:700;cursor:pointer;font-size:.875rem">Payer</button>
       </div>
     </div>
   </div>
@@ -398,6 +415,7 @@
 
 <div class="toast" id="toast"></div>
 
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js"></script>
 <script>
   const pages=['accueil','notes','emploidutemps','cours','examens','paiements','documents','profil'];
   const titles={'accueil':'Tableau de bord','notes':'Mes notes','emploidutemps':'Emploi du temps','cours':'Mes cours','examens':'Mes examens','paiements':'Mes paiements','documents':'Mes documents','profil':'Mon profil'};
@@ -412,6 +430,151 @@
   }
   let tt;
   function showToast(msg){const t=document.getElementById('toast');t.textContent=msg;t.classList.add('show');clearTimeout(tt);tt=setTimeout(()=>t.classList.remove('show'),3000);}
+
+  // ══════════ Connexion Supabase + données réelles (paiements) ══════════
+  const SUPABASE_URL = 'https://nzqluqpcihomyhzjqvrb.supabase.co';
+  const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im56cWx1cXBjaWhvbXloempxdnJiIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODM0ODc1MjIsImV4cCI6MjA5OTA2MzUyMn0.bWhEkZ-ii9Dj4FaTJ3r7rOqA5JFth6pGpYgLBsjAXRQ';
+  const supabaseClient = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+
+  let currentStudent = null;
+  let currentPayments = [];
+
+  async function handleLogout() {
+    await supabaseClient.auth.signOut();
+    sessionStorage.removeItem('unimanage_user');
+    window.location.href = 'index.html';
+  }
+
+  async function initAuthAndData() {
+    const { data: sessionData } = await supabaseClient.auth.getSession();
+    if (!sessionData?.session) { window.location.href = 'login.html'; return; }
+
+    const userId = sessionData.session.user.id;
+    const { data: student, error } = await supabaseClient
+      .from('students')
+      .select('id, full_name, matricule, university, department, frais_total, payment_status')
+      .eq('profile_id', userId)
+      .maybeSingle();
+
+    if (error || !student) {
+      console.error('Erreur chargement étudiant:', error);
+      showToast("⚠️ Impossible de charger votre dossier étudiant.");
+      return;
+    }
+    currentStudent = student;
+
+    document.getElementById('studentNameSidebar').textContent = student.full_name;
+    document.getElementById('studentMatSidebar').textContent = student.matricule;
+    document.getElementById('studentAvatarSidebar').textContent = student.full_name.split(/\s+/).map(w=>w[0]).slice(0,2).join('').toUpperCase();
+
+    await loadPayments();
+
+    // Retour depuis CinetPay (success_url / failed_url)
+    const params = new URLSearchParams(window.location.search);
+    if (params.get('payment') === 'success') {
+      showToast('✅ Paiement reçu — confirmation en cours (quelques secondes).');
+      showPage('paiements');
+      setTimeout(loadPayments, 4000);
+    } else if (params.get('payment') === 'failed') {
+      showToast('❌ Le paiement a échoué ou a été annulé.');
+      showPage('paiements');
+    }
+  }
+
+  async function loadPayments() {
+    if (!currentStudent) return;
+    const { data: payments, error } = await supabaseClient
+      .from('payments')
+      .select('amount, type, method, statut, paid_at, reference, transaction_id')
+      .eq('student_id', currentStudent.id)
+      .order('paid_at', { ascending: true });
+
+    if (error) { console.error(error); return; }
+    currentPayments = payments || [];
+    renderPaymentsSection();
+  }
+
+  function renderPaymentsSection() {
+    const confirmed = currentPayments.filter(p => p.statut === 'Confirmé');
+    const totalPaye = confirmed.reduce((s,p) => s + Number(p.amount), 0);
+    const totalDu = Number(currentStudent.frais_total || 0);
+    const restant = Math.max(0, totalDu - totalPaye);
+
+    document.getElementById('kpiPaye').textContent = totalPaye.toLocaleString('fr-FR');
+    document.getElementById('kpiRestant').textContent = restant.toLocaleString('fr-FR');
+    document.getElementById('kpiTranches').textContent = confirmed.length;
+
+    const planDiv = document.getElementById('payPlanList');
+    planDiv.innerHTML = confirmed.length === 0
+      ? '<div style="padding:1rem;color:var(--gray);font-size:.85rem">Aucun paiement confirmé pour le moment.</div>'
+      : confirmed.map((p,i) => `
+        <div class="pay-item">
+          <div><div class="pay-label">${p.type || 'Scolarité'} — Paiement ${i+1}</div><div class="pay-sub">Payé le ${p.paid_at || ''} · ${p.method}</div></div>
+          <div style="text-align:right"><div class="pay-amount" style="color:var(--success)">${Number(p.amount).toLocaleString('fr-FR')} FCFA</div><span class="badge badge-success">✓ Payé</span></div>
+        </div>`).join('');
+
+    const recDiv = document.getElementById('payReceiptsList');
+    recDiv.innerHTML = confirmed.length === 0
+      ? '<div style="padding:1rem;color:var(--gray);font-size:.85rem">Aucun reçu disponible.</div>'
+      : confirmed.map(p => `
+        <div class="pay-item">
+          <div><div class="pay-label">Réf. ${p.reference || p.transaction_id || '—'}</div><div class="pay-sub">${p.type || 'Scolarité'} · ${p.paid_at || ''}</div></div>
+          <button onclick="showToast('📄 Génération de reçu PDF — à venir')" style="padding:.4rem .9rem;border-radius:7px;border:1px solid var(--border);background:white;font-size:.78rem;cursor:pointer;font-weight:600">📄 PDF</button>
+        </div>`).join('');
+  }
+
+  function payerEnLigne() {
+    if (!currentStudent) { showToast('⚠️ Chargement du profil en cours, réessayez.'); return; }
+    document.getElementById('payModalAmount').value = '';
+    document.getElementById('payModalPhone').value = '';
+    document.getElementById('payModalError').textContent = '';
+    document.getElementById('payModalSubmit').disabled = false;
+    document.getElementById('payModalSubmit').textContent = 'Payer';
+    document.getElementById('payModal').style.display = 'flex';
+  }
+
+  async function confirmerPaiement() {
+    const amount = Number(document.getElementById('payModalAmount').value);
+    const phone = document.getElementById('payModalPhone').value.trim();
+    const errBox = document.getElementById('payModalError');
+    errBox.textContent = '';
+
+    if (!amount || amount < 100) { errBox.textContent = 'Montant invalide (minimum 100 FCFA).'; return; }
+    if (!phone) { errBox.textContent = 'Numéro de téléphone requis.'; return; }
+
+    const btn = document.getElementById('payModalSubmit');
+    btn.disabled = true; btn.textContent = 'Redirection...';
+
+    const { data: sessionData } = await supabaseClient.auth.getSession();
+    const token = sessionData?.session?.access_token;
+    if (!token) { errBox.textContent = 'Session expirée, reconnectez-vous.'; btn.disabled = false; btn.textContent = 'Payer'; return; }
+
+    try {
+      const resp = await fetch(SUPABASE_URL + '/functions/v1/cinetpay-initiate', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + token },
+        body: JSON.stringify({
+          student_id: currentStudent.id,
+          amount,
+          type: 'Scolarité',
+          phone,
+          return_url: window.location.origin + window.location.pathname
+        })
+      });
+      const result = await resp.json().catch(() => ({}));
+      if (!resp.ok || !result.payment_url) {
+        errBox.textContent = result.error || "Erreur lors de l'initialisation du paiement.";
+        btn.disabled = false; btn.textContent = 'Payer';
+        return;
+      }
+      window.location.href = result.payment_url;
+    } catch (e) {
+      errBox.textContent = 'Erreur réseau : ' + e.message;
+      btn.disabled = false; btn.textContent = 'Payer';
+    }
+  }
+
+  initAuthAndData();
 </script>
 </body>
 </html>

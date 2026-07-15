@@ -455,7 +455,13 @@
 
 </div><!-- /right-panel -->
 
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js"></script>
 <script>
+  // ── Connexion Supabase (projet UniManage) ──
+  const SUPABASE_URL = 'https://nzqluqpcihomyhzjqvrb.supabase.co';
+  const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im56cWx1cXBjaWhvbXloempxdnJiIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODM0ODc1MjIsImV4cCI6MjA5OTA2MzUyMn0.bWhEkZ-ii9Dj4FaTJ3r7rOqA5JFth6pGpYgLBsjAXRQ';
+  const supabaseClient = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+
   // ── État global ──
   let selectedRole = null;
 
@@ -485,7 +491,7 @@
       title: 'Connexion Étudiant',
       sub: 'Accédez à vos notes, emploi du temps et documents',
       redirect: 'etudiant.html',
-      demo: { email: 'kofi.adzoa@student.univ-lome.tg', pass: 'etudiant1234', label: 'Kofi Adzoa — UL-2025-001' }
+      demo: { email: 'kofi.adzoa@student.univ-lome.tg', pass: 'UnimanageTest2026!', label: 'Kofi Adzoa — UL-2025-001' }
     },
     superadmin: {
       label: '⚡ Super Admin',
@@ -580,31 +586,61 @@
     if(selectedRole === 'admin') document.getElementById('univInput').value = 'Université de Lomé';
   }
 
-  // ── STEP 2 : Login ──
-  function handleLogin() {
+  // ── STEP 2 : Login (vraie authentification Supabase) ──
+  async function handleLogin() {
     const email = document.getElementById('emailInput').value.trim();
     const pass  = document.getElementById('passInput').value;
     const alertBox = document.getElementById('alertBox');
+    const btn = document.getElementById('btnLogin');
 
     alertBox.className = 'alert';
     if(!email || !pass) {
       alertBox.textContent = '⚠️ Veuillez remplir tous les champs.';
       alertBox.classList.add('error'); return;
     }
-    if(pass.length < 6) {
-      alertBox.textContent = '⚠️ Mot de passe incorrect.';
-      alertBox.classList.add('error'); return;
+
+    btn.disabled = true;
+    const originalText = document.getElementById('loginBtnText').textContent;
+    document.getElementById('loginBtnText').textContent = 'Connexion...';
+
+    const { data, error } = await supabaseClient.auth.signInWithPassword({ email, password: pass });
+
+    if (error || !data?.user) {
+      alertBox.textContent = '⚠️ Email ou mot de passe incorrect.';
+      alertBox.classList.add('error');
+      btn.disabled = false;
+      document.getElementById('loginBtnText').textContent = originalText;
+      return;
     }
 
-    // Sauvegarde session
-    const r = roles[selectedRole];
+    // On vérifie le vrai rôle du compte (table profiles) plutôt que de se fier
+    // uniquement au bouton cliqué à l'étape 1 — évite qu'un compte étudiant
+    // atterrisse par erreur sur le tableau de bord admin, par exemple.
+    const { data: profile, error: profileErr } = await supabaseClient
+      .from('profiles')
+      .select('full_name, role, university, matricule')
+      .eq('id', data.user.id)
+      .single();
+
+    if (profileErr || !profile) {
+      alertBox.textContent = "⚠️ Profil introuvable pour ce compte. Contactez l'administrateur.";
+      alertBox.classList.add('error');
+      await supabaseClient.auth.signOut();
+      btn.disabled = false;
+      document.getElementById('loginBtnText').textContent = originalText;
+      return;
+    }
+
+    const r = roles[profile.role] || roles[selectedRole];
+    // Compatibilité avec le reste de l'app (mockup) qui lit sessionStorage pour l'affichage.
     sessionStorage.setItem('unimanage_user', JSON.stringify({
-      role: selectedRole, email,
-      univ: document.getElementById('univInput')?.value || 'Université de Lomé',
+      role: profile.role, email,
+      full_name: profile.full_name,
+      univ: profile.university || 'Université de Lomé',
       redirect: r.redirect, loggedIn: true
     }));
 
-    // Go loading
+    selectedRole = profile.role;
     startLoading();
   }
 
