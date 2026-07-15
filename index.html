@@ -73,9 +73,9 @@
 
     /* ─── HERO ─── */
     .hero {
-      min-height: 100vh;
-      display: flex; align-items: center;
-      padding: 100px 5% 60px;
+      min-height: 80vh;
+      display: flex; align-items: center; justify-content: center;
+      padding: 140px 5% 80px;
       background: linear-gradient(135deg, #F0F4FF 0%, #ffffff 60%, #EFF6FF 100%);
       position: relative; overflow: hidden;
     }
@@ -85,7 +85,7 @@
       width: 700px; height: 700px; border-radius: 50%;
       background: radial-gradient(circle, rgba(26,86,219,0.08) 0%, transparent 70%);
     }
-    .hero-content { max-width: 680px; z-index: 1; }
+    .hero-content { max-width: 780px; z-index: 1; text-align: center; margin: 0 auto; }
     .hero-badge {
       display: inline-flex; align-items: center; gap: .5rem;
       background: rgba(26,86,219,0.1); color: var(--blue);
@@ -96,16 +96,16 @@
     @keyframes pulse { 0%,100%{opacity:1} 50%{opacity:.3} }
     .hero h1 {
       font-family: 'Syne', sans-serif;
-      font-size: clamp(2rem, 4vw, 2.75rem);
-      font-weight: 800; line-height: 1.25;
+      font-size: clamp(2.2rem, 5vw, 3.25rem);
+      font-weight: 800; line-height: 1.2;
       margin-bottom: 1.5rem;
     }
     .hero h1 em { font-style: normal; color: var(--blue); }
     .hero p {
       font-size: 1.1rem; color: var(--gray);
-      line-height: 1.8; margin-bottom: 2rem; max-width: 500px;
+      line-height: 1.8; margin: 0 auto 2rem; max-width: 600px;
     }
-    .hero-actions { display: flex; gap: 1rem; flex-wrap: wrap; margin-bottom: 3rem; }
+    .hero-actions { display: flex; gap: 1rem; flex-wrap: wrap; justify-content: center; margin-bottom: 3rem; }
     .btn-hero {
       padding: .9rem 2rem; border-radius: 10px;
       font-size: 1rem; font-weight: 600; cursor: pointer;
@@ -121,77 +121,12 @@
       border: 1.5px solid var(--border);
     }
     .btn-hero-secondary:hover { border-color: var(--blue); color: var(--blue); }
-    .hero-stats { display: flex; gap: 2.5rem; flex-wrap: wrap; }
+    .hero-stats { display: flex; gap: 2.5rem; flex-wrap: wrap; justify-content: center; }
     .stat-item h3 {
       font-family: 'Syne', sans-serif;
       font-size: 1.8rem; font-weight: 800; color: var(--navy);
     }
     .stat-item p { font-size: .8rem; color: var(--gray); margin-top: .2rem; }
-    .hero-visual {
-      flex: 1; display: flex; justify-content: flex-end;
-      align-items: center; z-index: 1;
-    }
-    .dashboard-mockup {
-      width: 520px; background: white;
-      border-radius: 16px; padding: 1.5rem;
-      box-shadow: 0 30px 80px rgba(13,27,42,0.15);
-      border: 1px solid var(--border);
-      animation: float 4s ease-in-out infinite;
-    }
-    @keyframes float {
-      0%,100%{transform:translateY(0)} 50%{transform:translateY(-12px)}
-    }
-    .mock-header {
-      display: flex; align-items: center; justify-content: space-between;
-      margin-bottom: 1.5rem;
-    }
-    .mock-title {
-      font-family: 'Syne', sans-serif;
-      font-weight: 700; font-size: .95rem; color: var(--navy);
-    }
-    .mock-badge {
-      background: rgba(16,185,129,0.1); color: var(--success);
-      padding: .25rem .75rem; border-radius: 100px;
-      font-size: .75rem; font-weight: 600;
-    }
-    .mock-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; margin-bottom: 1rem; }
-    .mock-card {
-      background: var(--light); border-radius: 10px;
-      padding: 1rem; border: 1px solid var(--border);
-    }
-    .mock-card-num {
-      font-family: 'Syne', sans-serif;
-      font-size: 1.6rem; font-weight: 800; color: var(--navy);
-    }
-    .mock-card-label { font-size: .75rem; color: var(--gray); margin-top: .2rem; }
-    .mock-card-accent { color: var(--blue); }
-    .mock-card-gold { color: var(--gold); }
-    .mock-bar-label { font-size: .75rem; color: var(--gray); margin-bottom: .5rem; }
-    .mock-bar-wrap {
-      height: 8px; background: var(--border);
-      border-radius: 100px; overflow: hidden;
-    }
-    .mock-bar-fill {
-      height: 100%; border-radius: 100px;
-      background: linear-gradient(90deg, var(--blue), var(--sky));
-      animation: barGrow 2s ease-out forwards;
-      width: 0;
-    }
-    @keyframes barGrow { to { width: var(--w); } }
-    .mock-list { display: flex; flex-direction: column; gap: .5rem; }
-    .mock-row {
-      display: flex; align-items: center; justify-content: space-between;
-      padding: .5rem .75rem; background: var(--light);
-      border-radius: 8px; font-size: .8rem;
-    }
-    .mock-row-name { font-weight: 500; color: var(--navy); }
-    .mock-row-badge {
-      padding: .2rem .6rem; border-radius: 100px;
-      font-size: .7rem; font-weight: 600;
-    }
-    .badge-green { background: rgba(16,185,129,0.12); color: var(--success); }
-    .badge-blue  { background: rgba(26,86,219,0.1);   color: var(--blue); }
-    .badge-gold  { background: rgba(245,158,11,0.12); color: var(--gold); }
 
     /* ─── FEATURES ─── */
     .section { padding: 80px 5%; }
@@ -325,9 +260,6 @@
 
     /* ─── RESPONSIVE ─── */
     @media (max-width: 900px) {
-      .hero { flex-direction: column; gap: 3rem; }
-      .hero-visual { justify-content: center; }
-      .dashboard-mockup { width: 100%; max-width: 460px; }
       .footer-grid { grid-template-columns: 1fr 1fr; }
       .nav-links { display: none; }
     }
@@ -358,7 +290,7 @@
 <section class="hero">
   <div class="hero-content">
     <div class="hero-badge">Conçue pour les universités d'Afrique francophone</div>
-    <h1>Gérez votre <em>université</em> depuis une seule plateforme</h1>
+    <h1>Gérez votre université,<br><em>sur une seule plateforme</em></h1>
     <p>Administration scolaire, emplois du temps, résultats, comptabilité — tout ce dont votre établissement a besoin, en un seul endroit sécurisé.</p>
     <div class="hero-actions">
       <a href="onboarding.html" class="btn-hero btn-hero-primary">
@@ -380,56 +312,6 @@
       <div class="stat-item">
         <h3>FCFA</h3>
         <p>Devise native</p>
-      </div>
-    </div>
-  </div>
-
-  <div class="hero-visual">
-    <div class="dashboard-mockup">
-      <div class="mock-header">
-        <div class="mock-title">Tableau de bord — Université de Lomé</div>
-        <div class="mock-badge">● En ligne</div>
-      </div>
-      <div class="mock-grid">
-        <div class="mock-card">
-          <div class="mock-card-num mock-card-accent">1 248</div>
-          <div class="mock-card-label">Étudiants inscrits</div>
-        </div>
-        <div class="mock-card">
-          <div class="mock-card-num mock-card-gold">87</div>
-          <div class="mock-card-label">Enseignants actifs</div>
-        </div>
-        <div class="mock-card">
-          <div class="mock-card-num" style="color:var(--success)">94%</div>
-          <div class="mock-card-label">Taux de réussite</div>
-        </div>
-        <div class="mock-card">
-          <div class="mock-card-num">12M</div>
-          <div class="mock-card-label">FCFA encaissés</div>
-        </div>
-      </div>
-      <div class="mock-card" style="margin-bottom:1rem">
-        <div class="mock-bar-label">Paiements scolarité — Janvier 2025</div>
-        <div class="mock-bar-wrap">
-          <div class="mock-bar-fill" style="--w:78%"></div>
-        </div>
-        <div style="display:flex;justify-content:space-between;margin-top:.4rem;font-size:.72rem;color:var(--gray)">
-          <span>78% collecté</span><span>22% en attente</span>
-        </div>
-      </div>
-      <div class="mock-list">
-        <div class="mock-row">
-          <span class="mock-row-name">🏛️ Droit & Sciences Politiques</span>
-          <span class="mock-row-badge badge-green">312 étudiants</span>
-        </div>
-        <div class="mock-row">
-          <span class="mock-row-name">💻 Informatique & IA</span>
-          <span class="mock-row-badge badge-blue">287 étudiants</span>
-        </div>
-        <div class="mock-row">
-          <span class="mock-row-name">📊 Gestion & Finance</span>
-          <span class="mock-row-badge badge-gold">401 étudiants</span>
-        </div>
       </div>
     </div>
   </div>
