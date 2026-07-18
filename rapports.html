@@ -5,14 +5,14 @@
   <meta charset="UTF-8"/>
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
   <title>UniManage — Rapports & Analytics</title>
-  <link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=Inter:wght@300;400;500;600&display=swap" rel="stylesheet"/>
+  <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;600;700;800;900&family=Inter:wght@300;400;500;600&display=swap" rel="stylesheet"/>
   <style>
     :root{--navy:#0D1B2A;--blue:#1A56DB;--sky:#3B82F6;--gold:#F59E0B;--light:#F0F4FF;--white:#FFFFFF;--gray:#64748B;--border:#E2E8F0;--success:#10B981;--danger:#EF4444;--purple:#8B5CF6;--sidebar-w:240px;--topbar-h:64px;}
     *{margin:0;padding:0;box-sizing:border-box;}
     body{font-family:'Inter',sans-serif;background:#F8FAFC;color:var(--navy);display:flex;min-height:100vh;}
     .sidebar{width:var(--sidebar-w);background:var(--navy);display:flex;flex-direction:column;position:fixed;top:0;left:0;bottom:0;z-index:100;overflow-y:auto;}
     .sidebar-brand{padding:1.25rem;border-bottom:1px solid rgba(255,255,255,0.08);}
-    .brand-name{font-family:'Syne',sans-serif;font-weight:800;font-size:1.2rem;color:white;}
+    .brand-name{font-family:'Playfair Display',serif;font-weight:800;font-size:1.2rem;color:white;}
     .brand-name span{color:var(--sky);}
     .brand-sub{font-size:.72rem;color:rgba(255,255,255,0.35);margin-top:.2rem;}
     .sidebar-nav{padding:.75rem 0;flex:1;}
@@ -24,7 +24,7 @@
     .btn-back-dash{width:100%;padding:.6rem;border-radius:8px;background:rgba(255,255,255,0.07);color:rgba(255,255,255,0.6);border:none;font-size:.8rem;font-weight:600;cursor:pointer;}
     .btn-back-dash:hover{background:rgba(255,255,255,0.12);color:white;}
     .topbar{position:fixed;top:0;left:var(--sidebar-w);right:0;height:var(--topbar-h);background:white;border-bottom:1px solid var(--border);display:flex;align-items:center;justify-content:space-between;padding:0 1.75rem;z-index:50;}
-    .page-title{font-family:'Syne',sans-serif;font-weight:700;font-size:1.05rem;}
+    .page-title{font-family:'Playfair Display',serif;font-weight:700;font-size:1.05rem;}
     .breadcrumb{font-size:.78rem;color:var(--gray);}
     .topbar-right{display:flex;align-items:center;gap:.75rem;}
     .btn-primary{display:flex;align-items:center;gap:.4rem;padding:.55rem 1.1rem;border-radius:9px;background:var(--blue);color:white;font-size:.83rem;font-weight:600;cursor:pointer;border:none;transition:all .2s;}
@@ -40,7 +40,7 @@
     .kpi-card{background:white;border:1px solid var(--border);border-radius:12px;padding:1.1rem 1.25rem;transition:all .2s;}
     .kpi-card:hover{box-shadow:0 4px 16px rgba(0,0,0,0.07);transform:translateY(-2px);}
     .kpi-icon{width:42px;height:42px;border-radius:10px;display:flex;align-items:center;justify-content:center;font-size:1.1rem;margin-bottom:.65rem;}
-    .kpi-value{font-family:'Syne',sans-serif;font-size:1.6rem;font-weight:800;line-height:1;}
+    .kpi-value{font-family:'Playfair Display',serif;font-size:1.6rem;font-weight:800;line-height:1;}
     .kpi-label{font-size:.75rem;color:var(--gray);margin-top:.25rem;}
     .kpi-trend{font-size:.72rem;font-weight:600;margin-top:.25rem;}
     .trend-up{color:var(--success);}
@@ -49,7 +49,7 @@
     .dash-grid-3{display:grid;grid-template-columns:2fr 1fr;gap:1.25rem;margin-bottom:1.5rem;}
     .card{background:white;border:1px solid var(--border);border-radius:14px;overflow:hidden;margin-bottom:1.25rem;}
     .card-header{display:flex;align-items:center;justify-content:space-between;padding:1rem 1.25rem;border-bottom:1px solid var(--border);}
-    .card-title{font-family:'Syne',sans-serif;font-weight:700;font-size:.92rem;}
+    .card-title{font-family:'Playfair Display',serif;font-weight:700;font-size:.92rem;}
     .card-body{padding:1.1rem 1.25rem;}
     .card-action{font-size:.8rem;color:var(--blue);font-weight:600;cursor:pointer;background:none;border:none;}
     .badge{display:inline-block;padding:.22rem .7rem;border-radius:100px;font-size:.7rem;font-weight:600;}
@@ -82,7 +82,7 @@
     .report-card{background:white;border:1px solid var(--border);border-radius:12px;padding:1.25rem;cursor:pointer;transition:all .2s;}
     .report-card:hover{border-color:var(--blue);box-shadow:0 4px 16px rgba(26,86,219,0.1);transform:translateY(-2px);}
     .report-icon{font-size:2rem;margin-bottom:.75rem;}
-    .report-name{font-family:'Syne',sans-serif;font-weight:700;font-size:.9rem;margin-bottom:.25rem;}
+    .report-name{font-family:'Playfair Display',serif;font-weight:700;font-size:.9rem;margin-bottom:.25rem;}
     .report-desc{font-size:.78rem;color:var(--gray);line-height:1.6;margin-bottom:.85rem;}
     .report-actions{display:flex;gap:.5rem;}
     .btn-sm{padding:.35rem .85rem;border-radius:7px;font-size:.75rem;font-weight:600;cursor:pointer;transition:all .2s;}
@@ -98,7 +98,7 @@
     .metric-highlight{background:linear-gradient(135deg,var(--navy),#1a2d42);border-radius:14px;padding:1.5rem;color:white;margin-bottom:1.5rem;}
     .metric-highlight-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:1.25rem;}
     .metric-item{text-align:center;}
-    .metric-val{font-family:'Syne',sans-serif;font-weight:800;font-size:1.6rem;}
+    .metric-val{font-family:'Playfair Display',serif;font-weight:800;font-size:1.6rem;}
     .metric-label{font-size:.72rem;color:rgba(255,255,255,0.45);margin-top:.25rem;}
     .metric-change{font-size:.72rem;font-weight:600;margin-top:.2rem;}
     .metric-up{color:var(--success);}
@@ -208,7 +208,7 @@
               <circle cx="50" cy="50" r="38" fill="none" stroke="#F59E0B" stroke-width="16" stroke-dasharray="72 143" stroke-dashoffset="-96" stroke-linecap="round" transform="rotate(-90 50 50)"/>
               <circle cx="50" cy="50" r="38" fill="none" stroke="#10B981" stroke-width="16" stroke-dasharray="56 143" stroke-dashoffset="-168" stroke-linecap="round" transform="rotate(-90 50 50)"/>
               <circle cx="50" cy="50" r="38" fill="none" stroke="#8B5CF6" stroke-width="16" stroke-dasharray="39 143" stroke-dashoffset="-224" stroke-linecap="round" transform="rotate(-90 50 50)"/>
-              <text x="50" y="54" text-anchor="middle" font-size="11" font-weight="800" fill="#0D1B2A" font-family="Syne">1248</text>
+              <text x="50" y="54" text-anchor="middle" font-size="11" font-weight="800" fill="#0D1B2A" font-family="Playfair Display">1248</text>
             </svg>
             <div class="donut-legend">
               <div class="legend-item"><div class="legend-dot" style="background:var(--blue)"></div>Gestion & Finance <strong>401</strong></div>
@@ -243,8 +243,8 @@
             <div class="bar-col"><div class="bar-fill" style="height:88%;background:linear-gradient(180deg,var(--success),#34d399)"></div><div class="bar-label">Jan</div><div class="bar-val">13.1M</div></div>
           </div>
           <div style="margin-top:.85rem;padding:.75rem;background:rgba(16,185,129,0.07);border-radius:9px;display:flex;justify-content:space-between;align-items:center">
-            <div><div style="font-size:.72rem;color:var(--gray)">Total encaissé</div><div style="font-family:'Syne',sans-serif;font-weight:800;font-size:1.1rem;color:var(--success)">48.2M FCFA</div></div>
-            <div style="text-align:right"><div style="font-size:.72rem;color:var(--gray)">Objectif annuel</div><div style="font-family:'Syne',sans-serif;font-weight:800;font-size:1.1rem;color:var(--blue)">60M FCFA</div></div>
+            <div><div style="font-size:.72rem;color:var(--gray)">Total encaissé</div><div style="font-family:'Playfair Display',serif;font-weight:800;font-size:1.1rem;color:var(--success)">48.2M FCFA</div></div>
+            <div style="text-align:right"><div style="font-size:.72rem;color:var(--gray)">Objectif annuel</div><div style="font-family:'Playfair Display',serif;font-weight:800;font-size:1.1rem;color:var(--blue)">60M FCFA</div></div>
           </div>
         </div>
       </div>
@@ -253,7 +253,7 @@
 
   <!-- ══ ACADÉMIQUE ══ -->
   <div class="page" id="page-academique">
-    <div style="margin-bottom:1.5rem"><h2 style="font-family:'Syne',sans-serif;font-weight:800;font-size:1.3rem">🎓 Rapport Académique</h2></div>
+    <div style="margin-bottom:1.5rem"><h2 style="font-family:'Playfair Display',serif;font-weight:800;font-size:1.3rem">🎓 Rapport Académique</h2></div>
     <div class="filter-bar">
       <select class="filter-select"><option>Tous les départements</option><option>Informatique</option><option>Gestion</option><option>Droit</option></select>
       <select class="filter-select"><option>Tous les niveaux</option><option>L1</option><option>L2</option><option>L3</option><option>M1</option><option>M2</option></select>
@@ -278,7 +278,7 @@
 
   <!-- ══ FINANCIER ══ -->
   <div class="page" id="page-financier">
-    <div style="margin-bottom:1.5rem"><h2 style="font-family:'Syne',sans-serif;font-weight:800;font-size:1.3rem">💰 Rapport Financier</h2></div>
+    <div style="margin-bottom:1.5rem"><h2 style="font-family:'Playfair Display',serif;font-weight:800;font-size:1.3rem">💰 Rapport Financier</h2></div>
     <div class="kpi-grid">
       <div class="kpi-card"><div class="kpi-icon" style="background:rgba(16,185,129,0.1)">💵</div><div class="kpi-value" style="color:var(--success)">48.2M</div><div class="kpi-label">FCFA encaissés</div><div class="kpi-trend trend-up">▲ +12% vs 2024</div></div>
       <div class="kpi-card"><div class="kpi-icon" style="background:rgba(239,68,68,0.1)">⏳</div><div class="kpi-value" style="color:var(--danger)">8.6M</div><div class="kpi-label">FCFA impayés</div><div class="kpi-trend trend-down">187 étudiants</div></div>
@@ -301,7 +301,7 @@
 
   <!-- ══ RH ══ -->
   <div class="page" id="page-rh">
-    <div style="margin-bottom:1.5rem"><h2 style="font-family:'Syne',sans-serif;font-weight:800;font-size:1.3rem">👥 Rapport Ressources Humaines</h2></div>
+    <div style="margin-bottom:1.5rem"><h2 style="font-family:'Playfair Display',serif;font-weight:800;font-size:1.3rem">👥 Rapport Ressources Humaines</h2></div>
     <div class="kpi-grid">
       <div class="kpi-card"><div class="kpi-icon" style="background:rgba(26,86,219,0.1)">👨‍🏫</div><div class="kpi-value" style="color:var(--blue)">87</div><div class="kpi-label">Enseignants actifs</div></div>
       <div class="kpi-card"><div class="kpi-icon" style="background:rgba(245,158,11,0.1)">📋</div><div class="kpi-value" style="color:var(--gold)">12</div><div class="kpi-label">Vacataires</div></div>
@@ -325,7 +325,7 @@
   <!-- ══ RAPPORTS ══ -->
   <div class="page" id="page-rapports">
     <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:1.5rem">
-      <div><h2 style="font-family:'Syne',sans-serif;font-weight:800;font-size:1.3rem">📄 Bibliothèque de rapports</h2></div>
+      <div><h2 style="font-family:'Playfair Display',serif;font-weight:800;font-size:1.3rem">📄 Bibliothèque de rapports</h2></div>
     </div>
     <div class="report-grid">
       <div class="report-card"><div class="report-icon">📊</div><div class="report-name">Rapport annuel d'activité</div><div class="report-desc">Synthèse complète de l'année académique — inscriptions, résultats, finances, RH.</div><div class="report-actions"><button class="btn-sm btn-sm-blue" onclick="showToast('📥 Rapport annuel PDF généré !')">📥 PDF</button><button class="btn-sm btn-sm-outline" onclick="showToast('📊 Export Excel généré !')">⬇ Excel</button></div></div>
@@ -341,7 +341,7 @@
 
   <!-- ══ EXPORTS ══ -->
   <div class="page" id="page-exports">
-    <div style="margin-bottom:1.5rem"><h2 style="font-family:'Syne',sans-serif;font-weight:800;font-size:1.3rem">⬇️ Exports PDF / Excel</h2></div>
+    <div style="margin-bottom:1.5rem"><h2 style="font-family:'Playfair Display',serif;font-weight:800;font-size:1.3rem">⬇️ Exports PDF / Excel</h2></div>
     <div class="card">
       <div class="card-header"><div class="card-title">Exports disponibles</div></div>
       <table class="data-table">
@@ -358,8 +358,8 @@
   </div>
 
   <!-- COMPARATIF + PRÉDICTIONS -->
-  <div class="page" id="page-comparatif"><div style="margin-bottom:1.5rem"><h2 style="font-family:'Syne',sans-serif;font-weight:800;font-size:1.3rem">📈 Comparatif annuel</h2></div><div class="card"><div class="card-body" style="padding:2rem;text-align:center"><div style="font-size:3rem;margin-bottom:1rem">📈</div><div style="font-family:'Syne',sans-serif;font-weight:700;font-size:1.1rem">Comparaison 2022 · 2023 · 2024 · 2025</div><div style="color:var(--gray);margin-top:.5rem;font-size:.85rem">Les données comparatives sont disponibles dans le rapport annuel PDF</div><br/><button class="btn-primary" onclick="showToast('📊 Rapport comparatif exporté !')">📥 Télécharger le comparatif</button></div></div></div>
-  <div class="page" id="page-predictions"><div style="margin-bottom:1.5rem"><h2 style="font-family:'Syne',sans-serif;font-weight:800;font-size:1.3rem">🔮 Prédictions & Projections</h2></div><div class="card"><div class="card-body"><div style="padding:1.25rem;background:rgba(139,92,246,0.07);border-radius:12px;border:1px solid rgba(139,92,246,0.15);margin-bottom:1rem"><div style="font-family:'Syne',sans-serif;font-weight:700;margin-bottom:.5rem;color:var(--purple)">🔮 Prévisions Semestre 2 — 2025</div><div style="display:grid;grid-template-columns:repeat(3,1fr);gap:1rem"><div style="text-align:center"><div style="font-family:'Syne',sans-serif;font-weight:800;font-size:1.3rem;color:var(--purple)">1 350</div><div style="font-size:.75rem;color:var(--gray)">Inscrits estimés S2</div></div><div style="text-align:center"><div style="font-family:'Syne',sans-serif;font-weight:800;font-size:1.3rem;color:var(--success)">92%</div><div style="font-size:.75rem;color:var(--gray)">Taux réussite projeté</div></div><div style="text-align:center"><div style="font-family:'Syne',sans-serif;font-weight:800;font-size:1.3rem;color:var(--gold)">55M</div><div style="font-size:.75rem;color:var(--gray)">FCFA revenus projetés</div></div></div></div></div></div></div>
+  <div class="page" id="page-comparatif"><div style="margin-bottom:1.5rem"><h2 style="font-family:'Playfair Display',serif;font-weight:800;font-size:1.3rem">📈 Comparatif annuel</h2></div><div class="card"><div class="card-body" style="padding:2rem;text-align:center"><div style="font-size:3rem;margin-bottom:1rem">📈</div><div style="font-family:'Playfair Display',serif;font-weight:700;font-size:1.1rem">Comparaison 2022 · 2023 · 2024 · 2025</div><div style="color:var(--gray);margin-top:.5rem;font-size:.85rem">Les données comparatives sont disponibles dans le rapport annuel PDF</div><br/><button class="btn-primary" onclick="showToast('📊 Rapport comparatif exporté !')">📥 Télécharger le comparatif</button></div></div></div>
+  <div class="page" id="page-predictions"><div style="margin-bottom:1.5rem"><h2 style="font-family:'Playfair Display',serif;font-weight:800;font-size:1.3rem">🔮 Prédictions & Projections</h2></div><div class="card"><div class="card-body"><div style="padding:1.25rem;background:rgba(139,92,246,0.07);border-radius:12px;border:1px solid rgba(139,92,246,0.15);margin-bottom:1rem"><div style="font-family:'Playfair Display',serif;font-weight:700;margin-bottom:.5rem;color:var(--purple)">🔮 Prévisions Semestre 2 — 2025</div><div style="display:grid;grid-template-columns:repeat(3,1fr);gap:1rem"><div style="text-align:center"><div style="font-family:'Playfair Display',serif;font-weight:800;font-size:1.3rem;color:var(--purple)">1 350</div><div style="font-size:.75rem;color:var(--gray)">Inscrits estimés S2</div></div><div style="text-align:center"><div style="font-family:'Playfair Display',serif;font-weight:800;font-size:1.3rem;color:var(--success)">92%</div><div style="font-size:.75rem;color:var(--gray)">Taux réussite projeté</div></div><div style="text-align:center"><div style="font-family:'Playfair Display',serif;font-weight:800;font-size:1.3rem;color:var(--gold)">55M</div><div style="font-size:.75rem;color:var(--gray)">FCFA revenus projetés</div></div></div></div></div></div></div>
 
 </div></main>
 <div class="toast" id="toast"></div>

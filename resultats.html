@@ -5,7 +5,7 @@
   <meta charset="UTF-8"/>
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
   <title>UniManage — Résultats & Relevés</title>
-  <link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=Inter:wght@300;400;500;600&display=swap" rel="stylesheet"/>
+  <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;600;700;800;900&family=Inter:wght@300;400;500;600&display=swap" rel="stylesheet"/>
   <style>
     :root{--navy:#0D1B2A;--blue:#1A56DB;--sky:#3B82F6;--gold:#F59E0B;--light:#F0F4FF;--white:#FFFFFF;--gray:#64748B;--border:#E2E8F0;--success:#10B981;--danger:#EF4444;}
     *{margin:0;padding:0;box-sizing:border-box;}
@@ -13,13 +13,13 @@
 
     /* HEADER */
     .header{background:var(--navy);padding:1rem 5%;display:flex;align-items:center;justify-content:space-between;}
-    .header-logo{font-family:'Syne',sans-serif;font-weight:800;font-size:1.3rem;color:white;}
+    .header-logo{font-family:'Playfair Display',serif;font-weight:800;font-size:1.3rem;color:white;}
     .header-logo span{color:var(--sky);}
     .header-univ{font-size:.8rem;color:rgba(255,255,255,0.45);}
 
     /* HERO RÉSULTATS */
     .results-hero{background:linear-gradient(135deg,var(--navy) 0%,#1a2d42 100%);padding:2.5rem 5%;color:white;}
-    .results-hero h1{font-family:'Syne',sans-serif;font-weight:800;font-size:clamp(1.4rem,3vw,2rem);margin-bottom:.5rem;}
+    .results-hero h1{font-family:'Playfair Display',serif;font-weight:800;font-size:clamp(1.4rem,3vw,2rem);margin-bottom:.5rem;}
     .results-hero p{font-size:.9rem;color:rgba(255,255,255,0.55);margin-bottom:1.5rem;}
     .search-results{display:flex;gap:1rem;flex-wrap:wrap;}
     .search-input{flex:1;min-width:240px;padding:.75rem 1.1rem;border-radius:10px;border:1.5px solid rgba(255,255,255,0.15);background:rgba(255,255,255,0.08);color:white;font-size:.9rem;font-family:'Inter',sans-serif;outline:none;}
@@ -39,7 +39,7 @@
     /* CARDS */
     .card{background:white;border:1px solid var(--border);border-radius:14px;overflow:hidden;margin-bottom:1.5rem;}
     .card-header{display:flex;align-items:center;justify-content:space-between;padding:1.1rem 1.5rem;border-bottom:1px solid var(--border);}
-    .card-title{font-family:'Syne',sans-serif;font-weight:700;font-size:.95rem;}
+    .card-title{font-family:'Playfair Display',serif;font-weight:700;font-size:.95rem;}
     .card-body{padding:1.25rem 1.5rem;}
 
     /* BADGES */
@@ -55,7 +55,7 @@
     .data-table td{padding:.75rem 1rem;font-size:.85rem;border-bottom:1px solid var(--border);}
     .data-table tr:last-child td{border:none;}
     .data-table tr:hover td{background:#F8FAFC;}
-    .note-val{font-family:'Syne',sans-serif;font-weight:800;font-size:.95rem;}
+    .note-val{font-family:'Playfair Display',serif;font-weight:800;font-size:.95rem;}
     .note-good{color:var(--success);}
     .note-avg{color:var(--gold);}
     .note-bad{color:var(--danger);}
@@ -63,9 +63,9 @@
     /* RELEVÉ PDF PREVIEW */
     .releve-preview{background:white;border:2px solid var(--border);border-radius:12px;padding:2rem;position:relative;font-size:.85rem;}
     .releve-header{display:flex;align-items:flex-start;justify-content:space-between;margin-bottom:1.5rem;padding-bottom:1.5rem;border-bottom:3px solid var(--navy);}
-    .releve-univ{font-family:'Syne',sans-serif;font-weight:800;font-size:1.1rem;color:var(--navy);}
+    .releve-univ{font-family:'Playfair Display',serif;font-weight:800;font-size:1.1rem;color:var(--navy);}
     .releve-sub{font-size:.8rem;color:var(--gray);margin-top:.2rem;}
-    .releve-title{text-align:center;font-family:'Syne',sans-serif;font-weight:800;font-size:1.2rem;color:var(--navy);text-transform:uppercase;letter-spacing:.05em;margin-bottom:1.5rem;}
+    .releve-title{text-align:center;font-family:'Playfair Display',serif;font-weight:800;font-size:1.2rem;color:var(--navy);text-transform:uppercase;letter-spacing:.05em;margin-bottom:1.5rem;}
     .releve-student{display:grid;grid-template-columns:1fr 1fr;gap:.5rem;margin-bottom:1.5rem;padding:1rem;background:#F8FAFC;border-radius:10px;}
     .releve-field{font-size:.82rem;}
     .releve-field strong{color:var(--navy);}
@@ -76,7 +76,7 @@
     .releve-table tr:nth-child(even) td{background:#F8FAFC;}
     .releve-footer{display:flex;align-items:flex-start;justify-content:space-between;padding-top:1.5rem;border-top:2px solid var(--navy);}
     .releve-mention{text-align:center;}
-    .releve-mention-val{font-family:'Syne',sans-serif;font-weight:800;font-size:1.5rem;color:var(--success);}
+    .releve-mention-val{font-family:'Playfair Display',serif;font-weight:800;font-size:1.5rem;color:var(--success);}
     .releve-qr{text-align:center;}
     .qr-box{width:80px;height:80px;background:var(--navy);border-radius:8px;display:flex;align-items:center;justify-content:center;margin:0 auto .4rem;}
     .qr-inner{display:grid;grid-template-columns:repeat(7,1fr);gap:1px;width:60px;height:60px;}
@@ -88,8 +88,8 @@
     /* VÉRIFICATION */
     .verify-card{background:linear-gradient(135deg,rgba(26,86,219,0.05),rgba(16,185,129,0.05));border:1.5px solid var(--border);border-radius:14px;padding:2rem;text-align:center;margin-bottom:1.5rem;}
     .verify-icon{font-size:3rem;margin-bottom:1rem;}
-    .verify-title{font-family:'Syne',sans-serif;font-weight:800;font-size:1.1rem;margin-bottom:.5rem;}
-    .verify-code-input{padding:.75rem 1.25rem;border-radius:10px;border:2px solid var(--border);font-size:1rem;font-family:'Syne',sans-serif;font-weight:700;letter-spacing:.1em;text-align:center;width:280px;outline:none;transition:border-color .2s;}
+    .verify-title{font-family:'Playfair Display',serif;font-weight:800;font-size:1.1rem;margin-bottom:.5rem;}
+    .verify-code-input{padding:.75rem 1.25rem;border-radius:10px;border:2px solid var(--border);font-size:1rem;font-family:'Playfair Display',serif;font-weight:700;letter-spacing:.1em;text-align:center;width:280px;outline:none;transition:border-color .2s;}
     .verify-code-input:focus{border-color:var(--blue);}
     .btn-verify{padding:.75rem 2rem;border-radius:10px;background:var(--blue);color:white;font-size:.9rem;font-weight:700;cursor:pointer;border:none;margin-left:.75rem;transition:all .2s;}
     .btn-verify:hover{background:#1344b8;}
@@ -184,7 +184,7 @@
         </div>
         <div style="text-align:right">
           <div style="font-size:.75rem;color:var(--gray)">Réf. document</div>
-          <div style="font-family:'Syne',sans-serif;font-weight:800;font-size:.95rem;color:var(--navy)">RN-UL-2025-001-S1</div>
+          <div style="font-family:'Playfair Display',serif;font-weight:800;font-size:.95rem;color:var(--navy)">RN-UL-2025-001-S1</div>
           <div style="font-size:.75rem;color:var(--gray);margin-top:.2rem">Émis le 20 Janvier 2025</div>
           <div style="margin-top:.5rem"><span class="badge badge-success">✓ Document officiel</span></div>
         </div>
@@ -235,7 +235,7 @@
             <td><strong>44/60</strong></td>
             <td><strong>32</strong></td>
             <td colspan="2"></td>
-            <td><strong style="color:var(--blue);font-family:'Syne',sans-serif;font-size:1rem">13.8/20</strong></td>
+            <td><strong style="color:var(--blue);font-family:'Playfair Display',serif;font-size:1rem">13.8/20</strong></td>
             <td><span class="badge badge-blue">AB</span></td>
           </tr>
         </tfoot>
@@ -317,7 +317,7 @@
               <rect x="14" y="20" width="1" height="1" fill="white"/><rect x="16" y="20" width="1" height="1" fill="white"/><rect x="18" y="20" width="1" height="1" fill="white"/>
             </svg>
           </div>
-          <div style="font-size:.7rem;color:var(--gray);font-family:'Syne',sans-serif;font-weight:700">RN-UL-2025-001-S1</div>
+          <div style="font-size:.7rem;color:var(--gray);font-family:'Playfair Display',serif;font-weight:700">RN-UL-2025-001-S1</div>
           <div style="font-size:.65rem;color:var(--gray);margin-top:.2rem">Scannez pour vérifier</div>
         </div>
 
@@ -342,9 +342,9 @@
       <table class="data-table">
         <thead><tr><th>Rang</th><th>Étudiant</th><th>Matricule</th><th>Moyenne</th><th>Crédits</th><th>Mention</th><th>Résultat</th></tr></thead>
         <tbody>
-          <tr style="background:rgba(245,158,11,0.05)"><td><span style="font-family:'Syne',sans-serif;font-weight:800;font-size:1.1rem;color:var(--gold)">🥇 1</span></td><td><strong>Béatrice Komi</strong></td><td>UL-2025-005</td><td><span class="note-val note-good">17.3/20</span></td><td>58/60</td><td><span class="badge badge-success">Très Bien</span></td><td><span class="badge badge-success">Admis</span></td></tr>
-          <tr><td><span style="font-family:'Syne',sans-serif;font-weight:800;font-size:1.1rem;color:var(--gray)">🥈 2</span></td><td><strong>Kofi Adzoa</strong></td><td>UL-2025-001</td><td><span class="note-val note-good">13.8/20</span></td><td>44/60</td><td><span class="badge badge-blue">Assez Bien</span></td><td><span class="badge badge-success">Admis</span></td></tr>
-          <tr><td><span style="font-family:'Syne',sans-serif;font-weight:800;font-size:1.1rem;color:var(--gray)">🥉 3</span></td><td><strong>Afia Mensah</strong></td><td>UL-2025-002</td><td><span class="note-val note-good">13.3/20</span></td><td>46/60</td><td><span class="badge badge-blue">Assez Bien</span></td><td><span class="badge badge-success">Admis</span></td></tr>
+          <tr style="background:rgba(245,158,11,0.05)"><td><span style="font-family:'Playfair Display',serif;font-weight:800;font-size:1.1rem;color:var(--gold)">🥇 1</span></td><td><strong>Béatrice Komi</strong></td><td>UL-2025-005</td><td><span class="note-val note-good">17.3/20</span></td><td>58/60</td><td><span class="badge badge-success">Très Bien</span></td><td><span class="badge badge-success">Admis</span></td></tr>
+          <tr><td><span style="font-family:'Playfair Display',serif;font-weight:800;font-size:1.1rem;color:var(--gray)">🥈 2</span></td><td><strong>Kofi Adzoa</strong></td><td>UL-2025-001</td><td><span class="note-val note-good">13.8/20</span></td><td>44/60</td><td><span class="badge badge-blue">Assez Bien</span></td><td><span class="badge badge-success">Admis</span></td></tr>
+          <tr><td><span style="font-family:'Playfair Display',serif;font-weight:800;font-size:1.1rem;color:var(--gray)">🥉 3</span></td><td><strong>Afia Mensah</strong></td><td>UL-2025-002</td><td><span class="note-val note-good">13.3/20</span></td><td>46/60</td><td><span class="badge badge-blue">Assez Bien</span></td><td><span class="badge badge-success">Admis</span></td></tr>
           <tr><td style="color:var(--gray)">4</td><td><strong>Yao Dodzi</strong></td><td>UL-2025-003</td><td><span class="note-val note-avg">11.3/20</span></td><td>40/60</td><td><span class="badge badge-gold">Passable</span></td><td><span class="badge badge-gold">Admis cond.</span></td></tr>
           <tr><td style="color:var(--gray)">5</td><td><strong>Selom Edem</strong></td><td>UL-2025-004</td><td><span class="note-val note-bad">7.3/20</span></td><td>18/60</td><td><span class="badge badge-danger">Insuffisant</span></td><td><span class="badge badge-danger">Ajourné</span></td></tr>
         </tbody>

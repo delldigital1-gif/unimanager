@@ -5,14 +5,14 @@
   <meta charset="UTF-8"/>
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
   <title>UniManage — Examens Avancés</title>
-  <link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=Inter:wght@300;400;500;600&display=swap" rel="stylesheet"/>
+  <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;600;700;800;900&family=Inter:wght@300;400;500;600&display=swap" rel="stylesheet"/>
   <style>
     :root{--navy:#0D1B2A;--blue:#1A56DB;--sky:#3B82F6;--gold:#F59E0B;--light:#F0F4FF;--white:#FFFFFF;--gray:#64748B;--border:#E2E8F0;--success:#10B981;--danger:#EF4444;--purple:#8B5CF6;--sidebar-w:240px;--topbar-h:64px;}
     *{margin:0;padding:0;box-sizing:border-box;}
     body{font-family:'Inter',sans-serif;background:#F8FAFC;color:var(--navy);display:flex;min-height:100vh;}
     .sidebar{width:var(--sidebar-w);background:var(--navy);display:flex;flex-direction:column;position:fixed;top:0;left:0;bottom:0;z-index:100;overflow-y:auto;}
     .sidebar-brand{padding:1.25rem;border-bottom:1px solid rgba(255,255,255,0.08);}
-    .brand-name{font-family:'Syne',sans-serif;font-weight:800;font-size:1.2rem;color:white;}
+    .brand-name{font-family:'Playfair Display',serif;font-weight:800;font-size:1.2rem;color:white;}
     .brand-name span{color:var(--sky);}
     .brand-sub{font-size:.72rem;color:rgba(255,255,255,0.35);margin-top:.2rem;}
     .sidebar-nav{padding:.75rem 0;flex:1;}
@@ -25,7 +25,7 @@
     .btn-back-dash{width:100%;padding:.6rem;border-radius:8px;background:rgba(255,255,255,0.07);color:rgba(255,255,255,0.6);border:none;font-size:.8rem;font-weight:600;cursor:pointer;transition:all .2s;}
     .btn-back-dash:hover{background:rgba(255,255,255,0.12);color:white;}
     .topbar{position:fixed;top:0;left:var(--sidebar-w);right:0;height:var(--topbar-h);background:white;border-bottom:1px solid var(--border);display:flex;align-items:center;justify-content:space-between;padding:0 1.75rem;z-index:50;}
-    .page-title{font-family:'Syne',sans-serif;font-weight:700;font-size:1.05rem;}
+    .page-title{font-family:'Playfair Display',serif;font-weight:700;font-size:1.05rem;}
     .breadcrumb{font-size:.78rem;color:var(--gray);}
     .topbar-right{display:flex;align-items:center;gap:.75rem;}
     .btn-primary{display:flex;align-items:center;gap:.4rem;padding:.55rem 1.1rem;border-radius:9px;background:var(--blue);color:white;font-size:.83rem;font-weight:600;cursor:pointer;border:none;transition:all .2s;}
@@ -41,7 +41,7 @@
     .kpi-card{background:white;border:1px solid var(--border);border-radius:12px;padding:1.1rem 1.25rem;transition:all .2s;}
     .kpi-card:hover{box-shadow:0 4px 16px rgba(0,0,0,0.07);transform:translateY(-2px);}
     .kpi-icon{width:40px;height:40px;border-radius:10px;display:flex;align-items:center;justify-content:center;font-size:1.1rem;margin-bottom:.65rem;}
-    .kpi-value{font-family:'Syne',sans-serif;font-size:1.6rem;font-weight:800;line-height:1;}
+    .kpi-value{font-family:'Playfair Display',serif;font-size:1.6rem;font-weight:800;line-height:1;}
     .kpi-label{font-size:.75rem;color:var(--gray);margin-top:.25rem;}
     .kpi-trend{font-size:.72rem;font-weight:600;margin-top:.25rem;}
     .trend-up{color:var(--success);}
@@ -49,7 +49,7 @@
     .dash-grid{display:grid;grid-template-columns:1fr 1fr;gap:1.25rem;margin-bottom:1.5rem;}
     .card{background:white;border:1px solid var(--border);border-radius:14px;overflow:hidden;margin-bottom:1.25rem;}
     .card-header{display:flex;align-items:center;justify-content:space-between;padding:1rem 1.25rem;border-bottom:1px solid var(--border);}
-    .card-title{font-family:'Syne',sans-serif;font-weight:700;font-size:.92rem;}
+    .card-title{font-family:'Playfair Display',serif;font-weight:700;font-size:.92rem;}
     .card-body{padding:1.1rem 1.25rem;}
     .card-action{font-size:.8rem;color:var(--blue);font-weight:600;cursor:pointer;background:none;border:none;}
     .badge{display:inline-block;padding:.22rem .7rem;border-radius:100px;font-size:.7rem;font-weight:600;}
@@ -76,12 +76,12 @@
     .delib-table td:first-child{text-align:left;}
     .delib-table tr:nth-child(even) td{background:#F8FAFC;}
     .delib-table tr:hover td{background:var(--light);}
-    .moy-cell{font-family:'Syne',sans-serif;font-weight:800;font-size:.95rem;}
+    .moy-cell{font-family:'Playfair Display',serif;font-weight:800;font-size:.95rem;}
     .verdict-badge{display:inline-flex;align-items:center;gap:.3rem;padding:.3rem .7rem;border-radius:100px;font-size:.72rem;font-weight:700;}
     /* PV styles */
     .pv-doc{background:white;border:1px solid var(--border);border-radius:12px;padding:2rem;font-size:.85rem;}
     .pv-header{text-align:center;border-bottom:2px solid var(--navy);padding-bottom:1rem;margin-bottom:1.5rem;}
-    .pv-title{font-family:'Syne',sans-serif;font-weight:800;font-size:1.1rem;text-transform:uppercase;letter-spacing:.05em;}
+    .pv-title{font-family:'Playfair Display',serif;font-weight:800;font-size:1.1rem;text-transform:uppercase;letter-spacing:.05em;}
     .pv-section{margin-bottom:1.25rem;}
     .pv-section-title{font-weight:700;font-size:.88rem;margin-bottom:.6rem;padding:.4rem .75rem;background:#F8FAFC;border-radius:6px;border-left:3px solid var(--blue);}
     .pv-grid{display:grid;grid-template-columns:1fr 1fr;gap:.5rem;font-size:.82rem;}
@@ -91,11 +91,11 @@
     .jury-item{display:flex;justify-content:space-between;padding:.4rem .75rem;background:#F8FAFC;border-radius:6px;font-size:.82rem;}
     /* Proclamation */
     .proclamation{background:linear-gradient(135deg,#F0F4FF,white);border:2px solid var(--blue);border-radius:16px;padding:2rem;text-align:center;}
-    .procl-title{font-family:'Syne',sans-serif;font-weight:800;font-size:1.3rem;color:var(--blue);margin-bottom:.5rem;}
+    .procl-title{font-family:'Playfair Display',serif;font-weight:800;font-size:1.3rem;color:var(--blue);margin-bottom:.5rem;}
     .procl-sub{font-size:.85rem;color:var(--gray);margin-bottom:2rem;}
     .procl-stats{display:grid;grid-template-columns:repeat(4,1fr);gap:1rem;margin-bottom:2rem;}
     .procl-stat{background:white;border-radius:12px;padding:1rem;border:1px solid var(--border);}
-    .procl-stat-val{font-family:'Syne',sans-serif;font-weight:800;font-size:1.5rem;}
+    .procl-stat-val{font-family:'Playfair Display',serif;font-weight:800;font-size:1.5rem;}
     .procl-stat-label{font-size:.72rem;color:var(--gray);margin-top:.2rem;}
     .procl-list{text-align:left;}
     /* Modal */
@@ -104,7 +104,7 @@
     .modal{background:white;border-radius:18px;width:100%;max-width:520px;padding:2rem;position:relative;box-shadow:0 30px 80px rgba(0,0,0,0.2);animation:modalIn .3s ease;}
     @keyframes modalIn{from{opacity:0;transform:translateY(16px)}to{opacity:1;transform:translateY(0)}}
     .modal-close{position:absolute;top:1rem;right:1rem;background:#F8FAFC;border:none;cursor:pointer;width:30px;height:30px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:.85rem;color:var(--gray);}
-    .modal-title{font-family:'Syne',sans-serif;font-weight:800;font-size:1.1rem;margin-bottom:1.25rem;}
+    .modal-title{font-family:'Playfair Display',serif;font-weight:800;font-size:1.1rem;margin-bottom:1.25rem;}
     .form-group{margin-bottom:.85rem;}
     .form-group label{display:block;font-size:.78rem;font-weight:600;color:var(--navy);margin-bottom:.35rem;}
     .form-input{width:100%;padding:.65rem .9rem;border-radius:8px;border:1.5px solid var(--border);font-size:.875rem;font-family:'Inter',sans-serif;color:var(--navy);outline:none;transition:border-color .2s;}
@@ -198,7 +198,7 @@
   <!-- ══ SAISIE NOTES ══ -->
   <div class="page" id="page-saisie">
     <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:1.5rem">
-      <div><h2 style="font-family:'Syne',sans-serif;font-weight:800;font-size:1.3rem">Saisie des notes</h2><div style="font-size:.85rem;color:var(--gray);margin-top:.2rem">Algorithmique Avancée · Informatique L2 · Session 1</div></div>
+      <div><h2 style="font-family:'Playfair Display',serif;font-weight:800;font-size:1.3rem">Saisie des notes</h2><div style="font-size:.85rem;color:var(--gray);margin-top:.2rem">Algorithmique Avancée · Informatique L2 · Session 1</div></div>
       <div style="display:flex;gap:.75rem">
         <button class="btn-outline" onclick="showToast('💾 Brouillon sauvegardé')">💾 Sauvegarder</button>
         <button class="btn-primary" onclick="showToast('✅ Notes soumises pour validation jury !')">📤 Soumettre au jury</button>
@@ -206,22 +206,22 @@
     </div>
     <!-- Stats rapides -->
     <div style="display:flex;gap:1rem;margin-bottom:1.25rem;flex-wrap:wrap">
-      <div style="background:white;border:1px solid var(--border);border-radius:10px;padding:.75rem 1.25rem;display:flex;align-items:center;gap:.75rem"><span style="font-size:1.3rem">👥</span><div><div style="font-family:'Syne',sans-serif;font-weight:800;font-size:1.2rem;color:var(--blue)">287</div><div style="font-size:.72rem;color:var(--gray)">Étudiants</div></div></div>
-      <div style="background:white;border:1px solid var(--border);border-radius:10px;padding:.75rem 1.25rem;display:flex;align-items:center;gap:.75rem"><span style="font-size:1.3rem">✅</span><div><div style="font-family:'Syne',sans-serif;font-weight:800;font-size:1.2rem;color:var(--success)">285</div><div style="font-size:.72rem;color:var(--gray)">Notes saisies</div></div></div>
-      <div style="background:rgba(239,68,68,0.06);border:1px solid rgba(239,68,68,0.15);border-radius:10px;padding:.75rem 1.25rem;display:flex;align-items:center;gap:.75rem"><span style="font-size:1.3rem">⏳</span><div><div style="font-family:'Syne',sans-serif;font-weight:800;font-size:1.2rem;color:var(--danger)">2</div><div style="font-size:.72rem;color:var(--gray)">Manquantes</div></div></div>
-      <div style="background:white;border:1px solid var(--border);border-radius:10px;padding:.75rem 1.25rem;display:flex;align-items:center;gap:.75rem"><span style="font-size:1.3rem">📊</span><div><div style="font-family:'Syne',sans-serif;font-weight:800;font-size:1.2rem;color:var(--gold)">13.4</div><div style="font-size:.72rem;color:var(--gray)">Moy. classe</div></div></div>
-      <div style="background:white;border:1px solid var(--border);border-radius:10px;padding:.75rem 1.25rem;display:flex;align-items:center;gap:.75rem"><span style="font-size:1.3rem">🏆</span><div><div style="font-family:'Syne',sans-serif;font-weight:800;font-size:1.2rem;color:var(--success)">89%</div><div style="font-size:.72rem;color:var(--gray)">Réussite</div></div></div>
+      <div style="background:white;border:1px solid var(--border);border-radius:10px;padding:.75rem 1.25rem;display:flex;align-items:center;gap:.75rem"><span style="font-size:1.3rem">👥</span><div><div style="font-family:'Playfair Display',serif;font-weight:800;font-size:1.2rem;color:var(--blue)">287</div><div style="font-size:.72rem;color:var(--gray)">Étudiants</div></div></div>
+      <div style="background:white;border:1px solid var(--border);border-radius:10px;padding:.75rem 1.25rem;display:flex;align-items:center;gap:.75rem"><span style="font-size:1.3rem">✅</span><div><div style="font-family:'Playfair Display',serif;font-weight:800;font-size:1.2rem;color:var(--success)">285</div><div style="font-size:.72rem;color:var(--gray)">Notes saisies</div></div></div>
+      <div style="background:rgba(239,68,68,0.06);border:1px solid rgba(239,68,68,0.15);border-radius:10px;padding:.75rem 1.25rem;display:flex;align-items:center;gap:.75rem"><span style="font-size:1.3rem">⏳</span><div><div style="font-family:'Playfair Display',serif;font-weight:800;font-size:1.2rem;color:var(--danger)">2</div><div style="font-size:.72rem;color:var(--gray)">Manquantes</div></div></div>
+      <div style="background:white;border:1px solid var(--border);border-radius:10px;padding:.75rem 1.25rem;display:flex;align-items:center;gap:.75rem"><span style="font-size:1.3rem">📊</span><div><div style="font-family:'Playfair Display',serif;font-weight:800;font-size:1.2rem;color:var(--gold)">13.4</div><div style="font-size:.72rem;color:var(--gray)">Moy. classe</div></div></div>
+      <div style="background:white;border:1px solid var(--border);border-radius:10px;padding:.75rem 1.25rem;display:flex;align-items:center;gap:.75rem"><span style="font-size:1.3rem">🏆</span><div><div style="font-family:'Playfair Display',serif;font-weight:800;font-size:1.2rem;color:var(--success)">89%</div><div style="font-size:.72rem;color:var(--gray)">Réussite</div></div></div>
     </div>
     <div class="card">
       <div class="card-header"><div class="card-title">Liste des étudiants</div><input style="padding:.4rem .8rem;border:1px solid var(--border);border-radius:7px;font-size:.8rem;outline:none" placeholder="🔍 Rechercher..."/></div>
       <table class="data-table">
         <thead><tr><th>#</th><th>Étudiant</th><th>Matricule</th><th>CC /20</th><th>Examen /20</th><th>Moyenne</th><th>Mention</th><th>Verdict</th></tr></thead>
         <tbody>
-          <tr><td style="color:var(--gray)">1</td><td><strong>Béatrice Komi</strong></td><td style="color:var(--gray)">UL-2025-005</td><td><input class="note-input" value="18"/></td><td><input class="note-input" value="17"/></td><td><span style="font-family:'Syne',sans-serif;font-weight:800;color:var(--success)">17.3</span></td><td><span class="badge badge-success">Très Bien</span></td><td><span class="badge badge-success">✓ Admis</span></td></tr>
-          <tr><td style="color:var(--gray)">2</td><td><strong>Kofi Adzoa</strong></td><td style="color:var(--gray)">UL-2025-001</td><td><input class="note-input" value="17"/></td><td><input class="note-input" value="15"/></td><td><span style="font-family:'Syne',sans-serif;font-weight:800;color:var(--success)">15.7</span></td><td><span class="badge badge-blue">Bien</span></td><td><span class="badge badge-success">✓ Admis</span></td></tr>
-          <tr><td style="color:var(--gray)">3</td><td><strong>Afia Mensah</strong></td><td style="color:var(--gray)">UL-2025-002</td><td><input class="note-input" value="14"/></td><td><input class="note-input" value="13"/></td><td><span style="font-family:'Syne',sans-serif;font-weight:800;color:var(--blue)">13.3</span></td><td><span class="badge badge-gold">Assez Bien</span></td><td><span class="badge badge-success">✓ Admis</span></td></tr>
-          <tr><td style="color:var(--gray)">4</td><td><strong>Yao Dodzi</strong></td><td style="color:var(--gray)">UL-2025-003</td><td><input class="note-input" value="11"/></td><td><input class="note-input" value="10"/></td><td><span style="font-family:'Syne',sans-serif;font-weight:800;color:var(--gold)">10.3</span></td><td><span class="badge badge-gold">Passable</span></td><td><span class="badge badge-gold">~ Conditionnel</span></td></tr>
-          <tr><td style="color:var(--gray)">5</td><td><strong>Selom Edem</strong></td><td style="color:var(--gray)">UL-2025-004</td><td><input class="note-input" value="8"/></td><td><input class="note-input" value="7"/></td><td><span style="font-family:'Syne',sans-serif;font-weight:800;color:var(--danger)">7.3</span></td><td><span class="badge badge-danger">Insuffisant</span></td><td><span class="badge badge-danger">✗ Rattrapage</span></td></tr>
+          <tr><td style="color:var(--gray)">1</td><td><strong>Béatrice Komi</strong></td><td style="color:var(--gray)">UL-2025-005</td><td><input class="note-input" value="18"/></td><td><input class="note-input" value="17"/></td><td><span style="font-family:'Playfair Display',serif;font-weight:800;color:var(--success)">17.3</span></td><td><span class="badge badge-success">Très Bien</span></td><td><span class="badge badge-success">✓ Admis</span></td></tr>
+          <tr><td style="color:var(--gray)">2</td><td><strong>Kofi Adzoa</strong></td><td style="color:var(--gray)">UL-2025-001</td><td><input class="note-input" value="17"/></td><td><input class="note-input" value="15"/></td><td><span style="font-family:'Playfair Display',serif;font-weight:800;color:var(--success)">15.7</span></td><td><span class="badge badge-blue">Bien</span></td><td><span class="badge badge-success">✓ Admis</span></td></tr>
+          <tr><td style="color:var(--gray)">3</td><td><strong>Afia Mensah</strong></td><td style="color:var(--gray)">UL-2025-002</td><td><input class="note-input" value="14"/></td><td><input class="note-input" value="13"/></td><td><span style="font-family:'Playfair Display',serif;font-weight:800;color:var(--blue)">13.3</span></td><td><span class="badge badge-gold">Assez Bien</span></td><td><span class="badge badge-success">✓ Admis</span></td></tr>
+          <tr><td style="color:var(--gray)">4</td><td><strong>Yao Dodzi</strong></td><td style="color:var(--gray)">UL-2025-003</td><td><input class="note-input" value="11"/></td><td><input class="note-input" value="10"/></td><td><span style="font-family:'Playfair Display',serif;font-weight:800;color:var(--gold)">10.3</span></td><td><span class="badge badge-gold">Passable</span></td><td><span class="badge badge-gold">~ Conditionnel</span></td></tr>
+          <tr><td style="color:var(--gray)">5</td><td><strong>Selom Edem</strong></td><td style="color:var(--gray)">UL-2025-004</td><td><input class="note-input" value="8"/></td><td><input class="note-input" value="7"/></td><td><span style="font-family:'Playfair Display',serif;font-weight:800;color:var(--danger)">7.3</span></td><td><span class="badge badge-danger">Insuffisant</span></td><td><span class="badge badge-danger">✗ Rattrapage</span></td></tr>
           <tr><td style="color:var(--gray)">6</td><td><strong>Mawuli Kokou</strong></td><td style="color:var(--gray)">UL-2025-006</td><td><input class="note-input" placeholder="—"/></td><td><input class="note-input" placeholder="—"/></td><td><span style="color:var(--gray)">—</span></td><td><span class="badge badge-gray">En attente</span></td><td><span class="badge badge-gray">—</span></td></tr>
         </tbody>
       </table>
@@ -231,7 +231,7 @@
   <!-- ══ DÉLIBÉRATION ══ -->
   <div class="page" id="page-deliberation">
     <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:1.5rem">
-      <div><h2 style="font-family:'Syne',sans-serif;font-weight:800;font-size:1.3rem">⚖️ Délibération du Jury</h2><div style="font-size:.85rem;color:var(--gray);margin-top:.2rem">Informatique L2 · Session 1 · 22 Janvier 2025</div></div>
+      <div><h2 style="font-family:'Playfair Display',serif;font-weight:800;font-size:1.3rem">⚖️ Délibération du Jury</h2><div style="font-size:.85rem;color:var(--gray);margin-top:.2rem">Informatique L2 · Session 1 · 22 Janvier 2025</div></div>
       <div style="display:flex;gap:.75rem">
         <button class="btn-outline" onclick="showPage('pv')">📄 Générer PV</button>
         <button class="btn-primary" onclick="showPage('proclamation')">📢 Proclamer résultats</button>
@@ -268,7 +268,7 @@
   <!-- ══ PV ══ -->
   <div class="page" id="page-pv">
     <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:1.5rem">
-      <div><h2 style="font-family:'Syne',sans-serif;font-weight:800;font-size:1.3rem">📄 Procès-Verbal de Délibération</h2></div>
+      <div><h2 style="font-family:'Playfair Display',serif;font-weight:800;font-size:1.3rem">📄 Procès-Verbal de Délibération</h2></div>
       <div style="display:flex;gap:.75rem">
         <button class="btn-outline" onclick="window.print()">🖨️ Imprimer</button>
         <button class="btn-primary" onclick="showToast('📥 PV PDF téléchargé avec signatures !')">📥 Télécharger PDF</button>
@@ -308,10 +308,10 @@
       <div class="pv-section">
         <div class="pv-section-title">III. RÉSULTATS DE LA SESSION</div>
         <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:1rem;margin-bottom:1rem">
-          <div style="text-align:center;padding:.75rem;background:#F8FAFC;border-radius:8px;border:1px solid var(--border)"><div style="font-family:'Syne',sans-serif;font-weight:800;font-size:1.3rem;color:var(--navy)">287</div><div style="font-size:.72rem;color:var(--gray)">Inscrits</div></div>
-          <div style="text-align:center;padding:.75rem;background:rgba(16,185,129,0.07);border-radius:8px;border:1px solid rgba(16,185,129,0.2)"><div style="font-family:'Syne',sans-serif;font-weight:800;font-size:1.3rem;color:var(--success)">241</div><div style="font-size:.72rem;color:var(--gray)">Admis (84%)</div></div>
-          <div style="text-align:center;padding:.75rem;background:rgba(245,158,11,0.07);border-radius:8px;border:1px solid rgba(245,158,11,0.2)"><div style="font-family:'Syne',sans-serif;font-weight:800;font-size:1.3rem;color:var(--gold)">28</div><div style="font-size:.72rem;color:var(--gray)">Cond. (10%)</div></div>
-          <div style="text-align:center;padding:.75rem;background:rgba(239,68,68,0.07);border-radius:8px;border:1px solid rgba(239,68,68,0.2)"><div style="font-family:'Syne',sans-serif;font-weight:800;font-size:1.3rem;color:var(--danger)">18</div><div style="font-size:.72rem;color:var(--gray)">Ajournés (6%)</div></div>
+          <div style="text-align:center;padding:.75rem;background:#F8FAFC;border-radius:8px;border:1px solid var(--border)"><div style="font-family:'Playfair Display',serif;font-weight:800;font-size:1.3rem;color:var(--navy)">287</div><div style="font-size:.72rem;color:var(--gray)">Inscrits</div></div>
+          <div style="text-align:center;padding:.75rem;background:rgba(16,185,129,0.07);border-radius:8px;border:1px solid rgba(16,185,129,0.2)"><div style="font-family:'Playfair Display',serif;font-weight:800;font-size:1.3rem;color:var(--success)">241</div><div style="font-size:.72rem;color:var(--gray)">Admis (84%)</div></div>
+          <div style="text-align:center;padding:.75rem;background:rgba(245,158,11,0.07);border-radius:8px;border:1px solid rgba(245,158,11,0.2)"><div style="font-family:'Playfair Display',serif;font-weight:800;font-size:1.3rem;color:var(--gold)">28</div><div style="font-size:.72rem;color:var(--gray)">Cond. (10%)</div></div>
+          <div style="text-align:center;padding:.75rem;background:rgba(239,68,68,0.07);border-radius:8px;border:1px solid rgba(239,68,68,0.2)"><div style="font-family:'Playfair Display',serif;font-weight:800;font-size:1.3rem;color:var(--danger)">18</div><div style="font-size:.72rem;color:var(--gray)">Ajournés (6%)</div></div>
         </div>
         <div style="padding:.85rem;background:#F8FAFC;border-radius:8px;font-size:.83rem"><strong>Moyenne générale de la promotion :</strong> 12.8/20 &nbsp;·&nbsp; <strong>Meilleure note :</strong> 17.3/20 (KOMI Béatrice) &nbsp;·&nbsp; <strong>Note la plus basse :</strong> 7.3/20</div>
       </div>
@@ -331,7 +331,7 @@
   <!-- ══ PROCLAMATION ══ -->
   <div class="page" id="page-proclamation">
     <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:1.5rem">
-      <div><h2 style="font-family:'Syne',sans-serif;font-weight:800;font-size:1.3rem">📢 Proclamation des Résultats</h2></div>
+      <div><h2 style="font-family:'Playfair Display',serif;font-weight:800;font-size:1.3rem">📢 Proclamation des Résultats</h2></div>
       <div style="display:flex;gap:.75rem">
         <button class="btn-outline" onclick="showToast('👀 Aperçu public ouvert')">👀 Aperçu public</button>
         <button class="btn-primary" onclick="showToast('🌐 Résultats publiés ! 287 étudiants notifiés par SMS et email.')">🚀 Publier maintenant</button>
@@ -347,7 +347,7 @@
         <div class="procl-stat"><div class="procl-stat-val" style="color:var(--gold)">17.3</div><div class="procl-stat-label">Meilleure note</div></div>
       </div>
       <div class="procl-list">
-        <div style="font-family:'Syne',sans-serif;font-weight:700;font-size:.9rem;margin-bottom:.75rem;text-align:center">🏆 PALMARÈS — TOP 5</div>
+        <div style="font-family:'Playfair Display',serif;font-weight:700;font-size:.9rem;margin-bottom:.75rem;text-align:center">🏆 PALMARÈS — TOP 5</div>
         <table class="data-table" style="background:white;border-radius:10px;overflow:hidden">
           <thead><tr><th>Rang</th><th>Nom & Prénom</th><th>Matricule</th><th>Moyenne</th><th>Mention</th><th>Résultat</th></tr></thead>
           <tbody>
@@ -369,7 +369,7 @@
   <!-- ══ CONVOCATIONS ══ -->
   <div class="page" id="page-convocations">
     <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:1.5rem">
-      <div><h2 style="font-family:'Syne',sans-serif;font-weight:800;font-size:1.3rem">📋 Convocations aux examens</h2><div style="font-size:.85rem;color:var(--gray)">287 convocations · Session 1 · Février 2025</div></div>
+      <div><h2 style="font-family:'Playfair Display',serif;font-weight:800;font-size:1.3rem">📋 Convocations aux examens</h2><div style="font-size:.85rem;color:var(--gray)">287 convocations · Session 1 · Février 2025</div></div>
       <div style="display:flex;gap:.75rem">
         <button class="btn-outline" onclick="showToast('📧 287 convocations envoyées par email !')">📧 Envoyer par email</button>
         <button class="btn-primary" onclick="showToast('📥 287 convocations PDF générées !')">📥 Générer toutes les PDF</button>
@@ -390,7 +390,7 @@
 
   <!-- ══ RATTRAPAGE ══ -->
   <div class="page" id="page-rattrapage">
-    <div style="margin-bottom:1.5rem"><h2 style="font-family:'Syne',sans-serif;font-weight:800;font-size:1.3rem">🔄 Session de Rattrapage</h2><div style="font-size:.85rem;color:var(--gray)">Session 2 · Février 2025 · 18 étudiants concernés</div></div>
+    <div style="margin-bottom:1.5rem"><h2 style="font-family:'Playfair Display',serif;font-weight:800;font-size:1.3rem">🔄 Session de Rattrapage</h2><div style="font-size:.85rem;color:var(--gray)">Session 2 · Février 2025 · 18 étudiants concernés</div></div>
     <div class="kpi-grid" style="grid-template-columns:repeat(3,1fr)">
       <div class="kpi-card"><div class="kpi-icon" style="background:rgba(239,68,68,0.1)">🔄</div><div class="kpi-value" style="color:var(--danger)">18</div><div class="kpi-label">Étudiants en rattrapage</div></div>
       <div class="kpi-card"><div class="kpi-icon" style="background:rgba(245,158,11,0.1)">📝</div><div class="kpi-value" style="color:var(--gold)">6</div><div class="kpi-label">Matières concernées</div></div>
@@ -411,10 +411,10 @@
 
   <!-- PROGRAMMATION -->
   <div class="page" id="page-programmation">
-    <div style="margin-bottom:1.5rem"><h2 style="font-family:'Syne',sans-serif;font-weight:800;font-size:1.3rem">📅 Programmer un examen</h2></div>
-    <div class="card"><div class="card-body" style="text-align:center;padding:3rem"><div style="font-size:3rem;margin-bottom:1rem">📅</div><div style="font-family:'Syne',sans-serif;font-weight:700;font-size:1.1rem">Formulaire de programmation</div><br/><button class="btn-primary" onclick="openModal('examModal')">+ Programmer un examen</button></div></div>
+    <div style="margin-bottom:1.5rem"><h2 style="font-family:'Playfair Display',serif;font-weight:800;font-size:1.3rem">📅 Programmer un examen</h2></div>
+    <div class="card"><div class="card-body" style="text-align:center;padding:3rem"><div style="font-size:3rem;margin-bottom:1rem">📅</div><div style="font-family:'Playfair Display',serif;font-weight:700;font-size:1.1rem">Formulaire de programmation</div><br/><button class="btn-primary" onclick="openModal('examModal')">+ Programmer un examen</button></div></div>
   </div>
-  <div class="page" id="page-releves"><div style="margin-bottom:1.5rem"><h2 style="font-family:'Syne',sans-serif;font-weight:800;font-size:1.3rem">📜 Relevés de notes</h2></div><div class="card"><div class="card-body" style="text-align:center;padding:3rem"><button class="btn-primary" onclick="window.location.href='resultats.html'">📜 Ouvrir module Résultats</button></div></div></div>
+  <div class="page" id="page-releves"><div style="margin-bottom:1.5rem"><h2 style="font-family:'Playfair Display',serif;font-weight:800;font-size:1.3rem">📜 Relevés de notes</h2></div><div class="card"><div class="card-body" style="text-align:center;padding:3rem"><button class="btn-primary" onclick="window.location.href='resultats.html'">📜 Ouvrir module Résultats</button></div></div></div>
 
 </div></main>
 

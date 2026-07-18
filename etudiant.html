@@ -5,7 +5,7 @@
   <meta charset="UTF-8"/>
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
   <title>UniManage — Espace Étudiant</title>
-  <link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=Inter:wght@300;400;500;600&display=swap" rel="stylesheet"/>
+  <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;600;700;800;900&family=Inter:wght@300;400;500;600&display=swap" rel="stylesheet"/>
   <style>
     :root{--navy:#0D1B2A;--blue:#1A56DB;--sky:#3B82F6;--gold:#F59E0B;--light:#F0F4FF;--white:#FFFFFF;--gray:#64748B;--border:#E2E8F0;--success:#10B981;--danger:#EF4444;--sidebar-w:240px;--topbar-h:64px;}
     *{margin:0;padding:0;box-sizing:border-box;}
@@ -22,7 +22,7 @@
     body{font-family:'Inter',sans-serif;background:#F8FAFC;color:var(--navy);display:flex;min-height:100vh;}
     .sidebar{width:var(--sidebar-w);background:linear-gradient(180deg,#0D1B2A 0%,#1a2d42 100%);display:flex;flex-direction:column;position:fixed;top:0;left:0;bottom:0;z-index:100;overflow-y:auto;}
     .sidebar-brand{padding:1.5rem 1.25rem 1rem;border-bottom:1px solid rgba(255,255,255,0.08);}
-    .brand-name{font-family:'Syne',sans-serif;font-weight:800;font-size:1.2rem;color:white;}
+    .brand-name{font-family:'Playfair Display',serif;font-weight:800;font-size:1.2rem;color:white;}
     .brand-name span{color:var(--sky);}
     .brand-sub{font-size:.72rem;color:rgba(255,255,255,0.4);margin-top:.2rem;}
     .student-card{margin:1rem 1rem 0;background:rgba(255,255,255,0.07);border-radius:12px;padding:1rem;border:1px solid rgba(255,255,255,0.1);}
@@ -40,7 +40,7 @@
     .btn-logout{width:100%;padding:.65rem;border-radius:8px;background:rgba(239,68,68,0.15);color:#f87171;border:1px solid rgba(239,68,68,0.2);font-size:.8rem;font-weight:600;cursor:pointer;transition:all .2s;}
     .btn-logout:hover{background:rgba(239,68,68,0.25);}
     .topbar{position:fixed;top:0;left:var(--sidebar-w);right:0;height:var(--topbar-h);background:white;border-bottom:1px solid var(--border);display:flex;align-items:center;justify-content:space-between;padding:0 1.75rem;z-index:50;}
-    .page-title{font-family:'Syne',sans-serif;font-weight:700;font-size:1.05rem;}
+    .page-title{font-family:'Playfair Display',serif;font-weight:700;font-size:1.05rem;}
     .breadcrumb{font-size:.78rem;color:var(--gray);}
     .topbar-right{display:flex;align-items:center;gap:.75rem;}
     .sem-badge{background:var(--light);color:var(--blue);padding:.3rem .9rem;border-radius:8px;font-size:.78rem;font-weight:600;border:1px solid var(--border);}
@@ -55,12 +55,12 @@
     .kpi-card{background:white;border:1px solid var(--border);border-radius:12px;padding:1.1rem 1.25rem;transition:all .2s;}
     .kpi-card:hover{box-shadow:0 4px 16px rgba(0,0,0,0.07);transform:translateY(-2px);}
     .kpi-icon{width:40px;height:40px;border-radius:10px;display:flex;align-items:center;justify-content:center;font-size:1.1rem;margin-bottom:.75rem;}
-    .kpi-value{font-family:'Syne',sans-serif;font-size:1.5rem;font-weight:800;line-height:1;}
+    .kpi-value{font-family:'Playfair Display',serif;font-size:1.5rem;font-weight:800;line-height:1;}
     .kpi-label{font-size:.75rem;color:var(--gray);margin-top:.25rem;}
     .dash-grid{display:grid;grid-template-columns:1fr 1fr;gap:1.25rem;margin-bottom:1.5rem;}
     .card{background:white;border:1px solid var(--border);border-radius:14px;overflow:hidden;}
     .card-header{display:flex;align-items:center;justify-content:space-between;padding:1rem 1.25rem;border-bottom:1px solid var(--border);}
-    .card-title{font-family:'Syne',sans-serif;font-weight:700;font-size:.9rem;}
+    .card-title{font-family:'Playfair Display',serif;font-weight:700;font-size:.9rem;}
     .card-body{padding:1.1rem 1.25rem;}
     .card-action{font-size:.8rem;color:var(--blue);font-weight:600;cursor:pointer;background:none;border:none;}
     .badge{display:inline-block;padding:.2rem .65rem;border-radius:100px;font-size:.7rem;font-weight:600;}
@@ -76,7 +76,7 @@
     .data-table td{padding:.7rem 1rem;font-size:.83rem;border-bottom:1px solid var(--border);}
     .data-table tr:last-child td{border:none;}
     .data-table tr:hover td{background:#F8FAFC;}
-    .note-cell{font-family:'Syne',sans-serif;font-weight:800;font-size:1rem;}
+    .note-cell{font-family:'Playfair Display',serif;font-weight:800;font-size:1rem;}
     .note-good{color:var(--success);}
     .note-avg{color:var(--gold);}
     .note-bad{color:var(--danger);}
@@ -95,7 +95,7 @@
     .pay-item:last-child{border:none;}
     .pay-label{font-size:.85rem;font-weight:500;}
     .pay-sub{font-size:.75rem;color:var(--gray);margin-top:.15rem;}
-    .pay-amount{font-family:'Syne',sans-serif;font-weight:800;font-size:1rem;}
+    .pay-amount{font-family:'Playfair Display',serif;font-weight:800;font-size:1rem;}
     /* Toast */
     .toast{position:fixed;bottom:1.5rem;right:1.5rem;background:var(--navy);color:white;padding:.85rem 1.4rem;border-radius:12px;font-size:.875rem;font-weight:500;box-shadow:0 10px 30px rgba(0,0,0,0.2);z-index:9999;opacity:0;transform:translateY(20px);transition:all .3s;pointer-events:none;}
     .toast.show{opacity:1;transform:translateY(0);}
@@ -203,7 +203,7 @@
   <!-- PAGE NOTES -->
   <div class="page" id="page-notes">
     <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:1.5rem">
-      <div><h2 style="font-family:'Syne',sans-serif;font-weight:800;font-size:1.3rem">Mes notes</h2><div style="font-size:.85rem;color:var(--gray);margin-top:.2rem">Semestre 1 · Informatique L2</div></div>
+      <div><h2 style="font-family:'Playfair Display',serif;font-weight:800;font-size:1.3rem">Mes notes</h2><div style="font-size:.85rem;color:var(--gray);margin-top:.2rem">Semestre 1 · Informatique L2</div></div>
       <button onclick="downloadReleveNotes()" style="display:flex;align-items:center;gap:.5rem;padding:.65rem 1.2rem;border-radius:9px;background:var(--blue);color:white;font-size:.875rem;font-weight:600;cursor:pointer;border:none">📄 Relevé PDF</button>
     </div>
     <!-- Récap -->
@@ -227,7 +227,7 @@
   <!-- PAGE EMPLOI DU TEMPS -->
   <div class="page" id="page-emploidutemps">
     <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:1.5rem">
-      <div><h2 style="font-family:'Syne',sans-serif;font-weight:800;font-size:1.3rem">Emploi du temps</h2><div style="font-size:.85rem;color:var(--gray);margin-top:.2rem" id="et-sub">Chargement…</div></div>
+      <div><h2 style="font-family:'Playfair Display',serif;font-weight:800;font-size:1.3rem">Emploi du temps</h2><div style="font-size:.85rem;color:var(--gray);margin-top:.2rem" id="et-sub">Chargement…</div></div>
     </div>
     <div class="card" style="overflow-x:auto">
       <table style="width:100%;border-collapse:collapse">
@@ -249,7 +249,7 @@
   <!-- PAGE PAIEMENTS -->
   <div class="page" id="page-paiements">
     <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:1.5rem">
-      <div><h2 style="font-family:'Syne',sans-serif;font-weight:800;font-size:1.3rem">Mes paiements</h2><div style="font-size:.85rem;color:var(--gray);margin-top:.2rem">Année académique 2024–2025</div></div>
+      <div><h2 style="font-family:'Playfair Display',serif;font-weight:800;font-size:1.3rem">Mes paiements</h2><div style="font-size:.85rem;color:var(--gray);margin-top:.2rem">Année académique 2024–2025</div></div>
       <button onclick="ouvrirPaiementEnLigne()" style="display:flex;align-items:center;gap:.5rem;padding:.65rem 1.2rem;border-radius:9px;background:var(--blue);color:white;font-size:.875rem;font-weight:600;cursor:pointer;border:none">💳 Payer maintenant</button>
     </div>
     <div class="kpi-grid" style="grid-template-columns:repeat(3,1fr);margin-bottom:1.5rem">
@@ -275,7 +275,7 @@
 
   <!-- PAGE DOCUMENTS -->
   <div class="page" id="page-documents">
-    <div style="margin-bottom:1.5rem"><h2 style="font-family:'Syne',sans-serif;font-weight:800;font-size:1.3rem">Mes documents</h2><div style="font-size:.85rem;color:var(--gray);margin-top:.2rem">Documents officiels et ressources pédagogiques</div></div>
+    <div style="margin-bottom:1.5rem"><h2 style="font-family:'Playfair Display',serif;font-weight:800;font-size:1.3rem">Mes documents</h2><div style="font-size:.85rem;color:var(--gray);margin-top:.2rem">Documents officiels et ressources pédagogiques</div></div>
     <div class="dash-grid">
       <div class="card">
         <div class="card-header"><div class="card-title">📄 Documents officiels</div></div>
@@ -301,7 +301,7 @@
 
   <!-- PAGE EXAMENS -->
   <div class="page" id="page-examens">
-    <div style="margin-bottom:1.5rem"><h2 style="font-family:'Syne',sans-serif;font-weight:800;font-size:1.3rem">Mes examens</h2><div style="font-size:.85rem;color:var(--gray);margin-top:.2rem">Session 2 — Février 2025</div></div>
+    <div style="margin-bottom:1.5rem"><h2 style="font-family:'Playfair Display',serif;font-weight:800;font-size:1.3rem">Mes examens</h2><div style="font-size:.85rem;color:var(--gray);margin-top:.2rem">Session 2 — Février 2025</div></div>
     <div class="card">
       <div class="card-header"><div class="card-title">Calendrier des examens</div></div>
       <table class="data-table">
@@ -318,14 +318,14 @@
 
   <!-- PAGE PROFIL -->
   <div class="page" id="page-profil">
-    <div style="margin-bottom:1.5rem"><h2 style="font-family:'Syne',sans-serif;font-weight:800;font-size:1.3rem">Mon profil</h2></div>
+    <div style="margin-bottom:1.5rem"><h2 style="font-family:'Playfair Display',serif;font-weight:800;font-size:1.3rem">Mon profil</h2></div>
     <div class="dash-grid">
       <div class="card">
         <div class="card-header"><div class="card-title">👤 Informations personnelles</div></div>
         <div class="card-body">
           <div style="display:flex;align-items:center;gap:1rem;margin-bottom:1.5rem;padding:1rem;background:var(--light);border-radius:12px">
             <div style="width:64px;height:64px;border-radius:14px;background:linear-gradient(135deg,var(--blue),var(--sky));display:flex;align-items:center;justify-content:center;font-size:1.5rem;font-weight:800;color:white" id="pf-avatar">KA</div>
-            <div><div style="font-family:'Syne',sans-serif;font-weight:800;font-size:1.1rem" id="pf-nom">Kofi Adzoa</div><div style="font-size:.8rem;color:var(--gray);margin-top:.2rem" id="pf-matdept">UL-2025-001 · Informatique L2</div><div style="margin-top:.4rem"><span class="badge badge-success" id="pf-statut-badge">Étudiant actif</span></div></div>
+            <div><div style="font-family:'Playfair Display',serif;font-weight:800;font-size:1.1rem" id="pf-nom">Kofi Adzoa</div><div style="font-size:.8rem;color:var(--gray);margin-top:.2rem" id="pf-matdept">UL-2025-001 · Informatique L2</div><div style="margin-top:.4rem"><span class="badge badge-success" id="pf-statut-badge">Étudiant actif</span></div></div>
           </div>
           <div style="display:flex;flex-direction:column;gap:.75rem">
             <div style="display:flex;justify-content:space-between;padding:.6rem 0;border-bottom:1px solid var(--border);font-size:.85rem"><span style="color:var(--gray)">Email</span><span style="font-weight:500" id="pf-email">kofi.adzoa@student.univ.tg</span></div>
@@ -354,14 +354,14 @@
 
   <!-- PAGE COURS -->
   <div class="page" id="page-cours">
-    <div style="margin-bottom:1.5rem"><h2 style="font-family:'Syne',sans-serif;font-weight:800;font-size:1.3rem">Mes cours</h2><div style="font-size:.85rem;color:var(--gray);margin-top:.2rem">Informatique L2 · Semestre 1 · 10 matières</div></div>
+    <div style="margin-bottom:1.5rem"><h2 style="font-family:'Playfair Display',serif;font-weight:800;font-size:1.3rem">Mes cours</h2><div style="font-size:.85rem;color:var(--gray);margin-top:.2rem">Informatique L2 · Semestre 1 · 10 matières</div></div>
     <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(260px,1fr));gap:1.1rem">
-      <div class="card" style="cursor:pointer" onclick="showToast('📚 Cours Algorithmique ouvert')"><div style="height:6px;background:linear-gradient(90deg,var(--blue),var(--sky))"></div><div class="card-body"><div style="font-size:1.3rem;margin-bottom:.5rem">💻</div><div style="font-family:'Syne',sans-serif;font-weight:700;margin-bottom:.25rem">Algorithmique Avancée</div><div style="font-size:.78rem;color:var(--gray);margin-bottom:.75rem">Dr. Mensah · 4 crédits</div><div style="display:flex;justify-content:space-between;align-items:center"><span class="badge badge-success">16/20</span><span style="font-size:.75rem;color:var(--gray)">5 supports</span></div></div></div>
-      <div class="card" style="cursor:pointer" onclick="showToast('📚 Cours Bases de données ouvert')"><div style="height:6px;background:linear-gradient(90deg,var(--success),#34d399)"></div><div class="card-body"><div style="font-size:1.3rem;margin-bottom:.5rem">🗄️</div><div style="font-family:'Syne',sans-serif;font-weight:700;margin-bottom:.25rem">Bases de données</div><div style="font-size:.78rem;color:var(--gray);margin-bottom:.75rem">Prof. Komi · 3 crédits</div><div style="display:flex;justify-content:space-between;align-items:center"><span class="badge badge-blue">14.5/20</span><span style="font-size:.75rem;color:var(--gray)">7 supports</span></div></div></div>
-      <div class="card" style="cursor:pointer" onclick="showToast('📚 Cours Réseaux ouvert')"><div style="height:6px;background:linear-gradient(90deg,var(--gold),#fbbf24)"></div><div class="card-body"><div style="font-size:1.3rem;margin-bottom:.5rem">🌐</div><div style="font-family:'Syne',sans-serif;font-weight:700;margin-bottom:.25rem">Réseaux Informatiques</div><div style="font-size:.78rem;color:var(--gray);margin-bottom:.75rem">Prof. Dodzi · 3 crédits</div><div style="display:flex;justify-content:space-between;align-items:center"><span class="badge badge-gold">12/20</span><span style="font-size:.75rem;color:var(--gray)">4 supports</span></div></div></div>
-      <div class="card" style="cursor:pointer" onclick="showToast('📚 Cours POO Java ouvert')"><div style="height:6px;background:linear-gradient(90deg,#8b5cf6,#a78bfa)"></div><div class="card-body"><div style="font-size:1.3rem;margin-bottom:.5rem">☕</div><div style="font-family:'Syne',sans-serif;font-weight:700;margin-bottom:.25rem">Programmation Java</div><div style="font-size:.78rem;color:var(--gray);margin-bottom:.75rem">Dr. Atchoe · 4 crédits</div><div style="display:flex;justify-content:space-between;align-items:center"><span class="badge badge-success">15/20</span><span style="font-size:.75rem;color:var(--gray)">6 supports</span></div></div></div>
-      <div class="card" style="cursor:pointer" onclick="showToast('📚 Cours Sécurité ouvert')"><div style="height:6px;background:linear-gradient(90deg,var(--danger),#f87171)"></div><div class="card-body"><div style="font-size:1.3rem;margin-bottom:.5rem">🔐</div><div style="font-family:'Syne',sans-serif;font-weight:700;margin-bottom:.25rem">Sécurité Informatique</div><div style="font-size:.78rem;color:var(--gray);margin-bottom:.75rem">Prof. Komi · 3 crédits</div><div style="display:flex;justify-content:space-between;align-items:center"><span class="badge badge-danger">8/20 ⚠</span><span style="font-size:.75rem;color:var(--gray)">3 supports</span></div></div></div>
-      <div class="card" style="cursor:pointer" onclick="showToast('📚 Cours Maths ouvert')"><div style="height:6px;background:linear-gradient(90deg,#ec4899,#f472b6)"></div><div class="card-body"><div style="font-size:1.3rem;margin-bottom:.5rem">📐</div><div style="font-family:'Syne',sans-serif;font-weight:700;margin-bottom:.25rem">Mathématiques</div><div style="font-size:.78rem;color:var(--gray);margin-bottom:.75rem">Dr. Agbo · 3 crédits</div><div style="display:flex;justify-content:space-between;align-items:center"><span class="badge badge-gold">11.5/20</span><span style="font-size:.75rem;color:var(--gray)">4 supports</span></div></div></div>
+      <div class="card" style="cursor:pointer" onclick="showToast('📚 Cours Algorithmique ouvert')"><div style="height:6px;background:linear-gradient(90deg,var(--blue),var(--sky))"></div><div class="card-body"><div style="font-size:1.3rem;margin-bottom:.5rem">💻</div><div style="font-family:'Playfair Display',serif;font-weight:700;margin-bottom:.25rem">Algorithmique Avancée</div><div style="font-size:.78rem;color:var(--gray);margin-bottom:.75rem">Dr. Mensah · 4 crédits</div><div style="display:flex;justify-content:space-between;align-items:center"><span class="badge badge-success">16/20</span><span style="font-size:.75rem;color:var(--gray)">5 supports</span></div></div></div>
+      <div class="card" style="cursor:pointer" onclick="showToast('📚 Cours Bases de données ouvert')"><div style="height:6px;background:linear-gradient(90deg,var(--success),#34d399)"></div><div class="card-body"><div style="font-size:1.3rem;margin-bottom:.5rem">🗄️</div><div style="font-family:'Playfair Display',serif;font-weight:700;margin-bottom:.25rem">Bases de données</div><div style="font-size:.78rem;color:var(--gray);margin-bottom:.75rem">Prof. Komi · 3 crédits</div><div style="display:flex;justify-content:space-between;align-items:center"><span class="badge badge-blue">14.5/20</span><span style="font-size:.75rem;color:var(--gray)">7 supports</span></div></div></div>
+      <div class="card" style="cursor:pointer" onclick="showToast('📚 Cours Réseaux ouvert')"><div style="height:6px;background:linear-gradient(90deg,var(--gold),#fbbf24)"></div><div class="card-body"><div style="font-size:1.3rem;margin-bottom:.5rem">🌐</div><div style="font-family:'Playfair Display',serif;font-weight:700;margin-bottom:.25rem">Réseaux Informatiques</div><div style="font-size:.78rem;color:var(--gray);margin-bottom:.75rem">Prof. Dodzi · 3 crédits</div><div style="display:flex;justify-content:space-between;align-items:center"><span class="badge badge-gold">12/20</span><span style="font-size:.75rem;color:var(--gray)">4 supports</span></div></div></div>
+      <div class="card" style="cursor:pointer" onclick="showToast('📚 Cours POO Java ouvert')"><div style="height:6px;background:linear-gradient(90deg,#8b5cf6,#a78bfa)"></div><div class="card-body"><div style="font-size:1.3rem;margin-bottom:.5rem">☕</div><div style="font-family:'Playfair Display',serif;font-weight:700;margin-bottom:.25rem">Programmation Java</div><div style="font-size:.78rem;color:var(--gray);margin-bottom:.75rem">Dr. Atchoe · 4 crédits</div><div style="display:flex;justify-content:space-between;align-items:center"><span class="badge badge-success">15/20</span><span style="font-size:.75rem;color:var(--gray)">6 supports</span></div></div></div>
+      <div class="card" style="cursor:pointer" onclick="showToast('📚 Cours Sécurité ouvert')"><div style="height:6px;background:linear-gradient(90deg,var(--danger),#f87171)"></div><div class="card-body"><div style="font-size:1.3rem;margin-bottom:.5rem">🔐</div><div style="font-family:'Playfair Display',serif;font-weight:700;margin-bottom:.25rem">Sécurité Informatique</div><div style="font-size:.78rem;color:var(--gray);margin-bottom:.75rem">Prof. Komi · 3 crédits</div><div style="display:flex;justify-content:space-between;align-items:center"><span class="badge badge-danger">8/20 ⚠</span><span style="font-size:.75rem;color:var(--gray)">3 supports</span></div></div></div>
+      <div class="card" style="cursor:pointer" onclick="showToast('📚 Cours Maths ouvert')"><div style="height:6px;background:linear-gradient(90deg,#ec4899,#f472b6)"></div><div class="card-body"><div style="font-size:1.3rem;margin-bottom:.5rem">📐</div><div style="font-family:'Playfair Display',serif;font-weight:700;margin-bottom:.25rem">Mathématiques</div><div style="font-size:.78rem;color:var(--gray);margin-bottom:.75rem">Dr. Agbo · 3 crédits</div><div style="display:flex;justify-content:space-between;align-items:center"><span class="badge badge-gold">11.5/20</span><span style="font-size:.75rem;color:var(--gray)">4 supports</span></div></div></div>
     </div>
   </div>
 
@@ -371,7 +371,7 @@
 <div class="modal-overlay" id="payOnlineModal" onclick="if(event.target===this)fermerPaiementEnLigne()">
   <div class="modal">
     <button class="modal-close" onclick="fermerPaiementEnLigne()">✕</button>
-    <div style="font-family:'Syne',sans-serif;font-weight:800;font-size:1.15rem;margin-bottom:.25rem">💳 Payer en ligne</div>
+    <div style="font-family:'Playfair Display',serif;font-weight:800;font-size:1.15rem;margin-bottom:.25rem">💳 Payer en ligne</div>
     <p style="font-size:.85rem;color:var(--gray);margin-bottom:1.25rem">Paiement sécurisé via CinetPay (Wave, Orange Money, T-Money, Moov Money, carte…)</p>
     <div id="payOnlineError" style="display:none;background:rgba(239,68,68,0.08);color:var(--danger);border:1px solid rgba(239,68,68,0.2);padding:.6rem 1rem;border-radius:8px;font-size:.83rem;margin-bottom:1rem"></div>
     <div class="form-group"><label>Montant (FCFA)</label><input id="po_amount" type="number" class="form-input" placeholder="Ex: 50000"/></div>

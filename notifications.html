@@ -5,14 +5,14 @@
   <meta charset="UTF-8"/>
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
   <title>UniManage — Système de Notifications</title>
-  <link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=Inter:wght@300;400;500;600&display=swap" rel="stylesheet"/>
+  <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;600;700;800;900&family=Inter:wght@300;400;500;600&display=swap" rel="stylesheet"/>
   <style>
     :root{--navy:#0D1B2A;--blue:#1A56DB;--sky:#3B82F6;--gold:#F59E0B;--light:#F0F4FF;--white:#FFFFFF;--gray:#64748B;--border:#E2E8F0;--success:#10B981;--danger:#EF4444;--purple:#8B5CF6;--sidebar-w:240px;--topbar-h:64px;}
     *{margin:0;padding:0;box-sizing:border-box;}
     body{font-family:'Inter',sans-serif;background:#F8FAFC;color:var(--navy);display:flex;min-height:100vh;}
     .sidebar{width:var(--sidebar-w);background:var(--navy);display:flex;flex-direction:column;position:fixed;top:0;left:0;bottom:0;z-index:100;overflow-y:auto;}
     .sidebar-brand{padding:1.25rem;border-bottom:1px solid rgba(255,255,255,0.08);}
-    .brand-name{font-family:'Syne',sans-serif;font-weight:800;font-size:1.2rem;color:white;}
+    .brand-name{font-family:'Playfair Display',serif;font-weight:800;font-size:1.2rem;color:white;}
     .brand-name span{color:var(--sky);}
     .brand-sub{font-size:.72rem;color:rgba(255,255,255,0.35);margin-top:.2rem;}
     .sidebar-nav{padding:.75rem 0;flex:1;}
@@ -25,7 +25,7 @@
     .btn-back-dash{width:100%;padding:.6rem;border-radius:8px;background:rgba(255,255,255,0.07);color:rgba(255,255,255,0.6);border:none;font-size:.8rem;font-weight:600;cursor:pointer;}
     .btn-back-dash:hover{background:rgba(255,255,255,0.12);color:white;}
     .topbar{position:fixed;top:0;left:var(--sidebar-w);right:0;height:var(--topbar-h);background:white;border-bottom:1px solid var(--border);display:flex;align-items:center;justify-content:space-between;padding:0 1.75rem;z-index:50;}
-    .page-title{font-family:'Syne',sans-serif;font-weight:700;font-size:1.05rem;}
+    .page-title{font-family:'Playfair Display',serif;font-weight:700;font-size:1.05rem;}
     .topbar-right{display:flex;align-items:center;gap:.75rem;}
     .btn-primary{display:flex;align-items:center;gap:.4rem;padding:.55rem 1.1rem;border-radius:9px;background:var(--blue);color:white;font-size:.83rem;font-weight:600;cursor:pointer;border:none;transition:all .2s;}
     .btn-primary:hover{background:#1344b8;}
@@ -40,7 +40,7 @@
     .kpi-card{background:white;border:1px solid var(--border);border-radius:12px;padding:1.1rem 1.25rem;transition:all .2s;}
     .kpi-card:hover{box-shadow:0 4px 16px rgba(0,0,0,0.07);transform:translateY(-2px);}
     .kpi-icon{width:40px;height:40px;border-radius:10px;display:flex;align-items:center;justify-content:center;font-size:1.1rem;margin-bottom:.65rem;}
-    .kpi-value{font-family:'Syne',sans-serif;font-size:1.5rem;font-weight:800;line-height:1;}
+    .kpi-value{font-family:'Playfair Display',serif;font-size:1.5rem;font-weight:800;line-height:1;}
     .kpi-label{font-size:.75rem;color:var(--gray);margin-top:.25rem;}
     .kpi-trend{font-size:.72rem;font-weight:600;margin-top:.25rem;}
     .trend-up{color:var(--success);}
@@ -48,7 +48,7 @@
     .dash-grid{display:grid;grid-template-columns:1fr 1fr;gap:1.25rem;margin-bottom:1.5rem;}
     .card{background:white;border:1px solid var(--border);border-radius:14px;overflow:hidden;margin-bottom:1.25rem;}
     .card-header{display:flex;align-items:center;justify-content:space-between;padding:1rem 1.25rem;border-bottom:1px solid var(--border);}
-    .card-title{font-family:'Syne',sans-serif;font-weight:700;font-size:.92rem;}
+    .card-title{font-family:'Playfair Display',serif;font-weight:700;font-size:.92rem;}
     .card-body{padding:1.1rem 1.25rem;}
     .card-action{font-size:.8rem;color:var(--blue);font-weight:600;cursor:pointer;background:none;border:none;}
     .badge{display:inline-block;padding:.22rem .7rem;border-radius:100px;font-size:.7rem;font-weight:600;}
@@ -66,7 +66,7 @@
     .progress-fill{height:100%;border-radius:100px;}
     /* Notification composer */
     .composer{background:white;border:1px solid var(--border);border-radius:14px;padding:1.5rem;margin-bottom:1.25rem;}
-    .composer-title{font-family:'Syne',sans-serif;font-weight:700;font-size:.95rem;margin-bottom:1.25rem;}
+    .composer-title{font-family:'Playfair Display',serif;font-weight:700;font-size:.95rem;margin-bottom:1.25rem;}
     .form-group{margin-bottom:.85rem;}
     .form-group label{display:block;font-size:.78rem;font-weight:600;color:var(--navy);margin-bottom:.35rem;}
     .form-input{width:100%;padding:.65rem .9rem;border-radius:8px;border:1.5px solid var(--border);font-size:.875rem;font-family:'Inter',sans-serif;color:var(--navy);outline:none;transition:border-color .2s;}
@@ -83,7 +83,7 @@
     .channel-btn.active.push{border-color:var(--purple);background:rgba(139,92,246,0.07);color:var(--purple);}
     /* Recipients preview */
     .recipients-preview{background:#F8FAFC;border-radius:10px;padding:1rem;border:1px solid var(--border);margin-bottom:1rem;}
-    .recipients-count{font-family:'Syne',sans-serif;font-weight:800;font-size:1.3rem;color:var(--blue);}
+    .recipients-count{font-family:'Playfair Display',serif;font-weight:800;font-size:1.3rem;color:var(--blue);}
     .recipients-breakdown{display:flex;gap:1rem;margin-top:.5rem;font-size:.78rem;flex-wrap:wrap;}
     /* Send btn */
     .btn-send{display:flex;align-items:center;gap:.5rem;padding:.75rem 2rem;border-radius:10px;background:var(--blue);color:white;font-size:.9rem;font-weight:700;cursor:pointer;border:none;transition:all .2s;}
@@ -93,7 +93,7 @@
     .template-card{background:white;border:1px solid var(--border);border-radius:12px;padding:1.25rem;cursor:pointer;transition:all .2s;}
     .template-card:hover{border-color:var(--blue);box-shadow:0 4px 16px rgba(26,86,219,0.08);transform:translateY(-2px);}
     .template-icon{font-size:1.5rem;margin-bottom:.65rem;}
-    .template-name{font-family:'Syne',sans-serif;font-weight:700;font-size:.88rem;margin-bottom:.3rem;}
+    .template-name{font-family:'Playfair Display',serif;font-weight:700;font-size:.88rem;margin-bottom:.3rem;}
     .template-desc{font-size:.75rem;color:var(--gray);line-height:1.6;margin-bottom:.75rem;}
     .template-channels{display:flex;gap:.4rem;flex-wrap:wrap;}
     /* History item */
@@ -130,7 +130,7 @@
     .sending-overlay.show{display:flex;}
     .sending-spinner{width:60px;height:60px;border:4px solid rgba(255,255,255,0.2);border-top-color:white;border-radius:50%;animation:spin 1s linear infinite;}
     @keyframes spin{to{transform:rotate(360deg)}}
-    .sending-text{color:white;font-family:'Syne',sans-serif;font-weight:700;font-size:1.1rem;}
+    .sending-text{color:white;font-family:'Playfair Display',serif;font-weight:700;font-size:1.1rem;}
     .sending-sub{color:rgba(255,255,255,0.6);font-size:.83rem;}
     @media(max-width:1100px){.kpi-grid{grid-template-columns:repeat(2,1fr);}.dash-grid{grid-template-columns:1fr;}.form-row{grid-template-columns:1fr;}}
   </style>
@@ -299,7 +299,7 @@
   <!-- ══ TEMPLATES ══ -->
   <div class="page" id="page-templates">
     <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:1.5rem">
-      <div><h2 style="font-family:'Syne',sans-serif;font-weight:800;font-size:1.3rem">📋 Templates de notifications</h2></div>
+      <div><h2 style="font-family:'Playfair Display',serif;font-weight:800;font-size:1.3rem">📋 Templates de notifications</h2></div>
       <button class="btn-primary" onclick="showToast('✏️ Nouveau template créé')">+ Créer un template</button>
     </div>
     <div class="template-grid">
@@ -317,7 +317,7 @@
   <!-- ══ AUTOMATIQUE ══ -->
   <div class="page" id="page-automatique">
     <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:1.5rem">
-      <div><h2 style="font-family:'Syne',sans-serif;font-weight:800;font-size:1.3rem">🤖 Règles d'automatisation</h2><div style="font-size:.85rem;color:var(--gray)">Notifications déclenchées automatiquement selon les événements</div></div>
+      <div><h2 style="font-family:'Playfair Display',serif;font-weight:800;font-size:1.3rem">🤖 Règles d'automatisation</h2><div style="font-size:.85rem;color:var(--gray)">Notifications déclenchées automatiquement selon les événements</div></div>
       <button class="btn-primary" onclick="showToast('⚡ Nouvelle règle créée')">+ Nouvelle règle</button>
     </div>
     <div class="rule-card"><div class="rule-icon" style="background:rgba(16,185,129,0.1)">📊</div><div class="rule-body"><div class="rule-name">Publication des résultats</div><div class="rule-desc">Quand les résultats sont publiés → Notifier tous les étudiants concernés + leurs parents</div><div class="rule-channels"><span class="badge badge-blue">Email</span><span class="badge badge-success">SMS</span><span class="badge badge-purple">Push</span></div></div><div class="toggle-sw on" onclick="this.classList.toggle('on');this.classList.toggle('off');showToast('🔄 Règle mise à jour')"></div></div>
@@ -331,7 +331,7 @@
 
   <!-- ══ HISTORIQUE ══ -->
   <div class="page" id="page-historique">
-    <div style="margin-bottom:1.5rem"><h2 style="font-family:'Syne',sans-serif;font-weight:800;font-size:1.3rem">📜 Historique des envois</h2></div>
+    <div style="margin-bottom:1.5rem"><h2 style="font-family:'Playfair Display',serif;font-weight:800;font-size:1.3rem">📜 Historique des envois</h2></div>
     <div>
       <div class="history-item"><div class="history-icon" style="background:rgba(26,86,219,0.1)">📊</div><div class="history-body"><div class="history-title">Résultats S1 publiés</div><div class="history-meta">Aujourd'hui 09h32 · Email + SMS · 1 248 destinataires</div><div class="history-stats"><span style="color:var(--success)">✓ 1 223 livrés (98%)</span><span style="color:var(--gold)">👁️ 836 ouverts (67%)</span><span style="color:var(--danger)">✗ 25 échecs</span></div></div><span class="badge badge-success">✓ Envoyé</span></div>
       <div class="history-item"><div class="history-icon" style="background:rgba(239,68,68,0.1)">📅</div><div class="history-body"><div class="history-title">Report examen Réseaux Info L2</div><div class="history-meta">Hier 14h00 · Email + SMS + Push · 287 destinataires</div><div class="history-stats"><span style="color:var(--success)">✓ 279 livrés (97%)</span><span style="color:var(--gold)">👁️ 241 ouverts (86%)</span><span style="color:var(--danger)">✗ 8 échecs</span></div></div><span class="badge badge-success">✓ Envoyé</span></div>
@@ -342,7 +342,7 @@
 
   <!-- ══ STATISTIQUES ══ -->
   <div class="page" id="page-statistiques">
-    <div style="margin-bottom:1.5rem"><h2 style="font-family:'Syne',sans-serif;font-weight:800;font-size:1.3rem">📊 Statistiques de notifications</h2></div>
+    <div style="margin-bottom:1.5rem"><h2 style="font-family:'Playfair Display',serif;font-weight:800;font-size:1.3rem">📊 Statistiques de notifications</h2></div>
     <div class="kpi-grid">
       <div class="kpi-card"><div class="kpi-icon" style="background:rgba(16,185,129,0.1)">📤</div><div class="kpi-value" style="color:var(--success)">9 219</div><div class="kpi-label">Notifications totales</div><div class="kpi-trend trend-up">Ce mois</div></div>
       <div class="kpi-card"><div class="kpi-icon" style="background:rgba(26,86,219,0.1)">✅</div><div class="kpi-value" style="color:var(--blue)">97.8%</div><div class="kpi-label">Taux de livraison</div><div class="kpi-trend trend-up">▲ +0.3%</div></div>
@@ -373,10 +373,10 @@
   </div>
 
   <!-- PAGES PLACEHOLDER -->
-  <div class="page" id="page-programmees"><div style="margin-bottom:1.5rem"><h2 style="font-family:'Syne',sans-serif;font-weight:800;font-size:1.3rem">⏱️ Notifications programmées</h2></div><div class="card"><div class="card-header"><div class="card-title">3 envois programmés</div></div><table class="data-table"><thead><tr><th>Notification</th><th>Destinataires</th><th>Date d'envoi</th><th>Canaux</th><th>Actions</th></tr></thead><tbody><tr><td><strong>📝 Rappel examen Algo — J-3</strong></td><td>287 étudiants</td><td>31 Jan 2025 · 08h00</td><td><span class="badge badge-success">SMS</span> <span class="badge badge-purple">Push</span></td><td><button class="card-action" onclick="showToast('✏️ Notification modifiée')">Modifier</button> <button class="card-action" style="color:var(--danger)" onclick="showToast('🗑️ Notification annulée')">Annuler</button></td></tr><tr><td><strong>💳 Rappel impayés — Fév</strong></td><td>187 étudiants</td><td>01 Fév 2025 · 09h00</td><td><span class="badge badge-blue">Email</span> <span class="badge badge-success">SMS</span></td><td><button class="card-action" onclick="showToast('✏️ Notification modifiée')">Modifier</button></td></tr><tr><td><strong>📢 Emploi du temps S2</strong></td><td>Tous (1 248)</td><td>03 Fév 2025 · 08h00</td><td><span class="badge badge-blue">Email</span> <span class="badge badge-success">SMS</span> <span class="badge badge-purple">Push</span></td><td><button class="card-action" onclick="showToast('✏️ Notification modifiée')">Modifier</button></td></tr></tbody></table></div></div>
-  <div class="page" id="page-declencheurs"><div style="margin-bottom:1.5rem"><h2 style="font-family:'Syne',sans-serif;font-weight:800;font-size:1.3rem">⚡ Déclencheurs</h2></div><div class="card"><div class="card-body" style="text-align:center;padding:3rem"><div style="font-size:3rem;margin-bottom:1rem">⚡</div><div style="font-family:'Syne',sans-serif;font-weight:700;font-size:1.1rem">Déclencheurs d'événements système</div><div style="color:var(--gray);margin-top:.5rem">Configurez les événements qui déclenchent des notifications automatiques</div></div></div></div>
-  <div class="page" id="page-canaux"><div style="margin-bottom:1.5rem"><h2 style="font-family:'Syne',sans-serif;font-weight:800;font-size:1.3rem">📡 Configuration des canaux</h2></div><div class="card"><div class="card-body"><div style="display:flex;flex-direction:column;gap:1rem"><div style="padding:1rem;background:rgba(16,185,129,0.06);border-radius:12px;border:1px solid rgba(16,185,129,0.15);display:flex;justify-content:space-between;align-items:center"><div><div style="font-weight:700">📱 SMS — Twilio / Africa's Talking</div><div style="font-size:.78rem;color:var(--gray);margin-top:.2rem">Connecté · Crédit restant : 128 500 FCFA</div></div><span class="badge badge-success">● Actif</span></div><div style="padding:1rem;background:rgba(26,86,219,0.06);border-radius:12px;border:1px solid rgba(26,86,219,0.15);display:flex;justify-content:space-between;align-items:center"><div><div style="font-weight:700">📧 Email — SendGrid</div><div style="font-size:.78rem;color:var(--gray);margin-top:.2rem">Connecté · 50 000 emails/mois</div></div><span class="badge badge-success">● Actif</span></div><div style="padding:1rem;background:rgba(139,92,246,0.06);border-radius:12px;border:1px solid rgba(139,92,246,0.15);display:flex;justify-content:space-between;align-items:center"><div><div style="font-weight:700">🔔 Push — Firebase FCM</div><div style="font-size:.78rem;color:var(--gray);margin-top:.2rem">Connecté · Illimité</div></div><span class="badge badge-success">● Actif</span></div><div style="padding:1rem;background:rgba(245,158,11,0.06);border-radius:12px;border:1px solid rgba(245,158,11,0.15);display:flex;justify-content:space-between;align-items:center"><div><div style="font-weight:700">💬 WhatsApp Business API</div><div style="font-size:.78rem;color:var(--gray);margin-top:.2rem">Non configuré</div></div><button class="btn-primary" style="font-size:.78rem;padding:.4rem .85rem" onclick="showToast('⚙️ Configuration WhatsApp ouverte')">Configurer</button></div></div></div></div></div>
-  <div class="page" id="page-parametres"><div style="margin-bottom:1.5rem"><h2 style="font-family:'Syne',sans-serif;font-weight:800;font-size:1.3rem">⚙️ Paramètres notifications</h2></div><div class="card"><div class="card-body" style="text-align:center;padding:3rem"><div style="font-size:3rem;margin-bottom:1rem">⚙️</div><div style="font-family:'Syne',sans-serif;font-weight:700;font-size:1.1rem">Heures d'envoi, fréquences, opt-out</div></div></div></div>
+  <div class="page" id="page-programmees"><div style="margin-bottom:1.5rem"><h2 style="font-family:'Playfair Display',serif;font-weight:800;font-size:1.3rem">⏱️ Notifications programmées</h2></div><div class="card"><div class="card-header"><div class="card-title">3 envois programmés</div></div><table class="data-table"><thead><tr><th>Notification</th><th>Destinataires</th><th>Date d'envoi</th><th>Canaux</th><th>Actions</th></tr></thead><tbody><tr><td><strong>📝 Rappel examen Algo — J-3</strong></td><td>287 étudiants</td><td>31 Jan 2025 · 08h00</td><td><span class="badge badge-success">SMS</span> <span class="badge badge-purple">Push</span></td><td><button class="card-action" onclick="showToast('✏️ Notification modifiée')">Modifier</button> <button class="card-action" style="color:var(--danger)" onclick="showToast('🗑️ Notification annulée')">Annuler</button></td></tr><tr><td><strong>💳 Rappel impayés — Fév</strong></td><td>187 étudiants</td><td>01 Fév 2025 · 09h00</td><td><span class="badge badge-blue">Email</span> <span class="badge badge-success">SMS</span></td><td><button class="card-action" onclick="showToast('✏️ Notification modifiée')">Modifier</button></td></tr><tr><td><strong>📢 Emploi du temps S2</strong></td><td>Tous (1 248)</td><td>03 Fév 2025 · 08h00</td><td><span class="badge badge-blue">Email</span> <span class="badge badge-success">SMS</span> <span class="badge badge-purple">Push</span></td><td><button class="card-action" onclick="showToast('✏️ Notification modifiée')">Modifier</button></td></tr></tbody></table></div></div>
+  <div class="page" id="page-declencheurs"><div style="margin-bottom:1.5rem"><h2 style="font-family:'Playfair Display',serif;font-weight:800;font-size:1.3rem">⚡ Déclencheurs</h2></div><div class="card"><div class="card-body" style="text-align:center;padding:3rem"><div style="font-size:3rem;margin-bottom:1rem">⚡</div><div style="font-family:'Playfair Display',serif;font-weight:700;font-size:1.1rem">Déclencheurs d'événements système</div><div style="color:var(--gray);margin-top:.5rem">Configurez les événements qui déclenchent des notifications automatiques</div></div></div></div>
+  <div class="page" id="page-canaux"><div style="margin-bottom:1.5rem"><h2 style="font-family:'Playfair Display',serif;font-weight:800;font-size:1.3rem">📡 Configuration des canaux</h2></div><div class="card"><div class="card-body"><div style="display:flex;flex-direction:column;gap:1rem"><div style="padding:1rem;background:rgba(16,185,129,0.06);border-radius:12px;border:1px solid rgba(16,185,129,0.15);display:flex;justify-content:space-between;align-items:center"><div><div style="font-weight:700">📱 SMS — Twilio / Africa's Talking</div><div style="font-size:.78rem;color:var(--gray);margin-top:.2rem">Connecté · Crédit restant : 128 500 FCFA</div></div><span class="badge badge-success">● Actif</span></div><div style="padding:1rem;background:rgba(26,86,219,0.06);border-radius:12px;border:1px solid rgba(26,86,219,0.15);display:flex;justify-content:space-between;align-items:center"><div><div style="font-weight:700">📧 Email — SendGrid</div><div style="font-size:.78rem;color:var(--gray);margin-top:.2rem">Connecté · 50 000 emails/mois</div></div><span class="badge badge-success">● Actif</span></div><div style="padding:1rem;background:rgba(139,92,246,0.06);border-radius:12px;border:1px solid rgba(139,92,246,0.15);display:flex;justify-content:space-between;align-items:center"><div><div style="font-weight:700">🔔 Push — Firebase FCM</div><div style="font-size:.78rem;color:var(--gray);margin-top:.2rem">Connecté · Illimité</div></div><span class="badge badge-success">● Actif</span></div><div style="padding:1rem;background:rgba(245,158,11,0.06);border-radius:12px;border:1px solid rgba(245,158,11,0.15);display:flex;justify-content:space-between;align-items:center"><div><div style="font-weight:700">💬 WhatsApp Business API</div><div style="font-size:.78rem;color:var(--gray);margin-top:.2rem">Non configuré</div></div><button class="btn-primary" style="font-size:.78rem;padding:.4rem .85rem" onclick="showToast('⚙️ Configuration WhatsApp ouverte')">Configurer</button></div></div></div></div></div>
+  <div class="page" id="page-parametres"><div style="margin-bottom:1.5rem"><h2 style="font-family:'Playfair Display',serif;font-weight:800;font-size:1.3rem">⚙️ Paramètres notifications</h2></div><div class="card"><div class="card-body" style="text-align:center;padding:3rem"><div style="font-size:3rem;margin-bottom:1rem">⚙️</div><div style="font-family:'Playfair Display',serif;font-weight:700;font-size:1.1rem">Heures d'envoi, fréquences, opt-out</div></div></div></div>
 
 </div></main>
 

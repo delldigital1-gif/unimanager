@@ -5,7 +5,7 @@
   <meta charset="UTF-8"/>
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
   <title>UniManage — Tableau de bord</title>
-  <link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=Inter:wght@300;400;500;600&display=swap" rel="stylesheet"/>
+  <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;600;700;800;900&family=Inter:wght@300;400;500;600&display=swap" rel="stylesheet"/>
   <style>
     :root {
       --navy:    #0D1B2A;
@@ -39,7 +39,7 @@
       border-bottom: 1px solid rgba(255,255,255,0.08);
     }
     .brand-name {
-      font-family:'Syne',sans-serif; font-weight:800; font-size:1.3rem; color:white;
+      font-family:'Playfair Display',serif; font-weight:800; font-size:1.3rem; color:white;
     }
     .brand-name span { color: var(--sky); }
     .brand-univ {
@@ -103,7 +103,7 @@
       padding:0 1.75rem; z-index:50;
     }
     .topbar-left { display:flex; align-items:center; gap:1rem; }
-    .page-title { font-family:'Syne',sans-serif; font-weight:700; font-size:1.1rem; }
+    .page-title { font-family:'Playfair Display',serif; font-weight:700; font-size:1.1rem; }
     .breadcrumb { font-size:.8rem; color:var(--gray); }
     .topbar-right { display:flex; align-items:center; gap:1rem; }
     .topbar-btn {
@@ -156,7 +156,7 @@
     }
     .kpi-body { flex:1; }
     .kpi-value {
-      font-family:'Syne',sans-serif; font-size:1.7rem;
+      font-family:'Playfair Display',serif; font-size:1.7rem;
       font-weight:800; line-height:1;
     }
     .kpi-label { font-size:.775rem; color:var(--gray); margin-top:.3rem; }
@@ -180,7 +180,7 @@
       display:flex; align-items:center; justify-content:space-between;
       padding:1.1rem 1.5rem; border-bottom:1px solid var(--border);
     }
-    .card-title { font-family:'Syne',sans-serif; font-weight:700; font-size:.95rem; }
+    .card-title { font-family:'Playfair Display',serif; font-weight:700; font-size:.95rem; }
     .card-body { padding:1.25rem 1.5rem; }
     .card-action {
       font-size:.8rem; color:var(--blue); font-weight:600;
@@ -293,7 +293,7 @@
       display:flex; align-items:center; justify-content:space-between;
       margin-bottom:1.5rem;
     }
-    .page-header h2 { font-family:'Syne',sans-serif; font-weight:800; font-size:1.3rem; }
+    .page-header h2 { font-family:'Playfair Display',serif; font-weight:800; font-size:1.3rem; }
     .btn-add {
       display:flex; align-items:center; gap:.5rem;
       padding:.6rem 1.2rem; border-radius:9px;
@@ -555,7 +555,7 @@
                 stroke-dasharray="54 150" stroke-dashoffset="-89" stroke-linecap="round" transform="rotate(-90 50 50)"/>
               <circle cx="50" cy="50" r="38" fill="none" stroke="#10B981" stroke-width="14"
                 stroke-dasharray="45 150" stroke-dashoffset="-143" stroke-linecap="round" transform="rotate(-90 50 50)"/>
-              <text x="50" y="54" text-anchor="middle" font-size="12" font-weight="800" fill="#0D1B2A" font-family="Syne">401</text>
+              <text x="50" y="54" text-anchor="middle" font-size="12" font-weight="800" fill="#0D1B2A" font-family="Playfair Display">401</text>
             </svg>
             <div class="donut-legend">
               <div class="legend-item"><div class="legend-dot" style="background:var(--blue)"></div>Gestion & Finance <strong>401</strong></div>
@@ -699,7 +699,7 @@
   <div class="modal-overlay" id="modalAddEtudiant" onclick="if(event.target===this)closeAddEtudiantModal()">
     <div class="modal" style="max-width:480px">
       <button class="modal-close" onclick="closeAddEtudiantModal()">✕</button>
-      <div style="font-family:'Syne',sans-serif;font-weight:800;font-size:1.2rem;margin-bottom:1.25rem">+ Nouvel étudiant</div>
+      <div style="font-family:'Playfair Display',serif;font-weight:800;font-size:1.2rem;margin-bottom:1.25rem">+ Nouvel étudiant</div>
       <div id="addEtudiantError" style="display:none;background:rgba(239,68,68,0.08);color:var(--danger);border:1px solid rgba(239,68,68,0.2);padding:.6rem 1rem;border-radius:8px;font-size:.83rem;margin-bottom:1rem"></div>
       <div style="display:flex;flex-direction:column;gap:.85rem">
         <div><label style="font-size:.8rem;font-weight:600;display:block;margin-bottom:.3rem">Nom complet</label><input id="ae_nom" class="search-input" style="width:100%" placeholder="Ex: Kofi Adzoa"/></div>
@@ -758,7 +758,7 @@
   <div class="modal-overlay" id="creneauModal" onclick="if(event.target===this)closeCreneauModal()">
     <div class="modal" style="max-width:480px">
       <button class="modal-close" onclick="closeCreneauModal()">✕</button>
-      <div style="font-family:'Syne',sans-serif;font-weight:800;font-size:1.2rem;margin-bottom:1.25rem">+ Nouveau créneau</div>
+      <div style="font-family:'Playfair Display',serif;font-weight:800;font-size:1.2rem;margin-bottom:1.25rem">+ Nouveau créneau</div>
       <div id="creneauError" style="display:none;background:rgba(239,68,68,0.08);color:var(--danger);border:1px solid rgba(239,68,68,0.2);padding:.6rem 1rem;border-radius:8px;font-size:.83rem;margin-bottom:1rem"></div>
       <div class="form-row">
         <div class="form-group"><label>Jour</label><select id="cr_jour" class="filter-select" style="width:100%"><option>Lundi</option><option>Mardi</option><option>Mercredi</option><option>Jeudi</option><option>Vendredi</option></select></div>
@@ -919,7 +919,7 @@
       <div style="display:flex;align-items:center;gap:1rem;margin-bottom:1.5rem">
         <div id="ens-avatar" class="user-avatar" style="width:56px;height:56px;font-size:1.2rem;border-radius:14px"></div>
         <div>
-          <div id="ens-nom" style="font-family:'Syne',sans-serif;font-weight:800;font-size:1.1rem"></div>
+          <div id="ens-nom" style="font-family:'Playfair Display',serif;font-weight:800;font-size:1.1rem"></div>
           <div id="ens-spec" style="font-size:.85rem;color:var(--gray);margin-top:.2rem"></div>
         </div>
       </div>
@@ -944,7 +944,7 @@
       <div style="background:rgba(26,86,219,0.06);border-radius:12px;padding:1rem;margin-bottom:1.5rem;display:flex;justify-content:space-between;align-items:center">
         <div>
           <div style="font-size:.8rem;color:var(--gray)">Salaire estimé ce mois</div>
-          <div id="ens-salaire" style="font-family:'Syne',sans-serif;font-weight:800;font-size:1.4rem;color:var(--blue)"></div>
+          <div id="ens-salaire" style="font-family:'Playfair Display',serif;font-weight:800;font-size:1.4rem;color:var(--blue)"></div>
         </div>
         <div id="ens-statut"></div>
       </div>
@@ -959,7 +959,7 @@
   <div class="modal-overlay" id="modalAddEnseignant" onclick="if(event.target===this)closeAddEnseignantModal()">
     <div class="modal" style="max-width:480px">
       <button class="modal-close" onclick="closeAddEnseignantModal()">✕</button>
-      <div style="font-family:'Syne',sans-serif;font-weight:800;font-size:1.2rem;margin-bottom:1.25rem">+ Ajouter enseignant</div>
+      <div style="font-family:'Playfair Display',serif;font-weight:800;font-size:1.2rem;margin-bottom:1.25rem">+ Ajouter enseignant</div>
       <div id="addEnseignantError" style="display:none;background:rgba(239,68,68,0.08);color:var(--danger);border:1px solid rgba(239,68,68,0.2);padding:.6rem 1rem;border-radius:8px;font-size:.83rem;margin-bottom:1rem"></div>
       <div style="display:flex;flex-direction:column;gap:.85rem">
         <div><label style="font-size:.8rem;font-weight:600;display:block;margin-bottom:.3rem">Nom complet</label><input id="aen_nom" class="search-input" style="width:100%" placeholder="Ex: Dr. Kodjo Mensah"/></div>
@@ -1131,7 +1131,7 @@
   <div class="modal-overlay" id="paiementModal" onclick="if(event.target===this)closePaiementModal()">
     <div class="modal" style="max-width:480px">
       <button class="modal-close" onclick="closePaiementModal()">✕</button>
-      <div style="font-family:'Syne',sans-serif;font-weight:800;font-size:1.2rem;margin-bottom:.25rem">Enregistrer un paiement</div>
+      <div style="font-family:'Playfair Display',serif;font-weight:800;font-size:1.2rem;margin-bottom:.25rem">Enregistrer un paiement</div>
       <p style="font-size:.85rem;color:var(--gray);margin-bottom:1.5rem">Saisir un encaissement manuel</p>
       <div id="paiementError" style="display:none;background:rgba(239,68,68,0.08);color:var(--danger);border:1px solid rgba(239,68,68,0.2);padding:.6rem 1rem;border-radius:8px;font-size:.83rem;margin-bottom:1rem"></div>
       <div class="form-group"><label>Étudiant *</label><select id="pm_student" class="filter-select" style="width:100%"><option value="">Sélectionner un étudiant...</option></select></div>

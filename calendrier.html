@@ -5,13 +5,13 @@
   <meta charset="UTF-8"/>
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
   <title>UniManage — Calendrier Académique</title>
-  <link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=Inter:wght@300;400;500;600&display=swap" rel="stylesheet"/>
+  <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;600;700;800;900&family=Inter:wght@300;400;500;600&display=swap" rel="stylesheet"/>
   <style>
     :root{--navy:#0D1B2A;--blue:#1A56DB;--sky:#3B82F6;--gold:#F59E0B;--light:#F0F4FF;--white:#FFFFFF;--gray:#64748B;--border:#E2E8F0;--success:#10B981;--danger:#EF4444;--purple:#8B5CF6;}
     *{margin:0;padding:0;box-sizing:border-box;}
     body{font-family:'Inter',sans-serif;background:#F8FAFC;color:var(--navy);min-height:100vh;}
     .topbar{position:fixed;top:0;left:0;right:0;height:60px;background:white;border-bottom:1px solid var(--border);display:flex;align-items:center;justify-content:space-between;padding:0 1.5rem;z-index:100;}
-    .topbar-logo{font-family:'Syne',sans-serif;font-weight:800;font-size:1.1rem;color:var(--navy);}
+    .topbar-logo{font-family:'Playfair Display',serif;font-weight:800;font-size:1.1rem;color:var(--navy);}
     .topbar-logo span{color:var(--blue);}
     .topbar-right{display:flex;align-items:center;gap:.75rem;}
     .btn-primary{padding:.5rem 1.1rem;border-radius:9px;background:var(--blue);color:white;font-size:.83rem;font-weight:600;cursor:pointer;border:none;transition:all .2s;}
@@ -24,11 +24,11 @@
     .main-wrap{padding-top:60px;display:flex;height:100vh;}
     /* Sidebar */
     .cal-sidebar{width:280px;flex-shrink:0;background:white;border-right:1px solid var(--border);padding:1.25rem;overflow-y:auto;}
-    .cal-sidebar-title{font-family:'Syne',sans-serif;font-weight:700;font-size:.9rem;margin-bottom:1rem;}
+    .cal-sidebar-title{font-family:'Playfair Display',serif;font-weight:700;font-size:.9rem;margin-bottom:1rem;}
     /* Mini calendar */
     .mini-cal{margin-bottom:1.5rem;}
     .mini-cal-header{display:flex;align-items:center;justify-content:space-between;margin-bottom:.75rem;}
-    .mini-cal-title{font-family:'Syne',sans-serif;font-weight:700;font-size:.85rem;}
+    .mini-cal-title{font-family:'Playfair Display',serif;font-weight:700;font-size:.85rem;}
     .mini-cal-nav{background:none;border:none;cursor:pointer;color:var(--gray);font-size:1rem;padding:.2rem .4rem;border-radius:5px;transition:all .2s;}
     .mini-cal-nav:hover{background:var(--light);color:var(--blue);}
     .mini-cal-grid{display:grid;grid-template-columns:repeat(7,1fr);gap:.2rem;text-align:center;}
@@ -57,7 +57,7 @@
     /* Main calendar */
     .cal-main{flex:1;overflow-y:auto;padding:1.5rem;}
     .cal-header{display:flex;align-items:center;justify-content:space-between;margin-bottom:1.25rem;}
-    .cal-title{font-family:'Syne',sans-serif;font-weight:800;font-size:1.2rem;}
+    .cal-title{font-family:'Playfair Display',serif;font-weight:800;font-size:1.2rem;}
     .cal-nav-group{display:flex;align-items:center;gap:.5rem;}
     .cal-nav-btn{padding:.45rem .9rem;border-radius:8px;border:1.5px solid var(--border);background:white;cursor:pointer;font-size:.83rem;font-weight:600;color:var(--navy);transition:all .2s;}
     .cal-nav-btn:hover{border-color:var(--blue);color:var(--blue);}
@@ -100,7 +100,7 @@
     .modal{background:white;border-radius:18px;width:100%;max-width:500px;padding:2rem;position:relative;box-shadow:0 30px 80px rgba(0,0,0,0.2);animation:modalIn .3s ease;}
     @keyframes modalIn{from{opacity:0;transform:translateY(16px)}to{opacity:1;transform:translateY(0)}}
     .modal-close{position:absolute;top:1rem;right:1rem;background:#F8FAFC;border:none;cursor:pointer;width:30px;height:30px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:.85rem;color:var(--gray);}
-    .modal-title{font-family:'Syne',sans-serif;font-weight:800;font-size:1.1rem;margin-bottom:1.25rem;}
+    .modal-title{font-family:'Playfair Display',serif;font-weight:800;font-size:1.1rem;margin-bottom:1.25rem;}
     .form-group{margin-bottom:.85rem;}
     .form-group label{display:block;font-size:.78rem;font-weight:600;color:var(--navy);margin-bottom:.35rem;}
     .form-input{width:100%;padding:.65rem .9rem;border-radius:8px;border:1.5px solid var(--border);font-size:.875rem;font-family:'Inter',sans-serif;color:var(--navy);outline:none;transition:border-color .2s;}
@@ -114,7 +114,7 @@
     @keyframes popIn{from{opacity:0;transform:scale(.95)}to{opacity:1;transform:scale(1)}}
     .popup-close{float:right;background:none;border:none;cursor:pointer;color:var(--gray);font-size:.85rem;}
     .popup-type-bar{height:4px;border-radius:2px;margin-bottom:.85rem;}
-    .popup-title{font-family:'Syne',sans-serif;font-weight:700;font-size:.92rem;margin-bottom:.5rem;}
+    .popup-title{font-family:'Playfair Display',serif;font-weight:700;font-size:.92rem;margin-bottom:.5rem;}
     .popup-meta{font-size:.78rem;color:var(--gray);display:flex;flex-direction:column;gap:.25rem;}
     .popup-actions{display:flex;gap:.5rem;margin-top:.85rem;}
     .badge{display:inline-block;padding:.22rem .7rem;border-radius:100px;font-size:.7rem;font-weight:600;}
@@ -133,7 +133,7 @@
   <div style="display:flex;align-items:center;gap:1rem">
     <div class="topbar-logo">Uni<span>Manage</span></div>
     <span style="color:var(--border)">·</span>
-    <span style="font-family:'Syne',sans-serif;font-weight:700;font-size:.95rem">📆 Calendrier Académique</span>
+    <span style="font-family:'Playfair Display',serif;font-weight:700;font-size:.95rem">📆 Calendrier Académique</span>
   </div>
   <div class="topbar-right">
     <a href="dashboard.html" id="backLink" class="back-link">← Dashboard</a>
@@ -220,7 +220,7 @@
     <!-- LIST VIEW -->
     <div class="cal-view" id="view-list">
       <div style="background:white;border:1px solid var(--border);border-radius:14px;overflow:hidden">
-        <div style="padding:1rem 1.25rem;border-bottom:1px solid var(--border);font-family:'Syne',sans-serif;font-weight:700;font-size:.92rem">Tous les événements — Février 2025</div>
+        <div style="padding:1rem 1.25rem;border-bottom:1px solid var(--border);font-family:'Playfair Display',serif;font-weight:700;font-size:.92rem">Tous les événements — Février 2025</div>
         <div id="listEvents" style="display:flex;flex-direction:column"></div>
       </div>
     </div>

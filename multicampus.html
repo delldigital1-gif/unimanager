@@ -5,14 +5,14 @@
   <meta charset="UTF-8"/>
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
   <title>UniManage — Multi-Campus</title>
-  <link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=Inter:wght@300;400;500;600&display=swap" rel="stylesheet"/>
+  <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;600;700;800;900&family=Inter:wght@300;400;500;600&display=swap" rel="stylesheet"/>
   <style>
     :root{--navy:#0D1B2A;--blue:#1A56DB;--sky:#3B82F6;--gold:#F59E0B;--light:#F0F4FF;--white:#FFFFFF;--gray:#64748B;--border:#E2E8F0;--success:#10B981;--danger:#EF4444;--purple:#8B5CF6;--sidebar-w:240px;--topbar-h:64px;}
     *{margin:0;padding:0;box-sizing:border-box;}
     body{font-family:'Inter',sans-serif;background:#F8FAFC;color:var(--navy);display:flex;min-height:100vh;}
     .sidebar{width:var(--sidebar-w);background:var(--navy);display:flex;flex-direction:column;position:fixed;top:0;left:0;bottom:0;z-index:100;overflow-y:auto;}
     .sidebar-brand{padding:1.25rem;border-bottom:1px solid rgba(255,255,255,0.08);}
-    .brand-name{font-family:'Syne',sans-serif;font-weight:800;font-size:1.2rem;color:white;}
+    .brand-name{font-family:'Playfair Display',serif;font-weight:800;font-size:1.2rem;color:white;}
     .brand-name span{color:var(--sky);}
     .brand-sub{font-size:.72rem;color:rgba(255,255,255,0.35);margin-top:.2rem;}
     .campus-selector{margin:.75rem;background:rgba(255,255,255,0.06);border-radius:10px;padding:.65rem .85rem;border:1px solid rgba(255,255,255,0.1);}
@@ -28,7 +28,7 @@
     .btn-back-dash{width:100%;padding:.6rem;border-radius:8px;background:rgba(255,255,255,0.07);color:rgba(255,255,255,0.6);border:none;font-size:.8rem;font-weight:600;cursor:pointer;}
     .btn-back-dash:hover{background:rgba(255,255,255,0.12);color:white;}
     .topbar{position:fixed;top:0;left:var(--sidebar-w);right:0;height:var(--topbar-h);background:white;border-bottom:1px solid var(--border);display:flex;align-items:center;justify-content:space-between;padding:0 1.75rem;z-index:50;}
-    .page-title{font-family:'Syne',sans-serif;font-weight:700;font-size:1.05rem;}
+    .page-title{font-family:'Playfair Display',serif;font-weight:700;font-size:1.05rem;}
     .topbar-right{display:flex;align-items:center;gap:.75rem;}
     .btn-primary{display:flex;align-items:center;gap:.4rem;padding:.55rem 1.1rem;border-radius:9px;background:var(--blue);color:white;font-size:.83rem;font-weight:600;cursor:pointer;border:none;transition:all .2s;}
     .btn-primary:hover{background:#1344b8;}
@@ -43,7 +43,7 @@
     .kpi-card{background:white;border:1px solid var(--border);border-radius:12px;padding:1.1rem 1.25rem;transition:all .2s;}
     .kpi-card:hover{box-shadow:0 4px 16px rgba(0,0,0,0.07);transform:translateY(-2px);}
     .kpi-icon{width:42px;height:42px;border-radius:10px;display:flex;align-items:center;justify-content:center;font-size:1.2rem;margin-bottom:.65rem;}
-    .kpi-value{font-family:'Syne',sans-serif;font-size:1.6rem;font-weight:800;line-height:1;}
+    .kpi-value{font-family:'Playfair Display',serif;font-size:1.6rem;font-weight:800;line-height:1;}
     .kpi-label{font-size:.75rem;color:var(--gray);margin-top:.25rem;}
     .kpi-trend{font-size:.72rem;font-weight:600;margin-top:.25rem;}
     .trend-up{color:var(--success);}
@@ -52,7 +52,7 @@
     .dash-grid-3{display:grid;grid-template-columns:repeat(3,1fr);gap:1.25rem;margin-bottom:1.5rem;}
     .card{background:white;border:1px solid var(--border);border-radius:14px;overflow:hidden;margin-bottom:1.25rem;}
     .card-header{display:flex;align-items:center;justify-content:space-between;padding:1rem 1.25rem;border-bottom:1px solid var(--border);}
-    .card-title{font-family:'Syne',sans-serif;font-weight:700;font-size:.92rem;}
+    .card-title{font-family:'Playfair Display',serif;font-weight:700;font-size:.92rem;}
     .card-body{padding:1.1rem 1.25rem;}
     .card-action{font-size:.8rem;color:var(--blue);font-weight:600;cursor:pointer;background:none;border:none;}
     .badge{display:inline-block;padding:.22rem .7rem;border-radius:100px;font-size:.7rem;font-weight:600;}
@@ -73,11 +73,11 @@
     .campus-card.active-campus{border-color:var(--blue);box-shadow:0 0 0 3px rgba(26,86,219,0.1);}
     .campus-card-header{padding:1.1rem 1.25rem;border-bottom:1px solid var(--border);display:flex;align-items:center;gap:.85rem;}
     .campus-logo{width:44px;height:44px;border-radius:11px;display:flex;align-items:center;justify-content:center;font-size:1.1rem;font-weight:800;color:white;flex-shrink:0;}
-    .campus-name{font-family:'Syne',sans-serif;font-weight:700;font-size:.95rem;}
+    .campus-name{font-family:'Playfair Display',serif;font-weight:700;font-size:.95rem;}
     .campus-location{font-size:.75rem;color:var(--gray);margin-top:.15rem;}
     .campus-stats{display:grid;grid-template-columns:repeat(3,1fr);padding:.85rem 1.25rem;gap:.5rem;}
     .campus-stat{text-align:center;}
-    .campus-stat-val{font-family:'Syne',sans-serif;font-weight:800;font-size:1rem;}
+    .campus-stat-val{font-family:'Playfair Display',serif;font-weight:800;font-size:1rem;}
     .campus-stat-label{font-size:.65rem;color:var(--gray);margin-top:.15rem;}
     .campus-footer{padding:.65rem 1.25rem;background:#F8FAFC;border-top:1px solid var(--border);display:flex;justify-content:space-between;align-items:center;}
     /* Map placeholder */
@@ -111,7 +111,7 @@
     .modal{background:white;border-radius:18px;width:100%;max-width:520px;padding:2rem;position:relative;box-shadow:0 30px 80px rgba(0,0,0,0.2);animation:modalIn .3s ease;}
     @keyframes modalIn{from{opacity:0;transform:translateY(16px)}to{opacity:1;transform:translateY(0)}}
     .modal-close{position:absolute;top:1rem;right:1rem;background:#F8FAFC;border:none;cursor:pointer;width:30px;height:30px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:.85rem;color:var(--gray);}
-    .modal-title{font-family:'Syne',sans-serif;font-weight:800;font-size:1.1rem;margin-bottom:1.25rem;}
+    .modal-title{font-family:'Playfair Display',serif;font-weight:800;font-size:1.1rem;margin-bottom:1.25rem;}
     .toast{position:fixed;bottom:1.5rem;right:1.5rem;background:var(--navy);color:white;padding:.75rem 1.25rem;border-radius:10px;font-size:.83rem;font-weight:500;box-shadow:0 8px 24px rgba(0,0,0,0.2);z-index:9999;opacity:0;transform:translateY(16px);transition:all .3s;pointer-events:none;}
     .toast.show{opacity:1;transform:translateY(0);}
     @media(max-width:1100px){.kpi-grid{grid-template-columns:repeat(2,1fr);}.dash-grid,.dash-grid-3{grid-template-columns:1fr;}.campus-stats{grid-template-columns:repeat(3,1fr);}}
@@ -312,7 +312,7 @@
 
   <!-- ══ CARTE ══ -->
   <div class="page" id="page-carte">
-    <div style="margin-bottom:1.5rem"><h2 style="font-family:'Syne',sans-serif;font-weight:800;font-size:1.3rem">🗺️ Carte des campus</h2></div>
+    <div style="margin-bottom:1.5rem"><h2 style="font-family:'Playfair Display',serif;font-weight:800;font-size:1.3rem">🗺️ Carte des campus</h2></div>
     <div class="map-placeholder">
       <div style="position:absolute;inset:0;background:linear-gradient(135deg,#c8dfe8 0%,#d4e8d4 50%,#e8dfc8 100%);opacity:.5"></div>
       <!-- Pins campus -->
@@ -337,7 +337,7 @@
       </div>
       <div style="text-align:center;z-index:1">
         <div style="font-size:3rem;margin-bottom:.5rem">🗺️</div>
-        <div style="font-family:'Syne',sans-serif;font-weight:700;color:var(--navy)">Carte interactive Togo</div>
+        <div style="font-family:'Playfair Display',serif;font-weight:700;color:var(--navy)">Carte interactive Togo</div>
         <div style="font-size:.8rem;color:var(--gray);margin-top:.25rem">Cliquez sur un campus pour voir les détails</div>
       </div>
     </div>
@@ -346,7 +346,7 @@
   <!-- ══ COMPARAISON ══ -->
   <div class="page" id="page-comparaison">
     <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:1.5rem">
-      <div><h2 style="font-family:'Syne',sans-serif;font-weight:800;font-size:1.3rem">📈 Comparaison inter-campus</h2></div>
+      <div><h2 style="font-family:'Playfair Display',serif;font-weight:800;font-size:1.3rem">📈 Comparaison inter-campus</h2></div>
       <button class="btn-outline" onclick="showToast('📊 Rapport comparatif exporté !')">⬇ Exporter</button>
     </div>
     <div class="card">
@@ -361,7 +361,7 @@
           </tr>
         </thead>
         <tbody>
-          <tr><td><strong>Étudiants inscrits</strong></td><td><span style="font-family:'Syne',sans-serif;font-weight:700;color:var(--blue)">842</span></td><td><span style="font-family:'Syne',sans-serif;font-weight:700;color:var(--gold)">287</span></td><td><span style="font-family:'Syne',sans-serif;font-weight:700;color:var(--success)">119</span></td><td><strong>1 248</strong></td></tr>
+          <tr><td><strong>Étudiants inscrits</strong></td><td><span style="font-family:'Playfair Display',serif;font-weight:700;color:var(--blue)">842</span></td><td><span style="font-family:'Playfair Display',serif;font-weight:700;color:var(--gold)">287</span></td><td><span style="font-family:'Playfair Display',serif;font-weight:700;color:var(--success)">119</span></td><td><strong>1 248</strong></td></tr>
           <tr><td><strong>Enseignants actifs</strong></td><td>58</td><td>21</td><td>8</td><td><strong>87</strong></td></tr>
           <tr><td><strong>Taux de réussite</strong></td><td><span style="color:var(--success);font-weight:700">94%</span></td><td><span style="color:var(--gold);font-weight:700">91%</span></td><td><span style="color:var(--gold);font-weight:700">88%</span></td><td><strong>92%</strong></td></tr>
           <tr><td><strong>Revenus (FCFA)</strong></td><td>32.4M</td><td>10.8M</td><td>5.0M</td><td><strong>48.2M</strong></td></tr>
@@ -379,7 +379,7 @@
     <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:1.5rem">
       <div style="display:flex;align-items:center;gap:.85rem">
         <div style="width:48px;height:48px;border-radius:12px;background:linear-gradient(135deg,var(--blue),var(--sky));display:flex;align-items:center;justify-content:center;font-size:1.1rem;font-weight:700;color:white">CL</div>
-        <div><h2 style="font-family:'Syne',sans-serif;font-weight:800;font-size:1.3rem">Campus Principal — Lomé</h2><div style="font-size:.83rem;color:var(--gray)">📍 Avenue de la Libération, Lomé · Campus principal</div></div>
+        <div><h2 style="font-family:'Playfair Display',serif;font-weight:800;font-size:1.3rem">Campus Principal — Lomé</h2><div style="font-size:.83rem;color:var(--gray)">📍 Avenue de la Libération, Lomé · Campus principal</div></div>
       </div>
       <div style="display:flex;gap:.75rem">
         <button class="btn-outline" onclick="showToast('⚙️ Paramètres Campus Lomé ouverts')">⚙️ Paramètres</button>
@@ -424,7 +424,7 @@
   <div class="page" id="page-campus-kara">
     <div style="display:flex;align-items:center;gap:.85rem;margin-bottom:1.5rem">
       <div style="width:48px;height:48px;border-radius:12px;background:linear-gradient(135deg,var(--gold),#f59e0b);display:flex;align-items:center;justify-content:center;font-size:1.1rem;font-weight:700;color:white">CK</div>
-      <div><h2 style="font-family:'Syne',sans-serif;font-weight:800;font-size:1.3rem">Campus Kara</h2><div style="font-size:.83rem;color:var(--gray)">📍 Route de Niamtougou, Kara · Campus secondaire</div></div>
+      <div><h2 style="font-family:'Playfair Display',serif;font-weight:800;font-size:1.3rem">Campus Kara</h2><div style="font-size:.83rem;color:var(--gray)">📍 Route de Niamtougou, Kara · Campus secondaire</div></div>
     </div>
     <div class="kpi-grid">
       <div class="kpi-card"><div class="kpi-icon" style="background:rgba(245,158,11,0.1)">🎓</div><div class="kpi-value" style="color:var(--gold)">287</div><div class="kpi-label">Étudiants</div><div class="kpi-trend trend-up">▲ +15% vs 2024</div></div>
@@ -439,7 +439,7 @@
   <div class="page" id="page-campus-sokode">
     <div style="display:flex;align-items:center;gap:.85rem;margin-bottom:1.5rem">
       <div style="width:48px;height:48px;border-radius:12px;background:linear-gradient(135deg,var(--success),#34d399);display:flex;align-items:center;justify-content:center;font-size:1.1rem;font-weight:700;color:white">CS</div>
-      <div><h2 style="font-family:'Syne',sans-serif;font-weight:800;font-size:1.3rem">Campus Sokodé</h2><div style="font-size:.83rem;color:var(--gray)">📍 Quartier Administratif, Sokodé · Campus annexe</div></div>
+      <div><h2 style="font-family:'Playfair Display',serif;font-weight:800;font-size:1.3rem">Campus Sokodé</h2><div style="font-size:.83rem;color:var(--gray)">📍 Quartier Administratif, Sokodé · Campus annexe</div></div>
     </div>
     <div class="kpi-grid">
       <div class="kpi-card"><div class="kpi-icon" style="background:rgba(16,185,129,0.1)">🎓</div><div class="kpi-value" style="color:var(--success)">119</div><div class="kpi-label">Étudiants</div><div class="kpi-trend trend-up">▲ +22% vs 2024</div></div>
@@ -453,7 +453,7 @@
   <!-- ══ TRANSFERTS ══ -->
   <div class="page" id="page-transferts">
     <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:1.5rem">
-      <div><h2 style="font-family:'Syne',sans-serif;font-weight:800;font-size:1.3rem">🔄 Transferts inter-campus</h2></div>
+      <div><h2 style="font-family:'Playfair Display',serif;font-weight:800;font-size:1.3rem">🔄 Transferts inter-campus</h2></div>
       <button class="btn-primary" onclick="openModal('addTransfert')">+ Nouveau transfert</button>
     </div>
     <div class="card">
@@ -470,10 +470,10 @@
   </div>
 
   <!-- PAGES SIMPLES -->
-  <div class="page" id="page-programmes"><div style="margin-bottom:1.5rem"><h2 style="font-family:'Syne',sans-serif;font-weight:800;font-size:1.3rem">📚 Programmes partagés</h2></div><div class="card"><div class="card-body" style="text-align:center;padding:3rem"><div style="font-size:3rem;margin-bottom:1rem">📚</div><div style="font-family:'Syne',sans-serif;font-weight:700;font-size:1.1rem">7 programmes partagés entre les 3 campus</div><div style="color:var(--gray);margin-top:.5rem;font-size:.85rem">Curricula synchronisés · Examens unifiés</div></div></div></div>
-  <div class="page" id="page-ressources"><div style="margin-bottom:1.5rem"><h2 style="font-family:'Syne',sans-serif;font-weight:800;font-size:1.3rem">📦 Ressources partagées</h2></div><div class="card"><div class="card-body" style="text-align:center;padding:3rem"><div style="font-size:3rem;margin-bottom:1rem">📦</div><div style="font-family:'Syne',sans-serif;font-weight:700;font-size:1.1rem">Bibliothèque numérique · Outils pédagogiques partagés</div></div></div></div>
-  <div class="page" id="page-rapports"><div style="margin-bottom:1.5rem"><h2 style="font-family:'Syne',sans-serif;font-weight:800;font-size:1.3rem">📄 Rapports consolidés</h2></div><div class="card"><div class="card-body" style="text-align:center;padding:3rem"><div style="font-size:3rem;margin-bottom:1rem">📄</div><div style="font-family:'Syne',sans-serif;font-weight:700;font-size:1.1rem">Rapport consolidé 3 campus disponible</div><br/><button class="btn-primary" onclick="showToast('📥 Rapport consolidé PDF exporté !')">📥 Télécharger</button></div></div></div>
-  <div class="page" id="page-parametres"><div style="margin-bottom:1.5rem"><h2 style="font-family:'Syne',sans-serif;font-weight:800;font-size:1.3rem">⚙️ Paramètres Multi-campus</h2></div><div class="card"><div class="card-body" style="text-align:center;padding:3rem"><div style="font-size:3rem;margin-bottom:1rem">⚙️</div><div style="font-family:'Syne',sans-serif;font-weight:700;font-size:1.1rem">Configuration synchronisation & permissions</div></div></div></div>
+  <div class="page" id="page-programmes"><div style="margin-bottom:1.5rem"><h2 style="font-family:'Playfair Display',serif;font-weight:800;font-size:1.3rem">📚 Programmes partagés</h2></div><div class="card"><div class="card-body" style="text-align:center;padding:3rem"><div style="font-size:3rem;margin-bottom:1rem">📚</div><div style="font-family:'Playfair Display',serif;font-weight:700;font-size:1.1rem">7 programmes partagés entre les 3 campus</div><div style="color:var(--gray);margin-top:.5rem;font-size:.85rem">Curricula synchronisés · Examens unifiés</div></div></div></div>
+  <div class="page" id="page-ressources"><div style="margin-bottom:1.5rem"><h2 style="font-family:'Playfair Display',serif;font-weight:800;font-size:1.3rem">📦 Ressources partagées</h2></div><div class="card"><div class="card-body" style="text-align:center;padding:3rem"><div style="font-size:3rem;margin-bottom:1rem">📦</div><div style="font-family:'Playfair Display',serif;font-weight:700;font-size:1.1rem">Bibliothèque numérique · Outils pédagogiques partagés</div></div></div></div>
+  <div class="page" id="page-rapports"><div style="margin-bottom:1.5rem"><h2 style="font-family:'Playfair Display',serif;font-weight:800;font-size:1.3rem">📄 Rapports consolidés</h2></div><div class="card"><div class="card-body" style="text-align:center;padding:3rem"><div style="font-size:3rem;margin-bottom:1rem">📄</div><div style="font-family:'Playfair Display',serif;font-weight:700;font-size:1.1rem">Rapport consolidé 3 campus disponible</div><br/><button class="btn-primary" onclick="showToast('📥 Rapport consolidé PDF exporté !')">📥 Télécharger</button></div></div></div>
+  <div class="page" id="page-parametres"><div style="margin-bottom:1.5rem"><h2 style="font-family:'Playfair Display',serif;font-weight:800;font-size:1.3rem">⚙️ Paramètres Multi-campus</h2></div><div class="card"><div class="card-body" style="text-align:center;padding:3rem"><div style="font-size:3rem;margin-bottom:1rem">⚙️</div><div style="font-family:'Playfair Display',serif;font-weight:700;font-size:1.1rem">Configuration synchronisation & permissions</div></div></div></div>
 
 </div></main>
 

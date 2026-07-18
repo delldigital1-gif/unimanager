@@ -5,7 +5,7 @@
   <meta charset="UTF-8"/>
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
   <title>UniManage — Super Admin</title>
-  <link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=Inter:wght@300;400;500;600&display=swap" rel="stylesheet"/>
+  <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;600;700;800;900&family=Inter:wght@300;400;500;600&display=swap" rel="stylesheet"/>
   <style>
     :root{--navy:#0D1B2A;--blue:#1A56DB;--sky:#3B82F6;--gold:#F59E0B;--light:#F0F4FF;--white:#FFFFFF;--gray:#64748B;--border:#E2E8F0;--success:#10B981;--danger:#EF4444;--purple:#8B5CF6;--sidebar-w:260px;--topbar-h:64px;}
     *{margin:0;padding:0;box-sizing:border-box;}
@@ -14,7 +14,7 @@
     /* SIDEBAR */
     .sidebar{width:var(--sidebar-w);background:linear-gradient(180deg,#0d1520 0%,#060d16 100%);display:flex;flex-direction:column;position:fixed;top:0;left:0;bottom:0;z-index:100;overflow-y:auto;border-right:1px solid rgba(255,255,255,0.05);}
     .sidebar-brand{padding:1.5rem 1.25rem 1rem;border-bottom:1px solid rgba(255,255,255,0.06);}
-    .brand-logo{font-family:'Syne',sans-serif;font-weight:800;font-size:1.3rem;color:white;}
+    .brand-logo{font-family:'Playfair Display',serif;font-weight:800;font-size:1.3rem;color:white;}
     .brand-logo span{color:var(--sky);}
     .brand-tag{display:inline-flex;align-items:center;gap:.4rem;background:rgba(139,92,246,0.2);color:#a78bfa;padding:.2rem .75rem;border-radius:100px;font-size:.7rem;font-weight:700;margin-top:.4rem;border:1px solid rgba(139,92,246,0.3);}
     .admin-pill{margin:1rem 1rem 0;background:rgba(255,255,255,0.04);border-radius:12px;padding:.85rem 1rem;border:1px solid rgba(255,255,255,0.07);display:flex;align-items:center;gap:.75rem;}
@@ -34,7 +34,7 @@
 
     /* TOPBAR */
     .topbar{position:fixed;top:0;left:var(--sidebar-w);right:0;height:var(--topbar-h);background:rgba(10,15,26,0.95);backdrop-filter:blur(12px);border-bottom:1px solid rgba(255,255,255,0.06);display:flex;align-items:center;justify-content:space-between;padding:0 1.75rem;z-index:50;}
-    .page-title{font-family:'Syne',sans-serif;font-weight:700;font-size:1.05rem;color:white;}
+    .page-title{font-family:'Playfair Display',serif;font-weight:700;font-size:1.05rem;color:white;}
     .breadcrumb{font-size:.78rem;color:rgba(255,255,255,0.35);}
     .topbar-right{display:flex;align-items:center;gap:.75rem;}
     .live-badge{display:flex;align-items:center;gap:.5rem;background:rgba(16,185,129,0.12);color:var(--success);padding:.3rem .9rem;border-radius:8px;font-size:.78rem;font-weight:600;border:1px solid rgba(16,185,129,0.2);}
@@ -55,7 +55,7 @@
     .kpi-card::before{content:'';position:absolute;top:-30px;right:-30px;width:100px;height:100px;border-radius:50%;opacity:.06;}
     .kpi-card:hover{background:rgba(255,255,255,0.06);transform:translateY(-2px);}
     .kpi-icon{width:44px;height:44px;border-radius:11px;display:flex;align-items:center;justify-content:center;font-size:1.2rem;margin-bottom:.85rem;}
-    .kpi-value{font-family:'Syne',sans-serif;font-size:1.8rem;font-weight:800;line-height:1;}
+    .kpi-value{font-family:'Playfair Display',serif;font-size:1.8rem;font-weight:800;line-height:1;}
     .kpi-label{font-size:.775rem;color:rgba(255,255,255,0.45);margin-top:.3rem;}
     .kpi-trend{font-size:.75rem;font-weight:600;margin-top:.35rem;display:flex;align-items:center;gap:.25rem;}
     .trend-up{color:var(--success);}
@@ -66,7 +66,7 @@
     .dash-grid-3{display:grid;grid-template-columns:2fr 1fr;gap:1.25rem;margin-bottom:1.75rem;}
     .card{background:rgba(255,255,255,0.04);border:1px solid rgba(255,255,255,0.08);border-radius:14px;overflow:hidden;}
     .card-header{display:flex;align-items:center;justify-content:space-between;padding:1.1rem 1.5rem;border-bottom:1px solid rgba(255,255,255,0.06);}
-    .card-title{font-family:'Syne',sans-serif;font-weight:700;font-size:.92rem;color:white;}
+    .card-title{font-family:'Playfair Display',serif;font-weight:700;font-size:.92rem;color:white;}
     .card-body{padding:1.25rem 1.5rem;}
     .card-action{font-size:.8rem;color:var(--sky);font-weight:600;cursor:pointer;background:none;border:none;}
 
@@ -102,11 +102,11 @@
     .univ-card{background:rgba(255,255,255,0.04);border:1px solid rgba(255,255,255,0.08);border-radius:13px;padding:1.25rem;transition:all .2s;cursor:pointer;}
     .univ-card:hover{background:rgba(255,255,255,0.07);border-color:rgba(139,92,246,0.3);transform:translateY(-2px);}
     .univ-logo{width:42px;height:42px;border-radius:10px;display:flex;align-items:center;justify-content:center;font-size:1.1rem;font-weight:800;color:white;margin-bottom:.85rem;flex-shrink:0;}
-    .univ-name{font-family:'Syne',sans-serif;font-weight:700;font-size:.95rem;color:white;margin-bottom:.2rem;}
+    .univ-name{font-family:'Playfair Display',serif;font-weight:700;font-size:.95rem;color:white;margin-bottom:.2rem;}
     .univ-meta{font-size:.75rem;color:rgba(255,255,255,0.4);margin-bottom:.75rem;}
     .univ-stats{display:grid;grid-template-columns:1fr 1fr 1fr;gap:.5rem;margin-bottom:.85rem;}
     .univ-stat{text-align:center;background:rgba(255,255,255,0.04);border-radius:7px;padding:.5rem;}
-    .univ-stat-val{font-family:'Syne',sans-serif;font-weight:800;font-size:1rem;color:white;}
+    .univ-stat-val{font-family:'Playfair Display',serif;font-weight:800;font-size:1rem;color:white;}
     .univ-stat-label{font-size:.65rem;color:rgba(255,255,255,0.4);margin-top:.15rem;}
 
     /* REVENUE SECTION */
@@ -199,14 +199,14 @@
       <div style="display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:1rem">
         <div>
           <div style="font-size:.8rem;color:rgba(255,255,255,0.5);margin-bottom:.3rem">Revenu SaaS total 2025</div>
-          <div style="font-family:'Syne',sans-serif;font-weight:800;font-size:2.5rem;color:white">47.8M <span style="font-size:1.1rem;color:rgba(255,255,255,0.5)">FCFA</span></div>
+          <div style="font-family:'Playfair Display',serif;font-weight:800;font-size:2.5rem;color:white">47.8M <span style="font-size:1.1rem;color:rgba(255,255,255,0.5)">FCFA</span></div>
           <div style="font-size:.85rem;color:var(--success);margin-top:.3rem">▲ +34% vs 2024</div>
         </div>
         <div style="display:flex;gap:2rem;flex-wrap:wrap">
-          <div style="text-align:center"><div style="font-family:'Syne',sans-serif;font-weight:800;font-size:1.5rem;color:white">52</div><div style="font-size:.75rem;color:rgba(255,255,255,0.4)">Universités actives</div></div>
-          <div style="text-align:center"><div style="font-family:'Syne',sans-serif;font-weight:800;font-size:1.5rem;color:white">48K</div><div style="font-size:.75rem;color:rgba(255,255,255,0.4)">Étudiants gérés</div></div>
-          <div style="text-align:center"><div style="font-family:'Syne',sans-serif;font-weight:800;font-size:1.5rem;color:white">8</div><div style="font-size:.75rem;color:rgba(255,255,255,0.4)">Pays couverts</div></div>
-          <div style="text-align:center"><div style="font-family:'Syne',sans-serif;font-weight:800;font-size:1.5rem;color:white">99.9%</div><div style="font-size:.75rem;color:rgba(255,255,255,0.4)">Uptime ce mois</div></div>
+          <div style="text-align:center"><div style="font-family:'Playfair Display',serif;font-weight:800;font-size:1.5rem;color:white">52</div><div style="font-size:.75rem;color:rgba(255,255,255,0.4)">Universités actives</div></div>
+          <div style="text-align:center"><div style="font-family:'Playfair Display',serif;font-weight:800;font-size:1.5rem;color:white">48K</div><div style="font-size:.75rem;color:rgba(255,255,255,0.4)">Étudiants gérés</div></div>
+          <div style="text-align:center"><div style="font-family:'Playfair Display',serif;font-weight:800;font-size:1.5rem;color:white">8</div><div style="font-size:.75rem;color:rgba(255,255,255,0.4)">Pays couverts</div></div>
+          <div style="text-align:center"><div style="font-family:'Playfair Display',serif;font-weight:800;font-size:1.5rem;color:white">99.9%</div><div style="font-size:.75rem;color:rgba(255,255,255,0.4)">Uptime ce mois</div></div>
         </div>
       </div>
     </div>
@@ -274,7 +274,7 @@
           </div>
           <div style="margin-top:1.25rem;padding:.85rem;background:rgba(255,255,255,0.04);border-radius:10px;text-align:center">
             <div style="font-size:.75rem;color:rgba(255,255,255,0.4)">MRR (Monthly Recurring Revenue)</div>
-            <div style="font-family:'Syne',sans-serif;font-weight:800;font-size:1.4rem;color:var(--success);margin-top:.25rem">3 980 000 FCFA</div>
+            <div style="font-family:'Playfair Display',serif;font-weight:800;font-size:1.4rem;color:var(--success);margin-top:.25rem">3 980 000 FCFA</div>
           </div>
         </div>
       </div>
@@ -328,7 +328,7 @@
   <!-- ══ PAGE : UNIVERSITÉS ══ -->
   <div class="page" id="page-universites">
     <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:1.5rem">
-      <div><h2 style="font-family:'Syne',sans-serif;font-weight:800;font-size:1.3rem;color:white">Universités</h2><div style="font-size:.85rem;color:rgba(255,255,255,0.4);margin-top:.2rem">52 établissements · 8 pays</div></div>
+      <div><h2 style="font-family:'Playfair Display',serif;font-weight:800;font-size:1.3rem;color:white">Universités</h2><div style="font-size:.85rem;color:rgba(255,255,255,0.4);margin-top:.2rem">52 établissements · 8 pays</div></div>
       <button onclick="openModal()" style="padding:.65rem 1.2rem;border-radius:9px;background:var(--purple);color:white;font-size:.875rem;font-weight:600;cursor:pointer;border:none">+ Ajouter université</button>
     </div>
     <div class="univ-grid">
@@ -365,7 +365,7 @@
 
   <!-- ══ PAGE : REVENUS ══ -->
   <div class="page" id="page-revenus">
-    <div style="margin-bottom:1.5rem"><h2 style="font-family:'Syne',sans-serif;font-weight:800;font-size:1.3rem;color:white">Revenus SaaS</h2><div style="font-size:.85rem;color:rgba(255,255,255,0.4);margin-top:.2rem">Suivi financier de la plateforme</div></div>
+    <div style="margin-bottom:1.5rem"><h2 style="font-family:'Playfair Display',serif;font-weight:800;font-size:1.3rem;color:white">Revenus SaaS</h2><div style="font-size:.85rem;color:rgba(255,255,255,0.4);margin-top:.2rem">Suivi financier de la plateforme</div></div>
     <div class="kpi-grid" style="grid-template-columns:repeat(3,1fr)">
       <div class="kpi-card"><div class="kpi-icon" style="background:rgba(16,185,129,0.15)">💵</div><div class="kpi-value" style="color:var(--success)">47.8M</div><div class="kpi-label">FCFA revenus 2025</div><div class="kpi-trend trend-up">▲ +34% vs 2024</div></div>
       <div class="kpi-card"><div class="kpi-icon" style="background:rgba(139,92,246,0.15)">📈</div><div class="kpi-value" style="color:#a78bfa">3.98M</div><div class="kpi-label">FCFA MRR actuel</div><div class="kpi-trend trend-up">▲ +5 nouveaux ce mois</div></div>
@@ -388,12 +388,12 @@
   </div>
 
   <!-- ══ PAGES PLACEHOLDER ══ -->
-  <div class="page" id="page-abonnements"><div style="margin-bottom:1.5rem"><h2 style="font-family:'Syne',sans-serif;font-weight:800;font-size:1.3rem;color:white">Abonnements</h2></div><div class="card"><div class="card-body" style="text-align:center;padding:3rem"><div style="font-size:3rem;margin-bottom:1rem">📋</div><div style="font-family:'Syne',sans-serif;font-weight:700;font-size:1.1rem;color:white">52 abonnements actifs · 3 expirés</div></div></div></div>
-  <div class="page" id="page-activite"><div style="margin-bottom:1.5rem"><h2 style="font-family:'Syne',sans-serif;font-weight:800;font-size:1.3rem;color:white">Activité</h2></div><div class="card"><div class="card-body" style="text-align:center;padding:3rem"><div style="font-size:3rem;margin-bottom:1rem">📊</div><div style="font-family:'Syne',sans-serif;font-weight:700;font-size:1.1rem;color:white">2 847 actions aujourd'hui · 48K utilisateurs actifs</div></div></div></div>
-  <div class="page" id="page-incidents"><div style="margin-bottom:1.5rem"><h2 style="font-family:'Syne',sans-serif;font-weight:800;font-size:1.3rem;color:white">Incidents</h2></div><div class="card"><div class="card-body" style="text-align:center;padding:3rem"><div style="font-size:3rem;margin-bottom:1rem">⚠️</div><div style="font-family:'Syne',sans-serif;font-weight:700;font-size:1.1rem;color:white">2 incidents actifs · Priorité haute</div></div></div></div>
-  <div class="page" id="page-logs"><div style="margin-bottom:1.5rem"><h2 style="font-family:'Syne',sans-serif;font-weight:800;font-size:1.3rem;color:white">Logs système</h2></div><div class="card"><div class="card-body" style="padding:1.25rem;font-family:monospace;font-size:.78rem;color:var(--success);background:#050a10;border-radius:8px"><div>[2025-01-22 09:32:11] ✅ Paiement reçu — UCAO Abidjan — 150 000 FCFA</div><div style="margin-top:.4rem">[2025-01-22 09:18:45] 🏛️ Nouvelle inscription — ISIG Lomé — Plan Starter</div><div style="margin-top:.4rem">[2025-01-22 08:55:12] 🔄 Backup automatique — 52 bases de données — OK</div><div style="margin-top:.4rem">[2025-01-22 08:00:00] ✅ Uptime check — 99.9% — Tous systèmes opérationnels</div><div style="margin-top:.4rem;color:var(--gold)">[2025-01-21 23:45:02] ⚠️ Tentative connexion suspecte — IP bloquée</div><div style="margin-top:.4rem">[2025-01-21 22:00:00] 🔄 Déploiement v2.4.1 — Succès</div></div></div></div>
-  <div class="page" id="page-admins"><div style="margin-bottom:1.5rem"><h2 style="font-family:'Syne',sans-serif;font-weight:800;font-size:1.3rem;color:white">Admins plateforme</h2></div><div class="card"><div class="card-body" style="text-align:center;padding:3rem"><div style="font-size:3rem;margin-bottom:1rem">👑</div><div style="font-family:'Syne',sans-serif;font-weight:700;font-size:1.1rem;color:white">3 Super Admins · Accès total plateforme</div></div></div></div>
-  <div class="page" id="page-parametres"><div style="margin-bottom:1.5rem"><h2 style="font-family:'Syne',sans-serif;font-weight:800;font-size:1.3rem;color:white">Paramètres plateforme</h2></div><div class="card"><div class="card-body" style="text-align:center;padding:3rem"><div style="font-size:3rem;margin-bottom:1rem">⚙️</div><div style="font-family:'Syne',sans-serif;font-weight:700;font-size:1.1rem;color:white">Configuration globale de la plateforme</div></div></div></div>
+  <div class="page" id="page-abonnements"><div style="margin-bottom:1.5rem"><h2 style="font-family:'Playfair Display',serif;font-weight:800;font-size:1.3rem;color:white">Abonnements</h2></div><div class="card"><div class="card-body" style="text-align:center;padding:3rem"><div style="font-size:3rem;margin-bottom:1rem">📋</div><div style="font-family:'Playfair Display',serif;font-weight:700;font-size:1.1rem;color:white">52 abonnements actifs · 3 expirés</div></div></div></div>
+  <div class="page" id="page-activite"><div style="margin-bottom:1.5rem"><h2 style="font-family:'Playfair Display',serif;font-weight:800;font-size:1.3rem;color:white">Activité</h2></div><div class="card"><div class="card-body" style="text-align:center;padding:3rem"><div style="font-size:3rem;margin-bottom:1rem">📊</div><div style="font-family:'Playfair Display',serif;font-weight:700;font-size:1.1rem;color:white">2 847 actions aujourd'hui · 48K utilisateurs actifs</div></div></div></div>
+  <div class="page" id="page-incidents"><div style="margin-bottom:1.5rem"><h2 style="font-family:'Playfair Display',serif;font-weight:800;font-size:1.3rem;color:white">Incidents</h2></div><div class="card"><div class="card-body" style="text-align:center;padding:3rem"><div style="font-size:3rem;margin-bottom:1rem">⚠️</div><div style="font-family:'Playfair Display',serif;font-weight:700;font-size:1.1rem;color:white">2 incidents actifs · Priorité haute</div></div></div></div>
+  <div class="page" id="page-logs"><div style="margin-bottom:1.5rem"><h2 style="font-family:'Playfair Display',serif;font-weight:800;font-size:1.3rem;color:white">Logs système</h2></div><div class="card"><div class="card-body" style="padding:1.25rem;font-family:monospace;font-size:.78rem;color:var(--success);background:#050a10;border-radius:8px"><div>[2025-01-22 09:32:11] ✅ Paiement reçu — UCAO Abidjan — 150 000 FCFA</div><div style="margin-top:.4rem">[2025-01-22 09:18:45] 🏛️ Nouvelle inscription — ISIG Lomé — Plan Starter</div><div style="margin-top:.4rem">[2025-01-22 08:55:12] 🔄 Backup automatique — 52 bases de données — OK</div><div style="margin-top:.4rem">[2025-01-22 08:00:00] ✅ Uptime check — 99.9% — Tous systèmes opérationnels</div><div style="margin-top:.4rem;color:var(--gold)">[2025-01-21 23:45:02] ⚠️ Tentative connexion suspecte — IP bloquée</div><div style="margin-top:.4rem">[2025-01-21 22:00:00] 🔄 Déploiement v2.4.1 — Succès</div></div></div></div>
+  <div class="page" id="page-admins"><div style="margin-bottom:1.5rem"><h2 style="font-family:'Playfair Display',serif;font-weight:800;font-size:1.3rem;color:white">Admins plateforme</h2></div><div class="card"><div class="card-body" style="text-align:center;padding:3rem"><div style="font-size:3rem;margin-bottom:1rem">👑</div><div style="font-family:'Playfair Display',serif;font-weight:700;font-size:1.1rem;color:white">3 Super Admins · Accès total plateforme</div></div></div></div>
+  <div class="page" id="page-parametres"><div style="margin-bottom:1.5rem"><h2 style="font-family:'Playfair Display',serif;font-weight:800;font-size:1.3rem;color:white">Paramètres plateforme</h2></div><div class="card"><div class="card-body" style="text-align:center;padding:3rem"><div style="font-size:3rem;margin-bottom:1rem">⚙️</div><div style="font-family:'Playfair Display',serif;font-weight:700;font-size:1.1rem;color:white">Configuration globale de la plateforme</div></div></div></div>
 
 </div></main>
 
@@ -401,7 +401,7 @@
 <div class="modal-overlay" id="addModal" onclick="if(event.target===this)closeModal()">
   <div class="modal">
     <button class="modal-close" onclick="closeModal()">✕</button>
-    <div style="font-family:'Syne',sans-serif;font-weight:800;font-size:1.2rem;color:white;margin-bottom:.25rem">Ajouter une université</div>
+    <div style="font-family:'Playfair Display',serif;font-weight:800;font-size:1.2rem;color:white;margin-bottom:.25rem">Ajouter une université</div>
     <p style="font-size:.83rem;color:rgba(255,255,255,0.4);margin-bottom:1.5rem">Créer un nouvel espace université sur la plateforme</p>
     <div style="display:grid;grid-template-columns:1fr 1fr;gap:1rem">
       <div class="form-group"><label>Nom de l'université *</label><input class="form-input" placeholder="Ex: Université de Lomé"/></div>

@@ -5,7 +5,7 @@
   <meta charset="UTF-8"/>
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no"/>
   <title>UniManage Mobile</title>
-  <link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=Inter:wght@300;400;500;600&display=swap" rel="stylesheet"/>
+  <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;600;700;800;900&family=Inter:wght@300;400;500;600&display=swap" rel="stylesheet"/>
   <style>
     :root{
       --navy:#0D1B2A;--blue:#1A56DB;--sky:#3B82F6;
@@ -26,7 +26,7 @@
       padding:0 1rem;flex-shrink:0;
       position:sticky;top:0;z-index:100;
     }
-    .header-logo{font-family:'Syne',sans-serif;font-weight:800;font-size:1.1rem;color:var(--navy);}
+    .header-logo{font-family:'Playfair Display',serif;font-weight:800;font-size:1.1rem;color:var(--navy);}
     .header-logo span{color:var(--blue);}
     .header-right{display:flex;align-items:center;gap:.6rem;}
     .header-btn{width:36px;height:36px;border-radius:10px;border:1px solid var(--border);background:white;display:flex;align-items:center;justify-content:center;font-size:1rem;cursor:pointer;position:relative;transition:all .2s;}
@@ -77,7 +77,7 @@
     /* ── CARDS ── */
     .card{background:white;border:1px solid var(--border);border-radius:14px;overflow:hidden;margin-bottom:1rem;}
     .card-header{display:flex;align-items:center;justify-content:space-between;padding:.85rem 1rem;border-bottom:1px solid var(--border);}
-    .card-title{font-family:'Syne',sans-serif;font-weight:700;font-size:.88rem;}
+    .card-title{font-family:'Playfair Display',serif;font-weight:700;font-size:.88rem;}
     .card-body{padding:.85rem 1rem;}
     .card-action{font-size:.78rem;color:var(--blue);font-weight:600;cursor:pointer;background:none;border:none;}
 
@@ -85,7 +85,7 @@
     .kpi-row{display:grid;grid-template-columns:repeat(2,1fr);gap:.75rem;margin-bottom:1rem;}
     .kpi-card{background:white;border:1px solid var(--border);border-radius:12px;padding:.9rem 1rem;}
     .kpi-icon{font-size:1.3rem;margin-bottom:.4rem;}
-    .kpi-val{font-family:'Syne',sans-serif;font-weight:800;font-size:1.4rem;line-height:1;}
+    .kpi-val{font-family:'Playfair Display',serif;font-weight:800;font-size:1.4rem;line-height:1;}
     .kpi-label{font-size:.7rem;color:var(--gray);margin-top:.2rem;}
     .kpi-trend{font-size:.68rem;font-weight:600;margin-top:.2rem;}
     .up{color:var(--success);}
@@ -108,10 +108,10 @@
       background:rgba(26,86,219,0.2);
     }
     .welcome-time{font-size:.72rem;color:rgba(255,255,255,0.5);margin-bottom:.3rem;}
-    .welcome-name{font-family:'Syne',sans-serif;font-weight:800;font-size:1.2rem;}
+    .welcome-name{font-family:'Playfair Display',serif;font-weight:800;font-size:1.2rem;}
     .welcome-role{font-size:.78rem;color:rgba(255,255,255,0.6);margin-top:.2rem;}
     .welcome-stats{display:flex;gap:1.5rem;margin-top:1rem;}
-    .welcome-stat-val{font-family:'Syne',sans-serif;font-weight:800;font-size:1.1rem;}
+    .welcome-stat-val{font-family:'Playfair Display',serif;font-weight:800;font-size:1.1rem;}
     .welcome-stat-label{font-size:.65rem;color:rgba(255,255,255,0.45);margin-top:.1rem;}
 
     /* ── QUICK ACTIONS ── */
@@ -177,7 +177,7 @@
     }
     .note-card:active{background:var(--light);}
     .note-matiere{font-size:.83rem;font-weight:600;}
-    .note-val{font-family:'Syne',sans-serif;font-weight:800;font-size:1rem;}
+    .note-val{font-family:'Playfair Display',serif;font-weight:800;font-size:1rem;}
 
     /* ── PAYMENT ITEM ── */
     .pay-card{
@@ -188,7 +188,7 @@
     .pay-left{}
     .pay-label{font-size:.83rem;font-weight:600;}
     .pay-sub{font-size:.7rem;color:var(--gray);margin-top:.15rem;}
-    .pay-amount{font-family:'Syne',sans-serif;font-weight:800;font-size:1rem;}
+    .pay-amount{font-family:'Playfair Display',serif;font-weight:800;font-size:1rem;}
 
     /* ── BTN ── */
     .btn-full{
@@ -206,7 +206,7 @@
 
     /* ── SECTION TITLE ── */
     .section-title{
-      font-family:'Syne',sans-serif;font-weight:700;font-size:.85rem;
+      font-family:'Playfair Display',serif;font-weight:700;font-size:.85rem;
       color:var(--navy);margin-bottom:.75rem;
       display:flex;align-items:center;justify-content:space-between;
     }
@@ -252,7 +252,7 @@
       font-size:1.6rem;font-weight:800;color:white;
       margin:0 auto .75rem;border:3px solid rgba(255,255,255,0.2);
     }
-    .profile-name{font-family:'Syne',sans-serif;font-weight:800;font-size:1.1rem;color:white;}
+    .profile-name{font-family:'Playfair Display',serif;font-weight:800;font-size:1.1rem;color:white;}
     .profile-meta{font-size:.75rem;color:rgba(255,255,255,0.5);margin-top:.25rem;}
     .profile-badges{display:flex;gap:.4rem;justify-content:center;margin-top:.75rem;flex-wrap:wrap;}
     .profile-item{
@@ -326,7 +326,7 @@
     }
     @keyframes slideUp{from{transform:translateY(100%)}to{transform:translateY(0)}}
     .modal-handle{width:40px;height:4px;border-radius:2px;background:var(--border);margin:0 auto 1rem;}
-    .modal-title{font-family:'Syne',sans-serif;font-weight:800;font-size:1rem;margin-bottom:1rem;}
+    .modal-title{font-family:'Playfair Display',serif;font-weight:800;font-size:1rem;margin-bottom:1rem;}
     .form-group{margin-bottom:.85rem;}
     .form-group label{display:block;font-size:.78rem;font-weight:600;color:var(--navy);margin-bottom:.35rem;}
     .form-input{width:100%;padding:.7rem .9rem;border-radius:10px;border:1.5px solid var(--border);font-size:.9rem;font-family:'Inter',sans-serif;color:var(--navy);outline:none;}
@@ -536,7 +536,7 @@
   <div class="screen" id="screen-etudiantsList">
     <div style="display:flex;align-items:center;gap:.75rem;margin-bottom:1rem">
       <button onclick="switchScreen('home')" style="background:none;border:none;cursor:pointer;font-size:1.2rem">←</button>
-      <div style="font-family:'Syne',sans-serif;font-weight:700;font-size:1rem">Étudiants</div>
+      <div style="font-family:'Playfair Display',serif;font-weight:700;font-size:1rem">Étudiants</div>
     </div>
     <input style="width:100%;padding:.7rem 1rem;border:1.5px solid var(--border);border-radius:11px;font-size:.875rem;font-family:'Inter',sans-serif;outline:none;margin-bottom:1rem" placeholder="🔍 Rechercher..."/>
     <div class="card">
@@ -554,7 +554,7 @@
   <div class="screen" id="screen-notes">
     <div style="display:flex;align-items:center;gap:.75rem;margin-bottom:1rem">
       <button onclick="switchScreen('home')" style="background:none;border:none;cursor:pointer;font-size:1.2rem">←</button>
-      <div style="font-family:'Syne',sans-serif;font-weight:700;font-size:1rem">Notes & Résultats</div>
+      <div style="font-family:'Playfair Display',serif;font-weight:700;font-size:1rem">Notes & Résultats</div>
     </div>
     <!-- Récap -->
     <div class="kpi-row">
@@ -582,11 +582,11 @@
   <div class="screen" id="screen-paiements">
     <div style="display:flex;align-items:center;gap:.75rem;margin-bottom:1rem">
       <button onclick="switchScreen('home')" style="background:none;border:none;cursor:pointer;font-size:1.2rem">←</button>
-      <div style="font-family:'Syne',sans-serif;font-weight:700;font-size:1rem">Paiements</div>
+      <div style="font-family:'Playfair Display',serif;font-weight:700;font-size:1rem">Paiements</div>
     </div>
     <div style="background:linear-gradient(135deg,var(--success),#059669);border-radius:16px;padding:1.25rem;text-align:center;margin-bottom:1rem;color:white">
       <div style="font-size:.78rem;opacity:.7;margin-bottom:.3rem">Scolarité 2024–2025</div>
-      <div style="font-family:'Syne',sans-serif;font-weight:800;font-size:1.8rem">250 000 FCFA</div>
+      <div style="font-family:'Playfair Display',serif;font-weight:800;font-size:1.8rem">250 000 FCFA</div>
       <div style="font-size:.8rem;opacity:.8;margin-top:.25rem">ENTIÈREMENT SOLDÉE ✓</div>
     </div>
     <div class="section-title">Historique</div>
@@ -604,7 +604,7 @@
     <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:1rem">
       <div style="display:flex;align-items:center;gap:.75rem">
         <button onclick="switchScreen('home')" style="background:none;border:none;cursor:pointer;font-size:1.2rem">←</button>
-        <div style="font-family:'Syne',sans-serif;font-weight:700;font-size:1rem">Messages</div>
+        <div style="font-family:'Playfair Display',serif;font-weight:700;font-size:1rem">Messages</div>
       </div>
       <button onclick="showToast('✏️ Nouveau message')" style="padding:.4rem .85rem;border-radius:8px;background:var(--blue);color:white;border:none;font-size:.78rem;font-weight:600;cursor:pointer">+ Nouveau</button>
     </div>
@@ -625,7 +625,7 @@
     <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:1rem">
       <div style="display:flex;align-items:center;gap:.75rem">
         <button onclick="switchScreen('home')" style="background:none;border:none;cursor:pointer;font-size:1.2rem">←</button>
-        <div style="font-family:'Syne',sans-serif;font-weight:700;font-size:1rem">Notifications</div>
+        <div style="font-family:'Playfair Display',serif;font-weight:700;font-size:1rem">Notifications</div>
       </div>
       <button onclick="showToast('✅ Tout marqué comme lu')" style="font-size:.75rem;color:var(--blue);font-weight:600;background:none;border:none;cursor:pointer">Tout lire</button>
     </div>
