@@ -275,8 +275,26 @@
       </table>
     </div>
   </div>
-  <div class="page" id="page-etudiants"><div style="margin-bottom:1.5rem"><h2 style="font-family:'Playfair Display',serif;font-weight:800;font-size:1.3rem">Mes étudiants</h2></div><div class="card"><div class="card-body" style="text-align:center;padding:3rem"><div style="font-size:3rem;margin-bottom:1rem">🎓</div><div style="font-family:'Playfair Display',serif;font-weight:700;font-size:1.1rem">287 étudiants encadrés ce semestre</div></div></div></div>
-  <div class="page" id="page-examens"><div style="margin-bottom:1.5rem"><h2 style="font-family:'Playfair Display',serif;font-weight:800;font-size:1.3rem">Mes examens</h2></div><div class="card"><div class="card-body" style="text-align:center;padding:3rem"><div style="font-size:3rem;margin-bottom:1rem">📋</div><div style="font-family:'Playfair Display',serif;font-weight:700;font-size:1.1rem">3 examens programmés · Session 2</div></div></div></div>
+  <div class="page" id="page-etudiants">
+    <div style="margin-bottom:1.5rem"><h2 style="font-family:'Playfair Display',serif;font-weight:800;font-size:1.3rem">Mes étudiants</h2><div style="font-size:.85rem;color:var(--gray);margin-top:.2rem" id="et2-sub">Chargement...</div></div>
+    <div class="card">
+      <div class="card-header"><div class="card-title">Liste des étudiants encadrés</div></div>
+      <table class="data-table">
+        <thead><tr><th>#</th><th>Étudiant</th><th>Matricule</th><th>Département</th><th>Niveau</th><th>Matière(s)</th><th>Statut</th></tr></thead>
+        <tbody id="tbodyMesEtudiants"><tr><td colspan="7" style="text-align:center;color:var(--gray);padding:2rem">Chargement...</td></tr></tbody>
+      </table>
+    </div>
+  </div>
+  <div class="page" id="page-examens">
+    <div style="margin-bottom:1.5rem"><h2 style="font-family:'Playfair Display',serif;font-weight:800;font-size:1.3rem">Mes examens</h2><div style="font-size:.85rem;color:var(--gray);margin-top:.2rem" id="ex2-sub">Chargement...</div></div>
+    <div class="card">
+      <div class="card-header"><div class="card-title">Examens programmés</div></div>
+      <table class="data-table">
+        <thead><tr><th>Matière</th><th>Jour</th><th>Créneau</th><th>Salle</th><th>Classe</th><th>Action</th></tr></thead>
+        <tbody id="tbodyMesExamens"><tr><td colspan="6" style="text-align:center;color:var(--gray);padding:2rem">Chargement...</td></tr></tbody>
+      </table>
+    </div>
+  </div>
 
 </div></main>
 
@@ -584,11 +602,45 @@
         }).join('');
   }
 
+  // ── Mes étudiants (Supabase) ──
+  async function loadMesEtudiants(teacherRecord) {
+    const { data, error } = await supabaseClient
+      .from('grades').select('student_id, matiere, students(full_name, matricule, department, level, status)')
+      .eq('teacher_id', teacherRecord.id);
+    if (error) { console.error(error); return; }
+    const byStudent = {};
+    (data || []).forEach(g => {
+      if (!g.students) return;
+      if (!byStudent[g.student_id]) byStudent[g.student_id] = { ...g.students, matieres: new Set() };
+      byStudent[g.student_id].matieres.add(g.matiere);
+    });
+    const list = Object.values(byStudent);
+    document.getElementById('et2-sub').textContent = `${list.length} étudiant(s) encadré(s) ce semestre`;
+    const tbody = document.getElementById('tbodyMesEtudiants');
+    if (list.length === 0) { tbody.innerHTML = '<tr><td colspan="7" style="text-align:center;color:var(--gray);padding:2rem">Aucun étudiant inscrit à vos cours.</td></tr>'; return; }
+    tbody.innerHTML = list.map((s, i) => {
+      const badge = s.status === 'Actif' ? 'badge-success' : s.status === 'Suspendu' ? 'badge-danger' : 'badge-gray';
+      return `<tr><td style="color:var(--gray)">${String(i + 1).padStart(3, '0')}</td><td><strong>${s.full_name}</strong></td><td style="color:var(--gray)">${s.matricule}</td><td>${s.department || '—'}</td><td>${s.level || '—'}</td><td style="font-size:.78rem;color:var(--gray)">${[...s.matieres].join(', ')}</td><td><span class="badge ${badge}">${s.status || '—'}</span></td></tr>`;
+    }).join('');
+  }
+
+  // ── Mes examens (Supabase) ──
+  async function loadMesExamens(teacherRecord) {
+    const { data, error } = await supabaseClient
+      .from('schedule_slots').select('*')
+      .eq('teacher_id', teacherRecord.id).eq('type', 'Examen');
+    if (error) { console.error(error); return; }
+    document.getElementById('ex2-sub').textContent = `${(data || []).length} examen(s) programmé(s)`;
+    const tbody = document.getElementById('tbodyMesExamens');
+    if (!data || data.length === 0) { tbody.innerHTML = '<tr><td colspan="6" style="text-align:center;color:var(--gray);padding:2rem">Aucun examen programmé.</td></tr>'; return; }
+    tbody.innerHTML = data.map(s => `<tr><td><strong>${s.matiere}</strong></td><td>${s.jour}</td><td>${s.creneau}</td><td>${s.salle || '—'}</td><td>${s.department || ''} ${s.level || ''}</td><td><button class="btn-primary" style="padding:.35rem .8rem;font-size:.78rem" onclick="showPage('notes')">📝 Notes</button></td></tr>`).join('');
+  }
+
   window.authReady.then(async user => {
     if (!user) return;
     loadMonProfilEnseignant(user);
     const { data: rec } = await supabaseClient.from('teachers').select('*').eq('profile_id', user.id).maybeSingle();
-    if (rec) { loadSaisieNotes(rec); setupPresences(rec); loadMonPlanning(rec); }
+    if (rec) { loadSaisieNotes(rec); setupPresences(rec); loadMonPlanning(rec); loadMesEtudiants(rec); loadMesExamens(rec); }
   });
 </script>
 </body>

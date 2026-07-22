@@ -388,12 +388,102 @@
   </div>
 
   <!-- ══ PAGES PLACEHOLDER ══ -->
-  <div class="page" id="page-abonnements"><div style="margin-bottom:1.5rem"><h2 style="font-family:'Playfair Display',serif;font-weight:800;font-size:1.3rem;color:white">Abonnements</h2></div><div class="card"><div class="card-body" style="text-align:center;padding:3rem"><div style="font-size:3rem;margin-bottom:1rem">📋</div><div style="font-family:'Playfair Display',serif;font-weight:700;font-size:1.1rem;color:white">52 abonnements actifs · 3 expirés</div></div></div></div>
-  <div class="page" id="page-activite"><div style="margin-bottom:1.5rem"><h2 style="font-family:'Playfair Display',serif;font-weight:800;font-size:1.3rem;color:white">Activité</h2></div><div class="card"><div class="card-body" style="text-align:center;padding:3rem"><div style="font-size:3rem;margin-bottom:1rem">📊</div><div style="font-family:'Playfair Display',serif;font-weight:700;font-size:1.1rem;color:white">2 847 actions aujourd'hui · 48K utilisateurs actifs</div></div></div></div>
-  <div class="page" id="page-incidents"><div style="margin-bottom:1.5rem"><h2 style="font-family:'Playfair Display',serif;font-weight:800;font-size:1.3rem;color:white">Incidents</h2></div><div class="card"><div class="card-body" style="text-align:center;padding:3rem"><div style="font-size:3rem;margin-bottom:1rem">⚠️</div><div style="font-family:'Playfair Display',serif;font-weight:700;font-size:1.1rem;color:white">2 incidents actifs · Priorité haute</div></div></div></div>
+  <div class="page" id="page-abonnements">
+    <div style="margin-bottom:1.5rem"><h2 style="font-family:'Playfair Display',serif;font-weight:800;font-size:1.3rem;color:white">Abonnements</h2><div style="font-size:.85rem;color:rgba(255,255,255,0.4);margin-top:.2rem">52 abonnements actifs · 3 expirés</div></div>
+    <div class="card">
+      <div class="card-header"><div class="card-title">Abonnements par université</div></div>
+      <table class="data-table">
+        <thead><tr><th>Université</th><th>Plan</th><th>Prix / mois</th><th>Prochain renouvellement</th><th>Statut</th></tr></thead>
+        <tbody>
+          <tr><td><div style="font-weight:600;color:white">Université de Lomé</div></td><td><span class="badge badge-blue">Pro</span></td><td>75 000 FCFA</td><td>05 fév. 2025</td><td><span class="badge badge-success">Actif</span></td></tr>
+          <tr><td><div style="font-weight:600;color:white">UCAO Abidjan</div></td><td><span class="badge badge-purple">Enterprise</span></td><td>Sur devis</td><td>18 fév. 2025</td><td><span class="badge badge-success">Actif</span></td></tr>
+          <tr><td><div style="font-weight:600;color:white">UGB Saint-Louis</div></td><td><span class="badge badge-blue">Pro</span></td><td>75 000 FCFA</td><td>22 fév. 2025</td><td><span class="badge badge-success">Actif</span></td></tr>
+          <tr><td><div style="font-weight:600;color:white">IAM Cotonou</div></td><td><span class="badge badge-gray">Starter</span></td><td>25 000 FCFA</td><td>26 jan. 2025</td><td><span class="badge badge-gold">Trial — 3j restants</span></td></tr>
+          <tr><td><div style="font-weight:600;color:white">ESSEC Douala</div></td><td><span class="badge badge-purple">Enterprise</span></td><td>Sur devis</td><td>02 mars 2025</td><td><span class="badge badge-success">Actif</span></td></tr>
+          <tr><td><div style="font-weight:600;color:white">ISIG Lomé</div></td><td><span class="badge badge-gray">Starter</span></td><td>25 000 FCFA</td><td>12 jan. 2025</td><td><span class="badge badge-danger">Expiré</span></td></tr>
+          <tr><td><div style="font-weight:600;color:white">UAC Cotonou</div></td><td><span class="badge badge-gray">Starter</span></td><td>25 000 FCFA</td><td>08 jan. 2025</td><td><span class="badge badge-danger">Expiré</span></td></tr>
+          <tr><td><div style="font-weight:600;color:white">Université de Ouagadougou</div></td><td><span class="badge badge-blue">Pro</span></td><td>75 000 FCFA</td><td>30 déc. 2024</td><td><span class="badge badge-danger">Expiré</span></td></tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+  <div class="page" id="page-activite">
+    <div style="margin-bottom:1.5rem"><h2 style="font-family:'Playfair Display',serif;font-weight:800;font-size:1.3rem;color:white">Activité</h2><div style="font-size:.85rem;color:rgba(255,255,255,0.4);margin-top:.2rem">2 847 actions aujourd'hui · 48K utilisateurs actifs</div></div>
+    <div class="kpi-grid" style="grid-template-columns:repeat(3,1fr)">
+      <div class="kpi-card"><div class="kpi-icon" style="background:rgba(26,86,219,0.15)">👥</div><div class="kpi-value" style="color:var(--sky)">48K</div><div class="kpi-label">Utilisateurs actifs (30j)</div><div class="kpi-trend trend-up">▲ +6% vs mois dernier</div></div>
+      <div class="kpi-card"><div class="kpi-icon" style="background:rgba(16,185,129,0.15)">⚡</div><div class="kpi-value" style="color:var(--success)">2 847</div><div class="kpi-label">Actions aujourd'hui</div><div class="kpi-trend trend-up">▲ Pic à 11h</div></div>
+      <div class="kpi-card"><div class="kpi-icon" style="background:rgba(245,158,11,0.15)">🔥</div><div class="kpi-value" style="color:var(--gold)">312</div><div class="kpi-label">Connexions simultanées (pic)</div></div>
+    </div>
+    <div class="card">
+      <div class="card-header"><div class="card-title">Activité récente par établissement</div></div>
+      <table class="data-table">
+        <thead><tr><th>Action</th><th>Université</th><th>Utilisateur</th><th>Quand</th></tr></thead>
+        <tbody>
+          <tr><td>📝 45 notes saisies</td><td>Université de Lomé</td><td>Dr. Kodjo Mensah + 12 autres</td><td>Il y a 12 min</td></tr>
+          <tr><td>🎓 8 nouvelles inscriptions</td><td>UCAO Abidjan</td><td>Service scolarité</td><td>Il y a 34 min</td></tr>
+          <tr><td>💳 150 000 FCFA encaissés</td><td>UCAO Abidjan</td><td>Paiement Wave</td><td>Il y a 1h</td></tr>
+          <tr><td>✅ 287 présences enregistrées</td><td>UGB Saint-Louis</td><td>12 enseignants</td><td>Il y a 2h</td></tr>
+          <tr><td>📢 1 annonce diffusée</td><td>Université de Lomé</td><td>Direction académique</td><td>Il y a 3h</td></tr>
+          <tr><td>🔑 214 connexions</td><td>ESSEC Douala</td><td>Étudiants</td><td>Aujourd'hui</td></tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+  <div class="page" id="page-incidents">
+    <div style="margin-bottom:1.5rem"><h2 style="font-family:'Playfair Display',serif;font-weight:800;font-size:1.3rem;color:white">Incidents</h2><div style="font-size:.85rem;color:rgba(255,255,255,0.4);margin-top:.2rem">2 incidents actifs · Priorité haute</div></div>
+    <div class="card">
+      <div class="card-header"><div class="card-title">Incidents</div></div>
+      <table class="data-table">
+        <thead><tr><th>Incident</th><th>Université</th><th>Priorité</th><th>Statut</th><th>Ouvert depuis</th></tr></thead>
+        <tbody>
+          <tr><td>🐌 Lenteur de chargement — module Paiements</td><td>UCAO Abidjan</td><td><span class="badge badge-danger">Haute</span></td><td><span class="badge badge-gold">En cours</span></td><td>2h 15min</td></tr>
+          <tr><td>📧 Échec d'envoi des reçus par email</td><td>IAM Cotonou</td><td><span class="badge badge-danger">Haute</span></td><td><span class="badge badge-gold">En cours</span></td><td>45 min</td></tr>
+          <tr><td>🔄 Retard de synchronisation — sauvegarde nocturne</td><td>Toutes universités</td><td><span class="badge badge-blue">Moyenne</span></td><td><span class="badge badge-success">Résolu</span></td><td>Résolu il y a 6h</td></tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
   <div class="page" id="page-logs"><div style="margin-bottom:1.5rem"><h2 style="font-family:'Playfair Display',serif;font-weight:800;font-size:1.3rem;color:white">Logs système</h2></div><div class="card"><div class="card-body" style="padding:1.25rem;font-family:monospace;font-size:.78rem;color:var(--success);background:#050a10;border-radius:8px"><div>[2025-01-22 09:32:11] ✅ Paiement reçu — UCAO Abidjan — 150 000 FCFA</div><div style="margin-top:.4rem">[2025-01-22 09:18:45] 🏛️ Nouvelle inscription — ISIG Lomé — Plan Starter</div><div style="margin-top:.4rem">[2025-01-22 08:55:12] 🔄 Backup automatique — 52 bases de données — OK</div><div style="margin-top:.4rem">[2025-01-22 08:00:00] ✅ Uptime check — 99.9% — Tous systèmes opérationnels</div><div style="margin-top:.4rem;color:var(--gold)">[2025-01-21 23:45:02] ⚠️ Tentative connexion suspecte — IP bloquée</div><div style="margin-top:.4rem">[2025-01-21 22:00:00] 🔄 Déploiement v2.4.1 — Succès</div></div></div></div>
-  <div class="page" id="page-admins"><div style="margin-bottom:1.5rem"><h2 style="font-family:'Playfair Display',serif;font-weight:800;font-size:1.3rem;color:white">Admins plateforme</h2></div><div class="card"><div class="card-body" style="text-align:center;padding:3rem"><div style="font-size:3rem;margin-bottom:1rem">👑</div><div style="font-family:'Playfair Display',serif;font-weight:700;font-size:1.1rem;color:white">3 Super Admins · Accès total plateforme</div></div></div></div>
-  <div class="page" id="page-parametres"><div style="margin-bottom:1.5rem"><h2 style="font-family:'Playfair Display',serif;font-weight:800;font-size:1.3rem;color:white">Paramètres plateforme</h2></div><div class="card"><div class="card-body" style="text-align:center;padding:3rem"><div style="font-size:3rem;margin-bottom:1rem">⚙️</div><div style="font-family:'Playfair Display',serif;font-weight:700;font-size:1.1rem;color:white">Configuration globale de la plateforme</div></div></div></div>
+  <div class="page" id="page-admins">
+    <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:1.5rem">
+      <div><h2 style="font-family:'Playfair Display',serif;font-weight:800;font-size:1.3rem;color:white">Admins plateforme</h2><div style="font-size:.85rem;color:rgba(255,255,255,0.4);margin-top:.2rem">3 Super Admins · Accès total plateforme</div></div>
+      <button onclick="showToast('👑 Invitation envoyée')" style="padding:.65rem 1.2rem;border-radius:9px;background:var(--purple);color:white;font-size:.875rem;font-weight:600;cursor:pointer;border:none">+ Inviter un admin</button>
+    </div>
+    <div class="card">
+      <table class="data-table">
+        <thead><tr><th>Nom</th><th>Email</th><th>Rôle</th><th>Dernière connexion</th></tr></thead>
+        <tbody>
+          <tr><td><div style="font-weight:600;color:white">Lynx Adangbalo</div></td><td>delldigital1@gmail.com</td><td><span class="badge badge-purple">Super Admin</span></td><td>Aujourd'hui, 09h12</td></tr>
+          <tr><td><div style="font-weight:600;color:white">Support UniManage</div></td><td>support@unimanage.app</td><td><span class="badge badge-purple">Super Admin</span></td><td>Hier, 18h40</td></tr>
+          <tr><td><div style="font-weight:600;color:white">Ops Plateforme</div></td><td>ops@unimanage.app</td><td><span class="badge badge-blue">Admin technique</span></td><td>Il y a 3 jours</td></tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+  <div class="page" id="page-parametres">
+    <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:1.5rem">
+      <div><h2 style="font-family:'Playfair Display',serif;font-weight:800;font-size:1.3rem;color:white">Paramètres plateforme</h2><div style="font-size:.85rem;color:rgba(255,255,255,0.4);margin-top:.2rem">Configuration globale de la plateforme</div></div>
+      <button onclick="showToast('✅ Paramètres enregistrés')" style="padding:.65rem 1.2rem;border-radius:9px;background:var(--purple);color:white;font-size:.875rem;font-weight:600;cursor:pointer;border:none">💾 Sauvegarder</button>
+    </div>
+    <div class="dash-grid">
+      <div class="card">
+        <div class="card-header"><div class="card-title">Informations plateforme</div></div>
+        <div class="card-body">
+          <div class="form-group"><label>Nom de la plateforme</label><input class="form-input" type="text" value="UniManage"/></div>
+          <div class="form-group"><label>Email support</label><input class="form-input" type="email" value="support@unimanage.app"/></div>
+          <div class="form-group"><label>Devise par défaut</label><input class="form-input" type="text" value="FCFA"/></div>
+        </div>
+      </div>
+      <div class="card">
+        <div class="card-header"><div class="card-title">Tarification des plans</div></div>
+        <div class="card-body">
+          <div class="form-group"><label>Starter (FCFA / mois)</label><input class="form-input" type="text" value="25 000"/></div>
+          <div class="form-group"><label>Pro (FCFA / mois)</label><input class="form-input" type="text" value="75 000"/></div>
+          <div class="form-group"><label>Enterprise</label><input class="form-input" type="text" value="Sur devis" readonly/></div>
+        </div>
+      </div>
+    </div>
+  </div>
 
 </div></main>
 
