@@ -87,8 +87,17 @@
     const transactionId = params().get('transaction_id') || params().get('token');
     if (!transactionId) { render('notfound'); return; }
 
-    const { data: payment, error } = await supabaseClient
-      .from('payments').select('*').eq('transaction_id', transactionId).maybeSingle();
+    // Abonnement Dell Digital (transaction_id préfixé DDU-) vs scolarité étudiante
+    // (table payments) — deux flux de paiement distincts, voir subscription_payments.
+    let payment, error;
+    if (transactionId.startsWith('DDU-')) {
+      ({ data: payment, error } = await supabaseClient
+        .from('subscription_payments').select('*').eq('transaction_id', transactionId).maybeSingle());
+      if (payment) payment = { ...payment, amount: payment.amount_fcfa, type: `Abonnement ${payment.plan}`, method: 'CinetPay' };
+    } else {
+      ({ data: payment, error } = await supabaseClient
+        .from('payments').select('*').eq('transaction_id', transactionId).maybeSingle());
+    }
 
     if (error || !payment) { render('notfound'); return; }
 

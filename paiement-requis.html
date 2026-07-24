@@ -1,0 +1,145 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<style>html{visibility:hidden}</style>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>UniManage — Choisissez votre plan</title>
+  <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;600;700;800;900&family=Inter:wght@300;400;500;600&display=swap" rel="stylesheet"/>
+  <style>
+    :root{--navy:#0D1B2A;--blue:#1A56DB;--sky:#3B82F6;--gold:#F59E0B;--light:#F0F4FF;--gray:#64748B;--border:#E2E8F0;--success:#10B981;--danger:#EF4444;--purple:#8B5CF6;}
+    *{margin:0;padding:0;box-sizing:border-box;}
+    body{font-family:'Inter',sans-serif;background:#F8FAFC;color:var(--navy);min-height:100vh;}
+    .topbar{padding:1.25rem 5%;border-bottom:1px solid var(--border);background:white;display:flex;align-items:center;justify-content:space-between;}
+    .logo{font-family:'Playfair Display',serif;font-weight:800;font-size:1.3rem;color:var(--navy);}
+    .logo span{color:var(--blue);}
+    .wrap{max-width:960px;margin:0 auto;padding:3rem 1.5rem;}
+    .head{text-align:center;margin-bottom:2.5rem;}
+    .head h1{font-family:'Playfair Display',serif;font-weight:800;font-size:1.8rem;margin-bottom:.6rem;}
+    .head p{color:var(--gray);font-size:.95rem;}
+    .alert-trial{background:rgba(245,158,11,0.1);border:1px solid rgba(245,158,11,0.3);color:#92400E;border-radius:12px;padding:1rem 1.25rem;font-size:.9rem;margin-bottom:2rem;text-align:center;}
+    .plan-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:1.25rem;}
+    @media(max-width:800px){.plan-grid{grid-template-columns:1fr}}
+    .price-card{background:white;border:1.5px solid var(--border);border-radius:16px;padding:1.75rem;}
+    .price-card.featured{border-color:var(--blue);box-shadow:0 10px 30px rgba(26,86,219,0.12);}
+    .plan-name{font-family:'Playfair Display',serif;font-weight:800;font-size:1.15rem;margin-bottom:.25rem;}
+    .plan-price{font-family:'Playfair Display',serif;font-weight:800;font-size:1.6rem;margin:.75rem 0;}
+    .plan-price span{font-size:.8rem;font-weight:400;color:var(--gray);}
+    .btn-plan{display:block;text-align:center;width:100%;padding:.85rem;border-radius:10px;border:none;font-weight:700;font-size:.9rem;cursor:pointer;margin-top:1.25rem;text-decoration:none;}
+    .btn-plan-fill{background:var(--blue);color:white;}
+    .btn-plan-fill:hover{background:#1344b8;}
+    .btn-plan-outline{background:white;color:var(--navy);border:1.5px solid var(--border);}
+    .btn-plan-outline:hover{border-color:var(--blue);color:var(--blue);}
+    .btn-plan:disabled{opacity:.5;cursor:not-allowed;}
+    .status-msg{text-align:center;margin-top:1.5rem;font-size:.85rem;color:var(--gray);min-height:1.2rem;}
+    .status-msg.error{color:var(--danger);}
+  </style>
+</head>
+<body>
+<div class="topbar">
+  <div class="logo">Uni<span>Manage</span></div>
+  <a href="#" onclick="logout();return false;" style="color:var(--gray);font-size:.85rem;text-decoration:none;">Se déconnecter</a>
+</div>
+
+<div class="wrap">
+  <div class="head">
+    <h1>Votre essai gratuit est terminé</h1>
+    <p>Choisissez un plan pour continuer à utiliser UniManage.</p>
+  </div>
+  <div id="trialAlert" class="alert-trial" style="display:none"></div>
+
+  <div class="plan-grid">
+    <div class="price-card">
+      <div class="plan-name">Starter</div>
+      <div style="font-size:.8rem;color:var(--gray)">Jusqu'à 300 étudiants</div>
+      <div class="plan-price">25 000 <span>FCFA / mois</span></div>
+      <button class="btn-plan btn-plan-outline" onclick="payer('starter')" id="btn-starter">Choisir Starter</button>
+    </div>
+    <div class="price-card featured">
+      <div class="plan-name">Pro</div>
+      <div style="font-size:.8rem;color:var(--gray)">Jusqu'à 1 500 étudiants</div>
+      <div class="plan-price">75 000 <span>FCFA / mois</span></div>
+      <button class="btn-plan btn-plan-fill" onclick="payer('pro')" id="btn-pro">Choisir Pro</button>
+    </div>
+    <div class="price-card">
+      <div class="plan-name">Enterprise</div>
+      <div style="font-size:.8rem;color:var(--gray)">Étudiants illimités</div>
+      <div class="plan-price">Sur devis</div>
+      <a class="btn-plan btn-plan-outline" href="https://wa.me/22898069111" target="_blank">Nous contacter</a>
+    </div>
+  </div>
+
+  <div id="statusMsg" class="status-msg"></div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script src="supabase-config.js"></script>
+<script src="auth-guard.js"></script>
+<script>
+  // Page volontairement en dehors du gate de requireAuth() (elle EST la
+  // destination du gate) : vérifie juste la session, sans re-déclencher le
+  // contrôle d'essai qui provoquerait une boucle de redirection.
+  let currentSession = null;
+
+  async function init() {
+    const { data: { session } } = await supabaseClient.auth.getSession();
+    if (!session) { window.location.href = 'login.html'; return; }
+    currentSession = session;
+
+    const { data: profile } = await supabaseClient.from('profiles').select('*').eq('id', session.user.id).single();
+    if (profile && profile.university) {
+      const { data: uni } = await supabaseClient.from('universities').select('status, trial_ends_at').eq('name', profile.university).maybeSingle();
+      if (uni && uni.status === 'Actif') {
+        // Abonnement déjà actif (payé entretemps, ou faux positif) — retour au tableau de bord.
+        window.location.href = 'dashboard.html';
+        return;
+      }
+      if (uni && uni.trial_ends_at) {
+        const alertEl = document.getElementById('trialAlert');
+        alertEl.style.display = 'block';
+        alertEl.textContent = `⏳ Votre essai de 14 jours s'est terminé le ${new Date(uni.trial_ends_at).toLocaleDateString('fr-FR')}.`;
+      }
+    }
+    document.documentElement.style.visibility = 'visible';
+  }
+
+  async function payer(plan) {
+    const statusEl = document.getElementById('statusMsg');
+    statusEl.className = 'status-msg';
+    statusEl.textContent = '⏳ Préparation du paiement…';
+    document.getElementById('btn-starter').disabled = true;
+    document.getElementById('btn-pro').disabled = true;
+
+    try {
+      const resp = await fetch(`${SUPABASE_URL}/functions/v1/initier-paiement-abonnement`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${currentSession.access_token}`,
+        },
+        body: JSON.stringify({ plan }),
+      });
+      const data = await resp.json();
+      if (!resp.ok || data.erreur) {
+        statusEl.className = 'status-msg error';
+        statusEl.textContent = '⚠️ ' + (data.erreur || data.error || 'Erreur inconnue');
+        document.getElementById('btn-starter').disabled = false;
+        document.getElementById('btn-pro').disabled = false;
+        return;
+      }
+      if (data.mode === 'sandbox') {
+        statusEl.textContent = `🧪 Mode sandbox (CinetPay pas encore activé) — transaction ${data.transaction_id} créée.`;
+      }
+      window.location.href = data.url_paiement + (data.url_paiement.includes('?') ? '&' : '?') + 'transaction_id=' + data.transaction_id;
+    } catch (e) {
+      statusEl.className = 'status-msg error';
+      statusEl.textContent = '⚠️ Impossible de contacter le service de paiement.';
+      document.getElementById('btn-starter').disabled = false;
+      document.getElementById('btn-pro').disabled = false;
+    }
+  }
+
+  init();
+</script>
+</body>
+</html>

@@ -472,5 +472,14 @@
   </div>
 </footer>
 
+<script>
+  // Capte le code d'affilié Dell Digital Partner (?ref=...) et le mémorise :
+  // l'université peut visiter maintenant et s'inscrire plus tard.
+  (function () {
+    var ref = new URLSearchParams(window.location.search).get('ref');
+    if (ref) localStorage.setItem('dd_ref_affilie', ref);
+  })();
+</script>
+
 </body>
 </html>

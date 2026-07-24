@@ -1001,6 +1001,14 @@
   let selectedPlan = 'pro';
   const totalSteps = 6;
 
+  const PLAN_PRICES_FCFA = { starter: 25000, pro: 75000, enterprise: null }; // enterprise = sur devis
+  const REF_AFFILIE_STORAGE_KEY = 'dd_ref_affilie';
+  // Au cas où un lien d'affilié pointe directement ici plutôt que sur index.html.
+  (function () {
+    var ref = new URLSearchParams(window.location.search).get('ref');
+    if (ref) localStorage.setItem(REF_AFFILIE_STORAGE_KEY, ref);
+  })();
+
   // ── Navigation ──
   function goStep(n) {
     // Validation basique step 1
@@ -1173,6 +1181,8 @@
   // ── Create account ──
   async function createAccount() {
     const university = document.getElementById('f_nom').value || 'Mon Université';
+    const pays = document.getElementById('f_pays').value || 'Togo';
+    const ville = document.getElementById('f_ville').value || '';
     const email = document.getElementById('f_email_admin').value.trim();
     const fname = document.getElementById('f_prenom').value;
     const lname = document.getElementById('f_lnom').value;
@@ -1183,13 +1193,22 @@
       return;
     }
 
+    // Le compte admin ET la ligne universities (essai 14j) sont créés ensemble par
+    // le trigger handle_new_user() côté DB — universities reste écriture-superadmin
+    // only côté RLS, donc on ne peut pas l'insérer directement depuis le client ici.
+    const refAffilie = localStorage.getItem(REF_AFFILIE_STORAGE_KEY) || null;
     const { data, error } = await supabaseClient.auth.signUp({
       email, password: pass,
       options: {
         data: {
           role: 'admin',
           university,
-          full_name: `${fname} ${lname}`.trim()
+          full_name: `${fname} ${lname}`.trim(),
+          onboarding_country: pays,
+          onboarding_city: ville,
+          onboarding_plan: selectedPlan,
+          onboarding_price_monthly: PLAN_PRICES_FCFA[selectedPlan],
+          onboarding_ref_affilie: refAffilie,
         }
       }
     });
