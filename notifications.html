@@ -139,27 +139,19 @@
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <script src="supabase-config.js"></script>
 <script src="auth-guard.js"></script>
-<script>requireAuth();</script>
+<script>window.authReady = requireAuth('admin');</script>
 
 <aside class="sidebar">
   <div class="sidebar-brand">
     <div class="brand-name">Uni<span>Manage</span></div>
-    <div class="brand-sub">🔔 Système de Notifications</div>
+    <div class="brand-sub">🔔 Notifications par email</div>
   </div>
   <nav class="sidebar-nav">
     <div class="nav-group">Envoi</div>
     <div class="nav-it active" onclick="showPage('composer')">✉️ Composer & Envoyer</div>
-    <div class="nav-it" onclick="showPage('templates')">📋 Templates</div>
-    <div class="nav-it" onclick="showPage('programmees')">⏱️ Programmées<span class="nav-badge">3</span></div>
-    <div class="nav-group">Automatisation</div>
-    <div class="nav-it" onclick="showPage('automatique')">🤖 Règles auto.</div>
-    <div class="nav-it" onclick="showPage('declencheurs')">⚡ Déclencheurs</div>
-    <div class="nav-group">Historique & Stats</div>
+    <div class="nav-it" onclick="showPage('templates')">📋 Modèles</div>
+    <div class="nav-group">Suivi</div>
     <div class="nav-it" onclick="showPage('historique')">📜 Historique</div>
-    <div class="nav-it" onclick="showPage('statistiques')">📊 Statistiques</div>
-    <div class="nav-group">Configuration</div>
-    <div class="nav-it" onclick="showPage('canaux')">📡 Canaux (SMS/Email)</div>
-    <div class="nav-it" onclick="showPage('parametres')">⚙️ Paramètres</div>
   </nav>
   <div class="sidebar-footer">
     <button class="btn-back-dash" onclick="window.location.href='dashboard.html'">← Tableau de bord</button>
@@ -169,11 +161,7 @@
 <header class="topbar">
   <div>
     <div class="page-title" id="pageTitle">Composer & Envoyer</div>
-    <div style="font-size:.78rem;color:var(--gray)">Université de Lomé · Centre de notifications</div>
-  </div>
-  <div class="topbar-right">
-    <button class="btn-outline" onclick="showPage('statistiques')">📊 Statistiques</button>
-    <button class="btn-primary" onclick="showPage('composer')">✉️ Nouvelle notification</button>
+    <div style="font-size:.78rem;color:var(--gray)" id="topbarSub">Chargement...</div>
   </div>
 </header>
 
@@ -183,10 +171,10 @@
   <div class="page active" id="page-composer">
 
     <div class="kpi-grid">
-      <div class="kpi-card"><div class="kpi-icon" style="background:rgba(16,185,129,0.1)">📱</div><div class="kpi-value" style="color:var(--success)">2 847</div><div class="kpi-label">SMS envoyés ce mois</div><div class="kpi-trend trend-up">▲ Taux livraison 98%</div></div>
-      <div class="kpi-card"><div class="kpi-icon" style="background:rgba(26,86,219,0.1)">📧</div><div class="kpi-value" style="color:var(--blue)">5 124</div><div class="kpi-label">Emails envoyés ce mois</div><div class="kpi-trend trend-up">▲ Taux ouverture 67%</div></div>
-      <div class="kpi-card"><div class="kpi-icon" style="background:rgba(139,92,246,0.1)">🔔</div><div class="kpi-value" style="color:var(--purple)">1 248</div><div class="kpi-label">Push notifications</div><div class="kpi-trend trend-up">▲ Taux clic 42%</div></div>
-      <div class="kpi-card"><div class="kpi-icon" style="background:rgba(245,158,11,0.1)">⏱️</div><div class="kpi-value" style="color:var(--gold)">3</div><div class="kpi-label">Envois programmés</div><div class="kpi-trend">Prochain : demain 08h</div></div>
+      <div class="kpi-card"><div class="kpi-icon" style="background:rgba(26,86,219,0.1)">📧</div><div class="kpi-value" style="color:var(--blue)" id="kpi-emails-mois">—</div><div class="kpi-label">Emails envoyés ce mois</div></div>
+      <div class="kpi-card"><div class="kpi-icon" style="background:rgba(16,185,129,0.1)">📤</div><div class="kpi-value" style="color:var(--success)" id="kpi-envois-total">—</div><div class="kpi-label">Envois au total</div></div>
+      <div class="kpi-card"><div class="kpi-icon" style="background:rgba(139,92,246,0.1)">🎓</div><div class="kpi-value" style="color:var(--purple)" id="kpi-nb-etudiants">—</div><div class="kpi-label">Étudiants joignables</div></div>
+      <div class="kpi-card"><div class="kpi-icon" style="background:rgba(245,158,11,0.1)">👨‍🏫</div><div class="kpi-value" style="color:var(--gold)" id="kpi-nb-enseignants">—</div><div class="kpi-label">Enseignants joignables</div></div>
     </div>
 
     <!-- Composer -->
@@ -197,37 +185,26 @@
       <div class="form-group">
         <label>Canaux d'envoi</label>
         <div class="channel-grid">
-          <div class="channel-btn active" id="ch-email" onclick="toggleChannel('email')">📧 Email</div>
-          <div class="channel-btn active sms" id="ch-sms" onclick="toggleChannel('sms')">📱 SMS</div>
-          <div class="channel-btn active push" id="ch-push" onclick="toggleChannel('push')">🔔 Push</div>
-          <div class="channel-btn" id="ch-whatsapp" onclick="toggleChannel('whatsapp')">💬 WhatsApp</div>
+          <div class="channel-btn active" id="ch-email">📧 Email</div>
+          <div class="channel-btn" style="opacity:.5;cursor:not-allowed" title="Bientôt disponible — nécessite un fournisseur SMS">📱 SMS <span style="font-size:.68rem;margin-left:.3rem">(bientôt)</span></div>
+          <div class="channel-btn" style="opacity:.5;cursor:not-allowed" title="Bientôt disponible">🔔 Push <span style="font-size:.68rem;margin-left:.3rem">(bientôt)</span></div>
+          <div class="channel-btn" style="opacity:.5;cursor:not-allowed" title="Bientôt disponible">💬 WhatsApp <span style="font-size:.68rem;margin-left:.3rem">(bientôt)</span></div>
         </div>
       </div>
 
       <div class="form-row">
         <div class="form-group">
           <label>Destinataires *</label>
-          <select class="form-select" id="recipients" onchange="updateRecipients()">
-            <option value="1248">👥 Tous les étudiants (1 248)</option>
-            <option value="287">💻 Informatique L2 (287)</option>
-            <option value="401">📊 Gestion (401 étudiants)</option>
-            <option value="312">⚖️ Droit (312 étudiants)</option>
-            <option value="87">👨‍🏫 Tous les enseignants (87)</option>
-            <option value="8">👔 Équipe administrative (8)</option>
-            <option value="2495">🌍 Étudiants + Parents (2 495)</option>
+          <select class="form-select" id="recipientType" onchange="updateRecipientsPreview()">
+            <option value="etudiants">🎓 Tous les étudiants</option>
+            <option value="enseignants">👨‍🏫 Tous les enseignants</option>
+            <option value="tous">🌍 Étudiants + enseignants</option>
           </select>
         </div>
         <div class="form-group">
-          <label>Type de notification</label>
-          <select class="form-select" id="notifType">
-            <option>📢 Annonce générale</option>
-            <option>📝 Résultats disponibles</option>
-            <option>⚠️ Alerte urgente</option>
-            <option>💳 Rappel paiement</option>
-            <option>📅 Rappel examen</option>
-            <option>🔄 Modification emploi du temps</option>
-            <option>🎓 Cérémonie / Événement</option>
-            <option>📋 Convocation</option>
+          <label>Département (optionnel)</label>
+          <select class="form-select" id="recipientDept" onchange="updateRecipientsPreview()">
+            <option value="">Tous les départements</option>
           </select>
         </div>
       </div>
@@ -235,49 +212,26 @@
       <!-- Recipients preview -->
       <div class="recipients-preview">
         <div style="display:flex;align-items:center;justify-content:space-between">
-          <div><div style="font-size:.75rem;color:var(--gray);margin-bottom:.2rem">Destinataires sélectionnés</div><div class="recipients-count" id="recipientsCount">1 248 personnes</div></div>
-          <button class="btn-outline" style="font-size:.78rem;padding:.4rem .85rem" onclick="showToast('📋 Liste des destinataires ouverte')">Voir la liste</button>
-        </div>
-        <div class="recipients-breakdown">
-          <span>📧 <strong id="emailCount">1 248</strong> emails</span>
-          <span>📱 <strong id="smsCount">1 182</strong> SMS</span>
-          <span>🔔 <strong id="pushCount">876</strong> push</span>
-          <span style="color:var(--gray)">Coût estimé SMS : <strong id="smsCost">18 270 FCFA</strong></span>
+          <div><div style="font-size:.75rem;color:var(--gray);margin-bottom:.2rem">Destinataires réels correspondant à ce critère</div><div class="recipients-count" id="recipientsCount">—</div></div>
         </div>
       </div>
 
       <div class="form-group">
-        <label>Objet / Titre *</label>
+        <label>Objet *</label>
         <input class="form-input" id="notifTitle" placeholder="Ex: Résultats du Semestre 1 disponibles"/>
       </div>
 
       <div class="form-group">
         <label>Message *</label>
-        <textarea class="form-textarea" id="notifBody" placeholder="Rédigez votre message ici...&#10;&#10;Vous pouvez utiliser des variables : {prenom}, {nom}, {matricule}, {departement}, {moyenne}"></textarea>
-        <div style="display:flex;justify-content:space-between;margin-top:.35rem;font-size:.72rem;color:var(--gray)">
-          <span>💡 Variables disponibles : {prenom} {nom} {matricule} {departement}</span>
-          <span id="charCount">0 / 160 caractères SMS</span>
-        </div>
+        <textarea class="form-textarea" id="notifBody" placeholder="Rédigez votre message ici..."></textarea>
+        <div style="font-size:.72rem;color:var(--gray);margin-top:.35rem">💡 Chaque email commence automatiquement par "Bonjour {Prénom Nom},"</div>
       </div>
 
-      <div class="form-row">
-        <div class="form-group">
-          <label>Programmation</label>
-          <select class="form-select" id="scheduleType" onchange="toggleSchedule()">
-            <option value="now">🚀 Envoyer maintenant</option>
-            <option value="later">⏱️ Programmer pour plus tard</option>
-          </select>
-        </div>
-        <div class="form-group" id="scheduleDateTime" style="display:none">
-          <label>Date & heure d'envoi</label>
-          <input class="form-input" type="datetime-local"/>
-        </div>
-      </div>
+      <div id="sendError" style="display:none;background:rgba(239,68,68,0.08);color:var(--danger);border:1px solid rgba(239,68,68,0.2);padding:.75rem 1rem;border-radius:8px;font-size:.85rem;margin-bottom:1rem"></div>
+      <div id="sendSuccess" style="display:none;background:rgba(16,185,129,0.08);color:var(--success);border:1px solid rgba(16,185,129,0.2);padding:.75rem 1rem;border-radius:8px;font-size:.85rem;margin-bottom:1rem"></div>
 
       <div style="display:flex;gap:1rem;align-items:center;flex-wrap:wrap">
-        <button class="btn-send" onclick="sendNotification()">📤 Envoyer la notification</button>
-        <button class="btn-outline" onclick="showToast('👁️ Aperçu de la notification')">👁️ Aperçu</button>
-        <button class="btn-outline" onclick="showToast('💾 Brouillon sauvegardé')">💾 Brouillon</button>
+        <button class="btn-send" id="sendBtn" onclick="sendNotification()">📤 Envoyer l'email</button>
       </div>
     </div>
 
@@ -285,98 +239,30 @@
     <div class="card">
       <div class="card-header"><div class="card-title">📜 Derniers envois</div><button class="card-action" onclick="showPage('historique')">Voir tout →</button></div>
       <table class="data-table">
-        <thead><tr><th>Notification</th><th>Canaux</th><th>Destinataires</th><th>Envoyé</th><th>Taux livraison</th><th>Statut</th></tr></thead>
-        <tbody>
-          <tr><td><strong>📊 Résultats S1 publiés</strong></td><td><span class="badge badge-blue">Email</span> <span class="badge badge-success">SMS</span></td><td>1 248</td><td>Aujourd'hui 09h32</td><td><span style="color:var(--success);font-weight:700">98%</span></td><td><span class="badge badge-success">✓ Envoyé</span></td></tr>
-          <tr><td><strong>📅 Report examen Réseaux</strong></td><td><span class="badge badge-blue">Email</span> <span class="badge badge-success">SMS</span> <span class="badge badge-purple">Push</span></td><td>287</td><td>Hier 14h00</td><td><span style="color:var(--success);font-weight:700">97%</span></td><td><span class="badge badge-success">✓ Envoyé</span></td></tr>
-          <tr><td><strong>💳 Rappel paiement tranche 3</strong></td><td><span class="badge badge-blue">Email</span> <span class="badge badge-success">SMS</span></td><td>187</td><td>18 Jan 2025</td><td><span style="color:var(--success);font-weight:700">96%</span></td><td><span class="badge badge-success">✓ Envoyé</span></td></tr>
-          <tr><td><strong>📢 Réunion direction — 25 Jan</strong></td><td><span class="badge badge-blue">Email</span></td><td>8</td><td>17 Jan 2025</td><td><span style="color:var(--success);font-weight:700">100%</span></td><td><span class="badge badge-success">✓ Envoyé</span></td></tr>
-        </tbody>
+        <thead><tr><th>Objet</th><th>Destinataires</th><th>Envoyés</th><th>Échecs</th><th>Date</th><th>Statut</th></tr></thead>
+        <tbody id="recent-tbody"><tr><td colspan="6" style="text-align:center;color:var(--gray);padding:2rem">Chargement...</td></tr></tbody>
       </table>
     </div>
   </div>
 
   <!-- ══ TEMPLATES ══ -->
   <div class="page" id="page-templates">
-    <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:1.5rem">
-      <div><h2 style="font-family:'Playfair Display',serif;font-weight:800;font-size:1.3rem">📋 Templates de notifications</h2></div>
-      <button class="btn-primary" onclick="showToast('✏️ Nouveau template créé')">+ Créer un template</button>
-    </div>
+    <div style="margin-bottom:1.5rem"><h2 style="font-family:'Playfair Display',serif;font-weight:800;font-size:1.3rem">📋 Modèles de message</h2><div style="font-size:.85rem;color:var(--gray);margin-top:.2rem">Cliquez pour pré-remplir le composeur — sans variable dynamique pour l'instant, à ajuster avant l'envoi</div></div>
     <div class="template-grid">
-      <div class="template-card" onclick="useTemplate('Résultats disponibles','Bonjour {prenom}, vos résultats du Semestre 1 sont disponibles sur UniManage. Votre moyenne : {moyenne}/20. Connectez-vous pour voir le détail.')"><div class="template-icon">📊</div><div class="template-name">Résultats disponibles</div><div class="template-desc">Notifie les étudiants de la publication de leurs résultats avec leur moyenne.</div><div class="template-channels"><span class="badge badge-blue">Email</span><span class="badge badge-success">SMS</span><span class="badge badge-purple">Push</span></div></div>
-      <div class="template-card" onclick="useTemplate('Rappel paiement scolarité','Cher(e) {prenom}, votre paiement de scolarité est dû. Montant restant : {montant} FCFA. Payez via Wave ou Orange Money pour éviter la suspension de vos accès.')"><div class="template-icon">💳</div><div class="template-name">Rappel paiement scolarité</div><div class="template-desc">Rappel automatique aux étudiants ayant un solde impayé avec lien de paiement.</div><div class="template-channels"><span class="badge badge-blue">Email</span><span class="badge badge-success">SMS</span></div></div>
-      <div class="template-card" onclick="useTemplate('Rappel examen','Bonjour {prenom}, vous êtes convoqué(e) à l\'examen de {matiere} le {date} à {heure} — Salle {salle}, Place N°{place}. Munissez-vous de votre carte étudiant.')"><div class="template-icon">📝</div><div class="template-name">Convocation examen</div><div class="template-desc">Envoi des convocations avec salle, heure et numéro de place automatiquement.</div><div class="template-channels"><span class="badge badge-blue">Email</span><span class="badge badge-success">SMS</span></div></div>
-      <div class="template-card" onclick="useTemplate('Absence signalée','Bonjour, une absence de {nom_etudiant} a été signalée le {date} au cours de {matiere}. Veuillez fournir un justificatif dans les 48h.')"><div class="template-icon">⚠️</div><div class="template-name">Alerte absence (parents)</div><div class="template-desc">Notifie les parents en cas d'absence de leur enfant avec demande de justificatif.</div><div class="template-channels"><span class="badge badge-blue">Email</span><span class="badge badge-success">SMS</span></div></div>
-      <div class="template-card" onclick="useTemplate('Modification emploi du temps','Attention {prenom}, votre emploi du temps du {date} a été modifié. Cours de {matiere} déplacé à {nouvelle_heure} — Salle {salle}.')"><div class="template-icon">📅</div><div class="template-name">Modification planning</div><div class="template-desc">Alerte rapide en cas de changement d'emploi du temps ou annulation de cours.</div><div class="template-channels"><span class="badge badge-success">SMS</span><span class="badge badge-purple">Push</span></div></div>
-      <div class="template-card" onclick="useTemplate('Bienvenue sur UniManage','Bienvenue {prenom} ! Votre compte UniManage est activé. Matricule : {matricule}. Connectez-vous sur app.unimanage.app avec votre email et mot de passe.')"><div class="template-icon">🎉</div><div class="template-name">Bienvenue nouvel étudiant</div><div class="template-desc">Message de bienvenue avec identifiants envoyé lors de l'activation du compte.</div><div class="template-channels"><span class="badge badge-blue">Email</span><span class="badge badge-success">SMS</span></div></div>
-      <div class="template-card" onclick="useTemplate('Fiche de paie disponible','Bonjour Dr. {prenom}, votre fiche de paie du mois de {mois} est disponible. Montant net : {montant} FCFA. Connectez-vous à votre espace enseignant.')"><div class="template-icon">💰</div><div class="template-name">Fiche de paie enseignant</div><div class="template-desc">Notifie les enseignants de la disponibilité de leur fiche de paie mensuelle.</div><div class="template-channels"><span class="badge badge-blue">Email</span></div></div>
-      <div class="template-card" style="border:2px dashed var(--border);display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center;cursor:pointer;min-height:160px" onclick="showToast('✏️ Créer un template personnalisé')"><div style="font-size:2rem;margin-bottom:.5rem">+</div><div style="font-size:.85rem;font-weight:600;color:var(--gray)">Template personnalisé</div></div>
+      <div class="template-card" onclick="useTemplate('Résultats disponibles','Vos résultats sont désormais disponibles sur votre espace UniManage. Connectez-vous pour consulter le détail de vos notes.')"><div class="template-icon">📊</div><div class="template-name">Résultats disponibles</div><div class="template-desc">Notifie les étudiants de la publication de leurs résultats.</div></div>
+      <div class="template-card" onclick="useTemplate('Rappel — paiement de scolarité','Nous vous rappelons que votre paiement de scolarité est en attente. Merci de régulariser votre situation sur votre espace UniManage.')"><div class="template-icon">💳</div><div class="template-name">Rappel paiement scolarité</div><div class="template-desc">Rappel aux étudiants ayant un solde impayé.</div></div>
+      <div class="template-card" onclick="useTemplate('Modification de l\'emploi du temps','Votre emploi du temps a été modifié. Merci de consulter votre espace UniManage pour voir les changements.')"><div class="template-icon">📅</div><div class="template-name">Modification planning</div><div class="template-desc">Alerte en cas de changement d'emploi du temps.</div></div>
+      <div class="template-card" onclick="useTemplate('Bienvenue sur UniManage','Bienvenue sur UniManage ! Votre compte est désormais actif. Connectez-vous avec votre email pour accéder à votre espace.')"><div class="template-icon">🎉</div><div class="template-name">Bienvenue nouvel étudiant</div><div class="template-desc">Message de bienvenue lors de l'activation d'un compte.</div></div>
     </div>
-  </div>
-
-  <!-- ══ AUTOMATIQUE ══ -->
-  <div class="page" id="page-automatique">
-    <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:1.5rem">
-      <div><h2 style="font-family:'Playfair Display',serif;font-weight:800;font-size:1.3rem">🤖 Règles d'automatisation</h2><div style="font-size:.85rem;color:var(--gray)">Notifications déclenchées automatiquement selon les événements</div></div>
-      <button class="btn-primary" onclick="showToast('⚡ Nouvelle règle créée')">+ Nouvelle règle</button>
-    </div>
-    <div class="rule-card"><div class="rule-icon" style="background:rgba(16,185,129,0.1)">📊</div><div class="rule-body"><div class="rule-name">Publication des résultats</div><div class="rule-desc">Quand les résultats sont publiés → Notifier tous les étudiants concernés + leurs parents</div><div class="rule-channels"><span class="badge badge-blue">Email</span><span class="badge badge-success">SMS</span><span class="badge badge-purple">Push</span></div></div><div class="toggle-sw on" onclick="this.classList.toggle('on');this.classList.toggle('off');showToast('🔄 Règle mise à jour')"></div></div>
-    <div class="rule-card"><div class="rule-icon" style="background:rgba(239,68,68,0.1)">⚠️</div><div class="rule-body"><div class="rule-name">Absence détectée</div><div class="rule-desc">Quand une absence est saisie → Notifier les parents par SMS dans les 2h</div><div class="rule-channels"><span class="badge badge-success">SMS</span><span class="badge badge-blue">Email</span></div></div><div class="toggle-sw on" onclick="this.classList.toggle('on');this.classList.toggle('off');showToast('🔄 Règle mise à jour')"></div></div>
-    <div class="rule-card"><div class="rule-icon" style="background:rgba(245,158,11,0.1)">💳</div><div class="rule-body"><div class="rule-name">Impayé — J-7 échéance</div><div class="rule-desc">7 jours avant la date d'échéance → Rappel SMS + Email à l'étudiant et ses parents</div><div class="rule-channels"><span class="badge badge-success">SMS</span><span class="badge badge-blue">Email</span></div></div><div class="toggle-sw on" onclick="this.classList.toggle('on');this.classList.toggle('off');showToast('🔄 Règle mise à jour')"></div></div>
-    <div class="rule-card"><div class="rule-icon" style="background:rgba(26,86,219,0.1)">📝</div><div class="rule-body"><div class="rule-name">Rappel examen — J-3</div><div class="rule-desc">3 jours avant un examen → Rappel automatique avec convocation aux étudiants concernés</div><div class="rule-channels"><span class="badge badge-success">SMS</span><span class="badge badge-purple">Push</span></div></div><div class="toggle-sw on" onclick="this.classList.toggle('on');this.classList.toggle('off');showToast('🔄 Règle mise à jour')"></div></div>
-    <div class="rule-card"><div class="rule-icon" style="background:rgba(16,185,129,0.1)">🎉</div><div class="rule-body"><div class="rule-name">Nouveau compte étudiant</div><div class="rule-desc">À la création d'un compte étudiant → Envoi des identifiants par Email + SMS</div><div class="rule-channels"><span class="badge badge-blue">Email</span><span class="badge badge-success">SMS</span></div></div><div class="toggle-sw on" onclick="this.classList.toggle('on');this.classList.toggle('off');showToast('🔄 Règle mise à jour')"></div></div>
-    <div class="rule-card"><div class="rule-icon" style="background:rgba(139,92,246,0.1)">💰</div><div class="rule-body"><div class="rule-name">Fiche de paie disponible</div><div class="rule-desc">Chaque fin de mois → Notifier les enseignants de la disponibilité de leur fiche de paie</div><div class="rule-channels"><span class="badge badge-blue">Email</span></div></div><div class="toggle-sw on" onclick="this.classList.toggle('on');this.classList.toggle('off');showToast('🔄 Règle mise à jour')"></div></div>
-    <div class="rule-card"><div class="rule-icon" style="background:rgba(245,158,11,0.1)">⏰</div><div class="rule-body"><div class="rule-name">Cours annulé ou reporté</div><div class="rule-desc">En cas de modification d'emploi du temps → Alerte immédiate par SMS aux étudiants</div><div class="rule-channels"><span class="badge badge-success">SMS</span><span class="badge badge-purple">Push</span></div></div><div class="toggle-sw off" onclick="this.classList.toggle('on');this.classList.toggle('off');showToast('🔄 Règle mise à jour')"></div></div>
   </div>
 
   <!-- ══ HISTORIQUE ══ -->
   <div class="page" id="page-historique">
-    <div style="margin-bottom:1.5rem"><h2 style="font-family:'Playfair Display',serif;font-weight:800;font-size:1.3rem">📜 Historique des envois</h2></div>
-    <div>
-      <div class="history-item"><div class="history-icon" style="background:rgba(26,86,219,0.1)">📊</div><div class="history-body"><div class="history-title">Résultats S1 publiés</div><div class="history-meta">Aujourd'hui 09h32 · Email + SMS · 1 248 destinataires</div><div class="history-stats"><span style="color:var(--success)">✓ 1 223 livrés (98%)</span><span style="color:var(--gold)">👁️ 836 ouverts (67%)</span><span style="color:var(--danger)">✗ 25 échecs</span></div></div><span class="badge badge-success">✓ Envoyé</span></div>
-      <div class="history-item"><div class="history-icon" style="background:rgba(239,68,68,0.1)">📅</div><div class="history-body"><div class="history-title">Report examen Réseaux Info L2</div><div class="history-meta">Hier 14h00 · Email + SMS + Push · 287 destinataires</div><div class="history-stats"><span style="color:var(--success)">✓ 279 livrés (97%)</span><span style="color:var(--gold)">👁️ 241 ouverts (86%)</span><span style="color:var(--danger)">✗ 8 échecs</span></div></div><span class="badge badge-success">✓ Envoyé</span></div>
-      <div class="history-item"><div class="history-icon" style="background:rgba(245,158,11,0.1)">💳</div><div class="history-body"><div class="history-title">Rappel paiement tranche 3</div><div class="history-meta">18 Jan 2025 · Email + SMS · 187 destinataires</div><div class="history-stats"><span style="color:var(--success)">✓ 180 livrés (96%)</span><span style="color:var(--gold)">👁️ 124 ouverts (69%)</span><span style="color:var(--danger)">✗ 7 échecs</span></div></div><span class="badge badge-success">✓ Envoyé</span></div>
-      <div class="history-item"><div class="history-icon" style="background:rgba(16,185,129,0.1)">🎉</div><div class="history-body"><div class="history-title">Bienvenue — 12 nouveaux étudiants</div><div class="history-meta">15 Jan 2025 · Email + SMS · 12 destinataires</div><div class="history-stats"><span style="color:var(--success)">✓ 12 livrés (100%)</span><span style="color:var(--gold)">👁️ 11 ouverts (92%)</span></div></div><span class="badge badge-success">✓ Envoyé</span></div>
+    <div style="margin-bottom:1.5rem"><h2 style="font-family:'Playfair Display',serif;font-weight:800;font-size:1.3rem">📜 Historique des envois</h2><div style="font-size:.85rem;color:var(--gray);margin-top:.2rem" id="hist-sub">Chargement...</div></div>
+    <div id="hist-list">
+      <div style="text-align:center;color:var(--gray);padding:2rem">Chargement...</div>
     </div>
   </div>
-
-  <!-- ══ STATISTIQUES ══ -->
-  <div class="page" id="page-statistiques">
-    <div style="margin-bottom:1.5rem"><h2 style="font-family:'Playfair Display',serif;font-weight:800;font-size:1.3rem">📊 Statistiques de notifications</h2></div>
-    <div class="kpi-grid">
-      <div class="kpi-card"><div class="kpi-icon" style="background:rgba(16,185,129,0.1)">📤</div><div class="kpi-value" style="color:var(--success)">9 219</div><div class="kpi-label">Notifications totales</div><div class="kpi-trend trend-up">Ce mois</div></div>
-      <div class="kpi-card"><div class="kpi-icon" style="background:rgba(26,86,219,0.1)">✅</div><div class="kpi-value" style="color:var(--blue)">97.8%</div><div class="kpi-label">Taux de livraison</div><div class="kpi-trend trend-up">▲ +0.3%</div></div>
-      <div class="kpi-card"><div class="kpi-icon" style="background:rgba(245,158,11,0.1)">👁️</div><div class="kpi-value" style="color:var(--gold)">67%</div><div class="kpi-label">Taux d'ouverture email</div><div class="kpi-trend trend-up">▲ +5%</div></div>
-      <div class="kpi-card"><div class="kpi-icon" style="background:rgba(139,92,246,0.1)">💰</div><div class="kpi-value" style="color:var(--purple)">42 750</div><div class="kpi-label">FCFA coût SMS total</div><div class="kpi-trend">2 850 SMS × 15 FCFA</div></div>
-    </div>
-    <div class="dash-grid">
-      <div class="card">
-        <div class="card-header"><div class="card-title">Performance par canal</div></div>
-        <div class="card-body">
-          <div class="stat-row"><span class="stat-label">📧 Email — Taux ouverture</span><div class="stat-bar"><div class="stat-bar-fill" style="width:67%;background:var(--blue)"></div></div><span class="stat-pct" style="color:var(--blue)">67%</span></div>
-          <div class="stat-row"><span class="stat-label">📱 SMS — Taux livraison</span><div class="stat-bar"><div class="stat-bar-fill" style="width:98%;background:var(--success)"></div></div><span class="stat-pct" style="color:var(--success)">98%</span></div>
-          <div class="stat-row"><span class="stat-label">🔔 Push — Taux clic</span><div class="stat-bar"><div class="stat-bar-fill" style="width:42%;background:var(--purple)"></div></div><span class="stat-pct" style="color:var(--purple)">42%</span></div>
-          <div class="stat-row"><span class="stat-label">💬 WhatsApp — Taux lu</span><div class="stat-bar"><div class="stat-bar-fill" style="width:89%;background:var(--gold)"></div></div><span class="stat-pct" style="color:var(--gold)">89%</span></div>
-        </div>
-      </div>
-      <div class="card">
-        <div class="card-header"><div class="card-title">Top notifications performantes</div></div>
-        <div class="card-body">
-          <div style="display:flex;flex-direction:column;gap:.75rem">
-            <div style="display:flex;align-items:center;gap:.75rem;padding:.65rem;background:var(--light);border-radius:9px"><span style="font-size:1.1rem">🥇</span><div><div style="font-size:.83rem;font-weight:600">Bienvenue nouvel étudiant</div><div style="font-size:.72rem;color:var(--gray)">92% taux ouverture</div></div></div>
-            <div style="display:flex;align-items:center;gap:.75rem;padding:.65rem;background:var(--light);border-radius:9px"><span style="font-size:1.1rem">🥈</span><div><div style="font-size:.83rem;font-weight:600">Report examen urgent</div><div style="font-size:.72rem;color:var(--gray)">86% taux ouverture</div></div></div>
-            <div style="display:flex;align-items:center;gap:.75rem;padding:.65rem;background:var(--light);border-radius:9px"><span style="font-size:1.1rem">🥉</span><div><div style="font-size:.83rem;font-weight:600">Résultats S1 disponibles</div><div style="font-size:.72rem;color:var(--gray)">67% taux ouverture</div></div></div>
-          </div>
-        </div>
-      </div>
-    </div>
-  </div>
-
-  <!-- PAGES PLACEHOLDER -->
-  <div class="page" id="page-programmees"><div style="margin-bottom:1.5rem"><h2 style="font-family:'Playfair Display',serif;font-weight:800;font-size:1.3rem">⏱️ Notifications programmées</h2></div><div class="card"><div class="card-header"><div class="card-title">3 envois programmés</div></div><table class="data-table"><thead><tr><th>Notification</th><th>Destinataires</th><th>Date d'envoi</th><th>Canaux</th><th>Actions</th></tr></thead><tbody><tr><td><strong>📝 Rappel examen Algo — J-3</strong></td><td>287 étudiants</td><td>31 Jan 2025 · 08h00</td><td><span class="badge badge-success">SMS</span> <span class="badge badge-purple">Push</span></td><td><button class="card-action" onclick="showToast('✏️ Notification modifiée')">Modifier</button> <button class="card-action" style="color:var(--danger)" onclick="showToast('🗑️ Notification annulée')">Annuler</button></td></tr><tr><td><strong>💳 Rappel impayés — Fév</strong></td><td>187 étudiants</td><td>01 Fév 2025 · 09h00</td><td><span class="badge badge-blue">Email</span> <span class="badge badge-success">SMS</span></td><td><button class="card-action" onclick="showToast('✏️ Notification modifiée')">Modifier</button></td></tr><tr><td><strong>📢 Emploi du temps S2</strong></td><td>Tous (1 248)</td><td>03 Fév 2025 · 08h00</td><td><span class="badge badge-blue">Email</span> <span class="badge badge-success">SMS</span> <span class="badge badge-purple">Push</span></td><td><button class="card-action" onclick="showToast('✏️ Notification modifiée')">Modifier</button></td></tr></tbody></table></div></div>
-  <div class="page" id="page-declencheurs"><div style="margin-bottom:1.5rem"><h2 style="font-family:'Playfair Display',serif;font-weight:800;font-size:1.3rem">⚡ Déclencheurs</h2></div><div class="card"><div class="card-body" style="text-align:center;padding:3rem"><div style="font-size:3rem;margin-bottom:1rem">⚡</div><div style="font-family:'Playfair Display',serif;font-weight:700;font-size:1.1rem">Déclencheurs d'événements système</div><div style="color:var(--gray);margin-top:.5rem">Configurez les événements qui déclenchent des notifications automatiques</div></div></div></div>
-  <div class="page" id="page-canaux"><div style="margin-bottom:1.5rem"><h2 style="font-family:'Playfair Display',serif;font-weight:800;font-size:1.3rem">📡 Configuration des canaux</h2></div><div class="card"><div class="card-body"><div style="display:flex;flex-direction:column;gap:1rem"><div style="padding:1rem;background:rgba(16,185,129,0.06);border-radius:12px;border:1px solid rgba(16,185,129,0.15);display:flex;justify-content:space-between;align-items:center"><div><div style="font-weight:700">📱 SMS — Twilio / Africa's Talking</div><div style="font-size:.78rem;color:var(--gray);margin-top:.2rem">Connecté · Crédit restant : 128 500 FCFA</div></div><span class="badge badge-success">● Actif</span></div><div style="padding:1rem;background:rgba(26,86,219,0.06);border-radius:12px;border:1px solid rgba(26,86,219,0.15);display:flex;justify-content:space-between;align-items:center"><div><div style="font-weight:700">📧 Email — SendGrid</div><div style="font-size:.78rem;color:var(--gray);margin-top:.2rem">Connecté · 50 000 emails/mois</div></div><span class="badge badge-success">● Actif</span></div><div style="padding:1rem;background:rgba(139,92,246,0.06);border-radius:12px;border:1px solid rgba(139,92,246,0.15);display:flex;justify-content:space-between;align-items:center"><div><div style="font-weight:700">🔔 Push — Firebase FCM</div><div style="font-size:.78rem;color:var(--gray);margin-top:.2rem">Connecté · Illimité</div></div><span class="badge badge-success">● Actif</span></div><div style="padding:1rem;background:rgba(245,158,11,0.06);border-radius:12px;border:1px solid rgba(245,158,11,0.15);display:flex;justify-content:space-between;align-items:center"><div><div style="font-weight:700">💬 WhatsApp Business API</div><div style="font-size:.78rem;color:var(--gray);margin-top:.2rem">Non configuré</div></div><button class="btn-primary" style="font-size:.78rem;padding:.4rem .85rem" onclick="showToast('⚙️ Configuration WhatsApp ouverte')">Configurer</button></div></div></div></div></div>
-  <div class="page" id="page-parametres"><div style="margin-bottom:1.5rem"><h2 style="font-family:'Playfair Display',serif;font-weight:800;font-size:1.3rem">⚙️ Paramètres notifications</h2></div><div class="card"><div class="card-body" style="text-align:center;padding:3rem"><div style="font-size:3rem;margin-bottom:1rem">⚙️</div><div style="font-family:'Playfair Display',serif;font-weight:700;font-size:1.1rem">Heures d'envoi, fréquences, opt-out</div></div></div></div>
 
 </div></main>
 
@@ -390,69 +276,126 @@
 <div class="toast" id="toast"></div>
 
 <script>
-  const pages=['composer','templates','programmees','automatique','declencheurs','historique','statistiques','canaux','parametres'];
-  const titles={'composer':'Composer & Envoyer','templates':'Templates','programmees':'Programmées','automatique':'Automatisation','declencheurs':'Déclencheurs','historique':'Historique','statistiques':'Statistiques','canaux':'Canaux','parametres':'Paramètres'};
+  const pages=['composer','templates','historique'];
+  const titles={'composer':'Composer & Envoyer','templates':'Modèles','historique':'Historique'};
 
   function showPage(id){pages.forEach(p=>{document.getElementById('page-'+p)?.classList.remove('active');document.querySelectorAll('.nav-it').forEach(n=>{if(n.getAttribute('onclick')?.includes("'"+p+"'"))n.classList.remove('active');});});document.getElementById('page-'+id)?.classList.add('active');document.querySelectorAll('.nav-it').forEach(n=>{if(n.getAttribute('onclick')?.includes("'"+id+"'"))n.classList.add('active');});document.getElementById('pageTitle').textContent=titles[id]||id;}
 
-  function toggleChannel(ch){
-    const el=document.getElementById('ch-'+ch);
-    el.classList.toggle('active');
-    if(ch==='sms') el.classList.toggle('sms',el.classList.contains('active'));
-    if(ch==='push') el.classList.toggle('push',el.classList.contains('active'));
-    updateRecipients();
-  }
+  let allEtudiantsN = [], allEnseignantsN = [], notifLog = [];
 
-  function updateRecipients(){
-    const sel=document.getElementById('recipients');
-    const val=parseInt(sel.value);
-    document.getElementById('recipientsCount').textContent=val.toLocaleString('fr')+' personnes';
-    document.getElementById('emailCount').textContent=val;
-    const smsN=Math.round(val*0.95);
-    document.getElementById('smsCount').textContent=smsN.toLocaleString('fr');
-    document.getElementById('pushCount').textContent=Math.round(val*0.7).toLocaleString('fr');
-    document.getElementById('smsCost').textContent=(smsN*15).toLocaleString('fr')+' FCFA';
-  }
+  window.authReady.then(async user => {
+    if (!user) return;
+    document.getElementById('topbarSub').textContent = `${user.university || ''} · Notifications par email`;
 
-  function toggleSchedule(){
-    const v=document.getElementById('scheduleType').value;
-    document.getElementById('scheduleDateTime').style.display=v==='later'?'block':'none';
-  }
+    const [{ data: studs }, { data: teachs }, { data: log }] = await Promise.all([
+      supabaseClient.from('students').select('email, department').eq('university', user.university),
+      supabaseClient.from('teachers').select('email, department').eq('university', user.university),
+      supabaseClient.from('notification_log').select('*').eq('university', user.university).order('created_at', { ascending: false }),
+    ]);
+    allEtudiantsN = (studs || []).filter(s => s.email);
+    allEnseignantsN = (teachs || []).filter(t => t.email);
+    notifLog = log || [];
 
-  // Character count
-  document.getElementById('notifBody')?.addEventListener('input',function(){
-    document.getElementById('charCount').textContent=this.value.length+' / 160 caractères SMS';
+    document.getElementById('kpi-nb-etudiants').textContent = allEtudiantsN.length;
+    document.getElementById('kpi-nb-enseignants').textContent = allEnseignantsN.length;
+    document.getElementById('kpi-envois-total').textContent = notifLog.length;
+    const now = new Date();
+    const emailsMois = notifLog.filter(n => { const d = new Date(n.created_at); return d.getMonth() === now.getMonth() && d.getFullYear() === now.getFullYear(); }).reduce((s, n) => s + n.sent_count, 0);
+    document.getElementById('kpi-emails-mois').textContent = emailsMois;
+
+    const depts = [...new Set([...allEtudiantsN, ...allEnseignantsN].map(x => x.department).filter(Boolean))];
+    document.getElementById('recipientDept').innerHTML = '<option value="">Tous les départements</option>' + depts.map(d => `<option value="${d}">${d}</option>`).join('');
+
+    updateRecipientsPreview();
+    renderRecent();
+    renderHistorique();
   });
 
-  function sendNotification(){
-    const title=document.getElementById('notifTitle').value;
-    const body=document.getElementById('notifBody').value;
-    if(!title||!body){showToast('⚠️ Veuillez remplir le titre et le message');return;}
-    const overlay=document.getElementById('sendingOverlay');
-    overlay.classList.add('show');
-    const steps=[
-      [500,'Personnalisation des messages...'],
-      [1200,'Envoi des emails...'],
-      [1900,'Envoi des SMS...'],
-      [2600,'Envoi des push notifications...'],
-      [3200,'Finalisation...'],
-    ];
-    steps.forEach(([t,txt])=>setTimeout(()=>{document.getElementById('sendingSub').textContent=txt;},t));
-    setTimeout(()=>{
-      overlay.classList.remove('show');
-      showToast('✅ '+document.getElementById('recipientsCount').textContent+' notifiés avec succès !');
-      document.getElementById('notifTitle').value='';
-      document.getElementById('notifBody').value='';
-    },3800);
+  function updateRecipientsPreview() {
+    const type = document.getElementById('recipientType').value;
+    const dept = document.getElementById('recipientDept').value;
+    const filterDept = arr => dept ? arr.filter(x => x.department === dept) : arr;
+    let count = 0;
+    if (type === 'etudiants' || type === 'tous') count += filterDept(allEtudiantsN).length;
+    if (type === 'enseignants' || type === 'tous') count += filterDept(allEnseignantsN).length;
+    document.getElementById('recipientsCount').textContent = `${count} destinataire(s) avec email renseigné`;
   }
 
-  function useTemplate(name,body){
+  function renderRecent() {
+    const tbody = document.getElementById('recent-tbody');
+    const recent = notifLog.slice(0, 5);
+    tbody.innerHTML = recent.length === 0
+      ? '<tr><td colspan="6" style="text-align:center;color:var(--gray);padding:2rem">Aucun envoi pour le moment.</td></tr>'
+      : recent.map(n => {
+          const badge = n.status === 'Envoyé' ? 'badge-success' : n.status === 'Partiel' ? 'badge-gold' : 'badge-danger';
+          return `<tr><td><strong>${n.subject}</strong></td><td>${n.recipient_count}</td><td style="color:var(--success)">${n.sent_count}</td><td style="color:var(--danger)">${n.failed_count}</td><td>${new Date(n.created_at).toLocaleDateString('fr-FR')}</td><td><span class="badge ${badge}">${n.status}</span></td></tr>`;
+        }).join('');
+  }
+
+  function renderHistorique() {
+    document.getElementById('hist-sub').textContent = `${notifLog.length} envoi(s)`;
+    const listEl = document.getElementById('hist-list');
+    listEl.innerHTML = notifLog.length === 0
+      ? '<div style="text-align:center;color:var(--gray);padding:2rem">Aucun envoi pour le moment.</div>'
+      : notifLog.map(n => {
+          const icon = n.status === 'Envoyé' ? '📧' : n.status === 'Partiel' ? '⚠️' : '❌';
+          const bg = n.status === 'Envoyé' ? 'rgba(16,185,129,0.1)' : n.status === 'Partiel' ? 'rgba(245,158,11,0.1)' : 'rgba(239,68,68,0.1)';
+          return `<div class="history-item"><div class="history-icon" style="background:${bg}">${icon}</div><div class="history-body"><div class="history-title">${n.subject}</div><div class="history-meta">${new Date(n.created_at).toLocaleString('fr-FR')} · Email · ${n.recipient_count} destinataire(s)</div><div class="history-stats"><span style="color:var(--success)">✓ ${n.sent_count} envoyé(s)</span>${n.failed_count > 0 ? `<span style="color:var(--danger)">✗ ${n.failed_count} échec(s)</span>` : ''}</div></div><span class="badge ${n.status === 'Envoyé' ? 'badge-success' : n.status === 'Partiel' ? 'badge-gold' : 'badge-danger'}">${n.status}</span></div>`;
+        }).join('');
+  }
+
+  async function sendNotification() {
+    const errBox = document.getElementById('sendError');
+    const okBox = document.getElementById('sendSuccess');
+    errBox.style.display = 'none';
+    okBox.style.display = 'none';
+
+    const subject = document.getElementById('notifTitle').value.trim();
+    const message = document.getElementById('notifBody').value.trim();
+    const recipient_type = document.getElementById('recipientType').value;
+    const department = document.getElementById('recipientDept').value || undefined;
+
+    if (!subject || !message) {
+      errBox.textContent = '⚠️ Veuillez remplir l\'objet et le message.';
+      errBox.style.display = 'block';
+      return;
+    }
+
+    const btn = document.getElementById('sendBtn');
+    btn.disabled = true;
+    btn.textContent = '📤 Envoi en cours...';
+
+    const { data, error } = await supabaseClient.functions.invoke('send-notification-email', {
+      body: { recipient_type, department, subject, message },
+    });
+
+    btn.disabled = false;
+    btn.textContent = '📤 Envoyer l\'email';
+
+    if (error || data?.error) {
+      let msg = data?.error;
+      if (!msg) { try { const body = await error?.context?.json?.(); msg = body?.error; } catch (e) {} }
+      errBox.textContent = '⚠️ ' + (msg || 'Envoi échoué.');
+      errBox.style.display = 'block';
+      return;
+    }
+
+    okBox.textContent = `✅ ${data.sent_count}/${data.recipient_count} email(s) envoyé(s)` + (data.failed_count > 0 ? ` — ${data.failed_count} échec(s)` : '');
+    okBox.style.display = 'block';
+    document.getElementById('notifTitle').value = '';
+    document.getElementById('notifBody').value = '';
+
+    const { data: log } = await supabaseClient.from('notification_log').select('*').eq('university', window.currentUser.university).order('created_at', { ascending: false });
+    notifLog = log || [];
+    renderRecent();
+    renderHistorique();
+  }
+
+  function useTemplate(name, body) {
     showPage('composer');
-    setTimeout(()=>{
-      document.getElementById('notifTitle').value=name;
-      document.getElementById('notifBody').value=body;
-      showToast('📋 Template "'+name+'" appliqué !');
-    },200);
+    document.getElementById('notifTitle').value = name;
+    document.getElementById('notifBody').value = body;
+    showToast('📋 Modèle "' + name + '" appliqué');
   }
 
   let tt;
