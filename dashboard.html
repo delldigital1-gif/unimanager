@@ -1064,18 +1064,23 @@
        PAGE : PARAMÈTRES
   ══════════════════════════════ -->
   <div class="page" id="page-parametres">
-    <div class="page-header"><div><h2>Paramètres</h2><div style="font-size:.85rem;color:var(--gray);margin-top:.2rem">Configuration de votre université</div></div><button class="btn-add" onclick="showToast('✅ Modifications enregistrées')">💾 Sauvegarder</button></div>
+    <div class="page-header"><div><h2>Paramètres</h2><div style="font-size:.85rem;color:var(--gray);margin-top:.2rem">Configuration de votre université</div></div><button class="btn-add" onclick="saveUniversiteSettings()">💾 Sauvegarder</button></div>
+    <div id="paramsStatus" style="display:none;margin-bottom:1rem;padding:.75rem 1rem;border-radius:8px;font-size:.85rem"></div>
 
     <div class="dash-grid" style="margin-bottom:1.5rem">
       <!-- Infos université -->
       <div class="card">
         <div class="card-header"><div class="card-title">🏛️ Informations université</div></div>
         <div class="card-body">
-          <div class="form-group"><label>Nom officiel</label><input type="text" class="search-input" style="width:100%" value="Université de Lomé"/></div>
-          <div class="form-group"><label>Pays</label><input type="text" class="search-input" style="width:100%" value="Togo"/></div>
-          <div class="form-group"><label>Ville</label><input type="text" class="search-input" style="width:100%" value="Lomé"/></div>
-          <div class="form-group"><label>Email officiel</label><input type="email" class="search-input" style="width:100%" value="contact@univ-lome.tg"/></div>
-          <div class="form-group"><label>Téléphone</label><input type="text" class="search-input" style="width:100%" value="+228 22 XX XX XX"/></div>
+          <div class="form-group">
+            <label>Nom officiel</label>
+            <input type="text" class="search-input" style="width:100%;background:var(--light);cursor:not-allowed" id="param-univ-nom" disabled/>
+            <div style="font-size:.72rem;color:var(--gray);margin-top:.3rem">Non modifiable ici — renommer l'université casserait le lien avec tous ses étudiants/enseignants/paiements existants. Contactez le support pour un renommage.</div>
+          </div>
+          <div class="form-group"><label>Pays</label><input type="text" class="search-input" style="width:100%" id="param-univ-pays"/></div>
+          <div class="form-group"><label>Ville</label><input type="text" class="search-input" style="width:100%" id="param-univ-ville"/></div>
+          <div class="form-group"><label>Email officiel</label><input type="email" class="search-input" style="width:100%" id="param-univ-email"/></div>
+          <div class="form-group"><label>Téléphone</label><input type="text" class="search-input" style="width:100%" id="param-univ-tel"/></div>
         </div>
       </div>
 
@@ -1613,7 +1618,59 @@
     loadEnseignants();
   }
 
-  window.authReady.then(user => { if (user) { loadEtudiants(); loadEnseignants(); loadPaymentsData(); loadEmploiSetup(); loadUtilisateursKpis(user); } });
+  window.authReady.then(user => { if (user) { loadEtudiants(); loadEnseignants(); loadPaymentsData(); loadEmploiSetup(); loadUtilisateursKpis(user); loadUniversiteSettings(user); } });
+
+  // ── Paramètres > Informations université (données réelles Supabase) ──
+  // Le nom (colonne `universities.name`) n'est volontairement pas éditable ici :
+  // c'est la clé utilisée partout par correspondance textuelle pour scoper les
+  // données par établissement (profiles.university, students.university,
+  // teachers.university, payments.university, grades.university) — la
+  // renommer via ce formulaire romprait silencieusement ce rattachement pour
+  // toutes les données déjà créées.
+  async function loadUniversiteSettings(user) {
+    const { data, error } = await supabaseClient
+      .from('universities').select('name, country, city, email, phone')
+      .eq('name', user.university).maybeSingle();
+    if (error) { console.error(error); return; }
+    if (!data) return;
+    const nomEl = document.getElementById('param-univ-nom');
+    if (nomEl) nomEl.value = data.name || '';
+    const paysEl = document.getElementById('param-univ-pays');
+    if (paysEl) paysEl.value = data.country || '';
+    const villeEl = document.getElementById('param-univ-ville');
+    if (villeEl) villeEl.value = data.city || '';
+    const emailEl = document.getElementById('param-univ-email');
+    if (emailEl) emailEl.value = data.email || '';
+    const telEl = document.getElementById('param-univ-tel');
+    if (telEl) telEl.value = data.phone || '';
+  }
+
+  async function saveUniversiteSettings() {
+    const user = window.currentUser;
+    const statusEl = document.getElementById('paramsStatus');
+    if (!user || !statusEl) return;
+
+    const country = document.getElementById('param-univ-pays')?.value.trim() || null;
+    const city = document.getElementById('param-univ-ville')?.value.trim() || null;
+    const email = document.getElementById('param-univ-email')?.value.trim() || null;
+    const phone = document.getElementById('param-univ-tel')?.value.trim() || null;
+
+    const { error } = await supabaseClient
+      .from('universities').update({ country, city, email, phone })
+      .eq('name', user.university);
+
+    statusEl.style.display = 'block';
+    if (error) {
+      statusEl.style.background = 'rgba(239,68,68,0.08)';
+      statusEl.style.color = 'var(--danger)';
+      statusEl.textContent = '⚠️ ' + error.message;
+    } else {
+      statusEl.style.background = 'rgba(16,185,129,0.08)';
+      statusEl.style.color = 'var(--success)';
+      statusEl.textContent = '✅ Informations enregistrées.';
+      setTimeout(() => { statusEl.style.display = 'none'; }, 3000);
+    }
+  }
 
   // ── KPIs de l'onglet Utilisateurs (données réelles Supabase) — la liste
   // "Membres de l'équipe admin" et la "Matrice des permissions" en dessous
