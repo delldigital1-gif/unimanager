@@ -779,10 +779,10 @@
     <div class="page-header"><div><h2>Enseignants</h2><div style="font-size:.85rem;color:var(--gray)" id="enseignantsCount">Chargement...</div></div><button class="btn-add" onclick="openAddEnseignantModal()">+ Ajouter enseignant</button></div>
     <!-- KPIs enseignants -->
     <div class="kpi-grid" style="grid-template-columns:repeat(4,1fr);margin-bottom:1.5rem">
-      <div class="kpi-card"><div class="kpi-icon" style="background:rgba(26,86,219,0.1)">👨‍🏫</div><div class="kpi-body"><div class="kpi-value" style="color:var(--blue)">87</div><div class="kpi-label">Enseignants actifs</div></div></div>
-      <div class="kpi-card"><div class="kpi-icon" style="background:rgba(245,158,11,0.1)">📋</div><div class="kpi-body"><div class="kpi-value" style="color:var(--gold)">12</div><div class="kpi-label">Vacataires</div></div></div>
-      <div class="kpi-card"><div class="kpi-icon" style="background:rgba(16,185,129,0.1)">⏱️</div><div class="kpi-body"><div class="kpi-value" style="color:var(--success)">1 248h</div><div class="kpi-label">Heures ce semestre</div></div></div>
-      <div class="kpi-card"><div class="kpi-icon" style="background:rgba(239,68,68,0.1)">💰</div><div class="kpi-body"><div class="kpi-value" style="color:var(--danger)">12.1M</div><div class="kpi-label">FCFA salaires / mois</div></div></div>
+      <div class="kpi-card"><div class="kpi-icon" style="background:rgba(26,86,219,0.1)">👨‍🏫</div><div class="kpi-body"><div class="kpi-value" style="color:var(--blue)" id="ens-kpi-actifs">—</div><div class="kpi-label">Enseignants actifs</div></div></div>
+      <div class="kpi-card"><div class="kpi-icon" style="background:rgba(245,158,11,0.1)">📋</div><div class="kpi-body"><div class="kpi-value" style="color:var(--gold)" id="ens-kpi-vacataires">—</div><div class="kpi-label">Vacataires</div></div></div>
+      <div class="kpi-card"><div class="kpi-icon" style="background:rgba(16,185,129,0.1)">⏱️</div><div class="kpi-body"><div class="kpi-value" style="color:var(--success)" id="ens-kpi-heures">—</div><div class="kpi-label">Heures ce semestre</div></div></div>
+      <div class="kpi-card"><div class="kpi-icon" style="background:rgba(239,68,68,0.1)">💰</div><div class="kpi-body"><div class="kpi-value" style="color:var(--danger)" id="ens-kpi-salaires">—</div><div class="kpi-label">FCFA salaires / mois</div></div></div>
     </div>
 
     <!-- Filtres + liste -->
@@ -813,23 +813,8 @@
     <div class="card">
       <div class="card-header"><div class="card-title">Volume horaire effectué vs contractuel</div></div>
       <div class="card-body">
-        <div class="progress-list">
-          <div class="progress-item">
-            <div class="progress-top"><span class="progress-name">Informatique & IA — 22 enseignants</span><span class="progress-pct">78%</span></div>
-            <div class="progress-bar"><div class="progress-fill" style="width:78%;background:linear-gradient(90deg,var(--blue),var(--sky))"></div></div>
-          </div>
-          <div class="progress-item">
-            <div class="progress-top"><span class="progress-name">Gestion & Finance — 18 enseignants</span><span class="progress-pct">89%</span></div>
-            <div class="progress-bar"><div class="progress-fill" style="width:89%;background:linear-gradient(90deg,var(--success),#34d399)"></div></div>
-          </div>
-          <div class="progress-item">
-            <div class="progress-top"><span class="progress-name">Droit & Sciences Politiques — 15 enseignants</span><span class="progress-pct">65%</span></div>
-            <div class="progress-bar"><div class="progress-fill" style="width:65%;background:linear-gradient(90deg,var(--gold),#fbbf24)"></div></div>
-          </div>
-          <div class="progress-item">
-            <div class="progress-top"><span class="progress-name">Sciences & Ingénierie — 20 enseignants</span><span class="progress-pct">91%</span></div>
-            <div class="progress-bar"><div class="progress-fill" style="width:91%;background:linear-gradient(90deg,#8b5cf6,#a78bfa)"></div></div>
-          </div>
+        <div class="progress-list" id="ens-volume-horaire">
+          <div style="text-align:center;color:var(--gray);padding:1rem;font-size:.85rem">Chargement…</div>
         </div>
       </div>
     </div>
@@ -1173,10 +1158,10 @@
     <div class="page-header"><div><h2>Utilisateurs & Accès</h2><div style="font-size:.85rem;color:var(--gray);margin-top:.2rem">Gérez les rôles et permissions de votre équipe</div></div><button class="btn-add" onclick="showToast('📧 Invitation envoyée')">+ Inviter utilisateur</button></div>
 
     <div class="kpi-grid" style="grid-template-columns:repeat(4,1fr);margin-bottom:1.5rem">
-      <div class="kpi-card"><div class="kpi-icon" style="background:rgba(26,86,219,0.1)">👑</div><div class="kpi-body"><div class="kpi-value" style="color:var(--blue)">2</div><div class="kpi-label">Super Admins</div></div></div>
-      <div class="kpi-card"><div class="kpi-icon" style="background:rgba(245,158,11,0.1)">👨‍💼</div><div class="kpi-body"><div class="kpi-value" style="color:var(--gold)">8</div><div class="kpi-label">Administrateurs</div></div></div>
-      <div class="kpi-card"><div class="kpi-icon" style="background:rgba(16,185,129,0.1)">👨‍🏫</div><div class="kpi-body"><div class="kpi-value" style="color:var(--success)">87</div><div class="kpi-label">Enseignants</div></div></div>
-      <div class="kpi-card"><div class="kpi-icon" style="background:rgba(139,92,246,0.1)">🎓</div><div class="kpi-body"><div class="kpi-value" style="color:#8b5cf6">1 248</div><div class="kpi-label">Étudiants</div></div></div>
+      <div class="kpi-card"><div class="kpi-icon" style="background:rgba(26,86,219,0.1)">👑</div><div class="kpi-body"><div class="kpi-value" style="color:var(--blue)" id="usr-kpi-superadmins">—</div><div class="kpi-label">Super Admins</div></div></div>
+      <div class="kpi-card"><div class="kpi-icon" style="background:rgba(245,158,11,0.1)">👨‍💼</div><div class="kpi-body"><div class="kpi-value" style="color:var(--gold)" id="usr-kpi-admins">—</div><div class="kpi-label">Administrateurs</div></div></div>
+      <div class="kpi-card"><div class="kpi-icon" style="background:rgba(16,185,129,0.1)">👨‍🏫</div><div class="kpi-body"><div class="kpi-value" style="color:var(--success)" id="usr-kpi-enseignants">—</div><div class="kpi-label">Enseignants</div></div></div>
+      <div class="kpi-card"><div class="kpi-icon" style="background:rgba(139,92,246,0.1)">🎓</div><div class="kpi-body"><div class="kpi-value" style="color:#8b5cf6" id="usr-kpi-etudiants">—</div><div class="kpi-label">Étudiants</div></div></div>
     </div>
 
     <!-- Rôles -->
@@ -1518,6 +1503,44 @@
   function renderEnseignants() {
     document.getElementById('enseignantsCount').textContent = `${allEnseignants.length} enseignants · ${allEnseignants.filter(e=>e.contrat_type==='Vacataire').length} vacataires`;
 
+    // KPIs enseignants (données réelles — remplace les valeurs codées en dur)
+    const actifs = allEnseignants.filter(e => e.status === 'Actif').length;
+    const vacataires = allEnseignants.filter(e => e.contrat_type === 'Vacataire').length;
+    const totalHeures = allEnseignants.reduce((s, e) => s + (e.heures_effectuees || 0), 0);
+    const totalSalaires = allEnseignants.reduce((s, e) => s + (e.heures_effectuees || 0) * (e.taux_horaire || 0), 0);
+    const kpiActifsEl = document.getElementById('ens-kpi-actifs');
+    if (kpiActifsEl) kpiActifsEl.textContent = actifs.toLocaleString('fr-FR');
+    const kpiVacEl = document.getElementById('ens-kpi-vacataires');
+    if (kpiVacEl) kpiVacEl.textContent = vacataires.toLocaleString('fr-FR');
+    const kpiHeuresEl = document.getElementById('ens-kpi-heures');
+    if (kpiHeuresEl) kpiHeuresEl.textContent = totalHeures.toLocaleString('fr-FR') + 'h';
+    const kpiSalEl = document.getElementById('ens-kpi-salaires');
+    if (kpiSalEl) kpiSalEl.textContent = totalSalaires > 0 ? fmtFCFA(totalSalaires) : '0';
+
+    // Volume horaire effectué vs contractuel par département (dérivé de teachers.department)
+    const volEl = document.getElementById('ens-volume-horaire');
+    if (volEl) {
+      const byDept = {};
+      allEnseignants.forEach(e => {
+        const dept = e.department || 'Non renseigné';
+        if (!byDept[dept]) byDept[dept] = { effectuees: 0, max: 0, count: 0 };
+        byDept[dept].effectuees += e.heures_effectuees || 0;
+        byDept[dept].max += e.heures_max || 0;
+        byDept[dept].count++;
+      });
+      const colors = ['linear-gradient(90deg,var(--blue),var(--sky))', 'linear-gradient(90deg,var(--success),#34d399)', 'linear-gradient(90deg,var(--gold),#fbbf24)', 'linear-gradient(90deg,#8b5cf6,#a78bfa)'];
+      const entries = Object.entries(byDept);
+      volEl.innerHTML = entries.length === 0
+        ? '<div style="text-align:center;color:var(--gray);padding:1rem;font-size:.85rem">Aucun enseignant enregistré.</div>'
+        : entries.map(([dept, v], i) => {
+          const pct = v.max > 0 ? Math.round(v.effectuees / v.max * 100) : 0;
+          return `<div class="progress-item">
+            <div class="progress-top"><span class="progress-name">${dept} — ${v.count} enseignant${v.count > 1 ? 's' : ''}</span><span class="progress-pct">${pct}%</span></div>
+            <div class="progress-bar"><div class="progress-fill" style="width:${pct}%;background:${colors[i % colors.length]}"></div></div>
+          </div>`;
+        }).join('');
+    }
+
     const tbody = document.getElementById('enseignants-tbody');
     if (allEnseignants.length === 0) {
       tbody.innerHTML = '<tr><td colspan="8" style="text-align:center;color:var(--gray);padding:2rem">Aucun enseignant trouvé.</td></tr>';
@@ -1590,7 +1613,27 @@
     loadEnseignants();
   }
 
-  window.authReady.then(user => { if (user) { loadEtudiants(); loadEnseignants(); loadPaymentsData(); loadEmploiSetup(); } });
+  window.authReady.then(user => { if (user) { loadEtudiants(); loadEnseignants(); loadPaymentsData(); loadEmploiSetup(); loadUtilisateursKpis(user); } });
+
+  // ── KPIs de l'onglet Utilisateurs (données réelles Supabase) — la liste
+  // "Membres de l'équipe admin" et la "Matrice des permissions" en dessous
+  // restent statiques : elles décrivent des sous-rôles (Directeur, Comptable,
+  // etc.) et un système de permissions granulaire qui n'existent pas dans le
+  // modèle de données actuel (seuls admin/enseignant/etudiant/superadmin/
+  // parent existent réellement).
+  async function loadUtilisateursKpis(user) {
+    let query = supabaseClient.from('profiles').select('role');
+    if (user.role !== 'superadmin') query = query.eq('university', user.university);
+    const { data, error } = await query;
+    if (error) { console.error(error); return; }
+    const profs = data || [];
+    const count = (role) => profs.filter(p => p.role === role).length;
+    const set = (id, n) => { const el = document.getElementById(id); if (el) el.textContent = n.toLocaleString('fr-FR'); };
+    set('usr-kpi-superadmins', count('superadmin'));
+    set('usr-kpi-admins', count('admin'));
+    set('usr-kpi-enseignants', count('enseignant'));
+    set('usr-kpi-etudiants', count('etudiant'));
+  }
 
   // ── Emploi du temps (données réelles Supabase) ──
   const ET_JOURS = ['Lundi','Mardi','Mercredi','Jeudi','Vendredi'];
