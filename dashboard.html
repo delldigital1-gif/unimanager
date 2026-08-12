@@ -409,17 +409,17 @@
     </div>
 
     <div class="nav-group-label">Académique</div>
-    <div class="nav-item" onclick="showPage('etudiants')">
+    <div class="nav-item" data-module="etudiants" onclick="showPage('etudiants')">
       <span class="nav-icon">🎓</span> Étudiants
       <span class="nav-badge">12</span>
     </div>
-    <div class="nav-item" onclick="showPage('enseignants')">
+    <div class="nav-item" data-module="enseignants" onclick="showPage('enseignants')">
       <span class="nav-icon">👨‍🏫</span> Enseignants
     </div>
-    <div class="nav-item" onclick="showPage('emploi-temps')">
+    <div class="nav-item" data-module="emploi_temps" onclick="showPage('emploi-temps')">
       <span class="nav-icon">📅</span> Emploi du temps
     </div>
-    <div class="nav-item" onclick="showPage('examens')">
+    <div class="nav-item" data-module="examens" onclick="showPage('examens')">
       <span class="nav-icon">📝</span> Examens & Résultats
     </div>
     <div class="nav-item" onclick="showPage('departements')">
@@ -427,16 +427,16 @@
     </div>
 
     <div class="nav-group-label">Finance</div>
-    <div class="nav-item" onclick="showPage('comptabilite')">
+    <div class="nav-item" data-module="paiements" onclick="showPage('comptabilite')">
       <span class="nav-icon">💰</span> Comptabilité
     </div>
-    <div class="nav-item" onclick="showPage('paiements')">
+    <div class="nav-item" data-module="paiements" onclick="showPage('paiements')">
       <span class="nav-icon">💳</span> Paiements
       <span class="nav-badge">3</span>
     </div>
 
     <div class="nav-group-label">Système</div>
-    <div class="nav-item" onclick="showPage('parametres')">
+    <div class="nav-item" data-module="parametres" onclick="showPage('parametres')">
       <span class="nav-icon">⚙️</span> Paramètres
     </div>
     <div class="nav-item" onclick="showPage('utilisateurs')">
@@ -598,7 +598,7 @@
         <h2>Étudiants</h2>
         <div style="font-size:.85rem;color:var(--gray);margin-top:.2rem" id="etudiantsCount">Chargement...</div>
       </div>
-      <button class="btn-add" onclick="openAddEtudiantModal()">+ Nouvel étudiant</button>
+      <button class="btn-add" id="btn-add-etudiant" onclick="openAddEtudiantModal()">+ Nouvel étudiant</button>
     </div>
     <div class="search-bar">
       <input class="search-input" id="etudiantsSearch" placeholder="🔍  Rechercher par nom, matricule..." oninput="renderEtudiants()"/>
@@ -662,7 +662,7 @@
       <div style="display:flex;gap:.75rem;flex-wrap:wrap">
         <select id="et_dept" class="filter-select" onchange="onEtDeptChange()"></select>
         <select id="et_niveau" class="filter-select" onchange="loadEmploiDuTemps()"></select>
-        <button class="btn-add" onclick="openCreneauModal()">+ Ajouter créneau</button>
+        <button class="btn-add" id="btn-add-creneau" onclick="openCreneauModal()">+ Ajouter créneau</button>
       </div>
     </div>
     <div class="card" style="overflow-x:auto">
@@ -773,7 +773,7 @@
   </div>
 
   <div class="page" id="page-enseignants">
-    <div class="page-header"><div><h2>Enseignants</h2><div style="font-size:.85rem;color:var(--gray)" id="enseignantsCount">Chargement...</div></div><button class="btn-add" onclick="openAddEnseignantModal()">+ Ajouter enseignant</button></div>
+    <div class="page-header"><div><h2>Enseignants</h2><div style="font-size:.85rem;color:var(--gray)" id="enseignantsCount">Chargement...</div></div><button class="btn-add" id="btn-add-enseignant" onclick="openAddEnseignantModal()">+ Ajouter enseignant</button></div>
     <!-- KPIs enseignants -->
     <div class="kpi-grid" style="grid-template-columns:repeat(4,1fr);margin-bottom:1.5rem">
       <div class="kpi-card"><div class="kpi-icon" style="background:rgba(26,86,219,0.1)">👨‍🏫</div><div class="kpi-body"><div class="kpi-value" style="color:var(--blue)" id="ens-kpi-actifs">—</div><div class="kpi-label">Enseignants actifs</div></div></div>
@@ -905,7 +905,7 @@
     <div class="page-header">
       <div><h2>Paiements & Encaissements</h2><div style="font-size:.85rem;color:var(--gray);margin-top:.2rem">Suivi en temps réel · Année 2024–2025</div></div>
       <div style="display:flex;gap:.75rem">
-        <button class="btn-add" onclick="openPaiementModal()">+ Enregistrer paiement</button>
+        <button class="btn-add" id="btn-add-paiement" onclick="openPaiementModal()">+ Enregistrer paiement</button>
         <button class="btn-outline" style="padding:.6rem 1.2rem;border-radius:9px;font-size:.875rem;font-weight:600;cursor:pointer" onclick="showToast('📄 Export Excel généré')">⬇ Exporter</button>
       </div>
     </div>
@@ -992,7 +992,7 @@
        PAGE : PARAMÈTRES
   ══════════════════════════════ -->
   <div class="page" id="page-parametres">
-    <div class="page-header"><div><h2>Paramètres</h2><div style="font-size:.85rem;color:var(--gray);margin-top:.2rem">Configuration de votre université</div></div><button class="btn-add" onclick="saveUniversiteSettings()">💾 Sauvegarder</button></div>
+    <div class="page-header"><div><h2>Paramètres</h2><div style="font-size:.85rem;color:var(--gray);margin-top:.2rem">Configuration de votre université</div></div><button class="btn-add" id="btn-save-parametres" onclick="saveUniversiteSettings()">💾 Sauvegarder</button></div>
     <div id="paramsStatus" style="display:none;margin-bottom:1rem;padding:.75rem 1rem;border-radius:8px;font-size:.85rem"></div>
 
     <div class="dash-grid" style="margin-bottom:1.5rem">
@@ -1547,7 +1547,45 @@
     loadEnseignants();
   }
 
-  window.authReady.then(user => { if (user) { loadEtudiants(); loadEnseignants(); loadPaymentsData(); loadEmploiSetup(); loadUtilisateursKpis(user); loadUniversiteSettings(user); loadExamensEtDepartements(user); loadEquipeAdmin(user); loadPermissionsMatrix(); } });
+  window.authReady.then(user => { if (user) { loadEtudiants(); loadEnseignants(); loadPaymentsData(); loadEmploiSetup(); loadUtilisateursKpis(user); loadUniversiteSettings(user); loadExamensEtDepartements(user); loadEquipeAdmin(user); loadPermissionsMatrix(); applyPermissionGating(user); } });
+
+  // ── Gating UI selon la matrice de permissions réelle (role_permissions,
+  // appliquée côté base — voir migration enforce_permission_matrix). Masque
+  // les onglets où l'accès est 'none' et désactive le bouton d'ajout
+  // principal où l'accès est 'read' seule. C'est un confort d'interface :
+  // la vraie barrière de sécurité est déjà en RLS, ceci évite juste à un
+  // utilisateur restreint de cliquer sur un bouton qui échouerait
+  // silencieusement.
+  async function applyPermissionGating(user) {
+    if (user.role === 'superadmin') return; // accès complet non filtré par la matrice
+    const { data, error } = await supabaseClient.rpc('get_my_permissions');
+    if (error) { console.error(error); return; }
+    const levels = {};
+    (data || []).forEach(r => { levels[r.module_key] = r.access_level; });
+
+    document.querySelectorAll('.nav-item[data-module]').forEach(el => {
+      const level = levels[el.dataset.module] || 'none';
+      if (level === 'none') el.style.display = 'none';
+    });
+
+    const addButtons = {
+      etudiants: 'btn-add-etudiant',
+      enseignants: 'btn-add-enseignant',
+      paiements: 'btn-add-paiement',
+      emploi_temps: 'btn-add-creneau',
+      parametres: 'btn-save-parametres',
+    };
+    Object.entries(addButtons).forEach(([moduleKey, btnId]) => {
+      const level = levels[moduleKey] || 'none';
+      const btn = document.getElementById(btnId);
+      if (btn && level !== 'full') {
+        btn.disabled = true;
+        btn.title = 'Accès en lecture seule pour votre sous-rôle';
+        btn.style.opacity = '0.5';
+        btn.style.cursor = 'not-allowed';
+      }
+    });
+  }
 
   // ── Équipe admin + sous-rôles (données réelles Supabase) ──
   // Remplace la liste fictive ("Dr. Amavi Kokou", etc.) par les vrais
