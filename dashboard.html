@@ -399,7 +399,7 @@
 <aside class="sidebar" id="sidebar">
   <div class="sidebar-brand">
     <div class="brand-name">Uni<span>Manage</span></div>
-    <div class="brand-univ">Université de Lomé</div>
+    <div class="brand-univ" id="sidebarUniv">Université de Lomé</div>
   </div>
 
   <nav class="sidebar-nav">
@@ -446,10 +446,10 @@
 
   <div class="sidebar-footer">
     <div class="user-pill">
-      <div class="user-avatar">DA</div>
+      <div class="user-avatar" id="sidebarAvatar">DA</div>
       <div class="user-info">
-        <div class="user-name">Dr. Amavi Kokou</div>
-        <div class="user-role">Directeur Académique</div>
+        <div class="user-name" id="sidebarUserName">Dr. Amavi Kokou</div>
+        <div class="user-role" id="sidebarUserRole">Directeur Académique</div>
       </div>
       <span style="color:rgba(255,255,255,0.3);font-size:.8rem">⋯</span>
     </div>
@@ -489,33 +489,33 @@
       <div class="kpi-card">
         <div class="kpi-icon" style="background:rgba(26,86,219,0.1)">🎓</div>
         <div class="kpi-body">
-          <div class="kpi-value" style="color:var(--blue)">1 248</div>
+          <div class="kpi-value" style="color:var(--blue)" id="ov-kpi-etudiants">—</div>
           <div class="kpi-label">Étudiants inscrits</div>
-          <div class="kpi-trend trend-up">▲ +8% vs 2023</div>
+          <div class="kpi-trend trend-up" id="ov-kpi-etudiants-trend"></div>
         </div>
       </div>
       <div class="kpi-card">
         <div class="kpi-icon" style="background:rgba(245,158,11,0.1)">👨‍🏫</div>
         <div class="kpi-body">
-          <div class="kpi-value" style="color:var(--gold)">87</div>
+          <div class="kpi-value" style="color:var(--gold)" id="ov-kpi-enseignants">—</div>
           <div class="kpi-label">Enseignants actifs</div>
-          <div class="kpi-trend trend-up">▲ +5 ce semestre</div>
+          <div class="kpi-trend trend-up" id="ov-kpi-enseignants-trend"></div>
         </div>
       </div>
       <div class="kpi-card">
         <div class="kpi-icon" style="background:rgba(16,185,129,0.1)">✅</div>
         <div class="kpi-body">
-          <div class="kpi-value" style="color:var(--success)">94%</div>
+          <div class="kpi-value" style="color:var(--success)" id="ov-kpi-reussite">—</div>
           <div class="kpi-label">Taux de réussite</div>
-          <div class="kpi-trend trend-up">▲ +2% vs session 1</div>
+          <div class="kpi-trend trend-up" id="ov-kpi-reussite-trend"></div>
         </div>
       </div>
       <div class="kpi-card">
         <div class="kpi-icon" style="background:rgba(239,68,68,0.1)">💰</div>
         <div class="kpi-body">
-          <div class="kpi-value" style="color:var(--danger)">12.4M</div>
+          <div class="kpi-value" style="color:var(--danger)" id="ov-kpi-encaisse">—</div>
           <div class="kpi-label">FCFA encaissés</div>
-          <div class="kpi-trend trend-down">▼ 22% impayés</div>
+          <div class="kpi-trend trend-down" id="ov-kpi-encaisse-trend"></div>
         </div>
       </div>
     </div>
@@ -529,14 +529,7 @@
           <button class="card-action">Voir tout →</button>
         </div>
         <div class="card-body">
-          <div class="bar-chart">
-            <div class="bar-col"><div class="bar-fill" style="height:60%"></div><div class="bar-label">Oct</div><div class="bar-val">180</div></div>
-            <div class="bar-col"><div class="bar-fill" style="height:85%"></div><div class="bar-label">Nov</div><div class="bar-val">256</div></div>
-            <div class="bar-col"><div class="bar-fill" style="height:100%"></div><div class="bar-label">Déc</div><div class="bar-val">312</div></div>
-            <div class="bar-col"><div class="bar-fill gold" style="height:75%"></div><div class="bar-label">Jan</div><div class="bar-val">230</div></div>
-            <div class="bar-col"><div class="bar-fill gold" style="height:55%"></div><div class="bar-label">Fév</div><div class="bar-val">168</div></div>
-            <div class="bar-col"><div class="bar-fill green" style="height:40%"></div><div class="bar-label">Mar</div><div class="bar-val">102</div></div>
-          </div>
+          <div class="bar-chart" id="ov-inscriptions-chart"></div>
         </div>
       </div>
 
@@ -546,24 +539,7 @@
           <div class="card-title">Départements</div>
         </div>
         <div class="card-body">
-          <div class="donut-wrap">
-            <svg class="donut-svg" width="100" height="100" viewBox="0 0 100 100">
-              <circle cx="50" cy="50" r="38" fill="none" stroke="#E2E8F0" stroke-width="14"/>
-              <circle cx="50" cy="50" r="38" fill="none" stroke="#1A56DB" stroke-width="14"
-                stroke-dasharray="89 150" stroke-dashoffset="0" stroke-linecap="round" transform="rotate(-90 50 50)"/>
-              <circle cx="50" cy="50" r="38" fill="none" stroke="#F59E0B" stroke-width="14"
-                stroke-dasharray="54 150" stroke-dashoffset="-89" stroke-linecap="round" transform="rotate(-90 50 50)"/>
-              <circle cx="50" cy="50" r="38" fill="none" stroke="#10B981" stroke-width="14"
-                stroke-dasharray="45 150" stroke-dashoffset="-143" stroke-linecap="round" transform="rotate(-90 50 50)"/>
-              <text x="50" y="54" text-anchor="middle" font-size="12" font-weight="800" fill="#0D1B2A" font-family="Playfair Display">401</text>
-            </svg>
-            <div class="donut-legend">
-              <div class="legend-item"><div class="legend-dot" style="background:var(--blue)"></div>Gestion & Finance <strong>401</strong></div>
-              <div class="legend-item"><div class="legend-dot" style="background:var(--gold)"></div>Informatique <strong>312</strong></div>
-              <div class="legend-item"><div class="legend-dot" style="background:var(--success)"></div>Droit <strong>287</strong></div>
-              <div class="legend-item"><div class="legend-dot" style="background:var(--border)"></div>Autres <strong>248</strong></div>
-            </div>
-          </div>
+          <div class="donut-wrap" id="ov-departements-donut"></div>
         </div>
       </div>
     </div>
@@ -580,27 +556,8 @@
           <thead><tr>
             <th>Étudiant</th><th>Département</th><th>Niveau</th><th>Statut</th>
           </tr></thead>
-          <tbody>
-            <tr>
-              <td><div style="display:flex;align-items:center;gap:.6rem"><div class="td-avatar">KA</div><div><div class="td-name">Kofi Adzoa</div><div class="td-sub">UL-2025-001</div></div></div></td>
-              <td>Informatique</td><td>L2</td>
-              <td><span class="badge badge-success">Actif</span></td>
-            </tr>
-            <tr>
-              <td><div style="display:flex;align-items:center;gap:.6rem"><div class="td-avatar" style="background:linear-gradient(135deg,var(--gold),#f59e0b)">AM</div><div><div class="td-name">Afia Mensah</div><div class="td-sub">UL-2025-002</div></div></div></td>
-              <td>Gestion</td><td>M1</td>
-              <td><span class="badge badge-blue">En cours</span></td>
-            </tr>
-            <tr>
-              <td><div style="display:flex;align-items:center;gap:.6rem"><div class="td-avatar" style="background:linear-gradient(135deg,var(--success),#34d399)">YD</div><div><div class="td-name">Yao Dodzi</div><div class="td-sub">UL-2025-003</div></div></div></td>
-              <td>Droit</td><td>L3</td>
-              <td><span class="badge badge-success">Actif</span></td>
-            </tr>
-            <tr>
-              <td><div style="display:flex;align-items:center;gap:.6rem"><div class="td-avatar" style="background:linear-gradient(135deg,#8b5cf6,#a78bfa)">SE</div><div><div class="td-name">Selom Edem</div><div class="td-sub">UL-2025-004</div></div></div></td>
-              <td>Sciences</td><td>L1</td>
-              <td><span class="badge badge-gold">Incomplet</span></td>
-            </tr>
+          <tbody id="ov-inscriptions-recentes">
+            <tr><td colspan="4" style="text-align:center;color:var(--gray);padding:1.5rem">Chargement…</td></tr>
           </tbody>
         </table>
       </div>
@@ -611,42 +568,8 @@
           <div class="card-title">Activité récente</div>
         </div>
         <div class="card-body">
-          <div class="activity-list">
-            <div class="activity-item">
-              <div class="activity-dot" style="background:rgba(16,185,129,0.12)">✅</div>
-              <div class="activity-body">
-                <div class="activity-text"><strong>Résultats publiés</strong> — Session 1 Informatique L2</div>
-                <div class="activity-time">Il y a 20 min</div>
-              </div>
-            </div>
-            <div class="activity-item">
-              <div class="activity-dot" style="background:rgba(26,86,219,0.12)">🎓</div>
-              <div class="activity-body">
-                <div class="activity-text"><strong>Kofi Adzoa</strong> a complété son inscription</div>
-                <div class="activity-time">Il y a 1h</div>
-              </div>
-            </div>
-            <div class="activity-item">
-              <div class="activity-dot" style="background:rgba(245,158,11,0.12)">💰</div>
-              <div class="activity-body">
-                <div class="activity-text">Paiement de <strong>75 000 FCFA</strong> reçu via Wave</div>
-                <div class="activity-time">Il y a 2h</div>
-              </div>
-            </div>
-            <div class="activity-item">
-              <div class="activity-dot" style="background:rgba(139,92,246,0.12)">📅</div>
-              <div class="activity-body">
-                <div class="activity-text">Emploi du temps <strong>Semestre 2</strong> mis à jour</div>
-                <div class="activity-time">Il y a 3h</div>
-              </div>
-            </div>
-            <div class="activity-item">
-              <div class="activity-dot" style="background:rgba(239,68,68,0.12)">⚠️</div>
-              <div class="activity-body">
-                <div class="activity-text"><strong>3 étudiants</strong> ont un solde impayé depuis 30 jours</div>
-                <div class="activity-time">Hier</div>
-              </div>
-            </div>
+          <div class="activity-list" id="ov-activite-recente">
+            <div class="activity-item"><div class="activity-body"><div class="activity-text" style="color:var(--gray)">Chargement…</div></div></div>
           </div>
         </div>
       </div>
@@ -1308,8 +1231,11 @@
 
 <script>
   // ── Charger les données de session (window.currentUser posé par requireAuth() dans auth-guard.js) ──
-  window.addEventListener('DOMContentLoaded', () => {
-    const userData = window.currentUser;
+  // Important : requireAuth() est asynchrone (getSession + requêtes profiles/universities),
+  // donc window.currentUser n'est pas encore renseigné au moment où DOMContentLoaded se
+  // déclenche — attendre window.authReady (la promesse retournée par requireAuth) avant de
+  // lire les données de session, sinon ce bloc s'exécute sur `undefined` et ne fait rien.
+  window.authReady.then((userData) => {
     if (userData) {
       // Nom université dans la sidebar
       const univEl = document.getElementById('sidebarUniv');
@@ -1327,8 +1253,151 @@
       // Breadcrumb topbar
       const breadEl = document.getElementById('pageBreadcrumb');
       if (breadEl) breadEl.textContent = (userData.university || 'Université') + ' · 2024–2025';
+
+      loadDashboardOverview(userData);
     }
   });
+
+  // ── Vue d'ensemble du tableau de bord (données réelles Supabase, scopées à
+  // l'université connectée) — remplace les KPIs/graphiques/listes qui étaient
+  // codés en dur (mêmes chiffres "Université de Lomé" pour tout le monde).
+  async function loadDashboardOverview(user) {
+    const scoped = (q) => (user.role === 'superadmin' ? q : q.eq('university', user.university));
+
+    const [studsRes, teachsRes, paysRes, gradesRes] = await Promise.all([
+      scoped(supabaseClient.from('students').select('id, full_name, matricule, department, level, status, created_at')),
+      scoped(supabaseClient.from('teachers').select('id, status')),
+      scoped(supabaseClient.from('payments').select('amount, statut')),
+      scoped(supabaseClient.from('grades').select('note_cc, note_exam')),
+    ]);
+
+    const studs = studsRes.data || [];
+    const teachs = teachsRes.data || [];
+    const pays = paysRes.data || [];
+    const gr = gradesRes.data || [];
+
+    document.getElementById('ov-kpi-etudiants').textContent = studs.length.toLocaleString('fr-FR');
+
+    const enseignantsActifs = teachs.filter(t => t.status === 'Actif').length;
+    document.getElementById('ov-kpi-enseignants').textContent = enseignantsActifs.toLocaleString('fr-FR');
+
+    const notes = gr.filter(g => g.note_cc != null && g.note_exam != null)
+      .map(g => (Number(g.note_cc) + Number(g.note_exam)) / 2);
+    const reussite = notes.length > 0 ? Math.round(notes.filter(n => n >= 10).length / notes.length * 100) : null;
+    document.getElementById('ov-kpi-reussite').textContent = reussite !== null ? reussite + '%' : '—';
+
+    const totalEncaisse = pays.filter(p => p.statut === 'Confirmé').reduce((s, p) => s + Number(p.amount), 0);
+    document.getElementById('ov-kpi-encaisse').textContent = totalEncaisse > 0 ? fmtFCFA(totalEncaisse) : '0';
+
+    // Bar chart : inscriptions des 6 derniers mois
+    const chartEl = document.getElementById('ov-inscriptions-chart');
+    if (chartEl) {
+      const now = new Date();
+      const months = [];
+      for (let i = 5; i >= 0; i--) {
+        const d = new Date(now.getFullYear(), now.getMonth() - i, 1);
+        months.push({ key: d.getFullYear() + '-' + d.getMonth(), label: d.toLocaleDateString('fr-FR', { month: 'short' }), count: 0 });
+      }
+      studs.forEach(s => {
+        if (!s.created_at) return;
+        const d = new Date(s.created_at);
+        const key = d.getFullYear() + '-' + d.getMonth();
+        const m = months.find(m => m.key === key);
+        if (m) m.count++;
+      });
+      const max = Math.max(1, ...months.map(m => m.count));
+      chartEl.innerHTML = months.every(m => m.count === 0)
+        ? '<div style="text-align:center;color:var(--gray);padding:1rem;font-size:.85rem;width:100%">Aucune inscription enregistrée.</div>'
+        : months.map(m => `<div class="bar-col"><div class="bar-fill" style="height:${Math.max(4, Math.round(m.count / max * 100))}%"></div><div class="bar-label">${m.label}</div><div class="bar-val">${m.count}</div></div>`).join('');
+    }
+
+    // Donut : répartition par département (dérivée de students.department — il n'existe
+    // pas de table "départements" dédiée dans le schéma).
+    const donutEl = document.getElementById('ov-departements-donut');
+    if (donutEl) {
+      if (studs.length === 0) {
+        donutEl.innerHTML = '<div style="text-align:center;color:var(--gray);padding:1rem;font-size:.85rem">Aucun étudiant enregistré.</div>';
+      } else {
+        const byDept = {};
+        studs.forEach(s => { const d = s.department || 'Non renseigné'; byDept[d] = (byDept[d] || 0) + 1; });
+        const entries = Object.entries(byDept).sort((a, b) => b[1] - a[1]);
+        const top = entries.slice(0, 3);
+        const autres = entries.slice(3).reduce((s, [, c]) => s + c, 0);
+        if (autres > 0) top.push(['Autres', autres]);
+        const colors = ['#1A56DB', '#F59E0B', '#10B981', '#94A3B8'];
+        let offset = 0;
+        const circles = top.map(([, count], i) => {
+          const dash = Math.round((count / studs.length) * 150 * 100) / 100;
+          const c = `<circle cx="50" cy="50" r="38" fill="none" stroke="${colors[i % colors.length]}" stroke-width="14" stroke-dasharray="${dash} 150" stroke-dashoffset="${-offset}" stroke-linecap="round" transform="rotate(-90 50 50)"/>`;
+          offset += dash;
+          return c;
+        }).join('');
+        const legend = top.map(([dept, count], i) => `<div class="legend-item"><div class="legend-dot" style="background:${colors[i % colors.length]}"></div>${dept} <strong>${count}</strong></div>`).join('');
+        donutEl.innerHTML = `<svg class="donut-svg" width="100" height="100" viewBox="0 0 100 100">
+            <circle cx="50" cy="50" r="38" fill="none" stroke="#E2E8F0" stroke-width="14"/>
+            ${circles}
+            <text x="50" y="54" text-anchor="middle" font-size="12" font-weight="800" fill="#0D1B2A" font-family="Playfair Display">${studs.length}</text>
+          </svg>
+          <div class="donut-legend">${legend}</div>`;
+      }
+    }
+
+    // Inscriptions récentes
+    const recentBody = document.getElementById('ov-inscriptions-recentes');
+    if (recentBody) {
+      const recents = [...studs].sort((a, b) => new Date(b.created_at) - new Date(a.created_at)).slice(0, 4);
+      const statutBadge = { 'Actif': 'badge-success', 'En cours': 'badge-blue', 'Incomplet': 'badge-gold', 'Suspendu': 'badge-danger' };
+      recentBody.innerHTML = recents.length === 0
+        ? '<tr><td colspan="4" style="text-align:center;color:var(--gray);padding:1.5rem">Aucun étudiant inscrit pour le moment.</td></tr>'
+        : recents.map(s => {
+          const initials = (s.full_name || '').split(' ').filter(Boolean).map(w => w[0]).join('').slice(0, 2).toUpperCase();
+          return `<tr>
+            <td><div style="display:flex;align-items:center;gap:.6rem"><div class="td-avatar">${initials}</div><div><div class="td-name">${s.full_name}</div><div class="td-sub">${s.matricule || ''}</div></div></div></td>
+            <td>${s.department || '—'}</td><td>${s.level || '—'}</td>
+            <td><span class="badge ${statutBadge[s.status] || ''}">${s.status || '—'}</span></td>
+          </tr>`;
+        }).join('');
+    }
+
+    // Activité récente : fusion des dernières inscriptions + derniers paiements (pas de
+    // table "journal d'activité" dédiée dans le schéma — dérivé des deux sources réelles
+    // disponibles plutôt que d'inventer des événements).
+    const activEl = document.getElementById('ov-activite-recente');
+    if (activEl) {
+      let payActivityQuery = supabaseClient.from('payments')
+        .select('amount, method, paid_at, statut, students(full_name)')
+        .eq('statut', 'Confirmé').order('paid_at', { ascending: false }).limit(5);
+      if (user.role !== 'superadmin') payActivityQuery = payActivityQuery.eq('university', user.university);
+      const { data: recentPays } = await payActivityQuery;
+
+      const events = [];
+      studs.forEach(s => { if (s.created_at) events.push({ time: new Date(s.created_at), icon: '🎓', bg: 'rgba(26,86,219,0.12)', text: `<strong>${s.full_name}</strong> a rejoint la plateforme` }); });
+      (recentPays || []).forEach(p => { if (p.paid_at) events.push({ time: new Date(p.paid_at), icon: '💰', bg: 'rgba(245,158,11,0.12)', text: `Paiement de <strong>${fmtFCFA(p.amount)} FCFA</strong> reçu${p.method ? ' via ' + p.method : ''}` }); });
+      events.sort((a, b) => b.time - a.time);
+      const top4 = events.slice(0, 4);
+
+      activEl.innerHTML = top4.length === 0
+        ? '<div class="activity-item"><div class="activity-body"><div class="activity-text" style="color:var(--gray)">Aucune activité récente.</div></div></div>'
+        : top4.map(e => `<div class="activity-item">
+            <div class="activity-dot" style="background:${e.bg}">${e.icon}</div>
+            <div class="activity-body">
+              <div class="activity-text">${e.text}</div>
+              <div class="activity-time">${relativeTime(e.time)}</div>
+            </div>
+          </div>`).join('');
+    }
+  }
+
+  function relativeTime(date) {
+    const min = Math.floor((Date.now() - date.getTime()) / 60000);
+    if (min < 1) return "À l'instant";
+    if (min < 60) return `Il y a ${min} min`;
+    const h = Math.floor(min / 60);
+    if (h < 24) return `Il y a ${h}h`;
+    const d = Math.floor(h / 24);
+    if (d < 30) return `Il y a ${d} j`;
+    return date.toLocaleDateString('fr-FR');
+  }
 
   // logout() est fourni par auth-guard.js (déconnexion Supabase réelle)
 
