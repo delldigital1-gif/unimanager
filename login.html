@@ -13,7 +13,7 @@
       --success:#10B981;--danger:#EF4444;--purple:#8B5CF6;
     }
     *{margin:0;padding:0;box-sizing:border-box;}
-    body{font-family:'Inter',sans-serif;min-height:100vh;display:flex;background:#0a0f1a;overflow:hidden;}
+    body{font-family:'Inter',sans-serif;min-height:100vh;display:flex;background:#0a0f1a;}
 
     /* ── LEFT PANEL ── */
     .left-panel{
@@ -89,7 +89,7 @@
       width:480px;flex-shrink:0;
       background:white;display:flex;flex-direction:column;
       justify-content:center;padding:3rem;
-      position:relative;overflow:hidden;
+      position:relative;overflow-y:auto;max-height:100vh;
     }
     .right-panel::before{
       content:'';position:absolute;top:-80px;right:-80px;
