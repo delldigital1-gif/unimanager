@@ -33,21 +33,23 @@ async function requireAuth(expectedRole) {
     return null;
   }
 
-  // Gate d'essai : bloque l'accès si l'essai de 14 jours est expiré sans abonnement
-  // payant actif. Fail-open si aucune ligne universities ne correspond (comptes démo,
-  // superadmin, données créées avant l'introduction du suivi d'abonnement). Exempte
-  // aussi paiement-retour.html : sinon un paiement tout juste effectué (webhook pas
-  // encore traité) renverrait l'université vers paiement-requis.html au lieu de lui
-  // montrer la confirmation.
+  // Gate d'abonnement : bloque l'accès si l'université n'a pas d'abonnement payant
+  // actif. Souscription directe, plus de période d'essai — le paiement est requis
+  // dès la création du compte (trial_ends_at n'est plus renseigné pour les
+  // nouvelles inscriptions, voir handle_new_user()). Fail-open si aucune ligne
+  // universities ne correspond (comptes démo, superadmin, données créées avant
+  // l'introduction du suivi d'abonnement). Exempte aussi paiement-retour.html :
+  // sinon un paiement tout juste effectué (webhook pas encore traité) renverrait
+  // l'université vers paiement-requis.html au lieu de lui montrer la confirmation.
   const pageExempteDuGate = location.pathname.endsWith('paiement-retour.html');
   if (!pageExempteDuGate && profile.role !== 'superadmin' && profile.university) {
     const { data: uni } = await supabaseClient
       .from('universities')
-      .select('status, trial_ends_at')
+      .select('status')
       .eq('name', profile.university)
       .maybeSingle();
-    const essaiExpire = uni && uni.status !== 'Actif' && uni.trial_ends_at && new Date(uni.trial_ends_at) < new Date();
-    if (essaiExpire) {
+    const abonnementInactif = uni && uni.status !== 'Actif';
+    if (abonnementInactif) {
       window.location.href = 'paiement-requis.html';
       return null;
     }
