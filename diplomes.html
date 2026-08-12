@@ -130,28 +130,19 @@
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <script src="supabase-config.js"></script>
 <script src="auth-guard.js"></script>
-<script>requireAuth();</script>
+<script src="https://cdn.jsdelivr.net/npm/jspdf@2.5.2/dist/jspdf.umd.min.js"></script>
+<script>window.authReady = requireAuth('admin');</script>
 
 <aside class="sidebar">
   <div class="sidebar-brand">
     <div class="brand-name">Uni<span>Manage</span></div>
-    <div class="brand-sub">🎓 Diplômes & Certificats</div>
+    <div class="brand-sub">🎓 Diplômes & Attestations</div>
   </div>
   <nav class="sidebar-nav">
     <div class="nav-group">Diplômes</div>
     <div class="nav-it active" onclick="showPage('dashboard')">📊 Tableau de bord</div>
-    <div class="nav-it" onclick="showPage('generer')">🎓 Générer diplôme<span class="nav-badge">+</span></div>
+    <div class="nav-it" onclick="showPage('generer')">🎓 Émettre un diplôme</div>
     <div class="nav-it" onclick="showPage('liste')">📋 Liste des diplômes</div>
-    <div class="nav-it" onclick="showPage('apercu')">👁️ Aperçu diplôme</div>
-    <div class="nav-group">Certificats</div>
-    <div class="nav-it" onclick="showPage('certificats')">📄 Types de certificats</div>
-    <div class="nav-it" onclick="showPage('attestations')">📋 Attestations</div>
-    <div class="nav-group">Vérification</div>
-    <div class="nav-it" onclick="showPage('verification')">🔐 Vérifier authenticité</div>
-    <div class="nav-it" onclick="showPage('historique')">📜 Historique</div>
-    <div class="nav-group">Configuration</div>
-    <div class="nav-it" onclick="showPage('modeles')">🎨 Modèles & Design</div>
-    <div class="nav-it" onclick="showPage('signatures')">✍️ Signatures officielles</div>
   </nav>
   <div class="sidebar-footer">
     <button class="btn-back-dash" onclick="window.location.href='dashboard.html'">← Tableau de bord</button>
@@ -160,11 +151,10 @@
 
 <header class="topbar">
   <div>
-    <div class="page-title" id="pageTitle">Diplômes & Certificats</div>
-    <div style="font-size:.78rem;color:var(--gray)">Université de Lomé · Année 2024–2025</div>
+    <div class="page-title" id="pageTitle">Diplômes & Attestations</div>
+    <div style="font-size:.78rem;color:var(--gray)" id="topbarSub">Chargement...</div>
   </div>
   <div class="topbar-right">
-    <button class="btn-outline" onclick="showToast('📥 Export liste PDF généré !')">⬇ Exporter</button>
     <button class="btn-primary" onclick="showPage('generer')">🎓 Nouveau diplôme</button>
   </div>
 </header>
@@ -174,192 +164,62 @@
   <!-- ══ DASHBOARD ══ -->
   <div class="page active" id="page-dashboard">
     <div class="kpi-grid">
-      <div class="kpi-card"><div class="kpi-icon" style="background:rgba(245,158,11,0.1)">🎓</div><div class="kpi-value" style="color:var(--gold)">847</div><div class="kpi-label">Diplômes émis 2024</div><div class="kpi-trend">▲ +12% vs 2023</div></div>
-      <div class="kpi-card"><div class="kpi-icon" style="background:rgba(26,86,219,0.1)">📄</div><div class="kpi-value" style="color:var(--blue)">1 248</div><div class="kpi-label">Certificats générés</div><div class="kpi-trend">Ce mois</div></div>
-      <div class="kpi-card"><div class="kpi-icon" style="background:rgba(16,185,129,0.1)">✅</div><div class="kpi-value" style="color:var(--success)">24</div><div class="kpi-label">En attente de signature</div><div class="kpi-trend">À valider</div></div>
-      <div class="kpi-card"><div class="kpi-icon" style="background:rgba(139,92,246,0.1)">🔐</div><div class="kpi-value" style="color:var(--purple)">312</div><div class="kpi-label">Vérifications QR code</div><div class="kpi-trend">▲ Ce mois</div></div>
+      <div class="kpi-card"><div class="kpi-icon" style="background:rgba(245,158,11,0.1)">🎓</div><div class="kpi-value" style="color:var(--gold)" id="kpi-total">—</div><div class="kpi-label">Diplômes/attestations émis</div></div>
+      <div class="kpi-card"><div class="kpi-icon" style="background:rgba(26,86,219,0.1)">📄</div><div class="kpi-value" style="color:var(--blue)" id="kpi-diplomes">—</div><div class="kpi-label">Diplômes</div></div>
+      <div class="kpi-card"><div class="kpi-icon" style="background:rgba(16,185,129,0.1)">📋</div><div class="kpi-value" style="color:var(--success)" id="kpi-attestations">—</div><div class="kpi-label">Attestations & relevés</div></div>
+      <div class="kpi-card"><div class="kpi-icon" style="background:rgba(139,92,246,0.1)">📅</div><div class="kpi-value" style="color:var(--purple)" id="kpi-mois">—</div><div class="kpi-label">Émis ce mois</div></div>
     </div>
-    <div class="dash-grid">
-      <div class="card">
-        <div class="card-header"><div class="card-title">🎓 Derniers diplômes émis</div><button class="card-action" onclick="showPage('liste')">Voir tout →</button></div>
-        <table class="data-table">
-          <thead><tr><th>Diplômé</th><th>Filière</th><th>Mention</th><th>Date</th><th>Statut</th></tr></thead>
-          <tbody>
-            <tr><td><strong>Béatrice Komi</strong></td><td>Info L2 → L3</td><td><span class="badge badge-success">TB</span></td><td>22 Jan 2025</td><td><span class="badge badge-success">✓ Émis</span></td></tr>
-            <tr><td><strong>Kofi Adzoa</strong></td><td>Info L2 → L3</td><td><span class="badge badge-blue">AB</span></td><td>22 Jan 2025</td><td><span class="badge badge-gold">En attente</span></td></tr>
-            <tr><td><strong>Afia Mensah</strong></td><td>Gestion M1 → M2</td><td><span class="badge badge-blue">AB</span></td><td>20 Jan 2025</td><td><span class="badge badge-success">✓ Émis</span></td></tr>
-            <tr><td><strong>Yao Dodzi</strong></td><td>Droit L3</td><td><span class="badge badge-gold">P</span></td><td>19 Jan 2025</td><td><span class="badge badge-gold">En attente</span></td></tr>
-          </tbody>
-        </table>
-      </div>
-      <div class="card">
-        <div class="card-header"><div class="card-title">📊 Diplômes par département</div></div>
-        <div class="card-body">
-          <div style="display:flex;flex-direction:column;gap:.85rem">
-            <div><div style="display:flex;justify-content:space-between;font-size:.83rem;margin-bottom:.35rem"><span>💻 Informatique</span><span style="font-weight:700;color:var(--gold)">241</span></div><div style="height:7px;background:var(--border);border-radius:100px;overflow:hidden"><div style="width:71%;height:100%;background:linear-gradient(90deg,var(--gold),#fbbf24);border-radius:100px"></div></div></div>
-            <div><div style="display:flex;justify-content:space-between;font-size:.83rem;margin-bottom:.35rem"><span>📊 Gestion</span><span style="font-weight:700;color:var(--blue)">283</span></div><div style="height:7px;background:var(--border);border-radius:100px;overflow:hidden"><div style="width:83%;height:100%;background:linear-gradient(90deg,var(--blue),var(--sky));border-radius:100px"></div></div></div>
-            <div><div style="display:flex;justify-content:space-between;font-size:.83rem;margin-bottom:.35rem"><span>⚖️ Droit</span><span style="font-weight:700;color:var(--success)">198</span></div><div style="height:7px;background:var(--border);border-radius:100px;overflow:hidden"><div style="width:58%;height:100%;background:linear-gradient(90deg,var(--success),#34d399);border-radius:100px"></div></div></div>
-            <div><div style="display:flex;justify-content:space-between;font-size:.83rem;margin-bottom:.35rem"><span>🔬 Sciences</span><span style="font-weight:700;color:var(--purple)">125</span></div><div style="height:7px;background:var(--border);border-radius:100px;overflow:hidden"><div style="width:37%;height:100%;background:linear-gradient(90deg,var(--purple),#a78bfa);border-radius:100px"></div></div></div>
-          </div>
-        </div>
-      </div>
+    <div class="card">
+      <div class="card-header"><div class="card-title">🎓 Derniers documents émis</div><button class="card-action" onclick="showPage('liste')">Voir tout →</button></div>
+      <table class="data-table">
+        <thead><tr><th>Diplômé</th><th>Type</th><th>Intitulé</th><th>Mention</th><th>Date</th></tr></thead>
+        <tbody id="dash-tbody"><tr><td colspan="5" style="text-align:center;color:var(--gray);padding:2rem">Chargement...</td></tr></tbody>
+      </table>
     </div>
   </div>
 
-  <!-- ══ GÉNÉRER DIPLÔME ══ -->
+  <!-- ══ ÉMETTRE UN DIPLÔME ══ -->
   <div class="page" id="page-generer">
-    <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:1.5rem">
-      <div><h2 style="font-family:'Playfair Display',serif;font-weight:800;font-size:1.3rem">🎓 Générer un diplôme</h2></div>
-      <div style="display:flex;gap:.75rem">
-        <button class="btn-outline" onclick="showPage('apercu')">👁️ Aperçu</button>
-        <button class="btn-primary" onclick="generateDiploma()">🎓 Générer & Imprimer</button>
-      </div>
-    </div>
+    <div style="margin-bottom:1.5rem"><h2 style="font-family:'Playfair Display',serif;font-weight:800;font-size:1.3rem">🎓 Émettre un diplôme ou une attestation</h2></div>
     <div class="dash-grid">
       <div>
         <div class="card">
-          <div class="card-header"><div class="card-title">👤 Informations du diplômé</div></div>
+          <div class="card-header"><div class="card-title">👤 Document</div></div>
           <div class="card-body">
-            <div class="form-group"><label>Étudiant *</label><select class="form-select" id="dipEtudiant"><option>Béatrice Komi — UL-2025-005</option><option>Kofi Adzoa — UL-2025-001</option><option>Afia Mensah — UL-2025-002</option><option>Yao Dodzi — UL-2025-003</option></select></div>
+            <div id="genError" style="display:none;background:rgba(239,68,68,0.08);color:var(--danger);border:1px solid rgba(239,68,68,0.2);padding:.6rem 1rem;border-radius:8px;font-size:.83rem;margin-bottom:1rem"></div>
+            <div class="form-group"><label>Étudiant *</label><select class="form-select" id="dipEtudiant" onchange="updatePreview()"><option value="">Chargement...</option></select></div>
             <div class="form-row">
-              <div class="form-group"><label>Matricule</label><input class="form-input" value="UL-2025-005" id="dipMat"/></div>
-              <div class="form-group"><label>Date de naissance</label><input class="form-input" value="12 Mars 2000" id="dipDob"/></div>
+              <div class="form-group"><label>Type de document *</label><select class="form-select" id="dipType" onchange="updatePreview()"><option>Diplôme</option><option>Attestation de scolarité</option><option>Relevé de notes</option></select></div>
+              <div class="form-group"><label>Mention</label><select class="form-select" id="dipMention" onchange="updatePreview()"><option value="">—</option><option>Très Bien</option><option>Bien</option><option>Assez Bien</option><option>Passable</option></select></div>
             </div>
-            <div class="form-group"><label>Lieu de naissance</label><input class="form-input" value="Lomé, Togo" id="dipPob"/></div>
+            <div class="form-group"><label>Intitulé *</label><input class="form-input" id="dipIntitule" placeholder="Ex: Licence en Informatique" oninput="updatePreview()"/></div>
+            <div class="form-group"><label>Date d'émission</label><input class="form-input" type="date" id="dipDate" onchange="updatePreview()"/></div>
           </div>
         </div>
-        <div class="card">
-          <div class="card-header"><div class="card-title">🎓 Informations académiques</div></div>
-          <div class="card-body">
-            <div class="form-row">
-              <div class="form-group"><label>Type de diplôme *</label><select class="form-select" id="dipType"><option>Licence (L3)</option><option>Master (M2)</option><option>Doctorat (PhD)</option><option>DUT</option><option>BTS</option></select></div>
-              <div class="form-group"><label>Mention *</label><select class="form-select" id="dipMention"><option>Très Bien</option><option>Bien</option><option>Assez Bien</option><option>Passable</option></select></div>
-            </div>
-            <div class="form-group"><label>Département / Filière *</label><select class="form-select" id="dipFiliere"><option>Informatique & IA — Génie Logiciel</option><option>Gestion & Finance</option><option>Droit & Sciences Politiques</option><option>Sciences & Ingénierie</option></select></div>
-            <div class="form-row">
-              <div class="form-group"><label>Année académique</label><input class="form-input" value="2024–2025" id="dipAnnee"/></div>
-              <div class="form-group"><label>Date de délivrance</label><input class="form-input" type="date" value="2025-01-22" id="dipDate"/></div>
-            </div>
-            <div class="form-row">
-              <div class="form-group"><label>Moyenne générale</label><input class="form-input" value="16.2/20" id="dipMoy"/></div>
-              <div class="form-group"><label>Crédits validés</label><input class="form-input" value="180 crédits ECTS" id="dipCredits"/></div>
-            </div>
-          </div>
-        </div>
-        <div class="card">
-          <div class="card-header"><div class="card-title">🔐 Sécurité & Authentification</div></div>
-          <div class="card-body">
-            <div style="display:flex;flex-direction:column;gap:.6rem">
-              <div style="display:flex;align-items:center;gap:.75rem;padding:.65rem;background:var(--light);border-radius:8px"><input type="checkbox" checked style="accent-color:var(--gold)"/><label style="font-size:.83rem">QR Code de vérification</label></div>
-              <div style="display:flex;align-items:center;gap:.75rem;padding:.65rem;background:var(--light);border-radius:8px"><input type="checkbox" checked style="accent-color:var(--gold)"/><label style="font-size:.83rem">Numéro de série unique</label></div>
-              <div style="display:flex;align-items:center;gap:.75rem;padding:.65rem;background:var(--light);border-radius:8px"><input type="checkbox" checked style="accent-color:var(--gold)"/><label style="font-size:.83rem">Filigrane anti-falsification</label></div>
-              <div style="display:flex;align-items:center;gap:.75rem;padding:.65rem;background:var(--light);border-radius:8px"><input type="checkbox" style="accent-color:var(--gold)"/><label style="font-size:.83rem">Signature électronique</label></div>
-            </div>
-          </div>
-        </div>
+        <button class="btn-primary" style="width:100%;justify-content:center" onclick="emettreDiplome()">🎓 Émettre & télécharger le PDF</button>
       </div>
-      <!-- Preview diplôme -->
+      <!-- Preview -->
       <div>
         <div class="card">
-          <div class="card-header"><div class="card-title">👁️ Aperçu en temps réel</div></div>
+          <div class="card-header"><div class="card-title">👁️ Aperçu</div></div>
           <div class="card-body" style="padding:.85rem">
-            <div class="diploma-preview" style="transform:scale(0.7);transform-origin:top center;height:420px;overflow:hidden">
-              <div class="diploma-watermark">UNIVERSITÉ</div>
+            <div class="diploma-preview" style="transform:scale(0.75);transform-origin:top center;height:400px;overflow:hidden">
+              <div class="diploma-watermark" id="pv-watermark">UNIVERSITÉ</div>
               <div class="diploma-header">
-                <div class="diploma-country">République Togolaise</div>
-                <div class="diploma-univ">UNIVERSITÉ DE LOMÉ</div>
-                <div class="diploma-faculty">Faculté des Sciences et Technologies</div>
+                <div class="diploma-univ" id="pv-univ">—</div>
                 <div class="diploma-ornament">⚜️ ✦ ⚜️</div>
-                <div class="diploma-type">LICENCE</div>
+                <div class="diploma-type" id="pv-type">DIPLÔME</div>
               </div>
               <div class="diploma-body">
-                <div class="diploma-text">Le Directeur Général de l'Université de Lomé certifie que</div>
-                <div class="diploma-name">KOMI Béatrice</div>
-                <div class="diploma-text">a satisfait à toutes les exigences académiques requises et obtenu le grade de</div>
-                <div class="diploma-mention">Mention : Très Bien</div>
-                <div class="diploma-details">
-                  <div class="diploma-detail-item"><div class="diploma-detail-label">Filière</div><div class="diploma-detail-value" style="font-size:.8rem">Informatique & IA</div></div>
-                  <div class="diploma-detail-item"><div class="diploma-detail-label">Moyenne</div><div class="diploma-detail-value">16.2/20</div></div>
-                  <div class="diploma-detail-item"><div class="diploma-detail-label">Année</div><div class="diploma-detail-value">2024–2025</div></div>
-                </div>
+                <div class="diploma-text" id="pv-intro">Il est certifié que</div>
+                <div class="diploma-name" id="pv-name">—</div>
+                <div class="diploma-text" id="pv-corps">a satisfait aux exigences requises et obtenu :</div>
+                <div style="font-family:'Playfair Display',serif;font-weight:800;font-size:1.1rem;color:var(--navy);margin:.5rem 0" id="pv-intitule">—</div>
+                <div class="diploma-mention" id="pv-mention" style="display:none"></div>
               </div>
             </div>
           </div>
         </div>
-      </div>
-    </div>
-  </div>
-
-  <!-- ══ APERÇU DIPLÔME COMPLET ══ -->
-  <div class="page" id="page-apercu">
-    <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:1.5rem">
-      <div><h2 style="font-family:'Playfair Display',serif;font-weight:800;font-size:1.3rem">👁️ Aperçu du diplôme officiel</h2></div>
-      <div style="display:flex;gap:.75rem">
-        <button class="btn-outline" onclick="window.print()">🖨️ Imprimer</button>
-        <button class="btn-primary" onclick="showToast('📥 Diplôme PDF haute résolution téléchargé !')">📥 PDF Officiel</button>
-      </div>
-    </div>
-    <div class="diploma-preview">
-      <div class="diploma-watermark">UNIVERSITÉ DE LOMÉ</div>
-      <div class="diploma-ref">Réf : DIP-UL-2025-INFO-L3-005 · Émis le 22 Jan 2025</div>
-      <div class="diploma-header">
-        <div class="diploma-country">République Togolaise — Liberté · Travail · Solidarité</div>
-        <div style="font-size:.78rem;color:var(--gray);margin:.25rem 0">Ministère de l'Enseignement Supérieur et de la Recherche</div>
-        <div class="diploma-univ">UNIVERSITÉ DE LOMÉ</div>
-        <div class="diploma-faculty">Faculté des Sciences et Technologies de l'Information</div>
-        <div class="diploma-ornament">⚜️ ✦ ✦ ✦ ⚜️</div>
-        <div class="diploma-type">LICENCE EN INFORMATIQUE</div>
-        <div style="font-size:.85rem;color:var(--gray);margin-top:.25rem">Spécialité : Génie Logiciel & Intelligence Artificielle</div>
-      </div>
-      <div class="diploma-body">
-        <div class="diploma-text">Le Directeur Général de l'Université de Lomé, vu les textes réglementaires en vigueur, atteste et certifie que</div>
-        <div class="diploma-name">KOMI Béatrice Mawuena</div>
-        <div class="diploma-text">née le <strong>12 Mars 2000</strong> à <strong>Lomé, Togo</strong><br/>matricule <strong>UL-2025-005</strong></div>
-        <div class="diploma-text" style="margin-top:.5rem">a satisfait avec succès à toutes les exigences académiques requises du programme de Licence en Informatique et obtenu le grade de :</div>
-        <div style="font-family:'Playfair Display',serif;font-weight:800;font-size:1.2rem;color:var(--navy);margin:.75rem 0">LICENCIÉE ÈS SCIENCES INFORMATIQUES</div>
-        <div class="diploma-mention">🏅 Mention : Très Bien — 16.2/20</div>
-        <div class="diploma-details">
-          <div class="diploma-detail-item"><div class="diploma-detail-label">Département</div><div class="diploma-detail-value">Informatique & IA</div></div>
-          <div class="diploma-detail-item"><div class="diploma-detail-label">Crédits validés</div><div class="diploma-detail-value">180 / 180 ECTS</div></div>
-          <div class="diploma-detail-item"><div class="diploma-detail-label">Année académique</div><div class="diploma-detail-value">2024–2025</div></div>
-        </div>
-        <div class="diploma-text" style="font-style:italic;margin-top:.5rem">Fait à Lomé, le 22 Janvier 2025</div>
-      </div>
-      <div class="diploma-footer">
-        <div><div class="diploma-sig-line"></div><div class="diploma-sig-name">Dr. Amavi Kokou</div><div class="diploma-sig-role">Directeur Académique</div></div>
-        <div><div class="diploma-sig-line"></div><div class="diploma-sig-name">Prof. Akosua Komi</div><div class="diploma-sig-role">Doyen de la Faculté</div></div>
-        <div><div class="diploma-sig-line"></div><div class="diploma-sig-name">M. Jean Dupont</div><div class="diploma-sig-role">Directeur Général</div></div>
-      </div>
-      <div class="diploma-qr">
-        <svg width="70" height="70" viewBox="0 0 21 21">
-          <rect width="21" height="21" fill="white"/>
-          <rect x="0" y="0" width="7" height="7" fill="none" stroke="#0D1B2A" stroke-width=".5"/>
-          <rect x="1" y="1" width="5" height="5" fill="#0D1B2A"/>
-          <rect x="2" y="2" width="3" height="3" fill="white"/>
-          <rect x="3" y="3" width="1" height="1" fill="#0D1B2A"/>
-          <rect x="14" y="0" width="7" height="7" fill="none" stroke="#0D1B2A" stroke-width=".5"/>
-          <rect x="15" y="1" width="5" height="5" fill="#0D1B2A"/>
-          <rect x="16" y="2" width="3" height="3" fill="white"/>
-          <rect x="17" y="3" width="1" height="1" fill="#0D1B2A"/>
-          <rect x="0" y="14" width="7" height="7" fill="none" stroke="#0D1B2A" stroke-width=".5"/>
-          <rect x="1" y="15" width="5" height="5" fill="#0D1B2A"/>
-          <rect x="2" y="16" width="3" height="3" fill="white"/>
-          <rect x="3" y="17" width="1" height="1" fill="#0D1B2A"/>
-          <rect x="8" y="0" width="1" height="1" fill="#0D1B2A"/><rect x="10" y="0" width="1" height="1" fill="#0D1B2A"/>
-          <rect x="9" y="2" width="1" height="1" fill="#0D1B2A"/><rect x="11" y="2" width="1" height="1" fill="#0D1B2A"/>
-          <rect x="8" y="4" width="1" height="1" fill="#0D1B2A"/><rect x="12" y="4" width="1" height="1" fill="#0D1B2A"/>
-          <rect x="8" y="7" width="1" height="1" fill="#0D1B2A"/><rect x="10" y="7" width="1" height="1" fill="#0D1B2A"/>
-          <rect x="9" y="9" width="1" height="1" fill="#0D1B2A"/><rect x="11" y="9" width="1" height="1" fill="#0D1B2A"/>
-          <rect x="8" y="11" width="1" height="1" fill="#0D1B2A"/><rect x="12" y="11" width="1" height="1" fill="#0D1B2A"/>
-          <rect x="14" y="8" width="1" height="1" fill="#0D1B2A"/><rect x="16" y="8" width="1" height="1" fill="#0D1B2A"/>
-          <rect x="15" y="10" width="1" height="1" fill="#0D1B2A"/><rect x="17" y="10" width="1" height="1" fill="#0D1B2A"/>
-          <rect x="14" y="12" width="1" height="1" fill="#0D1B2A"/><rect x="18" y="12" width="1" height="1" fill="#0D1B2A"/>
-          <rect x="8" y="14" width="1" height="1" fill="#0D1B2A"/><rect x="10" y="14" width="1" height="1" fill="#0D1B2A"/>
-          <rect x="9" y="16" width="1" height="1" fill="#0D1B2A"/><rect x="11" y="16" width="1" height="1" fill="#0D1B2A"/>
-          <rect x="14" y="14" width="1" height="1" fill="#0D1B2A"/><rect x="16" y="14" width="1" height="1" fill="#0D1B2A"/>
-          <rect x="15" y="16" width="1" height="1" fill="#0D1B2A"/><rect x="18" y="16" width="1" height="1" fill="#0D1B2A"/>
-        </svg>
-        <div style="font-size:.6rem;color:var(--gray);margin-top:.2rem">Vérifier</div>
       </div>
     </div>
   </div>
@@ -367,92 +227,164 @@
   <!-- ══ LISTE DIPLÔMES ══ -->
   <div class="page" id="page-liste">
     <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:1.5rem">
-      <div><h2 style="font-family:'Playfair Display',serif;font-weight:800;font-size:1.3rem">📋 Liste des diplômes</h2><div style="font-size:.85rem;color:var(--gray)">847 diplômes émis · 2024–2025</div></div>
-      <button class="btn-primary" onclick="showToast('📥 Export liste Excel généré !')">⬇ Excel</button>
+      <div><h2 style="font-family:'Playfair Display',serif;font-weight:800;font-size:1.3rem">📋 Liste des diplômes émis</h2><div style="font-size:.85rem;color:var(--gray)" id="liste-sub">Chargement...</div></div>
     </div>
     <div class="card">
-      <div class="card-header"><div class="card-title">Diplômes 2024–2025</div><input style="padding:.4rem .8rem;border:1px solid var(--border);border-radius:7px;font-size:.8rem;outline:none" placeholder="🔍 Rechercher..."/></div>
       <table class="data-table">
-        <thead><tr><th>Diplômé</th><th>Matricule</th><th>Diplôme</th><th>Filière</th><th>Mention</th><th>Moy.</th><th>Date</th><th>N° Série</th><th>Actions</th></tr></thead>
-        <tbody>
-          <tr><td><strong>KOMI Béatrice</strong></td><td>UL-2025-005</td><td>Licence L3</td><td>Informatique</td><td><span class="badge badge-success">Très Bien</span></td><td><strong>16.2</strong></td><td>22 Jan 2025</td><td style="font-size:.72rem;font-family:monospace">DIP-UL-2025-005</td><td><button class="card-action" onclick="showPage('apercu')">PDF</button></td></tr>
-          <tr><td><strong>MENSAH Afia</strong></td><td>UL-2025-002</td><td>Master M2</td><td>Gestion</td><td><span class="badge badge-blue">Assez Bien</span></td><td><strong>12.8</strong></td><td>20 Jan 2025</td><td style="font-size:.72rem;font-family:monospace">DIP-UL-2025-002</td><td><button class="card-action" onclick="showPage('apercu')">PDF</button></td></tr>
-          <tr><td><strong>DODZI Yao</strong></td><td>UL-2025-003</td><td>Licence L3</td><td>Droit</td><td><span class="badge badge-gold">Passable</span></td><td><strong>10.8</strong></td><td>19 Jan 2025</td><td style="font-size:.72rem;font-family:monospace">DIP-UL-2025-003</td><td><button class="card-action" onclick="showPage('apercu')">PDF</button></td></tr>
-          <tr><td><strong>ADZOA Kofi</strong></td><td>UL-2025-001</td><td>Licence L3</td><td>Informatique</td><td><span class="badge badge-blue">Assez Bien</span></td><td><strong>13.8</strong></td><td>22 Jan 2025</td><td style="font-size:.72rem;color:var(--danger)">En attente sig.</td><td><button class="card-action" onclick="showToast('✅ Signature apposée !')">Signer</button></td></tr>
-        </tbody>
+        <thead><tr><th>Diplômé</th><th>Matricule</th><th>Type</th><th>Intitulé</th><th>Mention</th><th>Date</th><th>Actions</th></tr></thead>
+        <tbody id="liste-tbody"><tr><td colspan="7" style="text-align:center;color:var(--gray);padding:2rem">Chargement...</td></tr></tbody>
       </table>
     </div>
   </div>
-
-  <!-- ══ CERTIFICATS ══ -->
-  <div class="page" id="page-certificats">
-    <div style="margin-bottom:1.5rem"><h2 style="font-family:'Playfair Display',serif;font-weight:800;font-size:1.3rem">📄 Types de certificats disponibles</h2></div>
-    <div class="cert-grid">
-      <div class="cert-card" onclick="showToast('📄 Certificat de scolarité généré !')"><div class="cert-icon">🏫</div><div class="cert-name">Certificat de scolarité</div><div class="cert-desc">Atteste de l'inscription régulière de l'étudiant pour l'année en cours.</div><div class="cert-info"><span class="badge badge-success">Disponible en ligne</span></div></div>
-      <div class="cert-card" onclick="showToast('📄 Attestation de réussite générée !')"><div class="cert-icon">✅</div><div class="cert-name">Attestation de réussite</div><div class="cert-desc">Confirme la réussite aux examens en attendant le diplôme officiel.</div><div class="cert-info"><span class="badge badge-success">Disponible en ligne</span></div></div>
-      <div class="cert-card" onclick="showToast('📄 Relevé de notes généré !')"><div class="cert-icon">📊</div><div class="cert-name">Relevé de notes officiel</div><div class="cert-desc">Relevé détaillé de toutes les notes avec QR code de vérification.</div><div class="cert-info"><span class="badge badge-success">Disponible en ligne</span></div></div>
-      <div class="cert-card" onclick="showToast('📄 Attestation de stage générée !')"><div class="cert-icon">💼</div><div class="cert-name">Attestation de stage</div><div class="cert-desc">Attestation officielle pour les stages académiques validés.</div><div class="cert-info"><span class="badge badge-blue">Sur demande</span></div></div>
-      <div class="cert-card" onclick="showToast('📄 Certificat de conduite générée !')"><div class="cert-icon">🌟</div><div class="cert-name">Certificat de bonne conduite</div><div class="cert-desc">Atteste du comportement exemplaire de l'étudiant durant sa formation.</div><div class="cert-info"><span class="badge badge-blue">Sur demande</span></div></div>
-      <div class="cert-card" onclick="showToast('📄 Lettre de recommandation générée !')"><div class="cert-icon">📝</div><div class="cert-name">Lettre de recommandation</div><div class="cert-desc">Lettre officielle de recommandation signée par le directeur académique.</div><div class="cert-info"><span class="badge badge-gold">Validation requise</span></div></div>
-      <div class="cert-card" onclick="showToast('📄 Équivalence de diplôme générée !')"><div class="cert-icon">🔄</div><div class="cert-name">Équivalence de diplôme</div><div class="cert-desc">Attestation d'équivalence pour les diplômes reconnus à l'étranger.</div><div class="cert-info"><span class="badge badge-gold">Validation requise</span></div></div>
-      <div class="cert-card" onclick="showToast('📄 Certificat de classement généré !')"><div class="cert-icon">🏆</div><div class="cert-name">Certificat de classement</div><div class="cert-desc">Atteste du rang de l'étudiant dans sa promotion (pour les boursiers).</div><div class="cert-info"><span class="badge badge-blue">Sur demande</span></div></div>
-    </div>
-  </div>
-
-  <!-- ══ VÉRIFICATION ══ -->
-  <div class="page" id="page-verification">
-    <div style="margin-bottom:1.5rem"><h2 style="font-family:'Playfair Display',serif;font-weight:800;font-size:1.3rem">🔐 Vérifier l'authenticité d'un document</h2></div>
-    <div class="card" style="max-width:600px;margin:0 auto">
-      <div class="card-body" style="text-align:center;padding:2rem">
-        <div style="font-size:3rem;margin-bottom:1rem">🔐</div>
-        <div style="font-family:'Playfair Display',serif;font-weight:800;font-size:1.1rem;margin-bottom:.5rem">Vérification d'authenticité</div>
-        <div style="font-size:.85rem;color:var(--gray);margin-bottom:1.5rem">Entrez le numéro de série du diplôme ou scannez le QR code</div>
-        <div style="display:flex;gap:.75rem;justify-content:center;margin-bottom:1rem;flex-wrap:wrap">
-          <input id="verifyCode" class="form-input" style="max-width:280px;text-align:center;font-family:monospace;font-weight:700;letter-spacing:.08em" placeholder="DIP-UL-2025-XXX"/>
-          <button class="btn-primary" onclick="verifyDiploma()">Vérifier →</button>
-        </div>
-        <div id="verifyResult" style="display:none"></div>
-      </div>
-    </div>
-    <div class="card" style="max-width:600px;margin:1rem auto 0">
-      <div class="card-header"><div class="card-title">📊 Statistiques de vérification</div></div>
-      <div class="card-body">
-        <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:1rem;text-align:center">
-          <div style="padding:.75rem;background:var(--light);border-radius:9px"><div style="font-family:'Playfair Display',serif;font-weight:800;font-size:1.3rem;color:var(--blue)">312</div><div style="font-size:.72rem;color:var(--gray)">Vérifications ce mois</div></div>
-          <div style="padding:.75rem;background:rgba(16,185,129,0.08);border-radius:9px"><div style="font-family:'Playfair Display',serif;font-weight:800;font-size:1.3rem;color:var(--success)">309</div><div style="font-size:.72rem;color:var(--gray)">Documents authentiques</div></div>
-          <div style="padding:.75rem;background:rgba(239,68,68,0.07);border-radius:9px"><div style="font-family:'Playfair Display',serif;font-weight:800;font-size:1.3rem;color:var(--danger)">3</div><div style="font-size:.72rem;color:var(--gray)">Tentatives de fraude</div></div>
-        </div>
-      </div>
-    </div>
-  </div>
-
-  <!-- PAGES SIMPLES -->
-  <div class="page" id="page-attestations"><div style="margin-bottom:1.5rem"><h2 style="font-family:'Playfair Display',serif;font-weight:800;font-size:1.3rem">📋 Attestations</h2></div><div class="card"><div class="card-body" style="text-align:center;padding:3rem"><div style="font-size:3rem;margin-bottom:1rem">📋</div><div style="font-family:'Playfair Display',serif;font-weight:700;font-size:1.1rem">1 248 attestations générées ce mois</div><br/><button class="btn-primary" onclick="showToast('📋 Nouvelle attestation générée !')">+ Générer attestation</button></div></div></div>
-  <div class="page" id="page-historique"><div style="margin-bottom:1.5rem"><h2 style="font-family:'Playfair Display',serif;font-weight:800;font-size:1.3rem">📜 Historique</h2></div><div class="card"><div class="card-body" style="text-align:center;padding:3rem"><div style="font-size:3rem;margin-bottom:1rem">📜</div><div style="font-family:'Playfair Display',serif;font-weight:700;font-size:1.1rem">2 095 documents générés depuis 2020</div></div></div></div>
-  <div class="page" id="page-modeles"><div style="margin-bottom:1.5rem"><h2 style="font-family:'Playfair Display',serif;font-weight:800;font-size:1.3rem">🎨 Modèles & Design</h2></div><div class="card"><div class="card-body" style="text-align:center;padding:3rem"><div style="font-size:3rem;margin-bottom:1rem">🎨</div><div style="font-family:'Playfair Display',serif;font-weight:700;font-size:1.1rem">3 modèles disponibles · Personnalisables</div><br/><button class="btn-primary" onclick="showToast('🎨 Éditeur de modèle ouvert')">Personnaliser</button></div></div></div>
-  <div class="page" id="page-signatures"><div style="margin-bottom:1.5rem"><h2 style="font-family:'Playfair Display',serif;font-weight:800;font-size:1.3rem">✍️ Signatures officielles</h2></div><div class="card"><div class="card-body" style="text-align:center;padding:3rem"><div style="font-size:3rem;margin-bottom:1rem">✍️</div><div style="font-family:'Playfair Display',serif;font-weight:700;font-size:1.1rem">3 signataires configurés</div><br/><button class="btn-primary" onclick="showToast('✍️ Signature ajoutée !')">+ Ajouter signature</button></div></div></div>
 
 </div></main>
 
 <div class="toast" id="toast"></div>
 
 <script>
-  const pages=['dashboard','generer','apercu','liste','certificats','attestations','verification','historique','modeles','signatures'];
-  const titles={'dashboard':'Tableau de bord','generer':'Générer un diplôme','apercu':'Aperçu du diplôme','liste':'Liste des diplômes','certificats':'Types de certificats','attestations':'Attestations','verification':'Vérifier authenticité','historique':'Historique','modeles':'Modèles & Design','signatures':'Signatures officielles'};
+  const pages=['dashboard','generer','liste'];
+  const titles={'dashboard':'Tableau de bord','generer':'Émettre un diplôme','liste':'Liste des diplômes'};
   function showPage(id){pages.forEach(p=>{document.getElementById('page-'+p)?.classList.remove('active');document.querySelectorAll('.nav-it').forEach(n=>{if(n.getAttribute('onclick')?.includes("'"+p+"'"))n.classList.remove('active');});});document.getElementById('page-'+id)?.classList.add('active');document.querySelectorAll('.nav-it').forEach(n=>{if(n.getAttribute('onclick')?.includes("'"+id+"'"))n.classList.add('active');});document.getElementById('pageTitle').textContent=titles[id]||id;}
-  function generateDiploma(){showToast('🎓 Diplôme généré ! PDF haute résolution disponible.');setTimeout(()=>showPage('apercu'),1500);}
-  function verifyDiploma(){
-    const code=document.getElementById('verifyCode').value.trim().toUpperCase();
-    const result=document.getElementById('verifyResult');
-    result.style.display='block';
-    if(code==='DIP-UL-2025-005'||code==='DIP-UL-2025-001'||code==='DIP-UL-2025-002'){
-      result.innerHTML='<div style="background:rgba(16,185,129,0.1);border:1.5px solid rgba(16,185,129,0.3);border-radius:10px;padding:1rem;color:var(--success)"><div style="font-weight:700;margin-bottom:.4rem">✅ Document authentique</div><div style="font-size:.82rem">Diplôme de Licence — KOMI Béatrice · Université de Lomé · 2024–2025</div></div>';
-    } else if(code){
-      result.innerHTML='<div style="background:rgba(239,68,68,0.08);border:1.5px solid rgba(239,68,68,0.2);border-radius:10px;padding:1rem;color:var(--danger)"><div style="font-weight:700;margin-bottom:.4rem">❌ Document non reconnu</div><div style="font-size:.82rem">Ce numéro ne correspond à aucun document officiel dans notre base de données.</div></div>';
-    } else {showToast('⚠️ Entrez un numéro de série');}
-  }
   let tt;function showToast(msg){const t=document.getElementById('toast');t.textContent=msg;t.classList.add('show');clearTimeout(tt);tt=setTimeout(()=>t.classList.remove('show'),3000);}
-  document.getElementById('verifyCode')?.addEventListener('keypress',e=>{if(e.key==='Enter')verifyDiploma();});
+
+  let allEtudiantsDip = [];
+  let allDiplomas = [];
+
+  window.authReady.then(async user => {
+    if (!user) return;
+    document.getElementById('topbarSub').textContent = `${user.university || ''} · ${new Date().getFullYear()}`;
+    const [{ data: studs }, { data: dips }] = await Promise.all([
+      supabaseClient.from('students').select('id, full_name, matricule, department, level').eq('university', user.university).order('full_name'),
+      supabaseClient.from('diplomas').select('*, students(full_name, matricule)').eq('university', user.university).order('created_at', { ascending: false }),
+    ]);
+    allEtudiantsDip = studs || [];
+    allDiplomas = dips || [];
+
+    document.getElementById('dipEtudiant').innerHTML = allEtudiantsDip.length === 0
+      ? '<option value="">Aucun étudiant</option>'
+      : allEtudiantsDip.map(s => `<option value="${s.id}">${s.full_name} — ${s.matricule}</option>`).join('');
+    document.getElementById('dipDate').value = new Date().toISOString().slice(0, 10);
+
+    renderDashboard(user);
+    renderListe();
+    updatePreview();
+  });
+
+  function renderDashboard(user) {
+    document.getElementById('kpi-total').textContent = allDiplomas.length;
+    document.getElementById('kpi-diplomes').textContent = allDiplomas.filter(d => d.type === 'Diplôme').length;
+    document.getElementById('kpi-attestations').textContent = allDiplomas.filter(d => d.type !== 'Diplôme').length;
+    const now = new Date();
+    document.getElementById('kpi-mois').textContent = allDiplomas.filter(d => { const c = new Date(d.created_at); return c.getMonth() === now.getMonth() && c.getFullYear() === now.getFullYear(); }).length;
+
+    const tbody = document.getElementById('dash-tbody');
+    const recents = allDiplomas.slice(0, 5);
+    tbody.innerHTML = recents.length === 0
+      ? '<tr><td colspan="5" style="text-align:center;color:var(--gray);padding:2rem">Aucun document émis pour le moment.</td></tr>'
+      : recents.map(d => `<tr><td><strong>${d.students?.full_name || '—'}</strong></td><td>${d.type}</td><td>${d.intitule}</td><td>${d.mention ? `<span class="badge badge-success">${d.mention}</span>` : '—'}</td><td>${new Date(d.date_emission).toLocaleDateString('fr-FR')}</td></tr>`).join('');
+  }
+
+  function renderListe() {
+    document.getElementById('liste-sub').textContent = `${allDiplomas.length} document(s) émis`;
+    const tbody = document.getElementById('liste-tbody');
+    tbody.innerHTML = allDiplomas.length === 0
+      ? '<tr><td colspan="7" style="text-align:center;color:var(--gray);padding:2rem">Aucun document émis pour le moment.</td></tr>'
+      : allDiplomas.map((d, i) => `<tr>
+          <td><strong>${d.students?.full_name || '—'}</strong></td>
+          <td>${d.students?.matricule || '—'}</td>
+          <td>${d.type}</td>
+          <td>${d.intitule}</td>
+          <td>${d.mention ? `<span class="badge badge-success">${d.mention}</span>` : '—'}</td>
+          <td>${new Date(d.date_emission).toLocaleDateString('fr-FR')}</td>
+          <td><button class="card-action" onclick="downloadDiplomaPdf(${i})">📥 PDF</button></td>
+        </tr>`).join('');
+  }
+
+  function updatePreview() {
+    const etudiantId = document.getElementById('dipEtudiant').value;
+    const etudiant = allEtudiantsDip.find(s => s.id === etudiantId);
+    const type = document.getElementById('dipType').value;
+    const mention = document.getElementById('dipMention').value;
+    const intitule = document.getElementById('dipIntitule').value;
+    const univ = window.currentUser?.university || '—';
+
+    document.getElementById('pv-watermark').textContent = univ.toUpperCase();
+    document.getElementById('pv-univ').textContent = univ;
+    document.getElementById('pv-type').textContent = type ? type.toUpperCase() : 'DOCUMENT';
+    document.getElementById('pv-name').textContent = etudiant ? etudiant.full_name.toUpperCase() : '—';
+    document.getElementById('pv-intro').textContent = type === 'Diplôme'
+      ? 'Il est certifié que'
+      : type === 'Relevé de notes' ? 'Relevé de notes de' : 'Il est attesté que';
+    document.getElementById('pv-corps').textContent = type === 'Diplôme'
+      ? 'a satisfait aux exigences requises et obtenu :'
+      : 'est régulièrement inscrit(e) en';
+    document.getElementById('pv-intitule').textContent = intitule || (etudiant ? `${etudiant.department || ''} ${etudiant.level || ''}`.trim() : '—');
+    const mentionEl = document.getElementById('pv-mention');
+    if (mention) { mentionEl.style.display = 'inline-block'; mentionEl.textContent = 'Mention : ' + mention; }
+    else mentionEl.style.display = 'none';
+  }
+
+  async function emettreDiplome() {
+    const errBox = document.getElementById('genError');
+    errBox.style.display = 'none';
+    const student_id = document.getElementById('dipEtudiant').value;
+    const type = document.getElementById('dipType').value;
+    const mention = document.getElementById('dipMention').value || null;
+    const intitule = document.getElementById('dipIntitule').value.trim();
+    const date_emission = document.getElementById('dipDate').value;
+
+    if (!student_id || !intitule) {
+      errBox.textContent = '⚠️ Étudiant et intitulé sont obligatoires.';
+      errBox.style.display = 'block';
+      return;
+    }
+
+    const { data, error } = await supabaseClient.from('diplomas').insert({
+      student_id, university: window.currentUser.university, type, mention, intitule, date_emission,
+      issued_by: window.currentUser.id,
+    }).select('*, students(full_name, matricule, department, level)').single();
+
+    if (error) {
+      errBox.textContent = '⚠️ ' + error.message;
+      errBox.style.display = 'block';
+      return;
+    }
+
+    allDiplomas.unshift(data);
+    renderDashboard(window.currentUser);
+    renderListe();
+    downloadPdfFor(data);
+    showToast('✅ Document émis et téléchargé');
+    document.getElementById('dipIntitule').value = '';
+  }
+
+  function downloadDiplomaPdf(i) { downloadPdfFor(allDiplomas[i]); }
+
+  function downloadPdfFor(d) {
+    const { jsPDF } = window.jspdf;
+    const doc = new jsPDF();
+    const etu = d.students || {};
+    doc.setFont('helvetica', 'bold'); doc.setFontSize(20); doc.setTextColor(13, 27, 42);
+    doc.text('UniManage', 14, 20);
+    doc.setFontSize(11); doc.setTextColor(100, 116, 139); doc.setFont('helvetica', 'normal');
+    doc.text(d.university || '', 14, 27);
+    doc.setDrawColor(226, 232, 240); doc.line(14, 33, 196, 33);
+    doc.setFont('helvetica', 'bold'); doc.setFontSize(16); doc.setTextColor(13, 27, 42);
+    doc.text(d.type.toUpperCase(), 14, 45);
+    doc.setFont('helvetica', 'normal'); doc.setFontSize(10); doc.setTextColor(13, 27, 42);
+    let y = 60;
+    const lignes = d.type === 'Diplôme'
+      ? [`Il est certifié que ${etu.full_name || '—'}, matricule ${etu.matricule || '—'},`, `a satisfait aux exigences académiques requises et obtenu :`, '', d.intitule, d.mention ? `Mention : ${d.mention}` : '']
+      : [`Nous soussignés, ${d.university}, attestons que :`, '', `${etu.full_name || '—'}, matricule ${etu.matricule || '—'},`, `${d.intitule}.`];
+    lignes.forEach(line => { if (line) { doc.setFont('helvetica', line === d.intitule || (line.startsWith('Mention')) ? 'bold' : 'normal'); doc.text(line, 14, y); } y += 8; });
+    y += 15;
+    doc.setFontSize(9); doc.setTextColor(100, 116, 139);
+    doc.text(`Émis le ${new Date(d.date_emission).toLocaleDateString('fr-FR')}`, 14, y);
+    y += 20;
+    doc.setFontSize(8); doc.setTextColor(148, 163, 184);
+    doc.text('Document généré électroniquement via UniManage.', 14, y);
+    doc.save(`${d.type.toLowerCase().replace(/\s+/g, '_')}_${etu.matricule || 'document'}.pdf`);
+  }
 </script>
 </body>
 </html>

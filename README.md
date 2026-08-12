@@ -38,10 +38,8 @@
 ├── 📱  mobile.html           ← Version mobile
 │
 ├── ── MODULES ACADÉMIQUES ──
-├── 📝  examens.html          ← Examens + PV + Proclamation
-├── 📜  resultats.html        ← Résultats + Relevés + QR code
 ├── 📆  calendrier.html       ← Calendrier académique
-├── 🎓  diplomes.html         ← Diplômes & Certificats
+├── 🎓  diplomes.html         ← Diplômes & Attestations
 │
 ├── ── COMMUNICATION ──
 ├── 💬  messagerie.html       ← Messagerie interne
@@ -121,13 +119,11 @@ https://[votre-username].github.io/unimanage/hub.html
 | 👨‍👩‍👧 Portail Parents | `parents.html` | Suivi enfants, absences |
 | ⚡ Super Admin | `superadmin.html` | Vue globale SaaS |
 | 📱 Mobile | `mobile.html` | App mobile 4 rôles |
-| 📝 Examens | `examens.html` | Délibération, PV, proclamation |
-| 📜 Résultats | `resultats.html` | Relevés notes + QR code |
 | 📆 Calendrier | `calendrier.html` | Planning académique interactif |
-| 🎓 Diplômes | `diplomes.html` | Diplômes + certificats officiels |
+| 🎓 Diplômes | `diplomes.html` | Diplômes + attestations officielles |
 | 💬 Messagerie | `messagerie.html` | Chat interne complet |
 | 🔔 Notifications | `notifications.html` | SMS/Email/Push automatisé |
-| 📊 Rapports | `rapports.html` | Analytics + exports PDF/Excel |
+| 📊 Rapports | `rapports.html` | Exports CSV réels (étudiants, enseignants, paiements, notes) |
 | 🏢 Multi-Campus | `multicampus.html` | Gestion 3 campus |
 
 ---
@@ -187,7 +183,7 @@ hub.html (point d'entrée)
     │                                      │
     │                          ┌───────────┼───────────┐
     │                          ▼           ▼           ▼
-    │                     examens.html  rapports.html  messagerie.html
+    │                     rapports.html   messagerie.html
     │                     calendrier.html  notifications.html
     │                     diplomes.html    multicampus.html
     │

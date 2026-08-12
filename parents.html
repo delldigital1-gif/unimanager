@@ -319,6 +319,12 @@
       <div class="card" style="cursor:pointer" onclick="downloadAttestation()"><div class="card-body"><div style="font-size:2rem;margin-bottom:.75rem">📋</div><div style="font-weight:700;margin-bottom:.25rem">Attestation de scolarité</div><div style="font-size:.78rem;color:var(--gray);margin-bottom:.75rem">Année 2024–2025</div><span class="badge badge-success">Télécharger</span></div></div>
       <div class="card" style="cursor:pointer" onclick="downloadConvocationsEnfant()"><div class="card-body"><div style="font-size:2rem;margin-bottom:.75rem">📋</div><div style="font-weight:700;margin-bottom:.25rem">Convocations d'examens</div><div style="font-size:.78rem;color:var(--gray);margin-bottom:.75rem" id="doc-conv-sub">Chargement...</div><span class="badge badge-blue">Télécharger</span></div></div>
     </div>
+    <div class="card" style="margin-top:1.25rem">
+      <div class="card-header"><div class="card-title">🎓 Diplômes & attestations officielles</div></div>
+      <div class="card-body" style="display:flex;flex-direction:column;gap:.6rem" id="diplomes-enfant-list">
+        <div style="text-align:center;color:var(--gray);padding:1rem;font-size:.85rem">Chargement...</div>
+      </div>
+    </div>
   </div>
 
   <!-- ══ MESSAGES ══ -->
@@ -438,6 +444,7 @@
     loadPaiementsEnfant(child);
     loadNotificationsEnfant(child);
     loadConvocationsSub(child);
+    loadDiplomesEnfant(child);
     document.getElementById('nav-badge-paiements').style.display = (child.payment_status && child.payment_status !== 'Payé') ? 'inline-block' : 'none';
 
     document.querySelectorAll('.child-pill').forEach(p=>p.classList.remove('active'));
@@ -766,6 +773,47 @@
     doc.setFontSize(8); doc.setTextColor(148, 163, 184);
     doc.text("Présentez-vous 15 minutes avant le début de chaque épreuve, muni(e) de la carte d'étudiant.", 14, y);
     doc.save(`convocations_${child.matricule}.pdf`);
+  }
+
+  // ── Diplômes/attestations émis par l'admin (table diplomas) ──
+  let diplomesEnfantActif = [];
+  async function loadDiplomesEnfant(child) {
+    const { data, error } = await supabaseClient
+      .from('diplomas').select('*').eq('student_id', child.id).order('date_emission', { ascending: false });
+    const listEl = document.getElementById('diplomes-enfant-list');
+    diplomesEnfantActif = data || [];
+    if (error || diplomesEnfantActif.length === 0) {
+      listEl.innerHTML = '<div style="text-align:center;color:var(--gray);padding:1rem;font-size:.85rem">Aucun diplôme émis pour le moment.</div>';
+      return;
+    }
+    listEl.innerHTML = diplomesEnfantActif.map((d, i) => `<div style="display:flex;align-items:center;justify-content:space-between;padding:.75rem;background:var(--light);border-radius:9px"><div><div style="font-size:.85rem;font-weight:600">${d.type} — ${d.intitule}</div><div style="font-size:.75rem;color:var(--gray)">${d.mention ? d.mention + ' · ' : ''}Émis le ${new Date(d.date_emission).toLocaleDateString('fr-FR')}</div></div><button onclick="downloadDiplomeEnfant(${i})" style="padding:.4rem .9rem;border-radius:7px;border:none;background:var(--blue);color:white;font-size:.78rem;cursor:pointer;font-weight:600">⬇ PDF</button></div>`).join('');
+  }
+
+  function downloadDiplomeEnfant(i) {
+    const d = diplomesEnfantActif[i];
+    const child = mesEnfants.find(c => c.id === enfantActifId);
+    if (!d || !child) return;
+    const { jsPDF } = window.jspdf;
+    const doc = new jsPDF();
+    doc.setFont('helvetica', 'bold'); doc.setFontSize(20); doc.setTextColor(13, 27, 42);
+    doc.text('UniManage', 14, 20);
+    doc.setFontSize(11); doc.setTextColor(100, 116, 139); doc.setFont('helvetica', 'normal');
+    doc.text(d.university || '', 14, 27);
+    doc.setDrawColor(226, 232, 240); doc.line(14, 33, 196, 33);
+    doc.setFont('helvetica', 'bold'); doc.setFontSize(16); doc.setTextColor(13, 27, 42);
+    doc.text(d.type.toUpperCase(), 14, 45);
+    doc.setFont('helvetica', 'normal'); doc.setFontSize(10); doc.setTextColor(13, 27, 42);
+    let y = 60;
+    doc.text(`${child.full_name}, matricule ${child.matricule}`, 14, y); y += 8;
+    doc.setFont('helvetica', 'bold'); doc.text(d.intitule, 14, y); y += 8;
+    if (d.mention) { doc.setFont('helvetica', 'normal'); doc.text(`Mention : ${d.mention}`, 14, y); y += 8; }
+    y += 15;
+    doc.setFontSize(9); doc.setTextColor(100, 116, 139);
+    doc.text(`Émis le ${new Date(d.date_emission).toLocaleDateString('fr-FR')}`, 14, y);
+    y += 20;
+    doc.setFontSize(8); doc.setTextColor(148, 163, 184);
+    doc.text('Document généré électroniquement via UniManage.', 14, y);
+    doc.save(`${d.type.toLowerCase().replace(/\s+/g, '_')}_${child.matricule}.pdf`);
   }
 
   // ── Notifications réelles : dérivées des notes/absences/paiements de

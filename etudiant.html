@@ -275,26 +275,19 @@
 
   <!-- PAGE DOCUMENTS -->
   <div class="page" id="page-documents">
-    <div style="margin-bottom:1.5rem"><h2 style="font-family:'Playfair Display',serif;font-weight:800;font-size:1.3rem">Mes documents</h2><div style="font-size:.85rem;color:var(--gray);margin-top:.2rem">Documents officiels et ressources pédagogiques</div></div>
-    <div class="dash-grid">
-      <div class="card">
-        <div class="card-header"><div class="card-title">📄 Documents officiels</div></div>
-        <div class="card-body" style="display:flex;flex-direction:column;gap:.75rem">
-          <div style="display:flex;align-items:center;justify-content:space-between;padding:.75rem;background:var(--light);border-radius:9px"><div><div style="font-size:.85rem;font-weight:600">Relevé de notes S1 2024–2025</div><div style="font-size:.75rem;color:var(--gray)">PDF · Généré le 20 Jan 2025</div></div><button onclick="showToast('📄 Relevé de notes téléchargé')" style="padding:.4rem .9rem;border-radius:7px;border:none;background:var(--blue);color:white;font-size:.78rem;cursor:pointer;font-weight:600">⬇ PDF</button></div>
-          <div style="display:flex;align-items:center;justify-content:space-between;padding:.75rem;background:var(--light);border-radius:9px"><div><div style="font-size:.85rem;font-weight:600">Attestation d'inscription 2024–2025</div><div style="font-size:.75rem;color:var(--gray)">PDF · Généré le 05 Oct 2024</div></div><button onclick="showToast('📄 Attestation téléchargée')" style="padding:.4rem .9rem;border-radius:7px;border:none;background:var(--blue);color:white;font-size:.78rem;cursor:pointer;font-weight:600">⬇ PDF</button></div>
-          <div style="display:flex;align-items:center;justify-content:space-between;padding:.75rem;background:var(--light);border-radius:9px"><div><div style="font-size:.85rem;font-weight:600">Carte étudiant 2024–2025</div><div style="font-size:.75rem;color:var(--gray)">PDF · Généré le 05 Oct 2024</div></div><button onclick="showToast('🎓 Carte étudiant téléchargée')" style="padding:.4rem .9rem;border-radius:7px;border:none;background:var(--blue);color:white;font-size:.78rem;cursor:pointer;font-weight:600">⬇ PDF</button></div>
-          <div style="display:flex;align-items:center;justify-content:space-between;padding:.75rem;background:var(--light);border-radius:9px"><div><div style="font-size:.85rem;font-weight:600">Convocation Examen S1</div><div style="font-size:.75rem;color:var(--gray)">PDF · Salle A12 · Place 24</div></div><button onclick="showToast('📋 Convocation téléchargée')" style="padding:.4rem .9rem;border-radius:7px;border:none;background:var(--blue);color:white;font-size:.78rem;cursor:pointer;font-weight:600">⬇ PDF</button></div>
-        </div>
+    <div style="margin-bottom:1.5rem"><h2 style="font-family:'Playfair Display',serif;font-weight:800;font-size:1.3rem">Mes documents</h2><div style="font-size:.85rem;color:var(--gray);margin-top:.2rem">Documents officiels générés à partir de vos données réelles · les supports de cours sont dans l'onglet « Mes cours »</div></div>
+    <div class="card">
+      <div class="card-header"><div class="card-title">📄 Documents officiels</div></div>
+      <div class="card-body" style="display:flex;flex-direction:column;gap:.75rem">
+        <div style="display:flex;align-items:center;justify-content:space-between;padding:.75rem;background:var(--light);border-radius:9px"><div><div style="font-size:.85rem;font-weight:600">Relevé de notes</div><div style="font-size:.75rem;color:var(--gray)">Généré à partir de vos notes actuelles</div></div><button onclick="downloadReleveNotes()" style="padding:.4rem .9rem;border-radius:7px;border:none;background:var(--blue);color:white;font-size:.78rem;cursor:pointer;font-weight:600">⬇ PDF</button></div>
+        <div style="display:flex;align-items:center;justify-content:space-between;padding:.75rem;background:var(--light);border-radius:9px"><div><div style="font-size:.85rem;font-weight:600">Attestation de scolarité</div><div style="font-size:.75rem;color:var(--gray)">Année en cours</div></div><button onclick="downloadAttestationEtudiant()" style="padding:.4rem .9rem;border-radius:7px;border:none;background:var(--blue);color:white;font-size:.78rem;cursor:pointer;font-weight:600">⬇ PDF</button></div>
+        <div style="display:flex;align-items:center;justify-content:space-between;padding:.75rem;background:var(--light);border-radius:9px"><div><div style="font-size:.85rem;font-weight:600">Convocations d'examens</div><div style="font-size:.75rem;color:var(--gray)" id="doc-exam-count">Chargement...</div></div><button onclick="showPage('examens')" style="padding:.4rem .9rem;border-radius:7px;border:none;background:var(--blue);color:white;font-size:.78rem;cursor:pointer;font-weight:600">Voir →</button></div>
       </div>
-      <div class="card">
-        <div class="card-header"><div class="card-title">📚 Supports de cours</div></div>
-        <div class="card-body" style="display:flex;flex-direction:column;gap:.6rem">
-          <div style="display:flex;align-items:center;justify-content:space-between;padding:.65rem .75rem;background:var(--light);border-radius:8px"><div><div style="font-size:.83rem;font-weight:600">Algorithmique — Cours complet</div><div style="font-size:.72rem;color:var(--gray)">Dr. Mensah · 48 pages</div></div><button onclick="showToast('📚 Cours téléchargé')" style="padding:.35rem .8rem;border-radius:6px;border:1px solid var(--border);background:white;font-size:.75rem;cursor:pointer">⬇</button></div>
-          <div style="display:flex;align-items:center;justify-content:space-between;padding:.65rem .75rem;background:var(--light);border-radius:8px"><div><div style="font-size:.83rem;font-weight:600">BD — TD 1 à 5</div><div style="font-size:.72rem;color:var(--gray)">Prof. Komi · 32 pages</div></div><button onclick="showToast('📚 TD téléchargés')" style="padding:.35rem .8rem;border-radius:6px;border:1px solid var(--border);background:white;font-size:.75rem;cursor:pointer">⬇</button></div>
-          <div style="display:flex;align-items:center;justify-content:space-between;padding:.65rem .75rem;background:var(--light);border-radius:8px"><div><div style="font-size:.83rem;font-weight:600">Réseaux — Slides complets</div><div style="font-size:.72rem;color:var(--gray)">Prof. Dodzi · 65 slides</div></div><button onclick="showToast('📚 Slides téléchargés')" style="padding:.35rem .8rem;border-radius:6px;border:1px solid var(--border);background:white;font-size:.75rem;cursor:pointer">⬇</button></div>
-          <div style="display:flex;align-items:center;justify-content:space-between;padding:.65rem .75rem;background:var(--light);border-radius:8px"><div><div style="font-size:.83rem;font-weight:600">Java — Exercices corrigés</div><div style="font-size:.72rem;color:var(--gray)">Dr. Atchoe · 28 pages</div></div><button onclick="showToast('📚 Exercices téléchargés')" style="padding:.35rem .8rem;border-radius:6px;border:1px solid var(--border);background:white;font-size:.75rem;cursor:pointer">⬇</button></div>
-          <div style="display:flex;align-items:center;justify-content:space-between;padding:.65rem .75rem;background:var(--light);border-radius:8px"><div><div style="font-size:.83rem;font-weight:600">Examens corrigés 2023–2024</div><div style="font-size:.72rem;color:var(--gray)">Toutes matières · Archive</div></div><button onclick="showToast('📚 Archives téléchargées')" style="padding:.35rem .8rem;border-radius:6px;border:1px solid var(--border);background:white;font-size:.75rem;cursor:pointer">⬇</button></div>
-        </div>
+    </div>
+    <div class="card">
+      <div class="card-header"><div class="card-title">🎓 Mes diplômes & attestations officielles</div></div>
+      <div class="card-body" style="display:flex;flex-direction:column;gap:.6rem" id="mes-diplomes-list">
+        <div style="text-align:center;color:var(--gray);padding:1rem;font-size:.85rem">Chargement...</div>
       </div>
     </div>
   </div>
@@ -777,6 +770,8 @@
     if (error) { console.error(error); return; }
     mesExamens = data || [];
     sub.textContent = `${mesExamens.length} examen(s) programmé(s) · ${studentRecord.department} ${studentRecord.level}`;
+    const docCount = document.getElementById('doc-exam-count');
+    if (docCount) docCount.textContent = `${mesExamens.length} examen(s) programmé(s)`;
     tbody.innerHTML = mesExamens.length === 0
       ? '<tr><td colspan="5" style="text-align:center;color:var(--gray);padding:2rem">Aucun examen programmé.</td></tr>'
       : mesExamens.map((s, i) => `<tr><td><strong>${s.matiere}</strong></td><td>${s.jour}</td><td>${s.creneau}</td><td>${s.salle || '—'}</td><td><button onclick="downloadConvocation(${i})" style="padding:.35rem .8rem;border-radius:6px;border:1px solid var(--border);background:white;font-size:.75rem;cursor:pointer;font-weight:600">📋 PDF</button></td></tr>`).join('');
@@ -810,6 +805,75 @@
     doc.save(`convocation_${s.matiere.replace(/\s+/g, '_')}.pdf`);
   }
 
+  function downloadAttestationEtudiant() {
+    if (!monDossier) { showToast('⚠️ Dossier introuvable'); return; }
+    const { jsPDF } = window.jspdf;
+    const doc = new jsPDF();
+    doc.setFont('helvetica', 'bold'); doc.setFontSize(20); doc.setTextColor(13, 27, 42);
+    doc.text('UniManage', 14, 20);
+    doc.setFontSize(11); doc.setTextColor(100, 116, 139); doc.setFont('helvetica', 'normal');
+    doc.text(monDossier.university || '', 14, 27);
+    doc.setDrawColor(226, 232, 240); doc.line(14, 33, 196, 33);
+    doc.setFont('helvetica', 'bold'); doc.setFontSize(16); doc.setTextColor(13, 27, 42);
+    doc.text('ATTESTATION DE SCOLARITÉ', 14, 45);
+    doc.setFont('helvetica', 'normal'); doc.setFontSize(10); doc.setTextColor(13, 27, 42);
+    const annee = new Date().getFullYear();
+    const lignes = [
+      `Nous soussignés, ${monDossier.university || 'l\'établissement'}, attestons que :`, '',
+      `${monDossier.full_name}, matricule ${monDossier.matricule},`,
+      `est régulièrement inscrit(e) en ${monDossier.department || '—'} ${monDossier.level || ''} pour l'année académique ${annee - 1}–${annee}.`, '',
+      'La présente attestation est délivrée pour servir et valoir ce que de droit.',
+    ];
+    let y = 65;
+    lignes.forEach(line => { doc.text(line, 14, y); y += 8; });
+    y += 25;
+    doc.setFontSize(9); doc.setTextColor(100, 116, 139);
+    doc.text(`Fait le ${new Date().toLocaleDateString('fr-FR')}`, 14, y);
+    y += 20;
+    doc.setFontSize(8); doc.setTextColor(148, 163, 184);
+    doc.text('Document généré électroniquement via UniManage.', 14, y);
+    doc.save(`attestation_scolarite_${monDossier.matricule}.pdf`);
+  }
+
+  // ── Diplômes/attestations émis par l'admin (table diplomas) ──
+  async function loadMesDiplomes(studentRecord) {
+    const { data, error } = await supabaseClient
+      .from('diplomas').select('*').eq('student_id', studentRecord.id).order('date_emission', { ascending: false });
+    const listEl = document.getElementById('mes-diplomes-list');
+    if (error || !data || data.length === 0) {
+      listEl.innerHTML = '<div style="text-align:center;color:var(--gray);padding:1rem;font-size:.85rem">Aucun diplôme émis pour le moment.</div>';
+      return;
+    }
+    listEl.innerHTML = data.map((d, i) => `<div style="display:flex;align-items:center;justify-content:space-between;padding:.75rem;background:var(--light);border-radius:9px"><div><div style="font-size:.85rem;font-weight:600">${d.type} — ${d.intitule}</div><div style="font-size:.75rem;color:var(--gray)">${d.mention ? d.mention + ' · ' : ''}Émis le ${new Date(d.date_emission).toLocaleDateString('fr-FR')}</div></div><button onclick="downloadMonDiplome(${i})" style="padding:.4rem .9rem;border-radius:7px;border:none;background:var(--blue);color:white;font-size:.78rem;cursor:pointer;font-weight:600">⬇ PDF</button></div>`).join('');
+    window.__mesDiplomesData = data;
+  }
+
+  function downloadMonDiplome(i) {
+    const d = window.__mesDiplomesData[i];
+    if (!d || !monDossier) return;
+    const { jsPDF } = window.jspdf;
+    const doc = new jsPDF();
+    doc.setFont('helvetica', 'bold'); doc.setFontSize(20); doc.setTextColor(13, 27, 42);
+    doc.text('UniManage', 14, 20);
+    doc.setFontSize(11); doc.setTextColor(100, 116, 139); doc.setFont('helvetica', 'normal');
+    doc.text(d.university || '', 14, 27);
+    doc.setDrawColor(226, 232, 240); doc.line(14, 33, 196, 33);
+    doc.setFont('helvetica', 'bold'); doc.setFontSize(16); doc.setTextColor(13, 27, 42);
+    doc.text(d.type.toUpperCase(), 14, 45);
+    doc.setFont('helvetica', 'normal'); doc.setFontSize(10); doc.setTextColor(13, 27, 42);
+    let y = 60;
+    doc.text(`${monDossier.full_name}, matricule ${monDossier.matricule}`, 14, y); y += 8;
+    doc.setFont('helvetica', 'bold'); doc.text(d.intitule, 14, y); y += 8;
+    if (d.mention) { doc.setFont('helvetica', 'normal'); doc.text(`Mention : ${d.mention}`, 14, y); y += 8; }
+    y += 15;
+    doc.setFontSize(9); doc.setTextColor(100, 116, 139);
+    doc.text(`Émis le ${new Date(d.date_emission).toLocaleDateString('fr-FR')}`, 14, y);
+    y += 20;
+    doc.setFontSize(8); doc.setTextColor(148, 163, 184);
+    doc.text('Document généré électroniquement via UniManage.', 14, y);
+    doc.save(`${d.type.toLowerCase().replace(/\s+/g, '_')}_${monDossier.matricule}.pdf`);
+  }
+
   // ── Mes cours : supports déposés par les enseignants (Supabase Storage) ──
   async function loadMesCoursEtudiant(studentRecord) {
     const [{ data: notes }, { data: docs }] = await Promise.all([
@@ -841,7 +905,7 @@
     if (!user) return;
     loadMonDossier(user);
     const { data: rec } = await supabaseClient.from('students').select('*').eq('profile_id', user.id).maybeSingle();
-    if (rec) { loadNotes(rec); loadPaiements(rec); loadTauxPresence(rec); loadEmploiDuTemps(rec); loadMesExamens(rec); loadMesCoursEtudiant(rec); }
+    if (rec) { loadNotes(rec); loadPaiements(rec); loadTauxPresence(rec); loadEmploiDuTemps(rec); loadMesExamens(rec); loadMesCoursEtudiant(rec); loadMesDiplomes(rec); }
   });
 </script>
 </body>
