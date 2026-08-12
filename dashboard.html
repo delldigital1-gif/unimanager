@@ -753,23 +753,20 @@
   ══════════════════════════════ -->
   <div class="page" id="page-examens">
     <div class="page-header">
-      <div><h2>Examens & Résultats</h2><div style="font-size:.85rem;color:var(--gray);margin-top:.2rem">Session 2 — Février 2025</div></div>
-      <button class="btn-add" onclick="showToast('📝 Nouvelle session d\'examen créée')">+ Programmer examen</button>
+      <div><h2>Examens & Résultats</h2><div style="font-size:.85rem;color:var(--gray);margin-top:.2rem">Année 2024–2025</div></div>
+      <button class="btn-add" onclick="showToast('📅 Ajoutez un créneau de type \'Examen\' depuis l\'onglet Emploi du temps');showPage('emploi-temps')">+ Programmer examen</button>
     </div>
     <div class="kpi-grid" style="grid-template-columns:repeat(3,1fr)">
-      <div class="kpi-card"><div class="kpi-icon" style="background:rgba(26,86,219,0.1)">📋</div><div class="kpi-body"><div class="kpi-value" style="color:var(--blue)">24</div><div class="kpi-label">Examens programmés</div></div></div>
-      <div class="kpi-card"><div class="kpi-icon" style="background:rgba(16,185,129,0.1)">✅</div><div class="kpi-body"><div class="kpi-value" style="color:var(--success)">94%</div><div class="kpi-label">Taux de réussite moyen</div></div></div>
-      <div class="kpi-card"><div class="kpi-icon" style="background:rgba(245,158,11,0.1)">⏳</div><div class="kpi-body"><div class="kpi-value" style="color:var(--gold)">6</div><div class="kpi-label">Notes en attente de saisie</div></div></div>
+      <div class="kpi-card"><div class="kpi-icon" style="background:rgba(26,86,219,0.1)">📋</div><div class="kpi-body"><div class="kpi-value" style="color:var(--blue)" id="exm-kpi-programmes">—</div><div class="kpi-label">Examens programmés</div></div></div>
+      <div class="kpi-card"><div class="kpi-icon" style="background:rgba(16,185,129,0.1)">✅</div><div class="kpi-body"><div class="kpi-value" style="color:var(--success)" id="exm-kpi-reussite">—</div><div class="kpi-label">Taux de réussite moyen</div></div></div>
+      <div class="kpi-card"><div class="kpi-icon" style="background:rgba(245,158,11,0.1)">⏳</div><div class="kpi-body"><div class="kpi-value" style="color:var(--gold)" id="exm-kpi-attente">—</div><div class="kpi-label">Notes en attente de saisie</div></div></div>
     </div>
     <div class="card">
-      <div class="card-header"><div class="card-title">Examens à venir</div></div>
+      <div class="card-header"><div class="card-title">Examens programmés (créneaux "Examen" de l'emploi du temps)</div></div>
       <table class="data-table">
-        <thead><tr><th>Matière</th><th>Département</th><th>Niveau</th><th>Date</th><th>Salle</th><th>Statut</th><th>Actions</th></tr></thead>
-        <tbody>
-          <tr><td><strong>Algorithmes Avancés</strong></td><td>Informatique</td><td>L2</td><td>03 Fév 2025 · 08h00</td><td>Amphithéâtre A</td><td><span class="badge badge-blue">Programmé</span></td><td><button class="card-action" onclick="showToast('📊 Saisie des notes ouverte')">Saisir notes</button></td></tr>
-          <tr><td><strong>Droit des Affaires</strong></td><td>Droit</td><td>L3</td><td>04 Fév 2025 · 10h00</td><td>Salle B2</td><td><span class="badge badge-gold">En attente</span></td><td><button class="card-action" onclick="showToast('📊 Saisie des notes ouverte')">Saisir notes</button></td></tr>
-          <tr><td><strong>Comptabilité Générale</strong></td><td>Gestion</td><td>M1</td><td>05 Fév 2025 · 14h00</td><td>Amphithéâtre B</td><td><span class="badge badge-success">Résultats publiés</span></td><td><button class="card-action" onclick="showToast('📄 Relevés téléchargeables')">Relevés PDF</button></td></tr>
-          <tr><td><strong>Réseaux Informatiques</strong></td><td>Informatique</td><td>L2</td><td>06 Fév 2025 · 08h00</td><td>Labo Informatique</td><td><span class="badge badge-blue">Programmé</span></td><td><button class="card-action" onclick="showToast('📊 Saisie des notes ouverte')">Saisir notes</button></td></tr>
+        <thead><tr><th>Matière</th><th>Département</th><th>Niveau</th><th>Jour</th><th>Créneau</th><th>Salle</th><th>Enseignant</th></tr></thead>
+        <tbody id="exm-tbody">
+          <tr><td colspan="7" style="text-align:center;color:var(--gray);padding:2rem">Chargement…</td></tr>
         </tbody>
       </table>
     </div>
@@ -892,82 +889,13 @@
 
   <!-- ══ DÉPARTEMENTS ══ -->
   <div class="page" id="page-departements">
-    <div class="page-header"><div><h2>Départements & Filières</h2><div style="font-size:.85rem;color:var(--gray);margin-top:.2rem">4 facultés · 12 départements · Année 2024–2025</div></div><button class="btn-add" onclick="showToast('🏛️ Nouveau département créé')">+ Département</button></div>
-    <div class="kpi-grid" style="grid-template-columns:repeat(4,1fr);margin-bottom:1.5rem">
-      <div class="kpi-card"><div class="kpi-icon" style="background:rgba(26,86,219,0.1)">🏛️</div><div class="kpi-body"><div class="kpi-value" style="color:var(--blue)">4</div><div class="kpi-label">Facultés</div></div></div>
-      <div class="kpi-card"><div class="kpi-icon" style="background:rgba(245,158,11,0.1)">📚</div><div class="kpi-body"><div class="kpi-value" style="color:var(--gold)">12</div><div class="kpi-label">Départements</div></div></div>
-      <div class="kpi-card"><div class="kpi-icon" style="background:rgba(16,185,129,0.1)">🎓</div><div class="kpi-body"><div class="kpi-value" style="color:var(--success)">28</div><div class="kpi-label">Filières actives</div></div></div>
-      <div class="kpi-card"><div class="kpi-icon" style="background:rgba(139,92,246,0.1)">📖</div><div class="kpi-body"><div class="kpi-value" style="color:#8b5cf6">186</div><div class="kpi-label">Matières enseignées</div></div></div>
+    <div class="page-header"><div><h2>Départements</h2><div style="font-size:.85rem;color:var(--gray);margin-top:.2rem" id="dept-subtitle">Année 2024–2025</div></div><button class="btn-add" onclick="showToast('ℹ️ Un département apparaît automatiquement dès qu\'un étudiant ou enseignant lui est rattaché (fiche étudiant/enseignant).')">+ Département</button></div>
+    <div class="kpi-grid" style="grid-template-columns:repeat(2,1fr);margin-bottom:1.5rem">
+      <div class="kpi-card"><div class="kpi-icon" style="background:rgba(245,158,11,0.1)">📚</div><div class="kpi-body"><div class="kpi-value" style="color:var(--gold)" id="dept-kpi-nb">—</div><div class="kpi-label">Départements</div></div></div>
+      <div class="kpi-card"><div class="kpi-icon" style="background:rgba(139,92,246,0.1)">📖</div><div class="kpi-body"><div class="kpi-value" style="color:#8b5cf6" id="dept-kpi-matieres">—</div><div class="kpi-label">Matières enseignées</div></div></div>
     </div>
-    <div class="features-grid" style="display:grid;grid-template-columns:repeat(auto-fit,minmax(260px,1fr));gap:1.25rem">
-      <div class="card">
-        <div class="card-header" style="background:rgba(26,86,219,0.05)">
-          <div><div class="card-title">💻 Informatique & IA</div><div style="font-size:.75rem;color:var(--gray);margin-top:.2rem">Faculté des Sciences</div></div>
-          <span class="badge badge-blue">287 étudiants</span>
-        </div>
-        <div class="card-body">
-          <div class="progress-list">
-            <div class="progress-item"><div class="progress-top"><span class="progress-name">Licence Informatique</span><span class="progress-pct">142</span></div><div class="progress-bar"><div class="progress-fill" style="width:70%;background:var(--blue)"></div></div></div>
-            <div class="progress-item"><div class="progress-top"><span class="progress-name">Master IA & Big Data</span><span class="progress-pct">88</span></div><div class="progress-bar"><div class="progress-fill" style="width:45%;background:var(--sky)"></div></div></div>
-            <div class="progress-item"><div class="progress-top"><span class="progress-name">Licence Réseaux</span><span class="progress-pct">57</span></div><div class="progress-bar"><div class="progress-fill" style="width:28%;background:var(--blue)"></div></div></div>
-          </div>
-          <div style="margin-top:1rem;display:flex;gap:.5rem">
-            <button class="card-action" onclick="showToast('📋 Détails Informatique & IA')">Voir détails</button>
-            <button class="card-action" onclick="showToast('📅 Emploi du temps Informatique')">Emploi du temps</button>
-          </div>
-        </div>
-      </div>
-      <div class="card">
-        <div class="card-header" style="background:rgba(245,158,11,0.05)">
-          <div><div class="card-title">📊 Gestion & Finance</div><div style="font-size:.75rem;color:var(--gray);margin-top:.2rem">Faculté des Sciences Économiques</div></div>
-          <span class="badge badge-gold">401 étudiants</span>
-        </div>
-        <div class="card-body">
-          <div class="progress-list">
-            <div class="progress-item"><div class="progress-top"><span class="progress-name">Licence Gestion</span><span class="progress-pct">198</span></div><div class="progress-bar"><div class="progress-fill" style="width:75%;background:var(--gold)"></div></div></div>
-            <div class="progress-item"><div class="progress-top"><span class="progress-name">Master Finance</span><span class="progress-pct">124</span></div><div class="progress-bar"><div class="progress-fill" style="width:50%;background:var(--gold)"></div></div></div>
-            <div class="progress-item"><div class="progress-top"><span class="progress-name">Licence Comptabilité</span><span class="progress-pct">79</span></div><div class="progress-bar"><div class="progress-fill" style="width:32%;background:var(--gold)"></div></div></div>
-          </div>
-          <div style="margin-top:1rem;display:flex;gap:.5rem">
-            <button class="card-action" onclick="showToast('📋 Détails Gestion & Finance')">Voir détails</button>
-            <button class="card-action" onclick="showToast('📅 Emploi du temps Gestion')">Emploi du temps</button>
-          </div>
-        </div>
-      </div>
-      <div class="card">
-        <div class="card-header" style="background:rgba(16,185,129,0.05)">
-          <div><div class="card-title">⚖️ Droit & Sciences Politiques</div><div style="font-size:.75rem;color:var(--gray);margin-top:.2rem">Faculté de Droit</div></div>
-          <span class="badge badge-success">312 étudiants</span>
-        </div>
-        <div class="card-body">
-          <div class="progress-list">
-            <div class="progress-item"><div class="progress-top"><span class="progress-name">Licence Droit Privé</span><span class="progress-pct">156</span></div><div class="progress-bar"><div class="progress-fill" style="width:68%;background:var(--success)"></div></div></div>
-            <div class="progress-item"><div class="progress-top"><span class="progress-name">Master Droit des Affaires</span><span class="progress-pct">98</span></div><div class="progress-bar"><div class="progress-fill" style="width:42%;background:var(--success)"></div></div></div>
-            <div class="progress-item"><div class="progress-top"><span class="progress-name">Licence Sciences Politiques</span><span class="progress-pct">58</span></div><div class="progress-bar"><div class="progress-fill" style="width:25%;background:var(--success)"></div></div></div>
-          </div>
-          <div style="margin-top:1rem;display:flex;gap:.5rem">
-            <button class="card-action" onclick="showToast('📋 Détails Droit')">Voir détails</button>
-            <button class="card-action" onclick="showToast('📅 Emploi du temps Droit')">Emploi du temps</button>
-          </div>
-        </div>
-      </div>
-      <div class="card">
-        <div class="card-header" style="background:rgba(139,92,246,0.05)">
-          <div><div class="card-title">🔬 Sciences & Ingénierie</div><div style="font-size:.75rem;color:var(--gray);margin-top:.2rem">Faculté des Sciences Appliquées</div></div>
-          <span class="badge" style="background:rgba(139,92,246,0.1);color:#8b5cf6">248 étudiants</span>
-        </div>
-        <div class="card-body">
-          <div class="progress-list">
-            <div class="progress-item"><div class="progress-top"><span class="progress-name">Licence Physique-Chimie</span><span class="progress-pct">112</span></div><div class="progress-bar"><div class="progress-fill" style="width:55%;background:#8b5cf6"></div></div></div>
-            <div class="progress-item"><div class="progress-top"><span class="progress-name">Master Génie Civil</span><span class="progress-pct">86</span></div><div class="progress-bar"><div class="progress-fill" style="width:40%;background:#8b5cf6"></div></div></div>
-            <div class="progress-item"><div class="progress-top"><span class="progress-name">Licence Biologie</span><span class="progress-pct">50</span></div><div class="progress-bar"><div class="progress-fill" style="width:22%;background:#8b5cf6"></div></div></div>
-          </div>
-          <div style="margin-top:1rem;display:flex;gap:.5rem">
-            <button class="card-action" onclick="showToast('📋 Détails Sciences')">Voir détails</button>
-            <button class="card-action" onclick="showToast('📅 Emploi du temps Sciences')">Emploi du temps</button>
-          </div>
-        </div>
-      </div>
+    <div class="features-grid" id="dept-cards-grid" style="display:grid;grid-template-columns:repeat(auto-fit,minmax(260px,1fr));gap:1.25rem">
+      <div style="text-align:center;color:var(--gray);padding:2rem;grid-column:1/-1">Chargement…</div>
     </div>
   </div>
   <!-- ══════════════════════════════
@@ -1618,7 +1546,125 @@
     loadEnseignants();
   }
 
-  window.authReady.then(user => { if (user) { loadEtudiants(); loadEnseignants(); loadPaymentsData(); loadEmploiSetup(); loadUtilisateursKpis(user); loadUniversiteSettings(user); } });
+  window.authReady.then(user => { if (user) { loadEtudiants(); loadEnseignants(); loadPaymentsData(); loadEmploiSetup(); loadUtilisateursKpis(user); loadUniversiteSettings(user); loadExamensEtDepartements(user); } });
+
+  // ── Examens & Résultats + Départements (données réelles Supabase) ──
+  // "Examens programmés" = créneaux d'emploi du temps de type "Examen" (le
+  // seul concept de planification d'examen qui existe réellement en base :
+  // schedule_slots.type accepte 'Cours'/'TD'/'TP'/'Examen'). Il n'existe pas
+  // de table "facultés"/"filières" dans le schéma : la page Départements
+  // affiche les vrais départements distincts (students.department ∪
+  // teachers.department) avec une répartition par niveau (L1..M2, réelle)
+  // à la place des fausses filières inventées.
+  async function loadExamensEtDepartements(user) {
+    const scoped = (q) => (user.role === 'superadmin' ? q : q.eq('university', user.university));
+
+    const [examsRes, gradesRes, studsRes, teachsRes] = await Promise.all([
+      scoped(supabaseClient.from('schedule_slots').select('matiere, department, level, jour, creneau, salle, enseignant_nom').eq('type', 'Examen')),
+      scoped(supabaseClient.from('grades').select('matiere, note_cc, note_exam')),
+      scoped(supabaseClient.from('students').select('department, level')),
+      scoped(supabaseClient.from('teachers').select('department')),
+    ]);
+
+    const exams = examsRes.data || [];
+    const gr = gradesRes.data || [];
+    const studs = studsRes.data || [];
+    const teachs = teachsRes.data || [];
+
+    // ── Examens & Résultats ──
+    const kpiProgEl = document.getElementById('exm-kpi-programmes');
+    if (kpiProgEl) kpiProgEl.textContent = exams.length.toLocaleString('fr-FR');
+
+    const notesCompletes = gr.filter(g => g.note_cc != null && g.note_exam != null)
+      .map(g => (Number(g.note_cc) + Number(g.note_exam)) / 2);
+    const reussitePct = notesCompletes.length > 0 ? Math.round(notesCompletes.filter(n => n >= 10).length / notesCompletes.length * 100) : null;
+    const kpiReussiteEl = document.getElementById('exm-kpi-reussite');
+    if (kpiReussiteEl) kpiReussiteEl.textContent = reussitePct !== null ? reussitePct + '%' : '—';
+
+    const enAttente = gr.filter(g => g.note_cc == null || g.note_exam == null).length;
+    const kpiAttenteEl = document.getElementById('exm-kpi-attente');
+    if (kpiAttenteEl) kpiAttenteEl.textContent = enAttente.toLocaleString('fr-FR');
+
+    const exmBody = document.getElementById('exm-tbody');
+    if (exmBody) {
+      exmBody.innerHTML = exams.length === 0
+        ? '<tr><td colspan="7" style="text-align:center;color:var(--gray);padding:2rem">Aucun examen programmé. Ajoutez un créneau de type "Examen" depuis l\'onglet Emploi du temps.</td></tr>'
+        : exams.map(e => `<tr>
+            <td><strong>${e.matiere || '—'}</strong></td>
+            <td>${e.department || '—'}</td>
+            <td>${e.level || '—'}</td>
+            <td>${e.jour || '—'}</td>
+            <td>${e.creneau || '—'}</td>
+            <td>${e.salle || '—'}</td>
+            <td>${e.enseignant_nom || '—'}</td>
+          </tr>`).join('');
+    }
+
+    // ── Départements ──
+    const deptSet = new Set();
+    studs.forEach(s => { if (s.department) deptSet.add(s.department); });
+    teachs.forEach(t => { if (t.department) deptSet.add(t.department); });
+    const departments = [...deptSet].sort();
+
+    const matiereSet = new Set(gr.map(g => g.matiere).filter(Boolean));
+
+    const nbDeptEl = document.getElementById('dept-kpi-nb');
+    if (nbDeptEl) nbDeptEl.textContent = departments.length.toLocaleString('fr-FR');
+    const nbMatEl = document.getElementById('dept-kpi-matieres');
+    if (nbMatEl) nbMatEl.textContent = matiereSet.size.toLocaleString('fr-FR');
+
+    const subtitleEl = document.getElementById('dept-subtitle');
+    if (subtitleEl) subtitleEl.textContent = `${departments.length} département${departments.length > 1 ? 's' : ''} · Année 2024–2025`;
+
+    // Réutilise la liste réelle de départements pour le filtre de l'onglet
+    // Étudiants, qui n'avait que 4 options codées en dur (Informatique/
+    // Gestion/Droit/Sciences).
+    const deptFilterEl = document.getElementById('etudiantsFilterDept');
+    if (deptFilterEl) {
+      deptFilterEl.innerHTML = '<option value="">Tous les départements</option>'
+        + departments.map(d => `<option value="${d}">${d}</option>`).join('');
+    }
+
+    const gridEl = document.getElementById('dept-cards-grid');
+    if (gridEl) {
+      if (departments.length === 0) {
+        gridEl.innerHTML = '<div style="text-align:center;color:var(--gray);padding:2rem;grid-column:1/-1">Aucun département — un département apparaît automatiquement dès qu\'un étudiant ou enseignant lui est rattaché.</div>';
+      } else {
+        const colors = ['#1A56DB', '#F59E0B', '#10B981', '#8b5cf6', '#3B82F6', '#EF4444'];
+        gridEl.innerHTML = departments.map((dept, i) => {
+          const color = colors[i % colors.length];
+          const deptStuds = studs.filter(s => s.department === dept);
+          const deptTeachCount = teachs.filter(t => t.department === dept).length;
+          const byLevel = {};
+          deptStuds.forEach(s => { const l = s.level || 'Non renseigné'; byLevel[l] = (byLevel[l] || 0) + 1; });
+          const levelEntries = Object.entries(byLevel).sort((a, b) => b[1] - a[1]);
+          const maxLevel = Math.max(1, ...levelEntries.map(e => e[1]));
+          const levelsHtml = levelEntries.length === 0
+            ? '<div style="font-size:.8rem;color:var(--gray)">Aucun étudiant.</div>'
+            : levelEntries.map(([level, count]) => `<div class="progress-item"><div class="progress-top"><span class="progress-name">${level}</span><span class="progress-pct">${count}</span></div><div class="progress-bar"><div class="progress-fill" style="width:${Math.round(count / maxLevel * 100)}%;background:${color}"></div></div></div>`).join('');
+          return `<div class="card">
+            <div class="card-header" style="background:${color}0D">
+              <div><div class="card-title">${dept}</div><div style="font-size:.75rem;color:var(--gray);margin-top:.2rem">${deptTeachCount} enseignant${deptTeachCount > 1 ? 's' : ''}</div></div>
+              <span class="badge" style="background:${color}1A;color:${color}">${deptStuds.length} étudiant${deptStuds.length > 1 ? 's' : ''}</span>
+            </div>
+            <div class="card-body">
+              <div class="progress-list">${levelsHtml}</div>
+              <div style="margin-top:1rem;display:flex;gap:.5rem">
+                <button class="card-action" onclick="filterEtudiantsByDept('${dept.replace(/'/g, "\\'")}')">Voir détails</button>
+                <button class="card-action" onclick="showPage('emploi-temps')">Emploi du temps</button>
+              </div>
+            </div>
+          </div>`;
+        }).join('');
+      }
+    }
+  }
+
+  function filterEtudiantsByDept(dept) {
+    showPage('etudiants');
+    const sel = document.getElementById('etudiantsFilterDept');
+    if (sel) { sel.value = dept; renderEtudiants(); }
+  }
 
   // ── Paramètres > Informations université (données réelles Supabase) ──
   // Le nom (colonne `universities.name`) n'est volontairement pas éditable ici :
