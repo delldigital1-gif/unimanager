@@ -143,10 +143,10 @@
     <div class="nav-it" onclick="showPage('presences')">✅ Présences & Absences</div>
     <div class="nav-it" onclick="showPage('emploi')">📅 Emploi du temps</div>
     <div class="nav-group">Finance</div>
-    <div class="nav-it" onclick="showPage('paiements')">💳 Paiements scolarité<span class="nav-badge">!</span></div>
+    <div class="nav-it" onclick="showPage('paiements')">💳 Paiements scolarité<span class="nav-badge" id="nav-badge-paiements" style="display:none">!</span></div>
     <div class="nav-it" onclick="showPage('documents')">📄 Documents</div>
     <div class="nav-group">Communication</div>
-    <div class="nav-it" onclick="showPage('messages')">💬 Contacter l'université<span class="nav-badge">2</span></div>
+    <div class="nav-it" onclick="showPage('messages')">💬 Contacter l'université</div>
     <div class="nav-it" onclick="showPage('notifications')">🔔 Notifications</div>
   </nav>
   <div class="sidebar-footer">
@@ -313,81 +313,34 @@
 
   <!-- ══ DOCUMENTS ══ -->
   <div class="page" id="page-documents">
-    <div style="margin-bottom:1.5rem"><h2 style="font-family:'Playfair Display',serif;font-weight:800;font-size:1.3rem">📄 Documents officiels</h2></div>
+    <div style="margin-bottom:1.5rem"><h2 style="font-family:'Playfair Display',serif;font-weight:800;font-size:1.3rem">📄 Documents officiels</h2><div style="font-size:.85rem;color:var(--gray);margin-top:.2rem">Générés à partir des données réelles de l'enfant sélectionné</div></div>
     <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(260px,1fr));gap:1rem">
-      <div class="card" style="cursor:pointer" onclick="downloadReleveNotes()"><div class="card-body"><div style="font-size:2rem;margin-bottom:.75rem">📊</div><div style="font-weight:700;margin-bottom:.25rem">Relevé de notes S1</div><div style="font-size:.78rem;color:var(--gray);margin-bottom:.75rem">2024–2025</div><span class="badge badge-success">Disponible</span></div></div>
-      <div class="card" style="cursor:pointer" onclick="showToast('📄 Attestation d\'inscription téléchargée')"><div class="card-body"><div style="font-size:2rem;margin-bottom:.75rem">📋</div><div style="font-weight:700;margin-bottom:.25rem">Attestation d'inscription</div><div style="font-size:.78rem;color:var(--gray);margin-bottom:.75rem">Année 2024–2025 · Université de Lomé</div><span class="badge badge-success">Disponible</span></div></div>
-      <div class="card" style="cursor:pointer" onclick="showToast('🎓 Carte étudiant téléchargée')"><div class="card-body"><div style="font-size:2rem;margin-bottom:.75rem">🎓</div><div style="font-weight:700;margin-bottom:.25rem">Carte étudiant</div><div style="font-size:.78rem;color:var(--gray);margin-bottom:.75rem">Validité 2024–2025</div><span class="badge badge-success">Disponible</span></div></div>
-      <div class="card" style="cursor:pointer" onclick="showToast('📋 Convocation téléchargée')"><div class="card-body"><div style="font-size:2rem;margin-bottom:.75rem">📋</div><div style="font-weight:700;margin-bottom:.25rem">Convocation examens S1</div><div style="font-size:.78rem;color:var(--gray);margin-bottom:.75rem">Amphithéâtre A · Place N°24</div><span class="badge badge-blue">Session 1</span></div></div>
+      <div class="card" style="cursor:pointer" onclick="downloadReleveNotes()"><div class="card-body"><div style="font-size:2rem;margin-bottom:.75rem">📊</div><div style="font-weight:700;margin-bottom:.25rem">Relevé de notes</div><div style="font-size:.78rem;color:var(--gray);margin-bottom:.75rem">Année 2024–2025</div><span class="badge badge-success">Télécharger</span></div></div>
+      <div class="card" style="cursor:pointer" onclick="downloadAttestation()"><div class="card-body"><div style="font-size:2rem;margin-bottom:.75rem">📋</div><div style="font-weight:700;margin-bottom:.25rem">Attestation de scolarité</div><div style="font-size:.78rem;color:var(--gray);margin-bottom:.75rem">Année 2024–2025</div><span class="badge badge-success">Télécharger</span></div></div>
+      <div class="card" style="cursor:pointer" onclick="downloadConvocationsEnfant()"><div class="card-body"><div style="font-size:2rem;margin-bottom:.75rem">📋</div><div style="font-weight:700;margin-bottom:.25rem">Convocations d'examens</div><div style="font-size:.78rem;color:var(--gray);margin-bottom:.75rem" id="doc-conv-sub">Chargement...</div><span class="badge badge-blue">Télécharger</span></div></div>
     </div>
   </div>
 
   <!-- ══ MESSAGES ══ -->
   <div class="page" id="page-messages">
     <div style="margin-bottom:1.5rem"><h2 style="font-family:'Playfair Display',serif;font-weight:800;font-size:1.3rem">💬 Contacter l'université</h2></div>
-    <div class="dash-grid">
-      <div class="card">
-        <div class="card-header"><div class="card-title">Envoyer un message</div></div>
-        <div class="card-body">
-          <div class="form-group"><label>Destinataire</label><select style="width:100%;padding:.65rem .9rem;border-radius:8px;border:1.5px solid var(--border);font-size:.875rem;font-family:'Inter',sans-serif;outline:none"><option>Direction Académique</option><option>Responsable Scolarité</option><option>Dr. Kodjo Mensah (Enseignant)</option><option>Service Comptabilité</option></select></div>
-          <div class="form-group"><label>Objet *</label><input class="form-input" placeholder="Objet de votre message"/></div>
-          <div class="form-group"><label>Concerne l'enfant</label><select id="messageChildSelect" style="width:100%;padding:.65rem .9rem;border-radius:8px;border:1.5px solid var(--border);font-size:.875rem;font-family:'Inter',sans-serif;outline:none"></select></div>
-          <div class="form-group"><label>Message *</label><textarea class="form-textarea" placeholder="Décrivez votre demande ou préoccupation..."></textarea></div>
-          <button class="btn-submit" onclick="showToast('✅ Message envoyé à la Direction Académique !')">📤 Envoyer le message</button>
-        </div>
-      </div>
-      <div class="card">
-        <div class="card-header"><div class="card-title">Messages reçus</div><span class="badge badge-danger">2 nouveaux</span></div>
-        <div class="card-body">
-          <div style="display:flex;flex-direction:column;gap:.75rem">
-            <div style="padding:.85rem;background:rgba(26,86,219,0.06);border-radius:10px;border-left:3px solid var(--blue);cursor:pointer" onclick="showToast('📧 Message ouvert')"><div style="display:flex;justify-content:space-between;margin-bottom:.3rem"><span style="font-size:.83rem;font-weight:700">Direction Académique</span><span style="font-size:.7rem;color:var(--gray)">Aujourd'hui</span></div><div style="font-size:.8rem;font-weight:600">Résultats S1 disponibles</div><div style="font-size:.75rem;color:var(--gray);margin-top:.2rem">Les résultats du semestre 1 de Kofi sont publiés...</div></div>
-            <div style="padding:.85rem;background:rgba(245,158,11,0.06);border-radius:10px;border-left:3px solid var(--gold);cursor:pointer" onclick="showToast('📧 Message ouvert')"><div style="display:flex;justify-content:space-between;margin-bottom:.3rem"><span style="font-size:.83rem;font-weight:700">Responsable Scolarité</span><span style="font-size:.7rem;color:var(--gray)">Hier</span></div><div style="font-size:.8rem;font-weight:600">Absence non justifiée — 29 Jan</div><div style="font-size:.75rem;color:var(--gray);margin-top:.2rem">Votre enfant était absent le 29 Jan...</div></div>
-            <div style="padding:.85rem;background:#F8FAFC;border-radius:10px;border-left:3px solid var(--border);cursor:pointer" onclick="showToast('📧 Message ouvert')"><div style="display:flex;justify-content:space-between;margin-bottom:.3rem"><span style="font-size:.83rem;font-weight:700">Comptabilité</span><span style="font-size:.7rem;color:var(--gray)">20 Jan</span></div><div style="font-size:.8rem;font-weight:600">Confirmation paiement tranche 3</div><div style="font-size:.75rem;color:var(--gray);margin-top:.2rem">Votre paiement de 83 334 FCFA a été reçu...</div></div>
-          </div>
-        </div>
+    <div class="card">
+      <div class="card-body" style="text-align:center;padding:3rem 2rem">
+        <div style="font-size:2.5rem;margin-bottom:1rem">💬</div>
+        <div style="font-weight:700;margin-bottom:.5rem">Messagerie UniManage</div>
+        <div style="font-size:.85rem;color:var(--gray);margin-bottom:1.5rem;max-width:420px;margin-left:auto;margin-right:auto">Contactez directement le personnel de l'université (direction, scolarité, enseignants) via la messagerie intégrée, partagée avec tous les comptes de l'établissement.</div>
+        <a href="messagerie.html" class="btn-submit" style="display:inline-block;text-decoration:none;padding:.75rem 2rem">Ouvrir la messagerie →</a>
       </div>
     </div>
   </div>
 
   <!-- ══ NOTIFICATIONS ══ -->
   <div class="page" id="page-notifications">
-    <div style="margin-bottom:1.5rem"><h2 style="font-family:'Playfair Display',serif;font-weight:800;font-size:1.3rem">🔔 Notifications</h2></div>
+    <div style="margin-bottom:1.5rem"><h2 style="font-family:'Playfair Display',serif;font-weight:800;font-size:1.3rem">🔔 Notifications</h2><div style="font-size:.85rem;color:var(--gray);margin-top:.2rem" id="notif-sub">Chargement...</div></div>
     <div class="card">
-      <div class="card-header"><div class="card-title">Toutes les notifications</div><button class="card-action" onclick="showToast('✅ Toutes marquées comme lues')">Tout marquer lu</button></div>
-      <div class="card-body" style="display:flex;flex-direction:column;gap:.6rem">
-        <div style="display:flex;gap:.85rem;padding:.85rem;background:rgba(26,86,219,0.05);border-radius:10px;border-left:3px solid var(--blue)"><div style="font-size:1.3rem">📊</div><div style="flex:1"><div style="font-size:.85rem;font-weight:600">Résultats S1 publiés — Kofi Adzoa</div><div style="font-size:.78rem;color:var(--gray);margin-top:.2rem">Moyenne générale : 13.8/20 · Mention : Assez Bien · Rang : 2ème</div><div style="font-size:.7rem;color:var(--blue);margin-top:.3rem;font-weight:600">Aujourd'hui 09h32</div></div></div>
-        <div style="display:flex;gap:.85rem;padding:.85rem;background:rgba(239,68,68,0.05);border-radius:10px;border-left:3px solid var(--danger)"><div style="font-size:1.3rem">⚠️</div><div style="flex:1"><div style="font-size:.85rem;font-weight:600">Absence non justifiée — Kofi</div><div style="font-size:.78rem;color:var(--gray);margin-top:.2rem">Mathématiques du 29 Jan — veuillez fournir un justificatif</div><div style="font-size:.7rem;color:var(--danger);margin-top:.3rem;font-weight:600">Hier 14h00</div></div></div>
-        <div style="display:flex;gap:.85rem;padding:.85rem;background:rgba(16,185,129,0.05);border-radius:10px;border-left:3px solid var(--success)"><div style="font-size:1.3rem">💳</div><div style="flex:1"><div style="font-size:.85rem;font-weight:600">Paiement confirmé — 83 334 FCFA</div><div style="font-size:.78rem;color:var(--gray);margin-top:.2rem">Tranche 3/3 reçue via Wave · Scolarité entièrement soldée</div><div style="font-size:.7rem;color:var(--success);margin-top:.3rem;font-weight:600">20 Jan 2025</div></div></div>
-        <div style="display:flex;gap:.85rem;padding:.85rem;background:#F8FAFC;border-radius:10px;border-left:3px solid var(--border)"><div style="font-size:1.3rem">📅</div><div style="flex:1"><div style="font-size:.85rem;font-weight:600">Examen Réseaux reporté</div><div style="font-size:.78rem;color:var(--gray);margin-top:.2rem">Nouvelle date : 04 Fév 2025 à 08h00 · Amphithéâtre A</div><div style="font-size:.7rem;color:var(--gray);margin-top:.3rem;font-weight:600">13 Jan 2025</div></div></div>
-      </div>
-    </div>
-    <!-- Préférences notifications -->
-    <div class="card">
-      <div class="card-header"><div class="card-title">⚙️ Préférences de notification</div></div>
-      <div class="card-body">
-        <div style="display:flex;flex-direction:column;gap:.75rem">
-          <div style="display:flex;align-items:center;justify-content:space-between;padding:.65rem .85rem;background:#F8FAFC;border-radius:9px">
-            <div><div style="font-size:.85rem;font-weight:600">📊 Résultats & Notes</div><div style="font-size:.75rem;color:var(--gray)">Publication et mise à jour des notes</div></div>
-            <input type="checkbox" checked style="width:16px;height:16px;accent-color:var(--purple)"/>
-          </div>
-          <div style="display:flex;align-items:center;justify-content:space-between;padding:.65rem .85rem;background:#F8FAFC;border-radius:9px">
-            <div><div style="font-size:.85rem;font-weight:600">⚠️ Absences</div><div style="font-size:.75rem;color:var(--gray)">Toute absence ou retard signalé</div></div>
-            <input type="checkbox" checked style="width:16px;height:16px;accent-color:var(--purple)"/>
-          </div>
-          <div style="display:flex;align-items:center;justify-content:space-between;padding:.65rem .85rem;background:#F8FAFC;border-radius:9px">
-            <div><div style="font-size:.85rem;font-weight:600">💳 Paiements</div><div style="font-size:.75rem;color:var(--gray)">Confirmations et rappels d'échéance</div></div>
-            <input type="checkbox" checked style="width:16px;height:16px;accent-color:var(--purple)"/>
-          </div>
-          <div style="display:flex;align-items:center;justify-content:space-between;padding:.65rem .85rem;background:#F8FAFC;border-radius:9px">
-            <div><div style="font-size:.85rem;font-weight:600">📢 Annonces université</div><div style="font-size:.75rem;color:var(--gray)">Informations générales et annonces officielles</div></div>
-            <input type="checkbox" style="width:16px;height:16px;accent-color:var(--purple)"/>
-          </div>
-          <div style="display:flex;align-items:center;justify-content:space-between;padding:.65rem .85rem;background:#F8FAFC;border-radius:9px">
-            <div><div style="font-size:.85rem;font-weight:600">📱 SMS</div><div style="font-size:.75rem;color:var(--gray)">Recevoir les alertes par SMS en plus de l'email</div></div>
-            <input type="checkbox" checked style="width:16px;height:16px;accent-color:var(--purple)"/>
-          </div>
-        </div>
-        <button class="btn-submit" style="margin-top:1rem" onclick="showToast('✅ Préférences enregistrées !')">Enregistrer les préférences</button>
+      <div class="card-header"><div class="card-title">Activité récente</div></div>
+      <div class="card-body" style="display:flex;flex-direction:column;gap:.6rem" id="notif-list">
+        <div style="text-align:center;color:var(--gray);padding:1rem;font-size:.85rem">Chargement...</div>
       </div>
     </div>
   </div>
@@ -467,9 +420,6 @@
         <div class="child-tab-av" style="background:linear-gradient(135deg,var(--blue),var(--sky))">${initials(c.full_name)}</div>${c.full_name} — ${c.department||''} ${c.level||''}
       </div>`).join('');
 
-    document.getElementById('messageChildSelect').innerHTML = mesEnfants.map(c => `
-      <option value="${c.id}">${c.full_name} — ${c.department||''} ${c.level||''}</option>`).join('');
-
     selectChild(mesEnfants[0].id);
   }
 
@@ -486,6 +436,9 @@
     loadPresences(studentId);
     loadEmploiDuTemps(child);
     loadPaiementsEnfant(child);
+    loadNotificationsEnfant(child);
+    loadConvocationsSub(child);
+    document.getElementById('nav-badge-paiements').style.display = (child.payment_status && child.payment_status !== 'Payé') ? 'inline-block' : 'none';
 
     document.querySelectorAll('.child-pill').forEach(p=>p.classList.remove('active'));
     document.querySelectorAll('.child-tab').forEach(t=>t.classList.remove('active'));
@@ -531,9 +484,7 @@
     document.getElementById('kpi-moy').textContent = moyGen.toFixed(1);
     document.getElementById('n-moy').textContent = moyGen.toFixed(1)+'/20';
     document.getElementById('n-mention').textContent = mention(moyGen);
-    document.getElementById('n-credits').textContent = `${creditsValides}/60`;
-
-    showToast('👤 Affichage : '+child.full_name);
+    document.getElementById('n-credits').textContent = `${creditsValides}/${child.credits_requis || 60}`;
   }
 
   // ── Charger les vrais paiements de l'enfant sélectionné (Supabase) ──
@@ -737,6 +688,119 @@
     doc.text('Document généré électroniquement le ' + new Date().toLocaleDateString('fr-FR') + ' via UniManage.', 14, 280);
 
     doc.save(`releve_notes_${child.matricule}.pdf`);
+  }
+
+  // ── Attestation de scolarité (données réelles, aucune note requise) ──
+  function downloadAttestation() {
+    const child = mesEnfants.find(c => c.id === enfantActifId);
+    if (!child) { showToast('⚠️ Sélectionnez un enfant'); return; }
+    const { jsPDF } = window.jspdf;
+    const doc = new jsPDF();
+    doc.setFont('helvetica', 'bold'); doc.setFontSize(20); doc.setTextColor(13, 27, 42);
+    doc.text('UniManage', 14, 20);
+    doc.setFontSize(11); doc.setTextColor(100, 116, 139); doc.setFont('helvetica', 'normal');
+    doc.text(child.university || '', 14, 27);
+    doc.setDrawColor(226, 232, 240); doc.line(14, 33, 196, 33);
+    doc.setFont('helvetica', 'bold'); doc.setFontSize(16); doc.setTextColor(13, 27, 42);
+    doc.text('ATTESTATION DE SCOLARITÉ', 14, 45);
+    doc.setFont('helvetica', 'normal'); doc.setFontSize(10); doc.setTextColor(13, 27, 42);
+    const annee = new Date().getFullYear();
+    const lignes = [
+      `Nous soussignés, ${child.university || 'l\'établissement'}, attestons que :`, '',
+      `${child.full_name}, matricule ${child.matricule},`,
+      `est régulièrement inscrit(e) en ${child.department || '—'} ${child.level || ''} pour l'année académique ${annee - 1}–${annee}.`, '',
+      'La présente attestation est délivrée pour servir et valoir ce que de droit.',
+    ];
+    let y = 65;
+    lignes.forEach(line => { doc.text(line, 14, y); y += 8; });
+    y += 15;
+    doc.setFontSize(9); doc.setTextColor(100, 116, 139);
+    doc.text(`Fait le ${new Date().toLocaleDateString('fr-FR')}`, 14, y);
+    y += 20;
+    doc.setFontSize(8); doc.setTextColor(148, 163, 184);
+    doc.text('Document généré électroniquement via UniManage.', 14, y);
+    doc.save(`attestation_scolarite_${child.matricule}.pdf`);
+  }
+
+  // ── Convocations d'examens (créneaux type='Examen' réels) ──
+  async function loadConvocationsSub(child) {
+    const sub = document.getElementById('doc-conv-sub');
+    if (!child.department || !child.level) { sub.textContent = 'Indisponible'; return; }
+    const { data, error } = await supabaseClient
+      .from('schedule_slots').select('id').eq('department', child.department).eq('level', child.level).eq('type', 'Examen');
+    sub.textContent = error ? 'Indisponible' : `${(data || []).length} examen(s) programmé(s)`;
+  }
+
+  async function downloadConvocationsEnfant() {
+    const child = mesEnfants.find(c => c.id === enfantActifId);
+    if (!child || !child.department || !child.level) { showToast('⚠️ Sélectionnez un enfant'); return; }
+    const { data, error } = await supabaseClient
+      .from('schedule_slots').select('*').eq('department', child.department).eq('level', child.level).eq('type', 'Examen');
+    if (error || !data || data.length === 0) { showToast('⚠️ Aucun examen programmé pour le moment'); return; }
+
+    const { jsPDF } = window.jspdf;
+    const doc = new jsPDF();
+    doc.setFont('helvetica', 'bold'); doc.setFontSize(20); doc.setTextColor(13, 27, 42);
+    doc.text('UniManage', 14, 20);
+    doc.setFontSize(11); doc.setTextColor(100, 116, 139); doc.setFont('helvetica', 'normal');
+    doc.text(child.university || '', 14, 27);
+    doc.setDrawColor(226, 232, 240); doc.line(14, 33, 196, 33);
+    doc.setFont('helvetica', 'bold'); doc.setFontSize(16); doc.setTextColor(13, 27, 42);
+    doc.text("CONVOCATIONS D'EXAMENS", 14, 45);
+    doc.setFont('helvetica', 'normal'); doc.setFontSize(10); doc.setTextColor(100, 116, 139);
+    doc.text(`${child.full_name}  ·  ${child.matricule}  ·  ${child.department} ${child.level}`, 14, 53);
+
+    let y = 68;
+    doc.setFont('helvetica', 'bold'); doc.setFontSize(9); doc.setTextColor(255, 255, 255);
+    doc.setFillColor(13, 27, 42); doc.rect(14, y - 5, 182, 8, 'F');
+    doc.text('Matière', 16, y); doc.text('Jour', 90, y); doc.text('Horaire', 125, y); doc.text('Salle', 160, y);
+    y += 9;
+    doc.setFont('helvetica', 'normal'); doc.setTextColor(13, 27, 42);
+    data.forEach((s, i) => {
+      if (i % 2 === 0) { doc.setFillColor(248, 250, 252); doc.rect(14, y - 5, 182, 8, 'F'); }
+      doc.setFontSize(9);
+      doc.text(s.matiere, 16, y); doc.text(s.jour, 90, y); doc.text(s.creneau, 125, y); doc.text(s.salle || '—', 160, y);
+      y += 9;
+    });
+    y += 10;
+    doc.setFontSize(8); doc.setTextColor(148, 163, 184);
+    doc.text("Présentez-vous 15 minutes avant le début de chaque épreuve, muni(e) de la carte d'étudiant.", 14, y);
+    doc.save(`convocations_${child.matricule}.pdf`);
+  }
+
+  // ── Notifications réelles : dérivées des notes/absences/paiements de
+  // l'enfant actif — pas de table "notifications" dédiée dans le schéma,
+  // donc on reconstruit un fil d'activité à partir des vraies données au
+  // lieu d'inventer des événements. ──
+  async function loadNotificationsEnfant(child) {
+    const listEl = document.getElementById('notif-list');
+    const subEl = document.getElementById('notif-sub');
+    const [{ data: grades }, { data: attendance }, { data: payments }] = await Promise.all([
+      supabaseClient.from('grades').select('matiere, note_cc, note_exam, created_at').eq('student_id', child.id),
+      supabaseClient.from('attendance').select('matiere, statut, session_date').eq('student_id', child.id).neq('statut', 'Présent'),
+      supabaseClient.from('payments').select('amount, method, paid_at').eq('student_id', child.id).eq('statut', 'Confirmé'),
+    ]);
+
+    const events = [];
+    (grades || []).forEach(g => {
+      if (g.note_cc != null && g.note_exam != null && g.created_at) {
+        const moyenne = g.note_cc * 0.3 + g.note_exam * 0.7;
+        events.push({ time: new Date(g.created_at), icon: '📊', bg: 'rgba(26,86,219,0.05)', border: 'var(--blue)', text: `Note publiée — ${g.matiere}`, sub: `Moyenne : ${moyenne.toFixed(1)}/20 · ${mention(moyenne)}` });
+      }
+    });
+    (attendance || []).forEach(a => {
+      events.push({ time: new Date(a.session_date), icon: '⚠️', bg: 'rgba(239,68,68,0.05)', border: 'var(--danger)', text: `${a.statut} — ${a.matiere}`, sub: 'Signalé par l\'enseignant' });
+    });
+    (payments || []).forEach(p => {
+      if (p.paid_at) events.push({ time: new Date(p.paid_at), icon: '💳', bg: 'rgba(16,185,129,0.05)', border: 'var(--success)', text: `Paiement confirmé — ${Number(p.amount).toLocaleString('fr-FR')} FCFA`, sub: p.method ? `Reçu via ${p.method}` : 'Paiement enregistré' });
+    });
+    events.sort((a, b) => b.time - a.time);
+    const top = events.slice(0, 15);
+
+    subEl.textContent = `${child.full_name} · ${events.length} événement(s)`;
+    listEl.innerHTML = top.length === 0
+      ? '<div style="text-align:center;color:var(--gray);padding:1.5rem;font-size:.85rem">Aucune activité pour le moment.</div>'
+      : top.map(e => `<div style="display:flex;gap:.85rem;padding:.85rem;background:${e.bg};border-radius:10px;border-left:3px solid ${e.border}"><div style="font-size:1.3rem">${e.icon}</div><div style="flex:1"><div style="font-size:.85rem;font-weight:600">${e.text}</div><div style="font-size:.78rem;color:var(--gray);margin-top:.2rem">${e.sub}</div><div style="font-size:.7rem;color:${e.border};margin-top:.3rem;font-weight:600">${e.time.toLocaleDateString('fr-FR')}</div></div></div>`).join('');
   }
 
   // ── Charger les vraies présences (Supabase) ──

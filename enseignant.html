@@ -127,10 +127,10 @@
   <!-- ACCUEIL -->
   <div class="page active" id="page-accueil">
     <div class="kpi-grid">
-      <div class="kpi-card"><div class="kpi-icon" style="background:rgba(245,158,11,0.1)">⏱️</div><div class="kpi-value" style="color:var(--gold)">120h</div><div class="kpi-label">Heures effectuées / 180h</div></div>
-      <div class="kpi-card"><div class="kpi-icon" style="background:rgba(26,86,219,0.1)">🎓</div><div class="kpi-value" style="color:var(--blue)">287</div><div class="kpi-label">Étudiants encadrés</div></div>
-      <div class="kpi-card"><div class="kpi-icon" style="background:rgba(16,185,129,0.1)">📋</div><div class="kpi-value" style="color:var(--success)">4</div><div class="kpi-label">Matières enseignées</div></div>
-      <div class="kpi-card"><div class="kpi-icon" style="background:rgba(239,68,68,0.1)">📝</div><div class="kpi-value" style="color:var(--danger)">2</div><div class="kpi-label">Notes à saisir</div></div>
+      <div class="kpi-card"><div class="kpi-icon" style="background:rgba(245,158,11,0.1)">⏱️</div><div class="kpi-value" style="color:var(--gold)" id="acc-kpi-heures">—</div><div class="kpi-label">Heures effectuées</div></div>
+      <div class="kpi-card"><div class="kpi-icon" style="background:rgba(26,86,219,0.1)">🎓</div><div class="kpi-value" style="color:var(--blue)" id="acc-kpi-etudiants">—</div><div class="kpi-label">Étudiants encadrés</div></div>
+      <div class="kpi-card"><div class="kpi-icon" style="background:rgba(16,185,129,0.1)">📋</div><div class="kpi-value" style="color:var(--success)" id="acc-kpi-matieres">—</div><div class="kpi-label">Matières enseignées</div></div>
+      <div class="kpi-card"><div class="kpi-icon" style="background:rgba(239,68,68,0.1)">📝</div><div class="kpi-value" style="color:var(--danger)" id="acc-kpi-notes">—</div><div class="kpi-label">Notes à saisir</div></div>
     </div>
     <div class="dash-grid">
       <div class="card">
@@ -140,18 +140,15 @@
         </div>
       </div>
       <div class="card">
-        <div class="card-header"><div class="card-title">📊 Volume horaire</div></div>
+        <div class="card-header"><div class="card-title">📊 Volume horaire par matière</div></div>
         <div class="card-body">
-          <div style="display:flex;flex-direction:column;gap:1rem">
-            <div><div style="display:flex;justify-content:space-between;font-size:.83rem;margin-bottom:.3rem"><span>Algorithmique L2</span><span style="font-weight:700;color:var(--gold)">48h / 60h</span></div><div class="progress-bar"><div class="progress-fill" style="width:80%;background:var(--gold)"></div></div></div>
-            <div><div style="display:flex;justify-content:space-between;font-size:.83rem;margin-bottom:.3rem"><span>TP Algorithmique</span><span style="font-weight:700;color:var(--blue)">32h / 40h</span></div><div class="progress-bar"><div class="progress-fill" style="width:80%;background:var(--blue)"></div></div></div>
-            <div><div style="display:flex;justify-content:space-between;font-size:.83rem;margin-bottom:.3rem"><span>Projet tutoré</span><span style="font-weight:700;color:var(--success)">24h / 40h</span></div><div class="progress-bar"><div class="progress-fill" style="width:60%;background:var(--success)"></div></div></div>
-            <div><div style="display:flex;justify-content:space-between;font-size:.83rem;margin-bottom:.3rem"><span>Algorithmique L3</span><span style="font-weight:700;color:var(--danger)">16h / 40h</span></div><div class="progress-bar"><div class="progress-fill" style="width:40%;background:var(--danger)"></div></div></div>
+          <div id="acc-volume-horaire" style="display:flex;flex-direction:column;gap:1rem">
+            <div style="text-align:center;color:var(--gray);padding:1rem;font-size:.85rem">Chargement...</div>
           </div>
           <div style="margin-top:1.25rem;padding:.85rem;background:rgba(245,158,11,0.08);border-radius:10px;text-align:center">
-            <div style="font-size:.78rem;color:var(--gray)">Salaire estimé ce mois</div>
-            <div style="font-family:'Playfair Display',serif;font-weight:800;font-size:1.4rem;color:var(--gold);margin-top:.25rem">960 000 FCFA</div>
-            <div style="font-size:.72rem;color:var(--gray);margin-top:.2rem">120h × 8 000 FCFA/h</div>
+            <div style="font-size:.78rem;color:var(--gray)">Rémunération estimée</div>
+            <div style="font-family:'Playfair Display',serif;font-weight:800;font-size:1.4rem;color:var(--gold);margin-top:.25rem" id="acc-salaire-montant">—</div>
+            <div style="font-size:.72rem;color:var(--gray);margin-top:.2rem" id="acc-salaire-detail">—</div>
           </div>
         </div>
       </div>
@@ -159,39 +156,28 @@
     <!-- Alertes -->
     <div class="card">
       <div class="card-header"><div class="card-title">🔔 À faire</div></div>
-      <div class="card-body" style="display:flex;flex-direction:column;gap:.6rem">
-        <div style="display:flex;align-items:center;justify-content:space-between;padding:.75rem;background:rgba(239,68,68,0.06);border-radius:9px;border-left:3px solid var(--danger)">
-          <div><div style="font-size:.85rem;font-weight:600">📝 Saisir les notes — Algorithmique L2 S1</div><div style="font-size:.75rem;color:var(--gray);margin-top:.2rem">287 étudiants · Deadline : 25 Jan 2025</div></div>
-          <button class="btn-primary" style="padding:.45rem .9rem;font-size:.78rem" onclick="showPage('notes')">Saisir →</button>
-        </div>
-        <div style="display:flex;align-items:center;justify-content:space-between;padding:.75rem;background:rgba(245,158,11,0.06);border-radius:9px;border-left:3px solid var(--gold)">
-          <div><div style="font-size:.85rem;font-weight:600">📤 Déposer le TD 6 — Algorithmique</div><div style="font-size:.75rem;color:var(--gray);margin-top:.2rem">Avant le cours du Lundi 27 Jan</div></div>
-          <button class="btn-primary" style="padding:.45rem .9rem;font-size:.78rem" onclick="showPage('mescours')">Déposer →</button>
-        </div>
-        <div style="display:flex;align-items:center;justify-content:space-between;padding:.75rem;background:rgba(26,86,219,0.06);border-radius:9px;border-left:3px solid var(--blue)">
-          <div><div style="font-size:.85rem;font-weight:600">📋 Corriger les copies — TP Algo groupe C</div><div style="font-size:.75rem;color:var(--gray);margin-top:.2rem">32 copies · Rendu le 18 Jan 2025</div></div>
-          <button class="btn-primary" style="padding:.45rem .9rem;font-size:.78rem;background:var(--blue)" onclick="showPage('notes')">Corriger →</button>
-        </div>
+      <div class="card-body" style="display:flex;flex-direction:column;gap:.6rem" id="acc-a-faire">
+        <div style="text-align:center;color:var(--gray);padding:1rem;font-size:.85rem">Chargement...</div>
       </div>
     </div>
   </div>
 
   <!-- SAISIE NOTES -->
   <div class="page" id="page-notes">
-    <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:1.5rem">
-      <div><h2 style="font-family:'Playfair Display',serif;font-weight:800;font-size:1.3rem">Saisie des notes</h2><div style="font-size:.85rem;color:var(--gray);margin-top:.2rem">Algorithmique Avancée · Informatique L2 · Session 1</div></div>
-      <div style="display:flex;gap:.75rem">
+    <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:1.5rem;flex-wrap:wrap;gap:1rem">
+      <div><h2 style="font-family:'Playfair Display',serif;font-weight:800;font-size:1.3rem">Saisie des notes</h2><div style="font-size:.85rem;color:var(--gray);margin-top:.2rem" id="notes-sub">Chargement...</div></div>
+      <div style="display:flex;gap:.75rem;align-items:center;flex-wrap:wrap">
+        <select id="notes_matiere" style="padding:.6rem .9rem;border:1.5px solid var(--border);border-radius:9px;font-size:.85rem;font-family:'Inter',sans-serif" onchange="onNotesMatiereChange()"></select>
         <button class="btn-primary" onclick="enregistrerNotes()">💾 Enregistrer</button>
-        <button onclick="showToast('📤 Notes soumises pour validation !')" style="padding:.65rem 1.2rem;border-radius:9px;background:var(--success);color:white;font-size:.875rem;font-weight:600;cursor:pointer;border:none">📤 Soumettre</button>
       </div>
     </div>
     <div class="card" style="margin-bottom:1.25rem">
       <div class="card-body" style="display:flex;gap:1rem;flex-wrap:wrap">
-        <div style="background:var(--light);border-radius:9px;padding:.75rem 1rem;text-align:center"><div style="font-size:.72rem;color:var(--gray)">Étudiants</div><div style="font-family:'Playfair Display',serif;font-weight:800;font-size:1.2rem;color:var(--blue)">287</div></div>
-        <div style="background:var(--light);border-radius:9px;padding:.75rem 1rem;text-align:center"><div style="font-size:.72rem;color:var(--gray)">Notes saisies</div><div style="font-family:'Playfair Display',serif;font-weight:800;font-size:1.2rem;color:var(--success)">285</div></div>
-        <div style="background:rgba(239,68,68,0.08);border-radius:9px;padding:.75rem 1rem;text-align:center"><div style="font-size:.72rem;color:var(--gray)">Manquantes</div><div style="font-family:'Playfair Display',serif;font-weight:800;font-size:1.2rem;color:var(--danger)">2</div></div>
-        <div style="background:var(--light);border-radius:9px;padding:.75rem 1rem;text-align:center"><div style="font-size:.72rem;color:var(--gray)">Moyenne classe</div><div style="font-family:'Playfair Display',serif;font-weight:800;font-size:1.2rem;color:var(--gold)">13.4/20</div></div>
-        <div style="background:var(--light);border-radius:9px;padding:.75rem 1rem;text-align:center"><div style="font-size:.72rem;color:var(--gray)">Taux réussite</div><div style="font-family:'Playfair Display',serif;font-weight:800;font-size:1.2rem;color:var(--success)">89%</div></div>
+        <div style="background:var(--light);border-radius:9px;padding:.75rem 1rem;text-align:center"><div style="font-size:.72rem;color:var(--gray)">Étudiants</div><div style="font-family:'Playfair Display',serif;font-weight:800;font-size:1.2rem;color:var(--blue)" id="notes-kpi-etudiants">—</div></div>
+        <div style="background:var(--light);border-radius:9px;padding:.75rem 1rem;text-align:center"><div style="font-size:.72rem;color:var(--gray)">Notes saisies</div><div style="font-family:'Playfair Display',serif;font-weight:800;font-size:1.2rem;color:var(--success)" id="notes-kpi-saisies">—</div></div>
+        <div style="background:rgba(239,68,68,0.08);border-radius:9px;padding:.75rem 1rem;text-align:center"><div style="font-size:.72rem;color:var(--gray)">Manquantes</div><div style="font-family:'Playfair Display',serif;font-weight:800;font-size:1.2rem;color:var(--danger)" id="notes-kpi-manquantes">—</div></div>
+        <div style="background:var(--light);border-radius:9px;padding:.75rem 1rem;text-align:center"><div style="font-size:.72rem;color:var(--gray)">Moyenne classe</div><div style="font-family:'Playfair Display',serif;font-weight:800;font-size:1.2rem;color:var(--gold)" id="notes-kpi-moyenne">—</div></div>
+        <div style="background:var(--light);border-radius:9px;padding:.75rem 1rem;text-align:center"><div style="font-size:.72rem;color:var(--gray)">Taux réussite</div><div style="font-family:'Playfair Display',serif;font-weight:800;font-size:1.2rem;color:var(--success)" id="notes-kpi-reussite">—</div></div>
       </div>
     </div>
     <div class="card">
@@ -250,11 +236,28 @@
 
   <!-- PLACEHOLDER PAGES -->
   <div class="page" id="page-mescours">
-    <div style="margin-bottom:1.5rem"><h2 style="font-family:'Playfair Display',serif;font-weight:800;font-size:1.3rem">Mes cours</h2></div>
-    <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(260px,1fr));gap:1.1rem">
-      <div class="card" onclick="showToast('📚 Cours Algorithmique L2 ouvert')" style="cursor:pointer"><div style="height:5px;background:linear-gradient(90deg,var(--gold),#fbbf24)"></div><div class="card-body"><div style="font-size:1.3rem;margin-bottom:.5rem">💻</div><div style="font-family:'Playfair Display',serif;font-weight:700;margin-bottom:.3rem">Algorithmique L2</div><div style="font-size:.78rem;color:var(--gray);margin-bottom:.75rem">287 étudiants · 60h · CM + TP</div><div style="display:flex;gap:.5rem"><span class="badge badge-gold">48h / 60h</span><button onclick="event.stopPropagation();showToast('📤 Fichier déposé !')" style="padding:.25rem .7rem;border-radius:6px;border:1px solid var(--border);background:white;font-size:.72rem;cursor:pointer">+ Déposer</button></div></div></div>
-      <div class="card" onclick="showToast('📚 Cours TP Algorithmique ouvert')" style="cursor:pointer"><div style="height:5px;background:linear-gradient(90deg,var(--success),#34d399)"></div><div class="card-body"><div style="font-size:1.3rem;margin-bottom:.5rem">🔧</div><div style="font-family:'Playfair Display',serif;font-weight:700;margin-bottom:.3rem">TP Algorithmique L2</div><div style="font-size:.78rem;color:var(--gray);margin-bottom:.75rem">32 étudiants · 40h · TP</div><div style="display:flex;gap:.5rem"><span class="badge badge-success">32h / 40h</span><button onclick="event.stopPropagation();showToast('📤 Fichier déposé !')" style="padding:.25rem .7rem;border-radius:6px;border:1px solid var(--border);background:white;font-size:.72rem;cursor:pointer">+ Déposer</button></div></div></div>
-      <div class="card" onclick="showToast('📚 Cours Projet Tutoré ouvert')" style="cursor:pointer"><div style="height:5px;background:linear-gradient(90deg,var(--blue),var(--sky))"></div><div class="card-body"><div style="font-size:1.3rem;margin-bottom:.5rem">🚀</div><div style="font-family:'Playfair Display',serif;font-weight:700;margin-bottom:.3rem">Projet Tutoré L2</div><div style="font-size:.78rem;color:var(--gray);margin-bottom:.75rem">8 groupes · 40h · Encadrement</div><div style="display:flex;gap:.5rem"><span class="badge badge-blue">24h / 40h</span><button onclick="event.stopPropagation();showToast('📤 Fichier déposé !')" style="padding:.25rem .7rem;border-radius:6px;border:1px solid var(--border);background:white;font-size:.72rem;cursor:pointer">+ Déposer</button></div></div></div>
+    <div style="margin-bottom:1.5rem"><h2 style="font-family:'Playfair Display',serif;font-weight:800;font-size:1.3rem">Mes cours</h2><div style="font-size:.85rem;color:var(--gray);margin-top:.2rem">Déposez des supports (PDF, slides...) visibles par vos étudiants</div></div>
+    <div id="mescours-grid" style="display:grid;grid-template-columns:repeat(auto-fill,minmax(300px,1fr));gap:1.1rem">
+      <div style="text-align:center;color:var(--gray);padding:2rem;grid-column:1/-1">Chargement...</div>
+    </div>
+  </div>
+
+  <!-- MODAL : DÉPOSER UN DOCUMENT -->
+  <div class="modal-overlay" id="modalUploadDoc" onclick="if(event.target===this)closeUploadDocModal()">
+    <div class="modal" style="max-width:420px">
+      <button class="modal-close" onclick="closeUploadDocModal()">✕</button>
+      <div style="font-family:'Playfair Display',serif;font-weight:800;font-size:1.15rem;margin-bottom:.3rem">Déposer un document</div>
+      <div id="uploadDocMatiere" style="font-size:.85rem;color:var(--gray);margin-bottom:1.25rem"></div>
+      <div id="uploadDocError" style="display:none;background:rgba(239,68,68,0.08);color:var(--danger);border:1px solid rgba(239,68,68,0.2);padding:.6rem 1rem;border-radius:8px;font-size:.83rem;margin-bottom:1rem"></div>
+      <div class="form-group" style="margin-bottom:.85rem">
+        <label style="display:block;font-size:.8rem;font-weight:600;margin-bottom:.4rem">Titre du document</label>
+        <input id="uploadDocTitle" style="width:100%;padding:.65rem .9rem;border:1.5px solid var(--border);border-radius:9px;font-size:.85rem" placeholder="Ex: TD 6 — Récursivité"/>
+      </div>
+      <div class="form-group" style="margin-bottom:1.25rem">
+        <label style="display:block;font-size:.8rem;font-weight:600;margin-bottom:.4rem">Fichier</label>
+        <input id="uploadDocFile" type="file" style="width:100%"/>
+      </div>
+      <button class="btn-primary" style="width:100%" id="uploadDocSubmit" onclick="submitUploadDoc()">Déposer</button>
     </div>
   </div>
   <div class="page" id="page-emploidutemps">
@@ -333,11 +336,27 @@
     return parseFloat(cc) * 0.3 + parseFloat(exam) * 0.7;
   }
 
-  async function loadSaisieNotes(teacherRecord) {
+  let monTeacherRecordNotes = null;
+  async function setupNotesMatiere(teacherRecord) {
+    monTeacherRecordNotes = teacherRecord;
+    const { data: grades, error } = await supabaseClient
+      .from('grades').select('matiere').eq('teacher_id', teacherRecord.id);
+    if (error) { console.error(error); return; }
+    const matieres = [...new Set((grades || []).map(g => g.matiere))];
+    document.getElementById('notes_matiere').innerHTML = matieres.map(m => `<option value="${m}">${m}</option>`).join('');
+    if (matieres.length > 0) loadSaisieNotes(teacherRecord, matieres[0]);
+    else { document.getElementById('notes-sub').textContent = 'Aucune matière assignée.'; document.getElementById('tbodySaisieNotes').innerHTML = '<tr><td colspan="7" style="text-align:center;color:var(--gray);padding:2rem">Aucune matière assignée.</td></tr>'; }
+  }
+  function onNotesMatiereChange() {
+    if (monTeacherRecordNotes) loadSaisieNotes(monTeacherRecordNotes, document.getElementById('notes_matiere').value);
+  }
+
+  async function loadSaisieNotes(teacherRecord, matiere) {
     monTeacherId = teacherRecord.id;
+    document.getElementById('notes-sub').textContent = matiere;
     const { data: notes, error } = await supabaseClient
-      .from('grades').select('*, students(full_name, matricule)')
-      .eq('teacher_id', teacherRecord.id).eq('matiere', 'Algorithmique Avancée')
+      .from('grades').select('*, students(full_name, matricule, department, level)')
+      .eq('teacher_id', teacherRecord.id).eq('matiere', matiere)
       .order('created_at');
     if (error) { console.error(error); return; }
     notesEnCache = notes || [];
@@ -346,6 +365,14 @@
 
   function renderSaisieNotes() {
     const tbody = document.getElementById('tbodySaisieNotes');
+    const withMoyenne = notesEnCache.map(n => computeMoyenne(n.note_cc, n.note_exam));
+    const saisies = withMoyenne.filter(m => m != null);
+    document.getElementById('notes-kpi-etudiants').textContent = notesEnCache.length;
+    document.getElementById('notes-kpi-saisies').textContent = saisies.length;
+    document.getElementById('notes-kpi-manquantes').textContent = notesEnCache.length - saisies.length;
+    document.getElementById('notes-kpi-moyenne').textContent = saisies.length > 0 ? (saisies.reduce((s, m) => s + m, 0) / saisies.length).toFixed(1) + '/20' : '—';
+    document.getElementById('notes-kpi-reussite').textContent = saisies.length > 0 ? Math.round(saisies.filter(m => m >= 10).length / saisies.length * 100) + '%' : '—';
+
     if (notesEnCache.length === 0) {
       tbody.innerHTML = '<tr><td colspan="7" style="text-align:center;color:var(--gray);padding:2rem">Aucun étudiant inscrit à ce cours.</td></tr>';
       return;
@@ -636,11 +663,168 @@
     tbody.innerHTML = data.map(s => `<tr><td><strong>${s.matiere}</strong></td><td>${s.jour}</td><td>${s.creneau}</td><td>${s.salle || '—'}</td><td>${s.department || ''} ${s.level || ''}</td><td><button class="btn-primary" style="padding:.35rem .8rem;font-size:.78rem" onclick="showPage('notes')">📝 Notes</button></td></tr>`).join('');
   }
 
+  // ── Accueil : KPIs, volume horaire, à faire (données réelles) ──
+  // Remplace les chiffres codés en dur (120h, 287 étudiants, "960 000 FCFA"
+  // etc.) — dérivés de grades (matières/étudiants/notes manquantes),
+  // schedule_slots (heures programmées par matière) et teachers
+  // (heures_effectuees/taux_horaire, déjà réels).
+  async function loadAccueilKpis(teacherRecord) {
+    const [{ data: grades }, { data: slots }] = await Promise.all([
+      supabaseClient.from('grades').select('student_id, matiere, note_cc, note_exam').eq('teacher_id', teacherRecord.id),
+      supabaseClient.from('schedule_slots').select('matiere, creneau').eq('teacher_id', teacherRecord.id),
+    ]);
+    const gr = grades || [];
+    const matieres = [...new Set(gr.map(g => g.matiere))];
+    const etudiants = new Set(gr.map(g => g.student_id));
+    const manquantes = gr.filter(g => g.note_cc == null || g.note_exam == null);
+
+    document.getElementById('acc-kpi-heures').textContent = (teacherRecord.heures_effectuees || 0) + 'h';
+    document.getElementById('acc-kpi-etudiants').textContent = etudiants.size;
+    document.getElementById('acc-kpi-matieres').textContent = matieres.length;
+    document.getElementById('acc-kpi-notes').textContent = manquantes.length;
+
+    // Volume horaire par matière : 1 créneau programmé = 2h (granularité des
+    // créneaux d'emploi du temps dans ce schéma — pas de durée explicite par
+    // créneau). Barre relative à la matière la plus chargée.
+    const heuresByMatiere = {};
+    (slots || []).forEach(s => { heuresByMatiere[s.matiere] = (heuresByMatiere[s.matiere] || 0) + 2; });
+    const volEl = document.getElementById('acc-volume-horaire');
+    const entries = Object.entries(heuresByMatiere);
+    volEl.innerHTML = entries.length === 0
+      ? '<div style="text-align:center;color:var(--gray);padding:1rem;font-size:.85rem">Aucun créneau programmé.</div>'
+      : (() => {
+          const max = Math.max(1, ...entries.map(([, h]) => h));
+          const colors = ['var(--gold)', 'var(--blue)', 'var(--success)', 'var(--danger)', '#8B5CF6'];
+          return entries.map(([m, h], i) => `<div><div style="display:flex;justify-content:space-between;font-size:.83rem;margin-bottom:.3rem"><span>${m}</span><span style="font-weight:700;color:${colors[i % colors.length]}">${h}h</span></div><div class="progress-bar"><div class="progress-fill" style="width:${Math.round(h / max * 100)}%;background:${colors[i % colors.length]}"></div></div></div>`).join('');
+        })();
+
+    const heures = teacherRecord.heures_effectuees || 0;
+    const taux = teacherRecord.taux_horaire || 0;
+    document.getElementById('acc-salaire-montant').textContent = (heures * taux).toLocaleString('fr-FR') + ' FCFA';
+    document.getElementById('acc-salaire-detail').textContent = `${heures}h × ${taux.toLocaleString('fr-FR')} FCFA/h`;
+
+    // À faire : notes manquantes groupées par matière (seule alerte dérivable
+    // de données réelles — pas de table "dépôts attendus"/"copies à corriger"
+    // dans le schéma, donc pas d'alerte inventée pour ces cas-là).
+    const parMatiere = {};
+    manquantes.forEach(g => { parMatiere[g.matiere] = (parMatiere[g.matiere] || 0) + 1; });
+    const afEl = document.getElementById('acc-a-faire');
+    const items = Object.entries(parMatiere);
+    afEl.innerHTML = items.length === 0
+      ? '<div style="text-align:center;color:var(--gray);padding:1rem;font-size:.85rem">Aucune note en attente — tout est à jour.</div>'
+      : items.map(([m, count]) => `
+        <div style="display:flex;align-items:center;justify-content:space-between;padding:.75rem;background:rgba(239,68,68,0.06);border-radius:9px;border-left:3px solid var(--danger)">
+          <div><div style="font-size:.85rem;font-weight:600">📝 Saisir les notes — ${m}</div><div style="font-size:.75rem;color:var(--gray);margin-top:.2rem">${count} note(s) manquante(s)</div></div>
+          <button class="btn-primary" style="padding:.45rem .9rem;font-size:.78rem" onclick="showPage('notes');document.getElementById('notes_matiere').value='${m.replace(/'/g, "\\'")}';onNotesMatiereChange()">Saisir →</button>
+        </div>`).join('');
+  }
+
+  // ── Mes cours : dépôt de supports par matière (Supabase Storage) ──
+  let mesCoursMatieres = [];
+  let uploadDocMatiereActuelle = null;
+
+  async function loadMesCoursDocuments(teacherRecord) {
+    const [{ data: grades }, { data: docs }] = await Promise.all([
+      supabaseClient.from('grades').select('matiere, students(department, level)').eq('teacher_id', teacherRecord.id),
+      supabaseClient.from('course_documents').select('*').eq('teacher_id', teacherRecord.id).order('uploaded_at', { ascending: false }),
+    ]);
+    const byMatiere = {};
+    (grades || []).forEach(g => {
+      if (!byMatiere[g.matiere]) byMatiere[g.matiere] = { matiere: g.matiere, department: g.students?.department, level: g.students?.level, count: 0 };
+      byMatiere[g.matiere].count++;
+    });
+    mesCoursMatieres = Object.values(byMatiere);
+    const docsByMatiere = {};
+    (docs || []).forEach(d => { (docsByMatiere[d.matiere] = docsByMatiere[d.matiere] || []).push(d); });
+
+    const grid = document.getElementById('mescours-grid');
+    grid.innerHTML = mesCoursMatieres.length === 0
+      ? '<div style="text-align:center;color:var(--gray);padding:2rem;grid-column:1/-1">Aucune matière assignée pour le moment.</div>'
+      : mesCoursMatieres.map(c => {
+          const docsList = docsByMatiere[c.matiere] || [];
+          return `<div class="card">
+            <div style="height:5px;background:linear-gradient(90deg,var(--gold),#fbbf24)"></div>
+            <div class="card-body">
+              <div style="font-family:'Playfair Display',serif;font-weight:700;margin-bottom:.3rem">${c.matiere}</div>
+              <div style="font-size:.78rem;color:var(--gray);margin-bottom:.75rem">${c.count} étudiant(s) · ${c.department || ''} ${c.level || ''}</div>
+              <div style="display:flex;flex-direction:column;gap:.4rem;margin-bottom:.75rem">
+                ${docsList.length === 0
+                  ? '<div style="font-size:.75rem;color:var(--gray)">Aucun document déposé.</div>'
+                  : docsList.map(d => `<div style="display:flex;align-items:center;justify-content:space-between;font-size:.78rem"><a href="${courseDocUrl(d.file_path)}" target="_blank" style="color:var(--blue);text-decoration:none">📄 ${d.title}</a><button onclick="deleteCourseDoc('${d.id}','${d.file_path}')" style="background:none;border:none;color:var(--danger);cursor:pointer;font-size:.75rem">✕</button></div>`).join('')}
+              </div>
+              <button onclick="openUploadDocModal('${c.matiere.replace(/'/g, "\\'")}')" style="padding:.4rem .9rem;border-radius:6px;border:1px solid var(--border);background:white;font-size:.75rem;cursor:pointer">+ Déposer un document</button>
+            </div>
+          </div>`;
+        }).join('');
+  }
+
+  function courseDocUrl(path) {
+    return supabaseClient.storage.from('course-documents').getPublicUrl(path).data.publicUrl;
+  }
+
+  function openUploadDocModal(matiere) {
+    uploadDocMatiereActuelle = matiere;
+    document.getElementById('uploadDocMatiere').textContent = matiere;
+    document.getElementById('uploadDocTitle').value = '';
+    document.getElementById('uploadDocFile').value = '';
+    document.getElementById('uploadDocError').style.display = 'none';
+    document.getElementById('modalUploadDoc').classList.add('active');
+  }
+  function closeUploadDocModal() {
+    document.getElementById('modalUploadDoc').classList.remove('active');
+  }
+
+  async function submitUploadDoc() {
+    const errBox = document.getElementById('uploadDocError');
+    errBox.style.display = 'none';
+    const title = document.getElementById('uploadDocTitle').value.trim();
+    const fileInput = document.getElementById('uploadDocFile');
+    const file = fileInput.files[0];
+    if (!title || !file) {
+      errBox.textContent = '⚠️ Titre et fichier requis.';
+      errBox.style.display = 'block';
+      return;
+    }
+    const info = mesCoursMatieres.find(c => c.matiere === uploadDocMatiereActuelle);
+    const btn = document.getElementById('uploadDocSubmit');
+    btn.disabled = true;
+
+    const path = `${monTeacherRecordNotes.id}/${Date.now()}_${file.name}`;
+    const { error: upErr } = await supabaseClient.storage.from('course-documents').upload(path, file);
+    if (upErr) {
+      btn.disabled = false;
+      errBox.textContent = '⚠️ ' + upErr.message;
+      errBox.style.display = 'block';
+      return;
+    }
+    const { error: insErr } = await supabaseClient.from('course_documents').insert({
+      teacher_id: monTeacherRecordNotes.id, university: monTeacherRecordNotes.university,
+      department: info?.department, level: info?.level, matiere: uploadDocMatiereActuelle,
+      title, file_path: path, file_size: file.size,
+    });
+    btn.disabled = false;
+    if (insErr) {
+      errBox.textContent = '⚠️ ' + insErr.message;
+      errBox.style.display = 'block';
+      return;
+    }
+    closeUploadDocModal();
+    showToast('✅ Document déposé');
+    await loadMesCoursDocuments(monTeacherRecordNotes);
+  }
+
+  async function deleteCourseDoc(id, filePath) {
+    await supabaseClient.storage.from('course-documents').remove([filePath]);
+    await supabaseClient.from('course_documents').delete().eq('id', id);
+    showToast('🗑️ Document supprimé');
+    await loadMesCoursDocuments(monTeacherRecordNotes);
+  }
+
   window.authReady.then(async user => {
     if (!user) return;
     loadMonProfilEnseignant(user);
     const { data: rec } = await supabaseClient.from('teachers').select('*').eq('profile_id', user.id).maybeSingle();
-    if (rec) { loadSaisieNotes(rec); setupPresences(rec); loadMonPlanning(rec); loadMesEtudiants(rec); loadMesExamens(rec); }
+    if (rec) { setupNotesMatiere(rec); setupPresences(rec); loadMonPlanning(rec); loadMesEtudiants(rec); loadMesExamens(rec); loadAccueilKpis(rec); loadMesCoursDocuments(rec); }
   });
 </script>
 </body>

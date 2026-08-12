@@ -1088,7 +1088,7 @@
        PAGE : UTILISATEURS
   ══════════════════════════════ -->
   <div class="page" id="page-utilisateurs">
-    <div class="page-header"><div><h2>Utilisateurs & Accès</h2><div style="font-size:.85rem;color:var(--gray);margin-top:.2rem">Gérez les rôles et permissions de votre équipe</div></div><button class="btn-add" onclick="showToast('ℹ️ L\'invitation par email n\'est pas encore disponible — créez le compte via la page d\'inscription pour le moment.')">+ Inviter utilisateur</button></div>
+    <div class="page-header"><div><h2>Utilisateurs & Accès</h2><div style="font-size:.85rem;color:var(--gray);margin-top:.2rem">Gérez les rôles et permissions de votre équipe</div></div><button class="btn-add" id="btn-invite-admin" onclick="openInviteAdminModal()">+ Inviter utilisateur</button></div>
 
     <div class="kpi-grid" style="grid-template-columns:repeat(4,1fr);margin-bottom:1.5rem">
       <div class="kpi-card"><div class="kpi-icon" style="background:rgba(26,86,219,0.1)">👑</div><div class="kpi-body"><div class="kpi-value" style="color:var(--blue)" id="usr-kpi-superadmins">—</div><div class="kpi-label">Super Admins</div></div></div>
@@ -1100,13 +1100,17 @@
     <!-- Rôles -->
     <div class="dash-grid" style="margin-bottom:1.5rem">
       <div class="card">
-        <div class="card-header"><div class="card-title">Membres de l'équipe admin</div></div>
+        <div class="card-header"><div class="card-title">Membres de l'équipe admin</div><div id="equipe-admin-cap" style="font-size:.75rem;color:var(--gray)"></div></div>
         <table class="data-table">
           <thead><tr><th>Utilisateur</th><th>Sous-rôle</th><th>Membre depuis</th><th>Actions</th></tr></thead>
           <tbody id="equipe-admin-tbody">
             <tr><td colspan="4" style="text-align:center;color:var(--gray);padding:2rem">Chargement…</td></tr>
           </tbody>
         </table>
+        <div id="invites-admin-section" style="display:none;padding:1rem 1.25rem;border-top:1px solid var(--border)">
+          <div style="font-size:.78rem;font-weight:700;color:var(--gray);margin-bottom:.6rem;text-transform:uppercase;letter-spacing:.05em">Invitations en attente</div>
+          <div id="invites-admin-list"></div>
+        </div>
       </div>
 
       <!-- Matrice permissions -->
@@ -1139,6 +1143,54 @@
         <option value="Chef de département">Chef de département</option>
       </select>
       <button class="btn-add" style="width:100%;justify-content:center" id="subRoleSubmit" onclick="submitSubRoleChange()">Enregistrer</button>
+    </div>
+  </div>
+
+  <!-- ══ MODAL : INVITER UN ADMIN ══ -->
+  <div class="modal-overlay" id="modalInviteAdmin" onclick="if(event.target===this)closeInviteAdminModal()">
+    <div class="modal" style="max-width:460px">
+      <button class="modal-close" onclick="closeInviteAdminModal()">✕</button>
+      <div style="font-family:'Playfair Display',serif;font-weight:800;font-size:1.2rem;margin-bottom:.3rem">Inviter un administrateur</div>
+      <div id="inviteAdminIntro" style="font-size:.85rem;color:var(--gray);margin-bottom:1.25rem">La personne recevra un lien pour créer son compte, déjà rattaché à votre université.</div>
+      <div id="inviteAdminError" style="display:none;background:rgba(239,68,68,0.08);color:var(--danger);border:1px solid rgba(239,68,68,0.2);padding:.6rem 1rem;border-radius:8px;font-size:.83rem;margin-bottom:1rem"></div>
+      <div id="inviteAdminForm">
+        <div class="form-group" style="margin-bottom:1.25rem">
+          <label style="display:block;font-size:.78rem;font-weight:600;color:var(--gray);margin-bottom:.4rem">Email de la personne invitée</label>
+          <input class="filter-select" id="inviteAdminEmail" type="email" placeholder="collegue@universite.tg" style="width:100%"/>
+        </div>
+        <button class="btn-add" style="width:100%;justify-content:center" id="inviteAdminSubmit" onclick="submitInviteAdmin()">Générer le lien d'invitation</button>
+      </div>
+      <div id="inviteAdminResult" style="display:none">
+        <div style="font-size:.85rem;color:var(--gray);margin-bottom:.6rem">Lien généré — copiez-le et envoyez-le à la personne invitée :</div>
+        <div style="display:flex;gap:.5rem">
+          <input class="filter-select" id="inviteAdminLink" readonly style="width:100%;font-size:.78rem"/>
+          <button class="btn-add" onclick="copyInviteAdminLink()">Copier</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ══ MODAL : INVITER UN PARENT ══ -->
+  <div class="modal-overlay" id="modalInviteParent" onclick="if(event.target===this)closeInviteParentModal()">
+    <div class="modal" style="max-width:460px">
+      <button class="modal-close" onclick="closeInviteParentModal()">✕</button>
+      <div style="font-family:'Playfair Display',serif;font-weight:800;font-size:1.2rem;margin-bottom:.3rem">Lier un parent</div>
+      <div id="inviteParentIntro" style="font-size:.85rem;color:var(--gray);margin-bottom:1.25rem"></div>
+      <div id="inviteParentError" style="display:none;background:rgba(239,68,68,0.08);color:var(--danger);border:1px solid rgba(239,68,68,0.2);padding:.6rem 1rem;border-radius:8px;font-size:.83rem;margin-bottom:1rem"></div>
+      <div id="inviteParentForm">
+        <div class="form-group" style="margin-bottom:1.25rem">
+          <label style="display:block;font-size:.78rem;font-weight:600;color:var(--gray);margin-bottom:.4rem">Email du parent</label>
+          <input class="filter-select" id="inviteParentEmail" type="email" placeholder="parent@email.com" style="width:100%"/>
+        </div>
+        <button class="btn-add" style="width:100%;justify-content:center" id="inviteParentSubmit" onclick="submitInviteParent()">Générer le lien d'invitation</button>
+      </div>
+      <div id="inviteParentResult" style="display:none">
+        <div style="font-size:.85rem;color:var(--gray);margin-bottom:.6rem">Lien généré — copiez-le et envoyez-le au parent :</div>
+        <div style="display:flex;gap:.5rem">
+          <input class="filter-select" id="inviteParentLink" readonly style="width:100%;font-size:.78rem"/>
+          <button class="btn-add" onclick="copyInviteParentLink()">Copier</button>
+        </div>
+      </div>
     </div>
   </div>
 
@@ -1368,9 +1420,60 @@
         <td>${e.level || '—'}</td>
         <td><span class="badge ${paiementBadge[e.payment_status]||''}">${e.payment_status}</span></td>
         <td><span class="badge ${statutBadge[e.status]||''}">${e.status}</span></td>
-        <td><button class="card-action" onclick="showToast('👁️ Profil de ${e.full_name}')">Voir</button></td>
+        <td><div style="display:flex;gap:.5rem"><button class="card-action" onclick="showToast('👁️ Profil de ${e.full_name}')">Voir</button><button class="card-action" onclick="openInviteParentModal('${e.id}','${e.full_name.replace(/'/g, "\\'")}')">👨‍👩‍👧 Lier parent</button></div></td>
       </tr>`;
     }).join('');
+  }
+
+  // ── Invitation d'un parent (lié à un étudiant précis) — même mécanisme à
+  // token que l'invitation admin, mais type='parent' + student_id. Le
+  // parent s'inscrit lui-même via onboarding.html?invite=TOKEN.
+  let inviteParentStudentId = null;
+  function openInviteParentModal(studentId, studentName) {
+    inviteParentStudentId = studentId;
+    document.getElementById('inviteParentIntro').textContent = `Le parent recevra un lien pour créer son compte, déjà lié au dossier de ${studentName}.`;
+    document.getElementById('inviteParentEmail').value = '';
+    document.getElementById('inviteParentError').style.display = 'none';
+    document.getElementById('inviteParentForm').style.display = 'block';
+    document.getElementById('inviteParentResult').style.display = 'none';
+    document.getElementById('modalInviteParent').classList.add('active');
+  }
+  function closeInviteParentModal() {
+    document.getElementById('modalInviteParent').classList.remove('active');
+  }
+
+  async function submitInviteParent() {
+    const errBox = document.getElementById('inviteParentError');
+    errBox.style.display = 'none';
+    const email = document.getElementById('inviteParentEmail').value.trim();
+    if (!email || !email.includes('@')) {
+      errBox.textContent = '⚠️ Entrez un email valide.';
+      errBox.style.display = 'block';
+      return;
+    }
+    const btn = document.getElementById('inviteParentSubmit');
+    btn.disabled = true;
+    const { data, error } = await supabaseClient.from('invites').insert({
+      type: 'parent', university: window.currentUser.university, email,
+      student_id: inviteParentStudentId, created_by: window.currentUser.id,
+    }).select('token').single();
+    btn.disabled = false;
+    if (error) {
+      errBox.textContent = '⚠️ ' + error.message;
+      errBox.style.display = 'block';
+      return;
+    }
+    const link = `${location.origin}${location.pathname.replace('dashboard.html', '')}onboarding.html?invite=${data.token}`;
+    document.getElementById('inviteParentLink').value = link;
+    document.getElementById('inviteParentForm').style.display = 'none';
+    document.getElementById('inviteParentResult').style.display = 'block';
+  }
+
+  function copyInviteParentLink() {
+    const input = document.getElementById('inviteParentLink');
+    input.select();
+    navigator.clipboard?.writeText(input.value);
+    showToast('📋 Lien copié');
   }
 
   function openAddEtudiantModal() {
@@ -1547,7 +1650,7 @@
     loadEnseignants();
   }
 
-  window.authReady.then(user => { if (user) { loadEtudiants(); loadEnseignants(); loadPaymentsData(); loadEmploiSetup(); loadUtilisateursKpis(user); loadUniversiteSettings(user); loadExamensEtDepartements(user); loadEquipeAdmin(user); loadPermissionsMatrix(); applyPermissionGating(user); } });
+  window.authReady.then(user => { if (user) { loadEtudiants(); loadEnseignants(); loadPaymentsData(); loadEmploiSetup(); loadUtilisateursKpis(user); loadUniversiteSettings(user); loadExamensEtDepartements(user); loadEquipeAdmin(user); loadInvitesAdmin(user); loadPermissionsMatrix(); applyPermissionGating(user); } });
 
   // ── Gating UI selon la matrice de permissions réelle (role_permissions,
   // appliquée côté base — voir migration enforce_permission_matrix). Masque
@@ -1658,6 +1761,101 @@
     closeSubRoleModal();
     showToast('✅ Sous-rôle mis à jour');
     await loadEquipeAdmin(window.currentUser);
+  }
+
+  // ── Invitation d'un admin (remplace le faux bouton "+ Inviter utilisateur")
+  // Plafond repris tel quel de la page de prix (5 / 20 / illimité selon le
+  // plan) — la personne s'inscrit elle-même via onboarding.html?invite=TOKEN,
+  // je ne crée jamais de compte/mot de passe à sa place.
+  const ADMIN_CAP = { Starter: 5, Pro: 20, Enterprise: Infinity };
+
+  async function loadInvitesAdmin(user) {
+    if (user.role === 'superadmin') return;
+    const capEl = document.getElementById('equipe-admin-cap');
+    const sectionEl = document.getElementById('invites-admin-section');
+    const listEl = document.getElementById('invites-admin-list');
+
+    const [{ data: uni }, { count: adminsCount }, { data: invites }] = await Promise.all([
+      supabaseClient.from('universities').select('plan').eq('name', user.university).maybeSingle(),
+      supabaseClient.from('profiles').select('id', { count: 'exact', head: true }).eq('role', 'admin').eq('university', user.university),
+      supabaseClient.from('invites').select('*').eq('type', 'admin').eq('university', user.university).is('used_at', null).gt('expires_at', new Date().toISOString()).order('created_at', { ascending: false }),
+    ]);
+
+    const cap = ADMIN_CAP[uni?.plan] ?? Infinity;
+    const pending = invites || [];
+    window.__adminCapState = { cap, used: (adminsCount || 0) + pending.length };
+
+    if (capEl) capEl.textContent = cap === Infinity
+      ? `${adminsCount || 0} admin(s) · illimité (plan ${uni?.plan || '—'})`
+      : `${adminsCount || 0} + ${pending.length} en attente / ${cap} admin(s) max (plan ${uni?.plan || '—'})`;
+
+    if (pending.length === 0) { sectionEl.style.display = 'none'; return; }
+    sectionEl.style.display = 'block';
+    listEl.innerHTML = pending.map(inv => `
+      <div style="display:flex;align-items:center;justify-content:space-between;padding:.5rem 0;border-bottom:1px solid var(--border);font-size:.83rem">
+        <div><strong>${inv.email}</strong><div style="font-size:.72rem;color:var(--gray)">Envoyée le ${fmtDate(inv.created_at)} · Expire le ${fmtDate(inv.expires_at)}</div></div>
+        <button class="card-action" style="color:var(--danger)" onclick="revokeInvite('${inv.id}')">Annuler</button>
+      </div>`).join('');
+  }
+
+  function openInviteAdminModal() {
+    document.getElementById('inviteAdminEmail').value = '';
+    document.getElementById('inviteAdminError').style.display = 'none';
+    document.getElementById('inviteAdminForm').style.display = 'block';
+    document.getElementById('inviteAdminResult').style.display = 'none';
+    document.getElementById('modalInviteAdmin').classList.add('active');
+  }
+  function closeInviteAdminModal() {
+    document.getElementById('modalInviteAdmin').classList.remove('active');
+  }
+
+  async function submitInviteAdmin() {
+    const errBox = document.getElementById('inviteAdminError');
+    errBox.style.display = 'none';
+    const email = document.getElementById('inviteAdminEmail').value.trim();
+    if (!email || !email.includes('@')) {
+      errBox.textContent = '⚠️ Entrez un email valide.';
+      errBox.style.display = 'block';
+      return;
+    }
+    const state = window.__adminCapState;
+    if (state && state.used >= state.cap) {
+      errBox.textContent = `⚠️ Plafond atteint (${state.cap} administrateur(s) max sur votre plan). Passez à un plan supérieur pour en inviter davantage.`;
+      errBox.style.display = 'block';
+      return;
+    }
+
+    const btn = document.getElementById('inviteAdminSubmit');
+    btn.disabled = true;
+    const { data, error } = await supabaseClient.from('invites').insert({
+      type: 'admin', university: window.currentUser.university, email, created_by: window.currentUser.id,
+    }).select('token').single();
+    btn.disabled = false;
+
+    if (error) {
+      errBox.textContent = '⚠️ ' + error.message;
+      errBox.style.display = 'block';
+      return;
+    }
+    const link = `${location.origin}${location.pathname.replace('dashboard.html', '')}onboarding.html?invite=${data.token}`;
+    document.getElementById('inviteAdminLink').value = link;
+    document.getElementById('inviteAdminForm').style.display = 'none';
+    document.getElementById('inviteAdminResult').style.display = 'block';
+    await loadInvitesAdmin(window.currentUser);
+  }
+
+  function copyInviteAdminLink() {
+    const input = document.getElementById('inviteAdminLink');
+    input.select();
+    navigator.clipboard?.writeText(input.value);
+    showToast('📋 Lien copié');
+  }
+
+  async function revokeInvite(id) {
+    const { error } = await supabaseClient.from('invites').delete().eq('id', id);
+    if (error) { showToast('⚠️ ' + error.message); return; }
+    showToast('✅ Invitation annulée');
+    await loadInvitesAdmin(window.currentUser);
   }
 
   // ── Matrice des permissions (données réelles Supabase) ──

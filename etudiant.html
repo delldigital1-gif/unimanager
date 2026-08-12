@@ -301,17 +301,12 @@
 
   <!-- PAGE EXAMENS -->
   <div class="page" id="page-examens">
-    <div style="margin-bottom:1.5rem"><h2 style="font-family:'Playfair Display',serif;font-weight:800;font-size:1.3rem">Mes examens</h2><div style="font-size:.85rem;color:var(--gray);margin-top:.2rem">Session 2 — Février 2025</div></div>
+    <div style="margin-bottom:1.5rem"><h2 style="font-family:'Playfair Display',serif;font-weight:800;font-size:1.3rem">Mes examens</h2><div style="font-size:.85rem;color:var(--gray);margin-top:.2rem" id="exam-sub">Chargement...</div></div>
     <div class="card">
       <div class="card-header"><div class="card-title">Calendrier des examens</div></div>
       <table class="data-table">
-        <thead><tr><th>Matière</th><th>Date</th><th>Heure</th><th>Salle</th><th>Place</th><th>Statut</th><th>Convocation</th></tr></thead>
-        <tbody>
-          <tr><td><strong>Algorithmique Avancée</strong></td><td>03 Fév 2025</td><td>08h00–10h00</td><td>Amphithéâtre A</td><td>N° 24</td><td><span class="badge badge-blue">À venir</span></td><td><button onclick="showToast('📋 Convocation téléchargée')" style="padding:.35rem .8rem;border-radius:6px;border:1px solid var(--border);background:white;font-size:.75rem;cursor:pointer;font-weight:600">📋 PDF</button></td></tr>
-          <tr><td><strong>Réseaux Informatiques</strong></td><td>06 Fév 2025</td><td>08h00–10h00</td><td>Labo Informatique</td><td>N° 08</td><td><span class="badge badge-blue">À venir</span></td><td><button onclick="showToast('📋 Convocation téléchargée')" style="padding:.35rem .8rem;border-radius:6px;border:1px solid var(--border);background:white;font-size:.75rem;cursor:pointer;font-weight:600">📋 PDF</button></td></tr>
-          <tr><td><strong>Sécurité Informatique</strong></td><td>10 Fév 2025</td><td>14h00–16h00</td><td>Salle B2</td><td>N° 15</td><td><span class="badge badge-danger">Rattrapage</span></td><td><button onclick="showToast('📋 Convocation téléchargée')" style="padding:.35rem .8rem;border-radius:6px;border:1px solid var(--border);background:white;font-size:.75rem;cursor:pointer;font-weight:600">📋 PDF</button></td></tr>
-          <tr><td><strong>Bases de données</strong></td><td>12 Fév 2025</td><td>10h00–12h00</td><td>Amphithéâtre B</td><td>N° 31</td><td><span class="badge badge-blue">À venir</span></td><td><button onclick="showToast('📋 Convocation téléchargée')" style="padding:.35rem .8rem;border-radius:6px;border:1px solid var(--border);background:white;font-size:.75rem;cursor:pointer;font-weight:600">📋 PDF</button></td></tr>
-        </tbody>
+        <thead><tr><th>Matière</th><th>Jour</th><th>Horaire</th><th>Salle</th><th>Convocation</th></tr></thead>
+        <tbody id="exam-tbody"><tr><td colspan="5" style="text-align:center;color:var(--gray);padding:2rem">Chargement...</td></tr></tbody>
       </table>
     </div>
   </div>
@@ -321,31 +316,31 @@
     <div style="margin-bottom:1.5rem"><h2 style="font-family:'Playfair Display',serif;font-weight:800;font-size:1.3rem">Mon profil</h2></div>
     <div class="dash-grid">
       <div class="card">
-        <div class="card-header"><div class="card-title">👤 Informations personnelles</div></div>
+        <div class="card-header"><div class="card-title">👤 Informations personnelles</div><button class="card-action" id="pf-edit-btn" onclick="toggleProfilEdit()">✏️ Modifier</button></div>
         <div class="card-body">
           <div style="display:flex;align-items:center;gap:1rem;margin-bottom:1.5rem;padding:1rem;background:var(--light);border-radius:12px">
             <div style="width:64px;height:64px;border-radius:14px;background:linear-gradient(135deg,var(--blue),var(--sky));display:flex;align-items:center;justify-content:center;font-size:1.5rem;font-weight:800;color:white" id="pf-avatar">KA</div>
             <div><div style="font-family:'Playfair Display',serif;font-weight:800;font-size:1.1rem" id="pf-nom">Kofi Adzoa</div><div style="font-size:.8rem;color:var(--gray);margin-top:.2rem" id="pf-matdept">UL-2025-001 · Informatique L2</div><div style="margin-top:.4rem"><span class="badge badge-success" id="pf-statut-badge">Étudiant actif</span></div></div>
           </div>
           <div style="display:flex;flex-direction:column;gap:.75rem">
-            <div style="display:flex;justify-content:space-between;padding:.6rem 0;border-bottom:1px solid var(--border);font-size:.85rem"><span style="color:var(--gray)">Email</span><span style="font-weight:500" id="pf-email">kofi.adzoa@student.univ.tg</span></div>
-            <div style="display:flex;justify-content:space-between;padding:.6rem 0;border-bottom:1px solid var(--border);font-size:.85rem"><span style="color:var(--gray)">Téléphone</span><span style="font-weight:500">+228 90 XX XX XX</span></div>
-            <div style="display:flex;justify-content:space-between;padding:.6rem 0;border-bottom:1px solid var(--border);font-size:.85rem"><span style="color:var(--gray)">Date de naissance</span><span style="font-weight:500">15 Mars 2001</span></div>
-            <div style="display:flex;justify-content:space-between;padding:.6rem 0;border-bottom:1px solid var(--border);font-size:.85rem"><span style="color:var(--gray)">Nationalité</span><span style="font-weight:500">🇹🇬 Togolaise</span></div>
-            <div style="display:flex;justify-content:space-between;padding:.6rem 0;font-size:.85rem"><span style="color:var(--gray)">Inscrit depuis</span><span style="font-weight:500">Oct 2024</span></div>
+            <div style="display:flex;justify-content:space-between;padding:.6rem 0;border-bottom:1px solid var(--border);font-size:.85rem"><span style="color:var(--gray)">Email</span><span style="font-weight:500" id="pf-email">—</span></div>
+            <div style="display:flex;justify-content:space-between;align-items:center;padding:.6rem 0;border-bottom:1px solid var(--border);font-size:.85rem"><span style="color:var(--gray)">Téléphone</span><span style="font-weight:500" id="pf-phone-display">—</span><input id="pf-phone-input" style="display:none;width:55%;padding:.4rem .6rem;border:1.5px solid var(--border);border-radius:6px;font-size:.83rem" placeholder="+228 90 XX XX XX"/></div>
+            <div style="display:flex;justify-content:space-between;align-items:center;padding:.6rem 0;border-bottom:1px solid var(--border);font-size:.85rem"><span style="color:var(--gray)">Date de naissance</span><span style="font-weight:500" id="pf-naissance-display">—</span><input id="pf-naissance-input" type="date" style="display:none;width:55%;padding:.4rem .6rem;border:1.5px solid var(--border);border-radius:6px;font-size:.83rem"/></div>
+            <div style="display:flex;justify-content:space-between;align-items:center;padding:.6rem 0;border-bottom:1px solid var(--border);font-size:.85rem"><span style="color:var(--gray)">Nationalité</span><span style="font-weight:500" id="pf-nationalite-display">—</span><input id="pf-nationalite-input" style="display:none;width:55%;padding:.4rem .6rem;border:1.5px solid var(--border);border-radius:6px;font-size:.83rem" placeholder="Togolaise"/></div>
+            <div style="display:flex;justify-content:space-between;padding:.6rem 0;font-size:.85rem"><span style="color:var(--gray)">Inscrit depuis</span><span style="font-weight:500" id="pf-inscrit-depuis">—</span></div>
           </div>
+          <button class="btn-primary" id="pf-save-btn" style="display:none;width:100%;margin-top:1rem" onclick="saveProfilEdit()">💾 Enregistrer</button>
         </div>
       </div>
       <div class="card">
         <div class="card-header"><div class="card-title">🎓 Informations académiques</div></div>
         <div class="card-body">
           <div style="display:flex;flex-direction:column;gap:.75rem">
-            <div style="display:flex;justify-content:space-between;padding:.6rem 0;border-bottom:1px solid var(--border);font-size:.85rem"><span style="color:var(--gray)">Matricule</span><span style="font-weight:700;color:var(--blue)" id="pf-matricule">UL-2025-001</span></div>
-            <div style="display:flex;justify-content:space-between;padding:.6rem 0;border-bottom:1px solid var(--border);font-size:.85rem"><span style="color:var(--gray)">Département</span><span style="font-weight:500" id="pf-departement">Informatique & IA</span></div>
-            <div style="display:flex;justify-content:space-between;padding:.6rem 0;border-bottom:1px solid var(--border);font-size:.85rem"><span style="color:var(--gray)">Niveau</span><span style="font-weight:500" id="pf-niveau">Licence 2 (L2)</span></div>
-            <div style="display:flex;justify-content:space-between;padding:.6rem 0;border-bottom:1px solid var(--border);font-size:.85rem"><span style="color:var(--gray)">Filière</span><span style="font-weight:500">Génie Logiciel</span></div>
-            <div style="display:flex;justify-content:space-between;padding:.6rem 0;border-bottom:1px solid var(--border);font-size:.85rem"><span style="color:var(--gray)">Moyenne S1</span><span style="font-weight:700;color:var(--success)">13.8/20</span></div>
-            <div style="display:flex;justify-content:space-between;padding:.6rem 0;font-size:.85rem"><span style="color:var(--gray)">Crédits validés</span><span style="font-weight:700;color:var(--blue)">52/60</span></div>
+            <div style="display:flex;justify-content:space-between;padding:.6rem 0;border-bottom:1px solid var(--border);font-size:.85rem"><span style="color:var(--gray)">Matricule</span><span style="font-weight:700;color:var(--blue)" id="pf-matricule">—</span></div>
+            <div style="display:flex;justify-content:space-between;padding:.6rem 0;border-bottom:1px solid var(--border);font-size:.85rem"><span style="color:var(--gray)">Département</span><span style="font-weight:500" id="pf-departement">—</span></div>
+            <div style="display:flex;justify-content:space-between;padding:.6rem 0;border-bottom:1px solid var(--border);font-size:.85rem"><span style="color:var(--gray)">Niveau</span><span style="font-weight:500" id="pf-niveau">—</span></div>
+            <div style="display:flex;justify-content:space-between;padding:.6rem 0;border-bottom:1px solid var(--border);font-size:.85rem"><span style="color:var(--gray)">Moyenne générale</span><span style="font-weight:700;color:var(--success)" id="pf-moyenne">—</span></div>
+            <div style="display:flex;justify-content:space-between;padding:.6rem 0;font-size:.85rem"><span style="color:var(--gray)">Crédits validés</span><span style="font-weight:700;color:var(--blue)" id="pf-credits">—</span></div>
           </div>
         </div>
       </div>
@@ -354,14 +349,9 @@
 
   <!-- PAGE COURS -->
   <div class="page" id="page-cours">
-    <div style="margin-bottom:1.5rem"><h2 style="font-family:'Playfair Display',serif;font-weight:800;font-size:1.3rem">Mes cours</h2><div style="font-size:.85rem;color:var(--gray);margin-top:.2rem">Informatique L2 · Semestre 1 · 10 matières</div></div>
-    <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(260px,1fr));gap:1.1rem">
-      <div class="card" style="cursor:pointer" onclick="showToast('📚 Cours Algorithmique ouvert')"><div style="height:6px;background:linear-gradient(90deg,var(--blue),var(--sky))"></div><div class="card-body"><div style="font-size:1.3rem;margin-bottom:.5rem">💻</div><div style="font-family:'Playfair Display',serif;font-weight:700;margin-bottom:.25rem">Algorithmique Avancée</div><div style="font-size:.78rem;color:var(--gray);margin-bottom:.75rem">Dr. Mensah · 4 crédits</div><div style="display:flex;justify-content:space-between;align-items:center"><span class="badge badge-success">16/20</span><span style="font-size:.75rem;color:var(--gray)">5 supports</span></div></div></div>
-      <div class="card" style="cursor:pointer" onclick="showToast('📚 Cours Bases de données ouvert')"><div style="height:6px;background:linear-gradient(90deg,var(--success),#34d399)"></div><div class="card-body"><div style="font-size:1.3rem;margin-bottom:.5rem">🗄️</div><div style="font-family:'Playfair Display',serif;font-weight:700;margin-bottom:.25rem">Bases de données</div><div style="font-size:.78rem;color:var(--gray);margin-bottom:.75rem">Prof. Komi · 3 crédits</div><div style="display:flex;justify-content:space-between;align-items:center"><span class="badge badge-blue">14.5/20</span><span style="font-size:.75rem;color:var(--gray)">7 supports</span></div></div></div>
-      <div class="card" style="cursor:pointer" onclick="showToast('📚 Cours Réseaux ouvert')"><div style="height:6px;background:linear-gradient(90deg,var(--gold),#fbbf24)"></div><div class="card-body"><div style="font-size:1.3rem;margin-bottom:.5rem">🌐</div><div style="font-family:'Playfair Display',serif;font-weight:700;margin-bottom:.25rem">Réseaux Informatiques</div><div style="font-size:.78rem;color:var(--gray);margin-bottom:.75rem">Prof. Dodzi · 3 crédits</div><div style="display:flex;justify-content:space-between;align-items:center"><span class="badge badge-gold">12/20</span><span style="font-size:.75rem;color:var(--gray)">4 supports</span></div></div></div>
-      <div class="card" style="cursor:pointer" onclick="showToast('📚 Cours POO Java ouvert')"><div style="height:6px;background:linear-gradient(90deg,#8b5cf6,#a78bfa)"></div><div class="card-body"><div style="font-size:1.3rem;margin-bottom:.5rem">☕</div><div style="font-family:'Playfair Display',serif;font-weight:700;margin-bottom:.25rem">Programmation Java</div><div style="font-size:.78rem;color:var(--gray);margin-bottom:.75rem">Dr. Atchoe · 4 crédits</div><div style="display:flex;justify-content:space-between;align-items:center"><span class="badge badge-success">15/20</span><span style="font-size:.75rem;color:var(--gray)">6 supports</span></div></div></div>
-      <div class="card" style="cursor:pointer" onclick="showToast('📚 Cours Sécurité ouvert')"><div style="height:6px;background:linear-gradient(90deg,var(--danger),#f87171)"></div><div class="card-body"><div style="font-size:1.3rem;margin-bottom:.5rem">🔐</div><div style="font-family:'Playfair Display',serif;font-weight:700;margin-bottom:.25rem">Sécurité Informatique</div><div style="font-size:.78rem;color:var(--gray);margin-bottom:.75rem">Prof. Komi · 3 crédits</div><div style="display:flex;justify-content:space-between;align-items:center"><span class="badge badge-danger">8/20 ⚠</span><span style="font-size:.75rem;color:var(--gray)">3 supports</span></div></div></div>
-      <div class="card" style="cursor:pointer" onclick="showToast('📚 Cours Maths ouvert')"><div style="height:6px;background:linear-gradient(90deg,#ec4899,#f472b6)"></div><div class="card-body"><div style="font-size:1.3rem;margin-bottom:.5rem">📐</div><div style="font-family:'Playfair Display',serif;font-weight:700;margin-bottom:.25rem">Mathématiques</div><div style="font-size:.78rem;color:var(--gray);margin-bottom:.75rem">Dr. Agbo · 3 crédits</div><div style="display:flex;justify-content:space-between;align-items:center"><span class="badge badge-gold">11.5/20</span><span style="font-size:.75rem;color:var(--gray)">4 supports</span></div></div></div>
+    <div style="margin-bottom:1.5rem"><h2 style="font-family:'Playfair Display',serif;font-weight:800;font-size:1.3rem">Mes cours</h2><div style="font-size:.85rem;color:var(--gray);margin-top:.2rem" id="cours-sub">Chargement...</div></div>
+    <div id="cours-grid" style="display:grid;grid-template-columns:repeat(auto-fill,minmax(260px,1fr));gap:1.1rem">
+      <div style="text-align:center;color:var(--gray);padding:2rem;grid-column:1/-1">Chargement...</div>
     </div>
   </div>
 
@@ -423,6 +413,41 @@
     document.getElementById('pf-matricule').textContent = rec.matricule;
     document.getElementById('pf-departement').textContent = rec.department || '—';
     document.getElementById('pf-niveau').textContent = rec.level || '—';
+    document.getElementById('pf-phone-display').textContent = rec.phone || 'Non renseigné';
+    document.getElementById('pf-naissance-display').textContent = rec.date_naissance ? new Date(rec.date_naissance).toLocaleDateString('fr-FR', { day: '2-digit', month: 'long', year: 'numeric' }) : 'Non renseignée';
+    document.getElementById('pf-nationalite-display').textContent = rec.nationalite || 'Non renseignée';
+    document.getElementById('pf-inscrit-depuis').textContent = rec.created_at ? new Date(rec.created_at).toLocaleDateString('fr-FR', { month: 'long', year: 'numeric' }) : '—';
+  }
+
+  // ── Édition des coordonnées (téléphone/naissance/nationalité — les seules
+  // colonnes que l'étudiant peut modifier lui-même, cf. migration RLS) ──
+  function toggleProfilEdit() {
+    const editing = document.getElementById('pf-phone-input').style.display === 'block';
+    ['phone', 'naissance', 'nationalite'].forEach(f => {
+      document.getElementById(`pf-${f}-display`).style.display = editing ? '' : 'none';
+      document.getElementById(`pf-${f}-input`).style.display = editing ? 'none' : 'block';
+    });
+    document.getElementById('pf-save-btn').style.display = editing ? 'none' : 'block';
+    document.getElementById('pf-edit-btn').textContent = editing ? '✏️ Modifier' : '✕ Annuler';
+    if (!editing && monDossier) {
+      document.getElementById('pf-phone-input').value = monDossier.phone || '';
+      document.getElementById('pf-naissance-input').value = monDossier.date_naissance || '';
+      document.getElementById('pf-nationalite-input').value = monDossier.nationalite || '';
+    }
+  }
+
+  async function saveProfilEdit() {
+    const phone = document.getElementById('pf-phone-input').value.trim() || null;
+    const date_naissance = document.getElementById('pf-naissance-input').value || null;
+    const nationalite = document.getElementById('pf-nationalite-input').value.trim() || null;
+    const { error } = await supabaseClient.from('students').update({ phone, date_naissance, nationalite }).eq('id', monDossier.id);
+    if (error) { showToast('⚠️ ' + error.message); return; }
+    monDossier.phone = phone; monDossier.date_naissance = date_naissance; monDossier.nationalite = nationalite;
+    document.getElementById('pf-phone-display').textContent = phone || 'Non renseigné';
+    document.getElementById('pf-naissance-display').textContent = date_naissance ? new Date(date_naissance).toLocaleDateString('fr-FR', { day: '2-digit', month: 'long', year: 'numeric' }) : 'Non renseignée';
+    document.getElementById('pf-nationalite-display').textContent = nationalite || 'Non renseignée';
+    toggleProfilEdit();
+    showToast('✅ Coordonnées mises à jour');
   }
 
   // ── Charger les vraies notes (Supabase) ──
@@ -475,10 +500,17 @@
     }).join('');
 
     const moyenneGenerale = totalCoeff > 0 ? (totalPoints / totalCoeff) : 0;
+    const creditsCible = studentRecord.credits_requis || 60;
     document.getElementById('kpi-moyenne').textContent = moyenneGenerale.toFixed(1);
     document.getElementById('kpi-mention').textContent = mention(moyenneGenerale);
-    document.getElementById('kpi-credits').textContent = `${creditsValides}/60`;
+    document.getElementById('kpi-credits').textContent = `${creditsValides}/${creditsCible}`;
     document.getElementById('kpi-ue').textContent = `${ueValidees}/${notes.length}`;
+
+    // Reflété aussi dans l'onglet Profil (mêmes chiffres, pas de calcul dupliqué divergent).
+    const pfMoyenne = document.getElementById('pf-moyenne');
+    const pfCredits = document.getElementById('pf-credits');
+    if (pfMoyenne) pfMoyenne.textContent = totalCoeff > 0 ? moyenneGenerale.toFixed(1) + '/20' : 'Aucune note';
+    if (pfCredits) pfCredits.textContent = `${creditsValides}/${creditsCible}`;
   }
 
   // ── Charger les vrais paiements (Supabase) ──
@@ -725,11 +757,91 @@
     }).join('');
   }
 
+  // ── Mes examens (créneaux type='Examen' de l'emploi du temps réel) ──
+  // Le schéma n'a pas de date calendaire précise ni de numéro de place pour
+  // un créneau (jour de semaine + horaire récurrent seulement) — la
+  // convocation reflète donc jour/horaire/salle réels plutôt que d'inventer
+  // une date et un numéro de place.
+  let mesExamens = [];
+  async function loadMesExamens(studentRecord) {
+    const sub = document.getElementById('exam-sub');
+    const tbody = document.getElementById('exam-tbody');
+    if (!studentRecord.department || !studentRecord.level) {
+      sub.textContent = 'Département/niveau non renseigné';
+      tbody.innerHTML = '<tr><td colspan="5" style="text-align:center;color:var(--gray);padding:2rem">Indisponible.</td></tr>';
+      return;
+    }
+    const { data, error } = await supabaseClient
+      .from('schedule_slots').select('*')
+      .eq('department', studentRecord.department).eq('level', studentRecord.level).eq('type', 'Examen');
+    if (error) { console.error(error); return; }
+    mesExamens = data || [];
+    sub.textContent = `${mesExamens.length} examen(s) programmé(s) · ${studentRecord.department} ${studentRecord.level}`;
+    tbody.innerHTML = mesExamens.length === 0
+      ? '<tr><td colspan="5" style="text-align:center;color:var(--gray);padding:2rem">Aucun examen programmé.</td></tr>'
+      : mesExamens.map((s, i) => `<tr><td><strong>${s.matiere}</strong></td><td>${s.jour}</td><td>${s.creneau}</td><td>${s.salle || '—'}</td><td><button onclick="downloadConvocation(${i})" style="padding:.35rem .8rem;border-radius:6px;border:1px solid var(--border);background:white;font-size:.75rem;cursor:pointer;font-weight:600">📋 PDF</button></td></tr>`).join('');
+  }
+
+  function downloadConvocation(i) {
+    const s = mesExamens[i];
+    if (!s || !monDossier) return;
+    const { jsPDF } = window.jspdf;
+    const doc = new jsPDF();
+    doc.setFont('helvetica', 'bold'); doc.setFontSize(20); doc.setTextColor(13, 27, 42);
+    doc.text('UniManage', 14, 20);
+    doc.setFontSize(11); doc.setTextColor(100, 116, 139); doc.setFont('helvetica', 'normal');
+    doc.text(monDossier.university || '', 14, 27);
+    doc.setDrawColor(226, 232, 240); doc.line(14, 33, 196, 33);
+    doc.setFont('helvetica', 'bold'); doc.setFontSize(16); doc.setTextColor(13, 27, 42);
+    doc.text("CONVOCATION D'EXAMEN", 14, 45);
+    doc.setFont('helvetica', 'normal'); doc.setFontSize(10); doc.setTextColor(100, 116, 139);
+    doc.text(`${monDossier.full_name}  ·  ${monDossier.matricule}`, 14, 55);
+    doc.text(`${monDossier.department || '—'} ${monDossier.level || ''}`.trim(), 14, 61);
+    let y = 78;
+    [['Matière', s.matiere], ['Jour', s.jour], ['Horaire', s.creneau], ['Salle', s.salle || '—']].forEach(([label, val]) => {
+      doc.setTextColor(100, 116, 139); doc.text(label, 14, y);
+      doc.setTextColor(13, 27, 42); doc.setFont('helvetica', 'bold'); doc.text(String(val), 70, y);
+      doc.setFont('helvetica', 'normal'); y += 9;
+    });
+    y += 10;
+    doc.setFontSize(8); doc.setTextColor(148, 163, 184);
+    doc.text("Présentez-vous 15 minutes avant le début de l'épreuve, muni(e) de votre carte d'étudiant.", 14, y);
+    doc.text('Document généré électroniquement le ' + new Date().toLocaleDateString('fr-FR') + ' via UniManage.', 14, y + 6);
+    doc.save(`convocation_${s.matiere.replace(/\s+/g, '_')}.pdf`);
+  }
+
+  // ── Mes cours : supports déposés par les enseignants (Supabase Storage) ──
+  async function loadMesCoursEtudiant(studentRecord) {
+    const [{ data: notes }, { data: docs }] = await Promise.all([
+      supabaseClient.from('grades').select('matiere, enseignant_nom, coefficient, note_cc, note_exam').eq('student_id', studentRecord.id),
+      supabaseClient.from('course_documents').select('*').eq('department', studentRecord.department).eq('level', studentRecord.level).order('uploaded_at', { ascending: false }),
+    ]);
+    const matieres = notes || [];
+    document.getElementById('cours-sub').textContent = `${studentRecord.department || '—'} ${studentRecord.level || ''} · ${matieres.length} matière(s)`;
+    const docsByMatiere = {};
+    (docs || []).forEach(d => { (docsByMatiere[d.matiere] = docsByMatiere[d.matiere] || []).push(d); });
+
+    const grid = document.getElementById('cours-grid');
+    grid.innerHTML = matieres.length === 0
+      ? '<div style="text-align:center;color:var(--gray);padding:2rem;grid-column:1/-1">Aucune matière pour le moment.</div>'
+      : matieres.map(n => {
+          const moyenne = (n.note_cc != null && n.note_exam != null) ? (n.note_cc * 0.3 + n.note_exam * 0.7) : null;
+          const badge = moyenne == null ? '<span class="badge badge-gray">En attente</span>' : `<span class="badge ${moyenne >= 10 ? 'badge-success' : 'badge-danger'}">${moyenne.toFixed(1)}/20</span>`;
+          const docsList = docsByMatiere[n.matiere] || [];
+          return `<div class="card"><div style="height:6px;background:linear-gradient(90deg,var(--blue),var(--sky))"></div><div class="card-body">
+            <div style="font-family:'Playfair Display',serif;font-weight:700;margin-bottom:.25rem">${n.matiere}</div>
+            <div style="font-size:.78rem;color:var(--gray);margin-bottom:.75rem">${n.enseignant_nom || '—'} · ${n.coefficient} coeff.</div>
+            <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:${docsList.length ? '.6rem' : '0'}">${badge}<span style="font-size:.75rem;color:var(--gray)">${docsList.length} support(s)</span></div>
+            ${docsList.length > 0 ? `<div style="display:flex;flex-direction:column;gap:.3rem;border-top:1px solid var(--border);padding-top:.6rem">${docsList.map(d => `<a href="${supabaseClient.storage.from('course-documents').getPublicUrl(d.file_path).data.publicUrl}" target="_blank" style="font-size:.78rem;color:var(--blue);text-decoration:none">📄 ${d.title}</a>`).join('')}</div>` : ''}
+          </div></div>`;
+        }).join('');
+  }
+
   window.authReady.then(async user => {
     if (!user) return;
     loadMonDossier(user);
     const { data: rec } = await supabaseClient.from('students').select('*').eq('profile_id', user.id).maybeSingle();
-    if (rec) { loadNotes(rec); loadPaiements(rec); loadTauxPresence(rec); loadEmploiDuTemps(rec); }
+    if (rec) { loadNotes(rec); loadPaiements(rec); loadTauxPresence(rec); loadEmploiDuTemps(rec); loadMesExamens(rec); loadMesCoursEtudiant(rec); }
   });
 </script>
 </body>

@@ -383,7 +383,7 @@
 <div class="page-wrap">
 
   <!-- ── STEPPER PANEL ── -->
-  <aside class="stepper-panel">
+  <aside class="stepper-panel" id="stepperAside">
     <div class="stepper-title">Inscription université</div>
     <div class="stepper-sub">Créez votre espace UniManage en quelques étapes simples.</div>
 
@@ -445,6 +445,53 @@
 
   <!-- ── FORM MAIN ── -->
   <main class="form-main">
+
+    <!-- ══ REJOINDRE UNE UNIVERSITÉ (via lien d'invitation admin) ══ -->
+    <div class="step-panel" id="panelInvite">
+      <div class="step-header">
+        <div class="step-header-badge">✉️ Invitation</div>
+        <h2 id="inviteTitle">Chargement de l'invitation…</h2>
+        <p id="inviteSub"></p>
+      </div>
+
+      <div id="inviteAlert" class="alert"></div>
+
+      <div class="form-section" id="inviteFormSection" style="display:none">
+        <div class="form-section-title">👤 Vos informations</div>
+        <div class="form-row">
+          <div class="form-group">
+            <label>Prénom <span class="required">*</span></label>
+            <input class="form-input" id="inv_prenom" placeholder="Jean"/>
+          </div>
+          <div class="form-group">
+            <label>Nom <span class="required">*</span></label>
+            <input class="form-input" id="inv_lnom" placeholder="DUPONT"/>
+          </div>
+        </div>
+        <div class="form-group">
+          <label>Email</label>
+          <input class="form-input" id="inv_email" readonly style="background:var(--light)"/>
+        </div>
+        <div class="form-row">
+          <div class="form-group">
+            <label>Mot de passe <span class="required">*</span></label>
+            <input class="form-input" id="inv_pass" type="password" placeholder="Min. 8 caractères"/>
+          </div>
+          <div class="form-group">
+            <label>Confirmer <span class="required">*</span></label>
+            <input class="form-input" id="inv_pass2" type="password" placeholder="Répétez le mot de passe"/>
+          </div>
+        </div>
+        <div style="display:flex;align-items:center;gap:.75rem;padding:.75rem;background:var(--light);border-radius:9px;border:1px solid var(--border)">
+          <input type="checkbox" id="inv_cgu" style="width:16px;height:16px;accent-color:var(--blue)"/>
+          <label for="inv_cgu" style="font-size:.82rem;cursor:pointer">J'accepte les <a href="cgu.html" target="_blank" style="color:var(--blue)">Conditions Générales d'Utilisation</a> et la <a href="confidentialite.html" target="_blank" style="color:var(--blue)">Politique de confidentialité</a> <span class="required">*</span></label>
+        </div>
+        <div class="form-nav" style="margin-top:1.25rem">
+          <div></div>
+          <button class="btn-forward" style="background:var(--success)" id="inviteSubmitBtn" onclick="createInviteAccount()">🚀 Créer mon compte</button>
+        </div>
+      </div>
+    </div>
 
     <!-- ══ STEP 1 : Infos générales ══ -->
     <div class="step-panel active" id="panel1">
@@ -1004,6 +1051,115 @@
     var ref = new URLSearchParams(window.location.search).get('ref');
     if (ref) localStorage.setItem(REF_AFFILIE_STORAGE_KEY, ref);
   })();
+
+  // ── Invitation admin (?invite=TOKEN) : rejoindre une université déjà
+  // abonnée au lieu de créer un nouvel espace. Remplace tout l'assistant en
+  // 6 étapes (université déjà configurée, plan déjà payé) par un formulaire
+  // minimal — prénom/nom/mot de passe — puis crée le compte via l'API de
+  // signup normale de Supabase (jamais de mot de passe saisi par moi).
+  let currentInvite = null;
+  (async function initInviteFlow() {
+    const token = new URLSearchParams(window.location.search).get('invite');
+    if (!token) return;
+
+    document.getElementById('stepperAside').style.display = 'none';
+    document.querySelectorAll('.step-panel').forEach(p => p.classList.remove('active'));
+    document.getElementById('panelInvite').classList.add('active');
+
+    const { data: invite, error } = await supabaseClient.from('invites').select('*').eq('token', token).maybeSingle();
+    const titleEl = document.getElementById('inviteTitle');
+    const subEl = document.getElementById('inviteSub');
+    const alertEl = document.getElementById('inviteAlert');
+
+    if (error || !invite || (invite.type !== 'admin' && invite.type !== 'parent')) {
+      titleEl.textContent = 'Lien d\'invitation invalide';
+      alertEl.textContent = '⚠️ Ce lien n\'existe pas ou n\'est plus valide. Demandez un nouveau lien à votre administrateur.';
+      alertEl.classList.add('error');
+      return;
+    }
+    if (invite.used_at) {
+      titleEl.textContent = 'Invitation déjà utilisée';
+      alertEl.textContent = '⚠️ Ce lien a déjà servi à créer un compte. Connectez-vous depuis la page de connexion.';
+      alertEl.classList.add('error');
+      return;
+    }
+    if (new Date(invite.expires_at) < new Date()) {
+      titleEl.textContent = 'Invitation expirée';
+      alertEl.textContent = '⚠️ Ce lien a expiré. Demandez à votre administrateur de vous en envoyer un nouveau.';
+      alertEl.classList.add('error');
+      return;
+    }
+
+    currentInvite = invite;
+    titleEl.textContent = `Rejoindre ${invite.university}`;
+    subEl.textContent = invite.type === 'parent'
+      ? 'Créez votre compte parent pour suivre la scolarité de votre enfant.'
+      : 'Créez votre compte administrateur pour accéder à l\'espace de votre université.';
+    document.getElementById('inv_email').value = invite.email;
+    document.getElementById('inviteFormSection').style.display = 'block';
+  })();
+
+  async function createInviteAccount() {
+    if (!currentInvite) return;
+    const alertEl = document.getElementById('inviteAlert');
+    alertEl.className = 'alert';
+
+    const prenom = document.getElementById('inv_prenom').value.trim();
+    const lnom = document.getElementById('inv_lnom').value.trim();
+    const pass = document.getElementById('inv_pass').value;
+    const pass2 = document.getElementById('inv_pass2').value;
+    const cgu = document.getElementById('inv_cgu').checked;
+
+    if (!prenom || !lnom || !pass) {
+      alertEl.textContent = '⚠️ Veuillez remplir tous les champs obligatoires.';
+      alertEl.classList.add('error');
+      return;
+    }
+    if (pass.length < 8) {
+      alertEl.textContent = '⚠️ Le mot de passe doit contenir au moins 8 caractères.';
+      alertEl.classList.add('error');
+      return;
+    }
+    if (pass !== pass2) {
+      alertEl.textContent = '⚠️ Les mots de passe ne correspondent pas.';
+      alertEl.classList.add('error');
+      return;
+    }
+    if (!cgu) {
+      alertEl.textContent = '⚠️ Vous devez accepter les conditions générales.';
+      alertEl.classList.add('error');
+      return;
+    }
+
+    const btn = document.getElementById('inviteSubmitBtn');
+    btn.disabled = true;
+    const { data, error } = await supabaseClient.auth.signUp({
+      email: currentInvite.email, password: pass,
+      options: { data: { role: currentInvite.type, university: currentInvite.university, full_name: `${prenom} ${lnom}`.trim() } }
+    });
+    if (error) {
+      btn.disabled = false;
+      alertEl.textContent = '⚠️ ' + error.message;
+      alertEl.classList.add('error');
+      return;
+    }
+
+    // Marque l'invitation comme utilisée d'abord — la policy RLS qui permet
+    // au parent de créer lui-même sa ligne parent_students exige que
+    // l'invitation soit déjà marquée utilisée (cf. migration). Best-effort :
+    // le compte est déjà créé à ce stade, une erreur ici ne bloque pas la
+    // redirection.
+    await supabaseClient.from('invites').update({ used_at: new Date().toISOString() }).eq('id', currentInvite.id);
+
+    if (currentInvite.type === 'parent' && data.user) {
+      await supabaseClient.from('parent_students').insert({
+        parent_profile_id: data.user.id, student_id: currentInvite.student_id,
+      });
+      window.location.href = 'parents.html';
+      return;
+    }
+    window.location.href = 'dashboard.html';
+  }
 
   // ── Navigation ──
   function goStep(n) {
