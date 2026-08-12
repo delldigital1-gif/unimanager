@@ -1088,7 +1088,7 @@
        PAGE : UTILISATEURS
   ══════════════════════════════ -->
   <div class="page" id="page-utilisateurs">
-    <div class="page-header"><div><h2>Utilisateurs & Accès</h2><div style="font-size:.85rem;color:var(--gray);margin-top:.2rem">Gérez les rôles et permissions de votre équipe</div></div><button class="btn-add" onclick="showToast('📧 Invitation envoyée')">+ Inviter utilisateur</button></div>
+    <div class="page-header"><div><h2>Utilisateurs & Accès</h2><div style="font-size:.85rem;color:var(--gray);margin-top:.2rem">Gérez les rôles et permissions de votre équipe</div></div><button class="btn-add" onclick="showToast('ℹ️ L\'invitation par email n\'est pas encore disponible — créez le compte via la page d\'inscription pour le moment.')">+ Inviter utilisateur</button></div>
 
     <div class="kpi-grid" style="grid-template-columns:repeat(4,1fr);margin-bottom:1.5rem">
       <div class="kpi-card"><div class="kpi-icon" style="background:rgba(26,86,219,0.1)">👑</div><div class="kpi-body"><div class="kpi-value" style="color:var(--blue)" id="usr-kpi-superadmins">—</div><div class="kpi-label">Super Admins</div></div></div>
@@ -1102,12 +1102,9 @@
       <div class="card">
         <div class="card-header"><div class="card-title">Membres de l'équipe admin</div></div>
         <table class="data-table">
-          <thead><tr><th>Utilisateur</th><th>Rôle</th><th>Dernière connexion</th><th>Statut</th><th>Actions</th></tr></thead>
-          <tbody>
-            <tr><td><div style="display:flex;align-items:center;gap:.6rem"><div class="td-avatar">DA</div><div><div class="td-name">Dr. Amavi Kokou</div><div class="td-sub">amavi@univ.tg</div></div></div></td><td><span class="badge badge-blue">Directeur Académique</span></td><td>Aujourd'hui 09:32</td><td><span class="badge badge-success">Actif</span></td><td><button class="card-action" onclick="showToast('⚙️ Permissions modifiées')">Modifier</button></td></tr>
-            <tr><td><div style="display:flex;align-items:center;gap:.6rem"><div class="td-avatar" style="background:linear-gradient(135deg,var(--gold),#f59e0b)">SC</div><div><div class="td-name">Sœur Clémentine</div><div class="td-sub">clem@univ.tg</div></div></div></td><td><span class="badge badge-gold">Responsable Scolarité</span></td><td>Hier 16:45</td><td><span class="badge badge-success">Actif</span></td><td><button class="card-action" onclick="showToast('⚙️ Permissions modifiées')">Modifier</button></td></tr>
-            <tr><td><div style="display:flex;align-items:center;gap:.6rem"><div class="td-avatar" style="background:linear-gradient(135deg,var(--success),#34d399)">MK</div><div><div class="td-name">M. Mawuli Kpodo</div><div class="td-sub">mawuli@univ.tg</div></div></div></td><td><span class="badge" style="background:rgba(16,185,129,0.1);color:var(--success)">Comptable</span></td><td>20 Jan 2025</td><td><span class="badge badge-success">Actif</span></td><td><button class="card-action" onclick="showToast('⚙️ Permissions modifiées')">Modifier</button></td></tr>
-            <tr><td><div style="display:flex;align-items:center;gap:.6rem"><div class="td-avatar" style="background:linear-gradient(135deg,#8b5cf6,#a78bfa)">AE</div><div><div class="td-name">Mme Afi Etchou</div><div class="td-sub">afi@univ.tg</div></div></div></td><td><span class="badge badge-gray">Chef de département</span></td><td>19 Jan 2025</td><td><span class="badge badge-gold">En attente</span></td><td><button class="card-action" onclick="showToast('📧 Invitation renvoyée')">Relancer</button></td></tr>
+          <thead><tr><th>Utilisateur</th><th>Sous-rôle</th><th>Membre depuis</th><th>Actions</th></tr></thead>
+          <tbody id="equipe-admin-tbody">
+            <tr><td colspan="4" style="text-align:center;color:var(--gray);padding:2rem">Chargement…</td></tr>
           </tbody>
         </table>
       </div>
@@ -1116,28 +1113,32 @@
       <div class="card">
         <div class="card-header"><div class="card-title">🔐 Matrice des permissions</div></div>
         <div class="card-body" style="overflow-x:auto">
-          <table style="width:100%;border-collapse:collapse;font-size:.78rem">
-            <thead><tr>
-              <th style="text-align:left;padding:.4rem .6rem;color:var(--gray);font-weight:600">Module</th>
-              <th style="text-align:center;padding:.4rem;color:var(--blue)">Dir.</th>
-              <th style="text-align:center;padding:.4rem;color:var(--gold)">Scol.</th>
-              <th style="text-align:center;padding:.4rem;color:var(--success)">Compt.</th>
-              <th style="text-align:center;padding:.4rem;color:#8b5cf6">Ens.</th>
-            </tr></thead>
-            <tbody>
-              <tr style="border-bottom:1px solid var(--border)"><td style="padding:.4rem .6rem">Étudiants</td><td style="text-align:center">✅</td><td style="text-align:center">✅</td><td style="text-align:center">👁️</td><td style="text-align:center">👁️</td></tr>
-              <tr style="border-bottom:1px solid var(--border)"><td style="padding:.4rem .6rem">Enseignants</td><td style="text-align:center">✅</td><td style="text-align:center">👁️</td><td style="text-align:center">✅</td><td style="text-align:center">—</td></tr>
-              <tr style="border-bottom:1px solid var(--border)"><td style="padding:.4rem .6rem">Examens</td><td style="text-align:center">✅</td><td style="text-align:center">✅</td><td style="text-align:center">—</td><td style="text-align:center">✅</td></tr>
-              <tr style="border-bottom:1px solid var(--border)"><td style="padding:.4rem .6rem">Paiements</td><td style="text-align:center">✅</td><td style="text-align:center">✅</td><td style="text-align:center">✅</td><td style="text-align:center">—</td></tr>
-              <tr style="border-bottom:1px solid var(--border)"><td style="padding:.4rem .6rem">Emploi du temps</td><td style="text-align:center">✅</td><td style="text-align:center">✅</td><td style="text-align:center">—</td><td style="text-align:center">👁️</td></tr>
-              <tr><td style="padding:.4rem .6rem">Paramètres</td><td style="text-align:center">✅</td><td style="text-align:center">—</td><td style="text-align:center">—</td><td style="text-align:center">—</td></tr>
-            </tbody>
+          <table id="permissions-matrix-table" style="width:100%;border-collapse:collapse;font-size:.78rem">
+            <thead><tr><th colspan="7" style="text-align:center;padding:1rem;color:var(--gray)">Chargement…</th></tr></thead>
+            <tbody></tbody>
           </table>
           <div style="margin-top:1rem;font-size:.75rem;color:var(--gray);display:flex;gap:1rem">
             <span>✅ Plein accès</span><span>👁️ Lecture seule</span><span>— Aucun accès</span>
           </div>
         </div>
       </div>
+    </div>
+  </div>
+
+  <!-- ══ MODAL : SOUS-RÔLE UTILISATEUR ══ -->
+  <div class="modal-overlay" id="modalSubRole" onclick="if(event.target===this)closeSubRoleModal()">
+    <div class="modal" style="max-width:420px">
+      <button class="modal-close" onclick="closeSubRoleModal()">✕</button>
+      <div style="font-family:'Playfair Display',serif;font-weight:800;font-size:1.2rem;margin-bottom:.3rem">Modifier le sous-rôle</div>
+      <div id="subRoleUserName" style="font-size:.85rem;color:var(--gray);margin-bottom:1.25rem"></div>
+      <div id="subRoleError" style="display:none;background:rgba(239,68,68,0.08);color:var(--danger);border:1px solid rgba(239,68,68,0.2);padding:.6rem 1rem;border-radius:8px;font-size:.83rem;margin-bottom:1rem"></div>
+      <select id="subRoleSelect" class="filter-select" style="width:100%;margin-bottom:1.25rem">
+        <option value="Directeur Académique">Directeur Académique</option>
+        <option value="Responsable Scolarité">Responsable Scolarité</option>
+        <option value="Comptable">Comptable</option>
+        <option value="Chef de département">Chef de département</option>
+      </select>
+      <button class="btn-add" style="width:100%;justify-content:center" id="subRoleSubmit" onclick="submitSubRoleChange()">Enregistrer</button>
     </div>
   </div>
 
@@ -1546,7 +1547,120 @@
     loadEnseignants();
   }
 
-  window.authReady.then(user => { if (user) { loadEtudiants(); loadEnseignants(); loadPaymentsData(); loadEmploiSetup(); loadUtilisateursKpis(user); loadUniversiteSettings(user); loadExamensEtDepartements(user); } });
+  window.authReady.then(user => { if (user) { loadEtudiants(); loadEnseignants(); loadPaymentsData(); loadEmploiSetup(); loadUtilisateursKpis(user); loadUniversiteSettings(user); loadExamensEtDepartements(user); loadEquipeAdmin(user); loadPermissionsMatrix(); } });
+
+  // ── Équipe admin + sous-rôles (données réelles Supabase) ──
+  // Remplace la liste fictive ("Dr. Amavi Kokou", etc.) par les vrais
+  // comptes admin de l'université, avec un vrai sous-rôle modifiable
+  // (profiles.sub_role, protégé par une policy RLS + un GRANT restreint à
+  // cette seule colonne — voir migration staff_sub_roles_and_permissions).
+  let subRoleTargetId = null;
+
+  async function loadEquipeAdmin(user) {
+    let query = supabaseClient.from('profiles').select('id, full_name, email, sub_role, created_at').eq('role', 'admin');
+    if (user.role !== 'superadmin') query = query.eq('university', user.university);
+    const { data, error } = await query.order('created_at', { ascending: true });
+    if (error) { console.error(error); return; }
+    const admins = data || [];
+
+    const tbody = document.getElementById('equipe-admin-tbody');
+    if (!tbody) return;
+    if (admins.length === 0) {
+      tbody.innerHTML = '<tr><td colspan="4" style="text-align:center;color:var(--gray);padding:2rem">Aucun administrateur.</td></tr>';
+      return;
+    }
+    const subRoleBadge = {
+      'Directeur Académique': 'badge-blue',
+      'Responsable Scolarité': 'badge-gold',
+      'Comptable': 'background:rgba(16,185,129,0.1);color:var(--success)',
+      'Chef de département': 'badge-gray',
+    };
+    tbody.innerHTML = admins.map(a => {
+      const initials = (a.full_name || a.email || '').split(' ').filter(Boolean).map(s => s[0]).join('').slice(0, 2).toUpperCase();
+      const label = a.sub_role || 'Non défini';
+      const badgeStyle = subRoleBadge[label];
+      const badgeAttr = badgeStyle && badgeStyle.startsWith('badge-') ? `class="badge ${badgeStyle}"` : `class="badge" style="${badgeStyle || ''}"`;
+      return `<tr>
+        <td><div style="display:flex;align-items:center;gap:.6rem"><div class="td-avatar">${initials || '??'}</div><div><div class="td-name">${a.full_name || '—'}</div><div class="td-sub">${a.email || ''}</div></div></div></td>
+        <td><span ${badgeAttr}>${label}</span></td>
+        <td>${fmtDate(a.created_at)}</td>
+        <td><button class="card-action" onclick="openSubRoleModal('${a.id}', '${(a.full_name || a.email || '').replace(/'/g, "\\'")}', '${a.sub_role || 'Directeur Académique'}')">Modifier</button></td>
+      </tr>`;
+    }).join('');
+  }
+
+  function openSubRoleModal(id, name, currentSubRole) {
+    subRoleTargetId = id;
+    document.getElementById('subRoleUserName').textContent = name;
+    document.getElementById('subRoleSelect').value = currentSubRole;
+    document.getElementById('subRoleError').style.display = 'none';
+    document.getElementById('modalSubRole').classList.add('active');
+  }
+  function closeSubRoleModal() {
+    document.getElementById('modalSubRole').classList.remove('active');
+    subRoleTargetId = null;
+  }
+
+  async function submitSubRoleChange() {
+    if (!subRoleTargetId) return;
+    const errBox = document.getElementById('subRoleError');
+    errBox.style.display = 'none';
+    const newSubRole = document.getElementById('subRoleSelect').value;
+
+    const btn = document.getElementById('subRoleSubmit');
+    btn.disabled = true;
+    const { error } = await supabaseClient.from('profiles').update({ sub_role: newSubRole }).eq('id', subRoleTargetId);
+    btn.disabled = false;
+
+    if (error) {
+      errBox.textContent = '⚠️ ' + error.message;
+      errBox.style.display = 'block';
+      return;
+    }
+    closeSubRoleModal();
+    showToast('✅ Sous-rôle mis à jour');
+    await loadEquipeAdmin(window.currentUser);
+  }
+
+  // ── Matrice des permissions (données réelles Supabase) ──
+  // Affiche les 4 sous-rôles admin (mêmes colonnes que l'ancienne maquette
+  // Dir./Scol./Compt./Ens.) — la table role_permissions couvre aussi
+  // etudiant/parent pour un usage futur, non affiché ici pour rester
+  // lisible.
+  async function loadPermissionsMatrix() {
+    const { data, error } = await supabaseClient.from('role_permissions').select('actor, module_key, access_level');
+    if (error) { console.error(error); return; }
+    const rows = data || [];
+
+    const actors = [
+      { key: 'Directeur Académique', label: 'Dir.', color: 'var(--blue)' },
+      { key: 'Responsable Scolarité', label: 'Scol.', color: 'var(--gold)' },
+      { key: 'Comptable', label: 'Compt.', color: 'var(--success)' },
+      { key: 'enseignant', label: 'Ens.', color: '#8b5cf6' },
+    ];
+    const modules = [
+      { key: 'etudiants', label: 'Étudiants' },
+      { key: 'enseignants', label: 'Enseignants' },
+      { key: 'examens', label: 'Examens' },
+      { key: 'paiements', label: 'Paiements' },
+      { key: 'emploi_temps', label: 'Emploi du temps' },
+      { key: 'parametres', label: 'Paramètres' },
+    ];
+    const icon = { full: '✅', read: '👁️', none: '—' };
+    const lookup = {};
+    rows.forEach(r => { lookup[r.actor + '|' + r.module_key] = r.access_level; });
+
+    const table = document.getElementById('permissions-matrix-table');
+    if (!table) return;
+    table.querySelector('thead').innerHTML = `<tr>
+      <th style="text-align:left;padding:.4rem .6rem;color:var(--gray);font-weight:600">Module</th>
+      ${actors.map(a => `<th style="text-align:center;padding:.4rem;color:${a.color}">${a.label}</th>`).join('')}
+    </tr>`;
+    table.querySelector('tbody').innerHTML = modules.map((m, i) => `<tr style="${i < modules.length - 1 ? 'border-bottom:1px solid var(--border)' : ''}">
+      <td style="padding:.4rem .6rem">${m.label}</td>
+      ${actors.map(a => `<td style="text-align:center">${icon[lookup[a.key + '|' + m.key]] || '—'}</td>`).join('')}
+    </tr>`).join('');
+  }
 
   // ── Examens & Résultats + Départements (données réelles Supabase) ──
   // "Examens programmés" = créneaux d'emploi du temps de type "Examen" (le
