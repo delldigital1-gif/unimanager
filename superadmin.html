@@ -142,7 +142,7 @@
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <script src="supabase-config.js"></script>
 <script src="auth-guard.js"></script>
-<script>requireAuth('superadmin');</script>
+<script>window.authReady = requireAuth('superadmin');</script>
 
 <!-- SIDEBAR -->
 <aside class="sidebar">
@@ -160,12 +160,12 @@
   <nav class="sidebar-nav">
     <div class="nav-group-label">Plateforme</div>
     <div class="nav-item active" onclick="showPage('overview')"><span class="nav-icon">🌍</span> Vue globale</div>
-    <div class="nav-item" onclick="showPage('universites')"><span class="nav-icon">🏛️</span> Universités <span class="nav-badge">52</span></div>
-    <div class="nav-item" onclick="showPage('revenus')"><span class="nav-icon">💰</span> Revenus SaaS</div>
+    <div class="nav-item" onclick="showPage('universites')"><span class="nav-icon">🏛️</span> Universités <span class="nav-badge" id="nb-univ">—</span></div>
+    <div class="nav-item" onclick="showPage('revenus')"><span class="nav-icon">💰</span> Revenus</div>
     <div class="nav-item" onclick="showPage('abonnements')"><span class="nav-icon">📋</span> Abonnements</div>
     <div class="nav-group-label">Monitoring</div>
     <div class="nav-item" onclick="showPage('activite')"><span class="nav-icon">📊</span> Activité</div>
-    <div class="nav-item" onclick="showPage('incidents')"><span class="nav-icon">⚠️</span> Incidents <span class="nav-badge">2</span></div>
+    <div class="nav-item" onclick="showPage('incidents')"><span class="nav-icon">⚠️</span> Incidents <span class="nav-badge" id="nb-incidents">—</span></div>
     <div class="nav-item" onclick="showPage('logs')"><span class="nav-icon">📜</span> Logs système</div>
     <div class="nav-group-label">Administration</div>
     <div class="nav-item" onclick="showPage('admins')"><span class="nav-icon">👑</span> Admins</div>
@@ -198,15 +198,14 @@
     <div class="revenue-card">
       <div style="display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:1rem">
         <div>
-          <div style="font-size:.8rem;color:rgba(255,255,255,0.5);margin-bottom:.3rem">Revenu SaaS total 2025</div>
-          <div style="font-family:'Playfair Display',serif;font-weight:800;font-size:2.5rem;color:white">47.8M <span style="font-size:1.1rem;color:rgba(255,255,255,0.5)">FCFA</span></div>
-          <div style="font-size:.85rem;color:var(--success);margin-top:.3rem">▲ +34% vs 2024</div>
+          <div style="font-size:.8rem;color:rgba(255,255,255,0.5);margin-bottom:.3rem">Paiements traités via la plateforme (total)</div>
+          <div style="font-family:'Playfair Display',serif;font-weight:800;font-size:2.5rem;color:white" id="ov-revenue">— <span style="font-size:1.1rem;color:rgba(255,255,255,0.5)">FCFA</span></div>
+          <div style="font-size:.75rem;color:rgba(255,255,255,0.35);margin-top:.3rem">Données réelles — scolarités confirmées, toutes universités</div>
         </div>
         <div style="display:flex;gap:2rem;flex-wrap:wrap">
-          <div style="text-align:center"><div style="font-family:'Playfair Display',serif;font-weight:800;font-size:1.5rem;color:white">52</div><div style="font-size:.75rem;color:rgba(255,255,255,0.4)">Universités actives</div></div>
-          <div style="text-align:center"><div style="font-family:'Playfair Display',serif;font-weight:800;font-size:1.5rem;color:white">48K</div><div style="font-size:.75rem;color:rgba(255,255,255,0.4)">Étudiants gérés</div></div>
-          <div style="text-align:center"><div style="font-family:'Playfair Display',serif;font-weight:800;font-size:1.5rem;color:white">8</div><div style="font-size:.75rem;color:rgba(255,255,255,0.4)">Pays couverts</div></div>
-          <div style="text-align:center"><div style="font-family:'Playfair Display',serif;font-weight:800;font-size:1.5rem;color:white">99.9%</div><div style="font-size:.75rem;color:rgba(255,255,255,0.4)">Uptime ce mois</div></div>
+          <div style="text-align:center"><div style="font-family:'Playfair Display',serif;font-weight:800;font-size:1.5rem;color:white" id="ov-nb-univ">—</div><div style="font-size:.75rem;color:rgba(255,255,255,0.4)">Université(s) active(s)</div></div>
+          <div style="text-align:center"><div style="font-family:'Playfair Display',serif;font-weight:800;font-size:1.5rem;color:white" id="ov-nb-students">—</div><div style="font-size:.75rem;color:rgba(255,255,255,0.4)">Étudiants gérés</div></div>
+          <div style="text-align:center"><div style="font-family:'Playfair Display',serif;font-weight:800;font-size:1.5rem;color:white" id="ov-nb-teachers">—</div><div style="font-size:.75rem;color:rgba(255,255,255,0.4)">Enseignants gérés</div></div>
         </div>
       </div>
     </div>
@@ -215,111 +214,39 @@
     <div class="kpi-grid">
       <div class="kpi-card" style="border-color:rgba(139,92,246,0.2)">
         <div class="kpi-icon" style="background:rgba(139,92,246,0.15)">🏛️</div>
-        <div class="kpi-value" style="color:#a78bfa">52</div>
+        <div class="kpi-value" style="color:#a78bfa" id="ov-kpi-univ">—</div>
         <div class="kpi-label">Universités actives</div>
-        <div class="kpi-trend trend-up">▲ +8 ce trimestre</div>
       </div>
       <div class="kpi-card">
         <div class="kpi-icon" style="background:rgba(26,86,219,0.15)">🎓</div>
-        <div class="kpi-value" style="color:var(--sky)">48 240</div>
+        <div class="kpi-value" style="color:var(--sky)" id="ov-kpi-students">—</div>
         <div class="kpi-label">Étudiants sur la plateforme</div>
-        <div class="kpi-trend trend-up">▲ +12% vs N-1</div>
       </div>
       <div class="kpi-card">
         <div class="kpi-icon" style="background:rgba(16,185,129,0.15)">💵</div>
-        <div class="kpi-value" style="color:var(--success)">3.98M</div>
-        <div class="kpi-label">FCFA revenus / mois</div>
-        <div class="kpi-trend trend-up">▲ +5 abonnements</div>
+        <div class="kpi-value" style="color:var(--success)" id="ov-kpi-revenue">—</div>
+        <div class="kpi-label">FCFA encaissés (total)</div>
       </div>
       <div class="kpi-card">
         <div class="kpi-icon" style="background:rgba(239,68,68,0.15)">⚠️</div>
-        <div class="kpi-value" style="color:var(--danger)">3</div>
-        <div class="kpi-label">Abonnements expirés</div>
-        <div class="kpi-trend trend-down">▼ Relance nécessaire</div>
+        <div class="kpi-value" style="color:var(--danger)" id="ov-kpi-incidents">—</div>
+        <div class="kpi-label">Incidents actifs</div>
       </div>
     </div>
 
-    <!-- Charts -->
-    <div class="dash-grid-3">
-      <div class="card">
-        <div class="card-header"><div class="card-title">📈 Croissance universités 2025</div></div>
-        <div class="card-body">
-          <div class="bar-chart">
-            <div class="bar-col"><div class="bar-fill" style="height:35%;background:linear-gradient(180deg,#8B5CF6,#7c3aed)"></div><div class="bar-label">Jan</div><div class="bar-val">38</div></div>
-            <div class="bar-col"><div class="bar-fill" style="height:42%;background:linear-gradient(180deg,#8B5CF6,#7c3aed)"></div><div class="bar-label">Fév</div><div class="bar-val">40</div></div>
-            <div class="bar-col"><div class="bar-fill" style="height:48%;background:linear-gradient(180deg,#8B5CF6,#7c3aed)"></div><div class="bar-label">Mar</div><div class="bar-val">43</div></div>
-            <div class="bar-col"><div class="bar-fill" style="height:55%;background:linear-gradient(180deg,#8B5CF6,#7c3aed)"></div><div class="bar-label">Avr</div><div class="bar-val">46</div></div>
-            <div class="bar-col"><div class="bar-fill" style="height:65%;background:linear-gradient(180deg,#8B5CF6,#7c3aed)"></div><div class="bar-label">Mai</div><div class="bar-val">48</div></div>
-            <div class="bar-col"><div class="bar-fill" style="height:80%;background:linear-gradient(180deg,var(--gold),#f59e0b)"></div><div class="bar-label">Jun</div><div class="bar-val">50</div></div>
-            <div class="bar-col"><div class="bar-fill" style="height:100%;background:linear-gradient(180deg,var(--success),#10b981)"></div><div class="bar-label">Jul</div><div class="bar-val">52</div></div>
-          </div>
-        </div>
-      </div>
-      <div class="card">
-        <div class="card-header"><div class="card-title">Plans actifs</div></div>
-        <div class="card-body">
-          <div style="display:flex;flex-direction:column;gap:.85rem">
-            <div>
-              <div style="display:flex;justify-content:space-between;font-size:.82rem;margin-bottom:.3rem"><span style="color:rgba(255,255,255,0.7)">🟢 Enterprise</span><span style="font-weight:700;color:#a78bfa">12 — 1.8M FCFA</span></div>
-              <div class="progress-bar"><div class="progress-fill" style="width:23%;background:var(--purple)"></div></div>
-            </div>
-            <div>
-              <div style="display:flex;justify-content:space-between;font-size:.82rem;margin-bottom:.3rem"><span style="color:rgba(255,255,255,0.7)">🔵 Pro</span><span style="font-weight:700;color:var(--sky)">28 — 2.1M FCFA</span></div>
-              <div class="progress-bar"><div class="progress-fill" style="width:54%;background:var(--sky)"></div></div>
-            </div>
-            <div>
-              <div style="display:flex;justify-content:space-between;font-size:.82rem;margin-bottom:.3rem"><span style="color:rgba(255,255,255,0.7)">⚪ Starter</span><span style="font-weight:700;color:rgba(255,255,255,0.5)">12 — 300K FCFA</span></div>
-              <div class="progress-bar"><div class="progress-fill" style="width:23%;background:rgba(255,255,255,0.25)"></div></div>
-            </div>
-          </div>
-          <div style="margin-top:1.25rem;padding:.85rem;background:rgba(255,255,255,0.04);border-radius:10px;text-align:center">
-            <div style="font-size:.75rem;color:rgba(255,255,255,0.4)">MRR (Monthly Recurring Revenue)</div>
-            <div style="font-family:'Playfair Display',serif;font-weight:800;font-size:1.4rem;color:var(--success);margin-top:.25rem">3 980 000 FCFA</div>
-          </div>
-        </div>
-      </div>
-    </div>
-
-    <!-- Universités récentes + Activité -->
+    <!-- Universités + Activité -->
     <div class="dash-grid">
       <div class="card">
-        <div class="card-header"><div class="card-title">🏛️ Dernières universités inscrites</div><button class="card-action" onclick="showPage('universites')">Voir toutes →</button></div>
+        <div class="card-header"><div class="card-title">🏛️ Universités</div><button class="card-action" onclick="showPage('universites')">Voir toutes →</button></div>
         <table class="data-table">
           <thead><tr><th>Université</th><th>Pays</th><th>Plan</th><th>Étudiants</th><th>Statut</th></tr></thead>
-          <tbody>
-            <tr><td><div style="font-weight:600;color:white">Université de Lomé</div><div style="font-size:.72rem;color:rgba(255,255,255,0.35)">univ-lome.unimanage.app</div></td><td>🇹🇬 Togo</td><td><span class="badge badge-blue">Pro</span></td><td>1 248</td><td><span class="badge badge-success">Actif</span></td></tr>
-            <tr><td><div style="font-weight:600;color:white">UCAO Abidjan</div><div style="font-size:.72rem;color:rgba(255,255,255,0.35)">ucao.unimanage.app</div></td><td>🇨🇮 Côte d'Ivoire</td><td><span class="badge badge-purple">Enterprise</span></td><td>3 420</td><td><span class="badge badge-success">Actif</span></td></tr>
-            <tr><td><div style="font-weight:600;color:white">UGB Saint-Louis</div><div style="font-size:.72rem;color:rgba(255,255,255,0.35)">ugb.unimanage.app</div></td><td>🇸🇳 Sénégal</td><td><span class="badge badge-blue">Pro</span></td><td>2 180</td><td><span class="badge badge-success">Actif</span></td></tr>
-            <tr><td><div style="font-weight:600;color:white">IAM Cotonou</div><div style="font-size:.72rem;color:rgba(255,255,255,0.35)">iam.unimanage.app</div></td><td>🇧🇯 Bénin</td><td><span class="badge badge-gray">Starter</span></td><td>487</td><td><span class="badge badge-gold">Trial</span></td></tr>
-            <tr><td><div style="font-weight:600;color:white">ESSEC Douala</div><div style="font-size:.72rem;color:rgba(255,255,255,0.35)">essec.unimanage.app</div></td><td>🇨🇲 Cameroun</td><td><span class="badge badge-purple">Enterprise</span></td><td>4 100</td><td><span class="badge badge-success">Actif</span></td></tr>
-          </tbody>
+          <tbody id="ov-univ-tbody"><tr><td colspan="5" style="text-align:center;color:rgba(255,255,255,0.4);padding:2rem">Chargement...</td></tr></tbody>
         </table>
       </div>
       <div class="card">
-        <div class="card-header"><div class="card-title">🔔 Activité plateforme</div></div>
+        <div class="card-header"><div class="card-title">🔔 Activité récente</div><button class="card-action" onclick="showPage('activite')">Voir tout →</button></div>
         <div class="card-body">
-          <div>
-            <div class="activity-item"><div class="activity-dot" style="background:rgba(16,185,129,0.15)">✅</div><div><div class="activity-text"><strong>UCAO Abidjan</strong> a upgradé vers Enterprise</div><div class="activity-time">Il y a 15 min</div></div></div>
-            <div class="activity-item"><div class="activity-dot" style="background:rgba(139,92,246,0.15)">🏛️</div><div><div class="activity-text"><strong>Nouvelle université</strong> inscrite — ISIG Lomé</div><div class="activity-time">Il y a 2h</div></div></div>
-            <div class="activity-item"><div class="activity-dot" style="background:rgba(245,158,11,0.15)">💰</div><div><div class="activity-text">Paiement abonnement <strong>Pro — 75 000 FCFA</strong> reçu (UGB)</div><div class="activity-time">Il y a 4h</div></div></div>
-            <div class="activity-item"><div class="activity-dot" style="background:rgba(239,68,68,0.15)">⚠️</div><div><div class="activity-text">Abonnement <strong>IAM Niamey</strong> expire dans 3 jours</div><div class="activity-time">Hier</div></div></div>
-            <div class="activity-item"><div class="activity-dot" style="background:rgba(26,86,219,0.15)">🔄</div><div><div class="activity-text">Mise à jour système v2.4.1 déployée avec succès</div><div class="activity-time">Hier 22h00</div></div></div>
-          </div>
-        </div>
-      </div>
-    </div>
-
-    <!-- Répartition géographique -->
-    <div class="card">
-      <div class="card-header"><div class="card-title">🌍 Répartition géographique</div><button class="card-action" onclick="showToast('🗺️ Carte interactive — bientôt disponible')">Voir carte →</button></div>
-      <div class="card-body">
-        <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(180px,1fr));gap:1rem">
-          <div style="padding:1rem;background:rgba(255,255,255,0.04);border-radius:10px;display:flex;align-items:center;gap:.75rem"><span style="font-size:1.5rem">🇨🇮</span><div><div style="font-weight:700;color:white">Côte d'Ivoire</div><div style="font-size:.75rem;color:rgba(255,255,255,0.4)">14 universités · 18 200 étudiants</div><div class="progress-bar" style="margin-top:.4rem"><div class="progress-fill" style="width:27%;background:var(--sky)"></div></div></div></div>
-          <div style="padding:1rem;background:rgba(255,255,255,0.04);border-radius:10px;display:flex;align-items:center;gap:.75rem"><span style="font-size:1.5rem">🇸🇳</span><div><div style="font-weight:700;color:white">Sénégal</div><div style="font-size:.75rem;color:rgba(255,255,255,0.4)">11 universités · 14 300 étudiants</div><div class="progress-bar" style="margin-top:.4rem"><div class="progress-fill" style="width:22%;background:var(--success)"></div></div></div></div>
-          <div style="padding:1rem;background:rgba(255,255,255,0.04);border-radius:10px;display:flex;align-items:center;gap:.75rem"><span style="font-size:1.5rem">🇨🇲</span><div><div style="font-weight:700;color:white">Cameroun</div><div style="font-size:.75rem;color:rgba(255,255,255,0.4)">9 universités · 8 700 étudiants</div><div class="progress-bar" style="margin-top:.4rem"><div class="progress-fill" style="width:18%;background:var(--gold)"></div></div></div></div>
-          <div style="padding:1rem;background:rgba(255,255,255,0.04);border-radius:10px;display:flex;align-items:center;gap:.75rem"><span style="font-size:1.5rem">🇹🇬</span><div><div style="font-weight:700;color:white">Togo</div><div style="font-size:.75rem;color:rgba(255,255,255,0.4)">8 universités · 4 200 étudiants</div><div class="progress-bar" style="margin-top:.4rem"><div class="progress-fill" style="width:15%;background:var(--purple)"></div></div></div></div>
-          <div style="padding:1rem;background:rgba(255,255,255,0.04);border-radius:10px;display:flex;align-items:center;gap:.75rem"><span style="font-size:1.5rem">🇧🇯</span><div><div style="font-weight:700;color:white">Bénin</div><div style="font-size:.75rem;color:rgba(255,255,255,0.4)">6 universités · 2 840 étudiants</div><div class="progress-bar" style="margin-top:.4rem"><div class="progress-fill" style="width:11%;background:var(--danger)"></div></div></div></div>
-          <div style="padding:1rem;background:rgba(255,255,255,0.04);border-radius:10px;display:flex;align-items:center;gap:.75rem"><span style="font-size:1.5rem">🌍</span><div><div style="font-weight:700;color:white">Autres pays</div><div style="font-size:.75rem;color:rgba(255,255,255,0.4)">4 universités · Mali, BF, Niger, Guinée</div><div class="progress-bar" style="margin-top:.4rem"><div class="progress-fill" style="width:8%;background:rgba(255,255,255,0.3)"></div></div></div></div>
+          <div id="ov-activity">Chargement...</div>
         </div>
       </div>
     </div>
@@ -328,61 +255,24 @@
   <!-- ══ PAGE : UNIVERSITÉS ══ -->
   <div class="page" id="page-universites">
     <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:1.5rem">
-      <div><h2 style="font-family:'Playfair Display',serif;font-weight:800;font-size:1.3rem;color:white">Universités</h2><div style="font-size:.85rem;color:rgba(255,255,255,0.4);margin-top:.2rem">52 établissements · 8 pays</div></div>
-      <button onclick="openModal()" style="padding:.65rem 1.2rem;border-radius:9px;background:var(--purple);color:white;font-size:.875rem;font-weight:600;cursor:pointer;border:none">+ Ajouter université</button>
+      <div><h2 style="font-family:'Playfair Display',serif;font-weight:800;font-size:1.3rem;color:white">Universités</h2><div style="font-size:.85rem;color:rgba(255,255,255,0.4);margin-top:.2rem" id="univ-sub">Chargement...</div></div>
+      <button onclick="showToast('➕ Ajout d\'université — à connecter à un vrai formulaire')" style="padding:.65rem 1.2rem;border-radius:9px;background:var(--purple);color:white;font-size:.875rem;font-weight:600;cursor:pointer;border:none">+ Ajouter université</button>
     </div>
-    <div class="univ-grid">
-      <div class="univ-card" onclick="showToast('🏛️ Université de Lomé — Tableau de bord')">
-        <div style="display:flex;align-items:center;gap:.75rem;margin-bottom:.75rem"><div class="univ-logo" style="background:linear-gradient(135deg,var(--blue),var(--sky))">UL</div><div><div class="univ-name">Université de Lomé</div><div class="univ-meta">🇹🇬 Lomé, Togo · Pro · Depuis Jan 2024</div></div></div>
-        <div class="univ-stats"><div class="univ-stat"><div class="univ-stat-val">1 248</div><div class="univ-stat-label">Étudiants</div></div><div class="univ-stat"><div class="univ-stat-val">87</div><div class="univ-stat-label">Enseignants</div></div><div class="univ-stat"><div class="univ-stat-val" style="color:var(--success)">98%</div><div class="univ-stat-label">Uptime</div></div></div>
-        <div style="display:flex;justify-content:space-between;align-items:center"><span class="badge badge-success">● Actif</span><span style="font-size:.75rem;color:rgba(255,255,255,0.4)">75 000 FCFA/mois</span></div>
-      </div>
-      <div class="univ-card" onclick="showToast('🏛️ UCAO Abidjan — Tableau de bord')">
-        <div style="display:flex;align-items:center;gap:.75rem;margin-bottom:.75rem"><div class="univ-logo" style="background:linear-gradient(135deg,var(--gold),#d97706)">UC</div><div><div class="univ-name">UCAO Abidjan</div><div class="univ-meta">🇨🇮 Abidjan, Côte d'Ivoire · Enterprise</div></div></div>
-        <div class="univ-stats"><div class="univ-stat"><div class="univ-stat-val">3 420</div><div class="univ-stat-label">Étudiants</div></div><div class="univ-stat"><div class="univ-stat-val">214</div><div class="univ-stat-label">Enseignants</div></div><div class="univ-stat"><div class="univ-stat-val" style="color:var(--success)">99.9%</div><div class="univ-stat-label">Uptime</div></div></div>
-        <div style="display:flex;justify-content:space-between;align-items:center"><span class="badge badge-purple">● Enterprise</span><span style="font-size:.75rem;color:rgba(255,255,255,0.4)">Sur devis</span></div>
-      </div>
-      <div class="univ-card" onclick="showToast('🏛️ UGB Saint-Louis — Tableau de bord')">
-        <div style="display:flex;align-items:center;gap:.75rem;margin-bottom:.75rem"><div class="univ-logo" style="background:linear-gradient(135deg,var(--success),#059669)">UG</div><div><div class="univ-name">UGB Saint-Louis</div><div class="univ-meta">🇸🇳 Saint-Louis, Sénégal · Pro</div></div></div>
-        <div class="univ-stats"><div class="univ-stat"><div class="univ-stat-val">2 180</div><div class="univ-stat-label">Étudiants</div></div><div class="univ-stat"><div class="univ-stat-val">156</div><div class="univ-stat-label">Enseignants</div></div><div class="univ-stat"><div class="univ-stat-val" style="color:var(--success)">99%</div><div class="univ-stat-label">Uptime</div></div></div>
-        <div style="display:flex;justify-content:space-between;align-items:center"><span class="badge badge-success">● Actif</span><span style="font-size:.75rem;color:rgba(255,255,255,0.4)">75 000 FCFA/mois</span></div>
-      </div>
-      <div class="univ-card" onclick="showToast('🏛️ IAM Cotonou — Tableau de bord')">
-        <div style="display:flex;align-items:center;gap:.75rem;margin-bottom:.75rem"><div class="univ-logo" style="background:linear-gradient(135deg,var(--danger),#dc2626)">IA</div><div><div class="univ-name">IAM Cotonou</div><div class="univ-meta">🇧🇯 Cotonou, Bénin · Starter · Trial</div></div></div>
-        <div class="univ-stats"><div class="univ-stat"><div class="univ-stat-val">487</div><div class="univ-stat-label">Étudiants</div></div><div class="univ-stat"><div class="univ-stat-val">34</div><div class="univ-stat-label">Enseignants</div></div><div class="univ-stat"><div class="univ-stat-val" style="color:var(--gold)">97%</div><div class="univ-stat-label">Uptime</div></div></div>
-        <div style="display:flex;justify-content:space-between;align-items:center"><span class="badge badge-gold">⏱ Trial — 3j restants</span><span style="font-size:.75rem;color:rgba(255,255,255,0.4)">25 000 FCFA/mois</span></div>
-      </div>
-      <div class="univ-card" onclick="showToast('🏛️ ESSEC Douala — Tableau de bord')">
-        <div style="display:flex;align-items:center;gap:.75rem;margin-bottom:.75rem"><div class="univ-logo" style="background:linear-gradient(135deg,var(--purple),#7c3aed)">ES</div><div><div class="univ-name">ESSEC Douala</div><div class="univ-meta">🇨🇲 Douala, Cameroun · Enterprise</div></div></div>
-        <div class="univ-stats"><div class="univ-stat"><div class="univ-stat-val">4 100</div><div class="univ-stat-label">Étudiants</div></div><div class="univ-stat"><div class="univ-stat-val">287</div><div class="univ-stat-label">Enseignants</div></div><div class="univ-stat"><div class="univ-stat-val" style="color:var(--success)">99.9%</div><div class="univ-stat-label">Uptime</div></div></div>
-        <div style="display:flex;justify-content:space-between;align-items:center"><span class="badge badge-purple">● Enterprise</span><span style="font-size:.75rem;color:rgba(255,255,255,0.4)">Sur devis</span></div>
-      </div>
-      <div class="univ-card" style="border:2px dashed rgba(255,255,255,0.1);display:flex;align-items:center;justify-content:center;cursor:pointer;min-height:160px" onclick="openModal()">
-        <div style="text-align:center;color:rgba(255,255,255,0.3)"><div style="font-size:2rem;margin-bottom:.5rem">+</div><div style="font-size:.85rem;font-weight:600">Ajouter une université</div></div>
-      </div>
-    </div>
+    <div class="univ-grid" id="univ-grid"><div style="color:rgba(255,255,255,0.4);padding:2rem">Chargement...</div></div>
   </div>
 
   <!-- ══ PAGE : REVENUS ══ -->
   <div class="page" id="page-revenus">
-    <div style="margin-bottom:1.5rem"><h2 style="font-family:'Playfair Display',serif;font-weight:800;font-size:1.3rem;color:white">Revenus SaaS</h2><div style="font-size:.85rem;color:rgba(255,255,255,0.4);margin-top:.2rem">Suivi financier de la plateforme</div></div>
+    <div style="margin-bottom:1.5rem"><h2 style="font-family:'Playfair Display',serif;font-weight:800;font-size:1.3rem;color:white">Revenus</h2><div style="font-size:.85rem;color:rgba(255,255,255,0.4);margin-top:.2rem">Paiements de scolarité réels, traités via la plateforme</div></div>
     <div class="kpi-grid" style="grid-template-columns:repeat(3,1fr)">
-      <div class="kpi-card"><div class="kpi-icon" style="background:rgba(16,185,129,0.15)">💵</div><div class="kpi-value" style="color:var(--success)">47.8M</div><div class="kpi-label">FCFA revenus 2025</div><div class="kpi-trend trend-up">▲ +34% vs 2024</div></div>
-      <div class="kpi-card"><div class="kpi-icon" style="background:rgba(139,92,246,0.15)">📈</div><div class="kpi-value" style="color:#a78bfa">3.98M</div><div class="kpi-label">FCFA MRR actuel</div><div class="kpi-trend trend-up">▲ +5 nouveaux ce mois</div></div>
-      <div class="kpi-card"><div class="kpi-icon" style="background:rgba(245,158,11,0.15)">🎯</div><div class="kpi-value" style="color:var(--gold)">76.5M</div><div class="kpi-label">FCFA objectif 2025</div><div class="kpi-trend trend-up">62% atteint</div></div>
+      <div class="kpi-card"><div class="kpi-icon" style="background:rgba(16,185,129,0.15)">💵</div><div class="kpi-value" style="color:var(--success)" id="rev-total">—</div><div class="kpi-label">FCFA encaissés (total)</div></div>
+      <div class="kpi-card"><div class="kpi-icon" style="background:rgba(139,92,246,0.15)">📈</div><div class="kpi-value" style="color:#a78bfa" id="rev-count">—</div><div class="kpi-label">Paiements confirmés</div></div>
+      <div class="kpi-card"><div class="kpi-icon" style="background:rgba(245,158,11,0.15)">💳</div><div class="kpi-value" style="color:var(--gold)" id="rev-avg">—</div><div class="kpi-label">FCFA / paiement (moyenne)</div></div>
     </div>
     <div class="card">
-      <div class="card-header"><div class="card-title">Revenus mensuels 2025</div></div>
+      <div class="card-header"><div class="card-title">Paiements par mois</div></div>
       <div class="card-body">
-        <div class="bar-chart" style="height:160px">
-          <div class="bar-col"><div class="bar-fill" style="height:50%;background:linear-gradient(180deg,var(--purple),#7c3aed)"></div><div class="bar-label">Jan</div><div class="bar-val">4.8M</div></div>
-          <div class="bar-col"><div class="bar-fill" style="height:55%;background:linear-gradient(180deg,var(--purple),#7c3aed)"></div><div class="bar-label">Fév</div><div class="bar-val">5.2M</div></div>
-          <div class="bar-col"><div class="bar-fill" style="height:60%;background:linear-gradient(180deg,var(--purple),#7c3aed)"></div><div class="bar-label">Mar</div><div class="bar-val">5.8M</div></div>
-          <div class="bar-col"><div class="bar-fill" style="height:65%;background:linear-gradient(180deg,var(--purple),#7c3aed)"></div><div class="bar-label">Avr</div><div class="bar-val">6.2M</div></div>
-          <div class="bar-col"><div class="bar-fill" style="height:72%;background:linear-gradient(180deg,var(--purple),#7c3aed)"></div><div class="bar-label">Mai</div><div class="bar-val">6.9M</div></div>
-          <div class="bar-col"><div class="bar-fill" style="height:80%;background:linear-gradient(180deg,var(--gold),#f59e0b)"></div><div class="bar-label">Jun</div><div class="bar-val">7.6M</div></div>
-          <div class="bar-col"><div class="bar-fill" style="height:100%;background:linear-gradient(180deg,var(--success),#10b981)"></div><div class="bar-label">Jul</div><div class="bar-val">11.3M</div></div>
-        </div>
+        <div class="bar-chart" style="height:160px" id="rev-chart"><div style="color:rgba(255,255,255,0.4)">Chargement...</div></div>
       </div>
     </div>
   </div>
@@ -430,16 +320,12 @@
     </div>
   </div>
   <div class="page" id="page-incidents">
-    <div style="margin-bottom:1.5rem"><h2 style="font-family:'Playfair Display',serif;font-weight:800;font-size:1.3rem;color:white">Incidents</h2><div style="font-size:.85rem;color:rgba(255,255,255,0.4);margin-top:.2rem">2 incidents actifs · Priorité haute</div></div>
+    <div style="margin-bottom:1.5rem"><h2 style="font-family:'Playfair Display',serif;font-weight:800;font-size:1.3rem;color:white">Incidents</h2><div style="font-size:.85rem;color:rgba(255,255,255,0.4);margin-top:.2rem" id="inc-sub">Chargement...</div></div>
     <div class="card">
       <div class="card-header"><div class="card-title">Incidents</div></div>
       <table class="data-table">
         <thead><tr><th>Incident</th><th>Université</th><th>Priorité</th><th>Statut</th><th>Ouvert depuis</th></tr></thead>
-        <tbody>
-          <tr><td>🐌 Lenteur de chargement — module Paiements</td><td>UCAO Abidjan</td><td><span class="badge badge-danger">Haute</span></td><td><span class="badge badge-gold">En cours</span></td><td>2h 15min</td></tr>
-          <tr><td>📧 Échec d'envoi des reçus par email</td><td>IAM Cotonou</td><td><span class="badge badge-danger">Haute</span></td><td><span class="badge badge-gold">En cours</span></td><td>45 min</td></tr>
-          <tr><td>🔄 Retard de synchronisation — sauvegarde nocturne</td><td>Toutes universités</td><td><span class="badge badge-blue">Moyenne</span></td><td><span class="badge badge-success">Résolu</span></td><td>Résolu il y a 6h</td></tr>
-        </tbody>
+        <tbody id="inc-tbody"><tr><td colspan="5" style="text-align:center;color:rgba(255,255,255,0.4);padding:2rem">Chargement...</td></tr></tbody>
       </table>
     </div>
   </div>
@@ -522,6 +408,148 @@
   let tt;
   function showToast(msg){const t=document.getElementById('toast');t.textContent=msg;t.classList.add('show');clearTimeout(tt);tt=setTimeout(()=>t.classList.remove('show'),3000);}
   document.addEventListener('keydown',e=>{if(e.key==='Escape')closeModal();});
+
+  function fmtFCFA(n) { return Math.round(n).toLocaleString('fr-FR'); }
+  function relativeTime(date) {
+    const min = Math.floor((Date.now() - date.getTime()) / 60000);
+    if (min < 1) return "À l'instant";
+    if (min < 60) return `Il y a ${min} min`;
+    const h = Math.floor(min / 60);
+    if (h < 24) return `Il y a ${h}h`;
+    const d = Math.floor(h / 24);
+    if (d < 30) return `Il y a ${d} j`;
+    return date.toLocaleDateString('fr-FR');
+  }
+  function elapsedSince(date) {
+    const totalMin = Math.floor((Date.now() - date.getTime()) / 60000);
+    if (totalMin < 60) return `${totalMin} min`;
+    const h = Math.floor(totalMin / 60), m = totalMin % 60;
+    if (h < 24) return `${h}h ${m}min`;
+    return `${Math.floor(h / 24)} j`;
+  }
+
+  window.authReady.then(user => { if (user) loadSuperadminData(); });
+
+  // ── Données réelles plateforme (toutes universités confondues) — remplace les
+  // chiffres codés en dur (52 universités, 47.8M FCFA, etc.) qui étaient identiques
+  // pour tout le monde. Pas de table "activité"/"uptime" dédiée dans le schéma :
+  // l'activité est dérivée des inscriptions d'universités + paiements confirmés.
+  const PLAN_BADGE = { Starter: 'badge-gray', Pro: 'badge-blue', Enterprise: 'badge-purple' };
+  const STATUS_BADGE = { 'Actif': 'badge-success', 'En attente': 'badge-gold', 'Suspendu': 'badge-danger' };
+  const PLAN_LOGO = { Starter: 'linear-gradient(135deg,#64748B,#475569)', Pro: 'linear-gradient(135deg,var(--blue),var(--sky))', Enterprise: 'linear-gradient(135deg,var(--purple),#7c3aed)' };
+
+  async function loadSuperadminData() {
+    const [univRes, studsRes, teachsRes, paysRes, incidentsRes] = await Promise.all([
+      supabaseClient.from('universities').select('id, name, country, city, plan, price_monthly, status, created_at').order('created_at', { ascending: false }),
+      supabaseClient.from('students').select('id, university'),
+      supabaseClient.from('teachers').select('id, university'),
+      supabaseClient.from('payments').select('amount, paid_at, university').eq('statut', 'Confirmé'),
+      supabaseClient.from('platform_incidents').select('id, title, priority, status, opened_at, resolved_at, university_id').order('opened_at', { ascending: false }),
+    ]);
+
+    const univs = univRes.data || [];
+    const studs = studsRes.data || [];
+    const teachs = teachsRes.data || [];
+    const pays = paysRes.data || [];
+    const incidents = incidentsRes.data || [];
+
+    const studsByUniv = {}; studs.forEach(s => { studsByUniv[s.university] = (studsByUniv[s.university] || 0) + 1; });
+    const teachsByUniv = {}; teachs.forEach(t => { teachsByUniv[t.university] = (teachsByUniv[t.university] || 0) + 1; });
+    const univNameById = {}; univs.forEach(u => { univNameById[u.id] = u.name; });
+
+    const totalRevenue = pays.reduce((s, p) => s + Number(p.amount), 0);
+    const activeUnivs = univs.filter(u => u.status === 'Actif');
+    const openIncidents = incidents.filter(i => i.status !== 'Résolu');
+
+    // Sidebar
+    document.getElementById('nb-univ').textContent = univs.length;
+    document.getElementById('nb-incidents').textContent = openIncidents.length;
+
+    // Vue globale — bannière + KPIs
+    document.getElementById('ov-revenue').innerHTML = fmtFCFA(totalRevenue) + ' <span style="font-size:1.1rem;color:rgba(255,255,255,0.5)">FCFA</span>';
+    document.getElementById('ov-nb-univ').textContent = activeUnivs.length;
+    document.getElementById('ov-nb-students').textContent = studs.length.toLocaleString('fr-FR');
+    document.getElementById('ov-nb-teachers').textContent = teachs.length.toLocaleString('fr-FR');
+    document.getElementById('ov-kpi-univ').textContent = activeUnivs.length;
+    document.getElementById('ov-kpi-students').textContent = studs.length.toLocaleString('fr-FR');
+    document.getElementById('ov-kpi-revenue').textContent = fmtFCFA(totalRevenue);
+    document.getElementById('ov-kpi-incidents').textContent = openIncidents.length;
+
+    // Vue globale — table universités
+    const ovTbody = document.getElementById('ov-univ-tbody');
+    ovTbody.innerHTML = univs.length === 0
+      ? '<tr><td colspan="5" style="text-align:center;color:rgba(255,255,255,0.4);padding:2rem">Aucune université inscrite.</td></tr>'
+      : univs.slice(0, 5).map(u => `<tr>
+          <td><div style="font-weight:600;color:white">${u.name}</div></td>
+          <td>${u.country || '—'}</td>
+          <td><span class="badge ${PLAN_BADGE[u.plan] || 'badge-gray'}">${u.plan || '—'}</span></td>
+          <td>${(studsByUniv[u.name] || 0).toLocaleString('fr-FR')}</td>
+          <td><span class="badge ${STATUS_BADGE[u.status] || 'badge-gray'}">${u.status || '—'}</span></td>
+        </tr>`).join('');
+
+    // Vue globale — activité récente (nouvelles universités + paiements confirmés)
+    const events = [];
+    univs.forEach(u => { if (u.created_at) events.push({ time: new Date(u.created_at), icon: '🏛️', bg: 'rgba(139,92,246,0.15)', text: `<strong>${u.name}</strong> a rejoint la plateforme` }); });
+    pays.forEach(p => { if (p.paid_at) events.push({ time: new Date(p.paid_at), icon: '💰', bg: 'rgba(245,158,11,0.15)', text: `Paiement de <strong>${fmtFCFA(p.amount)} FCFA</strong> reçu${p.university ? ' — ' + p.university : ''}` }); });
+    events.sort((a, b) => b.time - a.time);
+    const topEvents = events.slice(0, 5);
+    document.getElementById('ov-activity').innerHTML = topEvents.length === 0
+      ? '<div style="color:rgba(255,255,255,0.4);font-size:.85rem">Aucune activité récente.</div>'
+      : topEvents.map(e => `<div class="activity-item"><div class="activity-dot" style="background:${e.bg}">${e.icon}</div><div><div class="activity-text">${e.text}</div><div class="activity-time">${relativeTime(e.time)}</div></div></div>`).join('');
+
+    // Page Universités
+    const countries = new Set(univs.map(u => u.country).filter(Boolean));
+    document.getElementById('univ-sub').textContent = `${univs.length} établissement${univs.length > 1 ? 's' : ''} · ${countries.size} pays`;
+    const univGrid = document.getElementById('univ-grid');
+    univGrid.innerHTML = (univs.length === 0
+      ? '<div style="color:rgba(255,255,255,0.4);padding:2rem">Aucune université inscrite.</div>'
+      : univs.map(u => {
+          const initials = (u.name || '').split(' ').filter(Boolean).map(w => w[0]).join('').slice(0, 2).toUpperCase();
+          const since = u.created_at ? new Date(u.created_at).toLocaleDateString('fr-FR', { month: 'short', year: 'numeric' }) : '—';
+          return `<div class="univ-card" onclick="showToast('🏛️ ${u.name.replace(/'/g, "\\'")} — vue détaillée à venir')">
+            <div style="display:flex;align-items:center;gap:.75rem;margin-bottom:.75rem"><div class="univ-logo" style="background:${PLAN_LOGO[u.plan] || PLAN_LOGO.Pro}">${initials || '?'}</div><div><div class="univ-name">${u.name}</div><div class="univ-meta">${u.city ? u.city + ', ' : ''}${u.country || '—'} · ${u.plan || '—'} · Depuis ${since}</div></div></div>
+            <div class="univ-stats"><div class="univ-stat"><div class="univ-stat-val">${studsByUniv[u.name] || 0}</div><div class="univ-stat-label">Étudiants</div></div><div class="univ-stat"><div class="univ-stat-val">${teachsByUniv[u.name] || 0}</div><div class="univ-stat-label">Enseignants</div></div></div>
+            <div style="display:flex;justify-content:space-between;align-items:center"><span class="badge ${STATUS_BADGE[u.status] || 'badge-gray'}">● ${u.status || '—'}</span><span style="font-size:.75rem;color:rgba(255,255,255,0.4)">${u.price_monthly ? fmtFCFA(u.price_monthly) + ' FCFA/mois' : 'Sur devis'}</span></div>
+          </div>`;
+        }).join('')
+    ) + '<div class="univ-card" style="border:2px dashed rgba(255,255,255,0.1);display:flex;align-items:center;justify-content:center;cursor:pointer;min-height:160px" onclick="openModal()"><div style="text-align:center;color:rgba(255,255,255,0.3)"><div style="font-size:2rem;margin-bottom:.5rem">+</div><div style="font-size:.85rem;font-weight:600">Ajouter une université</div></div></div>';
+
+    // Page Revenus
+    document.getElementById('rev-total').textContent = fmtFCFA(totalRevenue);
+    document.getElementById('rev-count').textContent = pays.length.toLocaleString('fr-FR');
+    document.getElementById('rev-avg').textContent = pays.length > 0 ? fmtFCFA(totalRevenue / pays.length) : '0';
+
+    const revChart = document.getElementById('rev-chart');
+    const now = new Date();
+    const months = [];
+    for (let i = 6; i >= 0; i--) {
+      const d = new Date(now.getFullYear(), now.getMonth() - i, 1);
+      months.push({ key: d.getFullYear() + '-' + d.getMonth(), label: d.toLocaleDateString('fr-FR', { month: 'short' }), total: 0 });
+    }
+    pays.forEach(p => {
+      if (!p.paid_at) return;
+      const d = new Date(p.paid_at);
+      const m = months.find(m => m.key === d.getFullYear() + '-' + d.getMonth());
+      if (m) m.total += Number(p.amount);
+    });
+    const maxTotal = Math.max(1, ...months.map(m => m.total));
+    revChart.innerHTML = months.every(m => m.total === 0)
+      ? '<div style="color:rgba(255,255,255,0.4)">Aucun paiement enregistré.</div>'
+      : months.map(m => `<div class="bar-col"><div class="bar-fill" style="height:${Math.max(4, Math.round(m.total / maxTotal * 100))}%;background:linear-gradient(180deg,var(--purple),#7c3aed)"></div><div class="bar-label">${m.label}</div><div class="bar-val">${m.total >= 1000 ? Math.round(m.total / 1000) + 'K' : m.total}</div></div>`).join('');
+
+    // Page Incidents
+    document.getElementById('inc-sub').textContent = `${openIncidents.length} incident${openIncidents.length > 1 ? 's' : ''} actif${openIncidents.length > 1 ? 's' : ''}`;
+    const priorityBadge = { Haute: 'badge-danger', Moyenne: 'badge-blue', Basse: 'badge-gray' };
+    document.getElementById('inc-tbody').innerHTML = incidents.length === 0
+      ? '<tr><td colspan="5" style="text-align:center;color:rgba(255,255,255,0.4);padding:2rem">Aucun incident enregistré.</td></tr>'
+      : incidents.map(i => `<tr>
+          <td>${i.title}</td>
+          <td>${i.university_id ? (univNameById[i.university_id] || '—') : 'Toutes universités'}</td>
+          <td><span class="badge ${priorityBadge[i.priority] || 'badge-gray'}">${i.priority || '—'}</span></td>
+          <td><span class="badge ${i.status === 'Résolu' ? 'badge-success' : 'badge-gold'}">${i.status || '—'}</span></td>
+          <td>${i.status === 'Résolu' && i.resolved_at ? 'Résolu ' + relativeTime(new Date(i.resolved_at)) : (i.opened_at ? elapsedSince(new Date(i.opened_at)) : '—')}</td>
+        </tr>`).join('');
+  }
 </script>
 </body>
 </html>
