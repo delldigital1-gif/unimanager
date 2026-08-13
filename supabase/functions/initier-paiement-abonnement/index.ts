@@ -1,20 +1,59 @@
 // Initie le paiement de l'abonnement Dell Digital pour une université (plan
 // Starter/Pro). Nécessite un JWT valide (verify_jwt=true) — l'appelant doit
-// être l'admin de l'université concernée. Mode sandbox tant que CINETPAY_API_KEY
-// n'est pas configuré (compte marchand CinetPay partagé, non vérifié).
+// être l'admin de l'université concernée.
+//
+// FIX (04 août 2026) : bascule de l'ancienne API CinetPay (apikey+site_id,
+// dépréciée confirmé par leur support) vers la nouvelle API "Aurore" (OAuth
+// api_key+api_password -> token, POST /v1/payment), relayée via le proxy
+// nginx du VPS (IP fixe whitelistée côté CinetPay). .trim() sur les secrets :
+// un retour à la ligne parasite avait été collé dans CINETPAY_API_KEY.
+//
+// PROBLEME OUVERT (04 août 2026) : l'OAuth reussit (token obtenu, user_id 391)
+// mais POST /v1/payment renvoie 422 INVALID_TOKEN (code 1002) avec ce même
+// token, alors que le même enchainement fonctionne sur NAOLA. A signaler au
+// support CinetPay.
+//
+// FIX (2026-08-13) : CORS manquant — aucun header Access-Control-Allow-*,
+// donc tout appel fetch() depuis le navigateur (paiement-requis.html, ou le
+// nouveau bouton "Passer au plan Pro" sur les pages gatées) échouait avant
+// même d'atteindre ce code. Même bug que send-notification-email, corrigé
+// selon le même pattern : préflight OPTIONS + headers CORS sur les réponses.
 import { createClient } from 'jsr:@supabase/supabase-js@2';
 
 const PRICES_FCFA: Record<string, number> = { starter: 25000, pro: 75000 };
-const CINETPAY_BASE_URL = 'https://api-checkout.cinetpay.com/v2';
+const CINETPAY_BASE = 'https://cinetpay-proxy.erpdelldigital.com';
+const CINETPAY_OAUTH_URL = `${CINETPAY_BASE}/v1/oauth/login`;
+const CINETPAY_PAYMENT_URL = `${CINETPAY_BASE}/v1/payment`;
+
+const CORS_HEADERS = {
+  'Access-Control-Allow-Origin': '*',
+  'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type',
+  'Access-Control-Allow-Methods': 'POST, OPTIONS',
+};
 
 function json(body: unknown, status = 200) {
   return new Response(JSON.stringify(body), {
     status,
-    headers: { 'Content-Type': 'application/json' },
+    headers: { 'Content-Type': 'application/json', ...CORS_HEADERS },
   });
 }
 
+async function getCinetpayToken(apiKey: string, apiPassword: string): Promise<string | null> {
+  try {
+    const resp = await fetch(CINETPAY_OAUTH_URL, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ api_key: apiKey, api_password: apiPassword }),
+    });
+    const data = await resp.json();
+    return data?.access_token ?? null;
+  } catch {
+    return null;
+  }
+}
+
 Deno.serve(async (req: Request) => {
+  if (req.method === 'OPTIONS') return new Response(null, { headers: CORS_HEADERS });
   if (req.method !== 'POST') return json({ error: 'Method not allowed' }, 405);
 
   const authHeader = req.headers.get('Authorization');
@@ -62,8 +101,9 @@ Deno.serve(async (req: Request) => {
     ref_affilie: uni.ref_affilie,
   });
 
-  const cinetpayKey = Deno.env.get('CINETPAY_API_KEY');
-  if (!cinetpayKey) {
+  const cinetpayApiKey = Deno.env.get('CINETPAY_API_KEY')?.trim();
+  const cinetpayApiPassword = Deno.env.get('CINETPAY_API_PASSWORD')?.trim();
+  if (!cinetpayApiKey || !cinetpayApiPassword) {
     return json({
       transaction_id: transactionId,
       url_paiement: `https://checkout.cinetpay.com/demo/${transactionId}`,
@@ -72,35 +112,45 @@ Deno.serve(async (req: Request) => {
     });
   }
 
+  const token = await getCinetpayToken(cinetpayApiKey, cinetpayApiPassword);
+  if (!token) {
+    return json({
+      transaction_id: transactionId, url_paiement: '', montant: amount,
+      erreur: 'Authentification CinetPay échouée (vérifier CINETPAY_API_KEY / CINETPAY_API_PASSWORD)',
+    });
+  }
+
   try {
-    const resp = await fetch(`${CINETPAY_BASE_URL}/payment`, {
+    const resp = await fetch(CINETPAY_PAYMENT_URL, {
       method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
+      headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${token}` },
       body: JSON.stringify({
-        apikey: cinetpayKey,
-        site_id: Deno.env.get('CINETPAY_SITE_ID'),
-        amount,
         currency: 'XOF',
-        transaction_id: transactionId,
-        description: `Abonnement UniManage ${plan} — ${uni.name}`,
-        return_url: `https://unimanagerdell.com/paiement-retour.html?transaction_id=${transactionId}`,
-        notify_url: `${supabaseUrl}/functions/v1/confirmer-paiement-abonnement`,
-        customer_name: uni.name,
-        customer_email: Deno.env.get('DELLDIGITAL_EMAIL') || 'delldigital1@gmail.com',
-        channels: 'ALL',
+        merchant_transaction_id: transactionId,
+        amount,
         lang: 'fr',
+        designation: `Abonnement UniManage ${plan} — ${uni.name}`.slice(0, 100),
+        client_email: Deno.env.get('DELLDIGITAL_EMAIL') || 'delldigital1@gmail.com',
+        client_first_name: uni.name,
+        client_last_name: uni.name,
+        success_url: `https://unimanagerdell.com/paiement-retour.html?transaction_id=${transactionId}`,
+        failed_url: `https://unimanagerdell.com/paiement-retour.html?transaction_id=${transactionId}&status=failed`,
+        notify_url: `${supabaseUrl}/functions/v1/confirmer-paiement-abonnement`,
+        channel: 'ALL',
+        direct_pay: false,
       }),
     });
     const data = await resp.json();
-    if (data.code !== '201') {
+    const paymentUrl = data?.payment_url || data?.data?.payment_url || '';
+    if (!paymentUrl) {
       return json({
         transaction_id: transactionId, url_paiement: '', montant: amount,
-        erreur: data.message || data.description || 'Réponse CinetPay inattendue',
+        erreur: data?.message || data?.description || 'Réponse CinetPay inattendue',
       });
     }
     return json({
       transaction_id: transactionId,
-      url_paiement: data.data?.payment_url || '',
+      url_paiement: paymentUrl,
       montant: amount,
       mode: 'production',
     });

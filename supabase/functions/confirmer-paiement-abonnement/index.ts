@@ -1,14 +1,17 @@
 // Webhook CinetPay — confirme le paiement de l'abonnement, active l'université,
 // puis notifie Dell Digital Partner pour créditer la commission de l'affilié
-// (produit saas_unimanage, même pourcentage que consultant_ai). Pas de JWT
-// (verify_jwt=false) : c'est CinetPay qui appelle, jamais un utilisateur —
-// on ne fait donc jamais confiance au corps de la requête, on revérifie
-// systématiquement auprès de CinetPay (mode sandbox : toujours accepté si
-// CINETPAY_API_KEY n'est pas configuré, même convention qu'ERP IA).
+// (produit saas_unimanage). Pas de JWT (verify_jwt=false) : c'est CinetPay qui
+// appelle — on revient toujours interroger CinetPay avant de faire confiance.
+//
+// FIX (04 août 2026) : bascule vers l'API "Aurore", relayée via le proxy nginx
+// du VPS. .trim() sur les secrets (retour à la ligne parasite collé).
 import { createClient } from 'jsr:@supabase/supabase-js@2';
 
-const CINETPAY_BASE_URL = 'https://api-checkout.cinetpay.com/v2';
+const CINETPAY_BASE = 'https://cinetpay-proxy.erpdelldigital.com';
+const CINETPAY_OAUTH_URL = `${CINETPAY_BASE}/v1/oauth/login`;
+const CINETPAY_PAYMENT_STATUS_URL = `${CINETPAY_BASE}/v1/payment`;
 const PARTNER_API_URL = 'https://partner.erpdelldigital.com';
+const SUCCESS_STATUSES = ['ACCEPTED', 'SUCCESS', 'SUCCESSFUL', 'COMPLETED', 'PAID'];
 
 function json(body: unknown, status = 200) {
   return new Response(JSON.stringify(body), {
@@ -29,6 +32,34 @@ async function extractTransactionId(req: Request): Promise<string | null> {
   }
 }
 
+async function getCinetpayToken(apiKey: string, apiPassword: string): Promise<string | null> {
+  try {
+    const resp = await fetch(CINETPAY_OAUTH_URL, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ api_key: apiKey, api_password: apiPassword }),
+    });
+    const data = await resp.json();
+    return data?.access_token ?? null;
+  } catch {
+    return null;
+  }
+}
+
+async function checkTransactionStatus(transactionId: string, token: string): Promise<string | null> {
+  try {
+    const resp = await fetch(`${CINETPAY_PAYMENT_STATUS_URL}/${encodeURIComponent(transactionId)}`, {
+      method: 'GET',
+      headers: { Authorization: `Bearer ${token}` },
+    });
+    const data = await resp.json();
+    return data?.status ?? null;
+  } catch (e) {
+    console.error('Erreur verification statut CinetPay:', e);
+    return null;
+  }
+}
+
 Deno.serve(async (req: Request) => {
   const transactionId = await extractTransactionId(req);
   if (!transactionId) return json({ error: 'Missing transaction_id' }, 400);
@@ -41,23 +72,17 @@ Deno.serve(async (req: Request) => {
   if (!payment) return json({ error: 'Transaction introuvable' }, 404);
   if (payment.statut === 'Confirmé') return json({ received: true, skipped: 'already_processed' });
 
-  const cinetpayKey = Deno.env.get('CINETPAY_API_KEY');
-  let accepted = true;
-  if (cinetpayKey) {
-    try {
-      const resp = await fetch(`${CINETPAY_BASE_URL}/payment/check`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          apikey: cinetpayKey,
-          site_id: Deno.env.get('CINETPAY_SITE_ID'),
-          transaction_id: transactionId,
-        }),
-      });
-      const data = await resp.json();
-      accepted = data?.data?.status === 'ACCEPTED';
-    } catch {
+  const cinetpayKey = Deno.env.get('CINETPAY_API_KEY')?.trim();
+  const cinetpayPassword = Deno.env.get('CINETPAY_API_PASSWORD')?.trim();
+  let accepted = true; // repli sandbox si les secrets ne sont pas encore configures
+
+  if (cinetpayKey && cinetpayPassword) {
+    const token = await getCinetpayToken(cinetpayKey, cinetpayPassword);
+    if (!token) {
       accepted = false;
+    } else {
+      const status = await checkTransactionStatus(transactionId, token);
+      accepted = !!status && SUCCESS_STATUSES.includes(status.toUpperCase());
     }
   }
 
@@ -73,8 +98,6 @@ Deno.serve(async (req: Request) => {
 
   const nextRenewal = new Date();
   nextRenewal.setMonth(nextRenewal.getMonth() + 1);
-  // universities.plan a une contrainte CHECK sur 'Starter'/'Pro'/'Enterprise' (capitalisé)
-  // alors que payment.plan est en minuscule (clé interne starter/pro).
   const planCapitalized = payment.plan.charAt(0).toUpperCase() + payment.plan.slice(1);
   await serviceClient
     .from('universities')
@@ -86,9 +109,6 @@ Deno.serve(async (req: Request) => {
     })
     .eq('id', payment.university_id);
 
-  // Notifie Partner pour créditer la commission — best-effort, ne doit jamais
-  // faire échouer la confirmation du paiement elle-même (leçon apprise sur le
-  // pont ERP IA : isoler chaque effet de bord).
   if (payment.ref_affilie) {
     try {
       const { data: secret } = await serviceClient.rpc('get_partner_webhook_secret');
