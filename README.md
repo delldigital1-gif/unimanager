@@ -35,7 +35,6 @@
 ├── 👨‍🏫  enseignant.html       ← Portail enseignant
 ├── 👨‍👩‍👧  parents.html          ← Portail parents
 ├── ⚡  superadmin.html       ← Super Admin SaaS
-├── 📱  mobile.html           ← Version mobile
 │
 ├── ── MODULES ACADÉMIQUES ──
 ├── 📆  calendrier.html       ← Calendrier académique
@@ -47,7 +46,6 @@
 │
 ├── ── ANALYSE & GESTION ──
 ├── 📊  rapports.html         ← Analytics + Exports PDF/Excel
-├── 🏢  multicampus.html      ← Multi-campus (3 sites)
 │
 └── 📖  README.md             ← Ce fichier
 ```
@@ -72,7 +70,7 @@
 # Option A — Via l'interface GitHub (recommandé)
 # 1. Ouvrir votre repository
 # 2. Cliquer "Add file" → "Upload files"
-# 3. Glisser-déposer les 18 fichiers HTML + README.md
+# 3. Glisser-déposer les fichiers HTML + README.md
 # 4. Cliquer "Commit changes"
 
 # Option B — Via Git (ligne de commande)
@@ -118,13 +116,11 @@ https://[votre-username].github.io/unimanage/hub.html
 | 👨‍🏫 Portail Enseignant | `enseignant.html` | Cours, notes, salaire |
 | 👨‍👩‍👧 Portail Parents | `parents.html` | Suivi enfants, absences |
 | ⚡ Super Admin | `superadmin.html` | Vue globale SaaS |
-| 📱 Mobile | `mobile.html` | App mobile 4 rôles |
 | 📆 Calendrier | `calendrier.html` | Planning académique interactif |
 | 🎓 Diplômes | `diplomes.html` | Diplômes + attestations officielles |
 | 💬 Messagerie | `messagerie.html` | Chat interne complet |
 | 🔔 Notifications | `notifications.html` | SMS/Email/Push automatisé |
 | 📊 Rapports | `rapports.html` | Exports CSV réels (étudiants, enseignants, paiements, notes) |
-| 🏢 Multi-Campus | `multicampus.html` | Gestion 3 campus |
 
 ---
 
@@ -185,7 +181,7 @@ hub.html (point d'entrée)
     │                          ▼           ▼           ▼
     │                     rapports.html   messagerie.html
     │                     calendrier.html  notifications.html
-    │                     diplomes.html    multicampus.html
+    │                     diplomes.html
     │
     ├── etudiant.html  ←── (rôle étudiant)
     ├── enseignant.html ←── (rôle enseignant)
