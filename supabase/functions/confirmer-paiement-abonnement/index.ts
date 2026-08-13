@@ -5,6 +5,11 @@
 //
 // FIX (04 août 2026) : bascule vers l'API "Aurore", relayée via le proxy nginx
 // du VPS. .trim() sur les secrets (retour à la ligne parasite collé).
+//
+// FIX (2026-08-13) : le renouvellement était toujours calculé à +1 mois fixe,
+// alors que les plans se paient maintenant par cycle (3/6/12 mois, colonne
+// billing_months sur subscription_payments) — corrigé pour refléter le vrai
+// cycle payé.
 import { createClient } from 'jsr:@supabase/supabase-js@2';
 
 const CINETPAY_BASE = 'https://cinetpay-proxy.erpdelldigital.com';
@@ -97,7 +102,7 @@ Deno.serve(async (req: Request) => {
     .eq('transaction_id', transactionId);
 
   const nextRenewal = new Date();
-  nextRenewal.setMonth(nextRenewal.getMonth() + 1);
+  nextRenewal.setMonth(nextRenewal.getMonth() + (payment.billing_months || 1));
   const planCapitalized = payment.plan.charAt(0).toUpperCase() + payment.plan.slice(1);
   await serviceClient
     .from('universities')

@@ -1,6 +1,9 @@
-// Initie le paiement de l'abonnement Dell Digital pour une université (plan
-// Starter/Pro). Nécessite un JWT valide (verify_jwt=true) — l'appelant doit
-// être l'admin de l'université concernée.
+// Initie le paiement de l'abonnement Dell Digital pour une université
+// (plan Starter/Pro/Max × cycle trimestriel/semestriel/annuel — plus de
+// mensuel, ni de calcul par pourcentage : chaque combinaison plan×cycle a
+// un prix fixe, décidé le 2026-08-13, sur le modèle du sélecteur de
+// période de SynergySphere). Nécessite un JWT valide (verify_jwt=true) —
+// l'appelant doit être l'admin de l'université concernée.
 //
 // FIX (04 août 2026) : bascule de l'ancienne API CinetPay (apikey+site_id,
 // dépréciée confirmé par leur support) vers la nouvelle API "Aurore" (OAuth
@@ -14,13 +17,20 @@
 // support CinetPay.
 //
 // FIX (2026-08-13) : CORS manquant — aucun header Access-Control-Allow-*,
-// donc tout appel fetch() depuis le navigateur (paiement-requis.html, ou le
-// nouveau bouton "Passer au plan Pro" sur les pages gatées) échouait avant
-// même d'atteindre ce code. Même bug que send-notification-email, corrigé
+// donc tout appel fetch() depuis le navigateur échouait avant même
+// d'atteindre ce code. Même bug que send-notification-email, corrigé
 // selon le même pattern : préflight OPTIONS + headers CORS sur les réponses.
 import { createClient } from 'jsr:@supabase/supabase-js@2';
 
-const PRICES_FCFA: Record<string, number> = { starter: 25000, pro: 75000 };
+type Cycle = 'trimestriel' | 'semestriel' | 'annuel';
+const CYCLE_MONTHS: Record<Cycle, number> = { trimestriel: 3, semestriel: 6, annuel: 12 };
+
+const PRICES_FCFA: Record<string, Record<Cycle, number>> = {
+  starter: { trimestriel: 375000, semestriel: 750000, annuel: 1500000 },
+  pro: { trimestriel: 300000, semestriel: 600000, annuel: 1200000 },
+  max: { trimestriel: 450000, semestriel: 900000, annuel: 1800000 },
+};
+
 const CINETPAY_BASE = 'https://cinetpay-proxy.erpdelldigital.com';
 const CINETPAY_OAUTH_URL = `${CINETPAY_BASE}/v1/oauth/login`;
 const CINETPAY_PAYMENT_URL = `${CINETPAY_BASE}/v1/payment`;
@@ -68,7 +78,7 @@ Deno.serve(async (req: Request) => {
   const { data: { user } } = await userClient.auth.getUser();
   if (!user) return json({ error: 'Unauthorized' }, 401);
 
-  let body: { plan?: string };
+  let body: { plan?: string; cycle?: string };
   try {
     body = await req.json();
   } catch {
@@ -76,10 +86,12 @@ Deno.serve(async (req: Request) => {
   }
 
   const plan = body.plan;
-  const amount = plan ? PRICES_FCFA[plan] : undefined;
-  if (!plan || !amount) {
-    return json({ error: "Plan invalide — choix possibles : starter, pro. (enterprise = sur devis, nous contacter)" }, 400);
+  const cycle = body.cycle as Cycle | undefined;
+  const amount = plan && cycle ? PRICES_FCFA[plan]?.[cycle] : undefined;
+  if (!plan || !cycle || !amount) {
+    return json({ error: "Plan ou période invalide — plans : starter, pro, max. Périodes : trimestriel, semestriel, annuel." }, 400);
   }
+  const months = CYCLE_MONTHS[cycle];
 
   const { data: profile } = await userClient
     .from('profiles').select('university').eq('id', user.id).single();
@@ -99,6 +111,8 @@ Deno.serve(async (req: Request) => {
     transaction_id: transactionId,
     statut: 'En attente',
     ref_affilie: uni.ref_affilie,
+    billing_cycle: cycle,
+    billing_months: months,
   });
 
   const cinetpayApiKey = Deno.env.get('CINETPAY_API_KEY')?.trim();
@@ -129,7 +143,7 @@ Deno.serve(async (req: Request) => {
         merchant_transaction_id: transactionId,
         amount,
         lang: 'fr',
-        designation: `Abonnement UniManage ${plan} — ${uni.name}`.slice(0, 100),
+        designation: `Abonnement UniManage ${plan} (${cycle}) — ${uni.name}`.slice(0, 100),
         client_email: Deno.env.get('DELLDIGITAL_EMAIL') || 'delldigital1@gmail.com',
         client_first_name: uni.name,
         client_last_name: uni.name,
