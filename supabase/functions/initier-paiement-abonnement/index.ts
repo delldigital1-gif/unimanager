@@ -27,7 +27,7 @@ const CYCLE_MONTHS: Record<Cycle, number> = { trimestriel: 3, semestriel: 6, ann
 
 const PRICES_FCFA: Record<string, Record<Cycle, number>> = {
   starter: { trimestriel: 375000, semestriel: 750000, annuel: 1500000 },
-  pro: { trimestriel: 400000, semestriel: 800000, annuel: 1600000 },
+  pro: { trimestriel: 405000, semestriel: 810000, annuel: 1620000 },
   max: { trimestriel: 450000, semestriel: 900000, annuel: 1800000 },
 };
 
