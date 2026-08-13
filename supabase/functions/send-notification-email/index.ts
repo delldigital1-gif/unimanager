@@ -4,27 +4,38 @@
 // utilisateur 2026-08-12). Nécessite un JWT valide (verify_jwt=true) —
 // l'appelant doit être l'admin de l'université concernée.
 //
-// FIX (2026-08-13) : toutes les erreurs "métier" (pas de destinataire, pas
-// admin, clé Resend absente...) renvoient désormais un statut HTTP 200 avec
-// {error: "..."} dans le corps, au lieu de 400/401/403/500. Avec un statut
-// non-2xx, supabase-js v2 lève une FunctionsHttpError dont le corps de
-// réponse est parfois déjà consommé en interne — .context.json() échoue
-// silencieusement côté frontend et un message générique s'affiche à la
-// place du vrai message d'erreur. Un 200 avec un champ `error` explicite
-// est lisible de façon fiable via `data.error`.
+// FIX (2026-08-13a) : toutes les erreurs "métier" (pas de destinataire, pas
+// admin, clé Resend absente...) renvoient un statut HTTP 200 avec
+// {error: "..."} dans le corps, au lieu de 400/401/403/500 — supabase-js v2
+// ne relit pas toujours le corps sur un statut non-2xx, ce qui affichait un
+// message générique côté frontend à la place du vrai motif.
+//
+// FIX (2026-08-13b) : CORS manquant — la fonction n'envoyait aucun header
+// Access-Control-Allow-*, donc le navigateur bloquait l'appel avant même
+// qu'il n'atteigne ce code (aucune ligne journalisée dans notification_log
+// pour la tentative de test, preuve que la requête n'est jamais arrivée).
+// Ajout de la gestion du préflight OPTIONS + headers CORS sur toutes les
+// réponses.
 import { createClient } from 'jsr:@supabase/supabase-js@2';
 
 const RESEND_URL = 'https://api.resend.com/emails/batch';
 const BATCH_SIZE = 100; // limite Resend par requête batch
 
+const CORS_HEADERS = {
+  'Access-Control-Allow-Origin': '*',
+  'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type',
+  'Access-Control-Allow-Methods': 'POST, OPTIONS',
+};
+
 function json(body: unknown) {
   return new Response(JSON.stringify(body), {
     status: 200,
-    headers: { 'Content-Type': 'application/json' },
+    headers: { 'Content-Type': 'application/json', ...CORS_HEADERS },
   });
 }
 
 Deno.serve(async (req: Request) => {
+  if (req.method === 'OPTIONS') return new Response(null, { headers: CORS_HEADERS });
   if (req.method !== 'POST') return json({ error: 'Method not allowed' });
 
   const authHeader = req.headers.get('Authorization');
