@@ -20,7 +20,7 @@
     .alert-trial{background:rgba(245,158,11,0.1);border:1px solid rgba(245,158,11,0.3);color:#92400E;border-radius:12px;padding:1rem 1.25rem;font-size:.9rem;margin-bottom:2rem;text-align:center;}
     .plan-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:1.25rem;}
     @media(max-width:800px){.plan-grid{grid-template-columns:1fr}}
-    .price-card{background:white;border:1.5px solid var(--border);border-radius:16px;padding:1.75rem;}
+    .price-card{background:white;border:1.5px solid var(--border);border-radius:16px;padding:1.75rem;display:flex;flex-direction:column;}
     .price-card.featured{border-color:var(--blue);box-shadow:0 10px 30px rgba(26,86,219,0.12);}
     .plan-name{font-family:'Playfair Display',serif;font-weight:800;font-size:1.15rem;margin-bottom:.25rem;}
     .plan-price{font-family:'Playfair Display',serif;font-weight:800;font-size:1.6rem;margin:.75rem 0;}
@@ -33,6 +33,22 @@
     .btn-plan:disabled{opacity:.5;cursor:not-allowed;}
     .status-msg{text-align:center;margin-top:1.5rem;font-size:.85rem;color:var(--gray);min-height:1.2rem;}
     .status-msg.error{color:var(--danger);}
+    .plan-features{list-style:none;margin:1rem 0;flex:1;}
+    .plan-features li{font-size:.8rem;color:var(--gray);padding:.3rem 0;padding-left:1.3rem;position:relative;}
+    .plan-features li::before{content:"✓";position:absolute;left:0;color:var(--success);font-weight:700;}
+    .plan-note{text-align:center;color:var(--gray);font-size:.78rem;margin-top:1.5rem;}
+    .periode-card{max-width:460px;margin:0 auto;background:white;border:1.5px solid var(--border);border-radius:16px;padding:2rem;}
+    .periode-head{text-align:center;margin-bottom:1.5rem;}
+    .periode-head h2{font-family:'Playfair Display',serif;font-weight:800;font-size:1.4rem;}
+    .periode-head p{color:var(--gray);font-size:.85rem;margin-top:.15rem;}
+    .link-btn{background:none;border:none;color:var(--gray);font-size:.78rem;text-decoration:underline;cursor:pointer;margin-top:.4rem;}
+    .link-btn:hover{color:var(--blue);}
+    .cycle-pills{display:flex;flex-wrap:wrap;gap:.5rem;justify-content:center;margin-bottom:1.5rem;}
+    .cycle-pill{padding:.55rem 1.1rem;border-radius:8px;border:1.5px solid var(--border);background:white;color:var(--gray);font-size:.85rem;font-weight:600;cursor:pointer;transition:all .15s;}
+    .cycle-pill:hover{color:var(--navy);}
+    .cycle-pill.active{border-color:var(--blue);background:var(--blue);color:white;}
+    .periode-price{text-align:center;font-family:'Playfair Display',serif;font-weight:800;font-size:1.7rem;margin-bottom:.25rem;}
+    .periode-unit{font-size:.85rem;font-weight:400;color:var(--gray);}
   </style>
 </head>
 <body>
@@ -48,28 +64,31 @@
   </div>
   <div id="trialAlert" class="alert-trial" style="display:none"></div>
 
-  <div class="plan-grid">
-    <div class="price-card">
-      <div class="plan-name">Starter</div>
-      <div style="font-size:.8rem;color:var(--gray)">Jusqu'à 300 étudiants</div>
-      <div class="plan-price">25 000 <span>FCFA / mois</span></div>
-      <button class="btn-plan btn-plan-outline" onclick="payer('starter')" id="btn-starter">Choisir Starter</button>
-    </div>
-    <div class="price-card featured">
-      <div class="plan-name">Pro</div>
-      <div style="font-size:.8rem;color:var(--gray)">Jusqu'à 1 500 étudiants</div>
-      <div class="plan-price">75 000 <span>FCFA / mois</span></div>
-      <button class="btn-plan btn-plan-fill" onclick="payer('pro')" id="btn-pro">Choisir Pro</button>
-    </div>
-    <div class="price-card">
-      <div class="plan-name">Enterprise</div>
-      <div style="font-size:.8rem;color:var(--gray)">Étudiants illimités</div>
-      <div class="plan-price">Sur devis</div>
-      <a class="btn-plan btn-plan-outline" href="https://wa.me/22898069111" target="_blank">Nous contacter</a>
-    </div>
+  <!-- ═══ Étape 1 : choix du plan ═══ -->
+  <div id="panelPlans">
+    <div class="plan-grid" id="planGrid"></div>
+    <p class="plan-note">Prix affiché à titre indicatif (équivalent mensuel) — la facturation se fait par cycle trimestriel, semestriel ou annuel, à choisir à l'étape suivante.</p>
   </div>
 
-  <div id="statusMsg" class="status-msg"></div>
+  <!-- ═══ Étape 2 : choix de la périodicité ═══ -->
+  <div id="panelPeriode" style="display:none">
+    <div class="periode-card">
+      <div class="periode-head">
+        <h2 id="periodePlanName">—</h2>
+        <p id="periodePlanSub"></p>
+        <button type="button" class="link-btn" onclick="retourPlans()">← Changer de plan</button>
+      </div>
+      <div class="cycle-pills" id="cyclePills">
+        <button type="button" class="cycle-pill" data-cycle="trimestriel" onclick="choisirCycle('trimestriel')">Trimestriel</button>
+        <button type="button" class="cycle-pill" data-cycle="semestriel" onclick="choisirCycle('semestriel')">Semestriel</button>
+        <button type="button" class="cycle-pill" data-cycle="annuel" onclick="choisirCycle('annuel')">Annuel</button>
+      </div>
+      <div class="periode-price"><span id="periodeAmount">—</span> <span class="periode-unit" id="periodeUnit"></span></div>
+      <ul class="plan-features" id="periodeFeatures"></ul>
+      <button type="button" class="btn-plan btn-plan-fill" id="btnPayer" onclick="payer()">Payer maintenant</button>
+      <div id="statusMsg" class="status-msg"></div>
+    </div>
+  </div>
 </div>
 
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
@@ -81,16 +100,99 @@
   // contrôle d'essai qui provoquerait une boucle de redirection.
   let currentSession = null;
 
+  // Flux plan → périodicité repris de SynergySphere (pastilles cliquables +
+  // prix live), mais en 2 panneaux dans une seule page statique au lieu de
+  // 2 routes Next.js. Plus de mensuel ni de calcul par %, décision
+  // utilisateur 2026-08-13 — chaque combinaison plan×cycle a un prix fixe,
+  // identique à la table PRICES_FCFA de l'Edge Function.
+  const PLANS = {
+    starter: {
+      name: 'Starter', sub: "Jusqu'à 300 étudiants",
+      prices: { trimestriel: 375000, semestriel: 750000, annuel: 1500000 },
+      features: ['Administration scolaire', 'Gestion étudiants & enseignants', 'Emploi du temps basique', 'Examens & résultats', '5 comptes administrateurs', 'Support email'],
+    },
+    pro: {
+      name: 'Pro', sub: "Jusqu'à 1 500 étudiants", featured: true,
+      prices: { trimestriel: 300000, semestriel: 600000, annuel: 1200000 },
+      features: ['Tout le plan Starter', 'Gestion comptable complète', 'Wave & Orange Money', 'Rapports & Analytics (exports CSV)', 'Notifications email en masse', 'Emploi du temps intelligent', 'Sous-domaine personnalisé', '20 comptes administrateurs', 'Support prioritaire'],
+    },
+    max: {
+      name: 'Max', sub: 'Étudiants illimités',
+      prices: { trimestriel: 450000, semestriel: 900000, annuel: 1800000 },
+      features: ['Tout le plan Pro', 'Diplômes & Certificats officiels', 'Intégrations sur mesure', 'Administrateurs illimités', 'Account manager dédié', 'SLA 99.9% garanti'],
+    },
+  };
+  const CYCLE_LABELS = { trimestriel: 'Trimestriel', semestriel: 'Semestriel', annuel: 'Annuel' };
+  const CYCLE_MONTHS = { trimestriel: 3, semestriel: 6, annuel: 12 };
+
+  let selectedPlan = null;
+  let selectedCycle = 'trimestriel';
+
+  function renderPlanGrid() {
+    const grid = document.getElementById('planGrid');
+    grid.innerHTML = Object.entries(PLANS).map(([key, plan]) => {
+      const monthlyEquiv = Math.round(plan.prices.trimestriel / CYCLE_MONTHS.trimestriel);
+      return `
+        <div class="price-card${plan.featured ? ' featured' : ''}">
+          <div class="plan-name">${plan.name}</div>
+          <div style="font-size:.8rem;color:var(--gray)">${plan.sub}</div>
+          <div class="plan-price">${monthlyEquiv.toLocaleString('fr-FR')} <span>FCFA / mois*</span></div>
+          <ul class="plan-features">${plan.features.map(f => `<li>${f}</li>`).join('')}</ul>
+          <button type="button" class="btn-plan ${plan.featured ? 'btn-plan-fill' : 'btn-plan-outline'}" onclick="choisirPlan('${key}')">Choisir ${plan.name}</button>
+        </div>`;
+    }).join('');
+  }
+
+  function choisirPlan(planKey) {
+    selectedPlan = planKey;
+    selectedCycle = 'trimestriel';
+    renderPeriode();
+    document.getElementById('panelPlans').style.display = 'none';
+    document.getElementById('panelPeriode').style.display = 'block';
+    history.replaceState(null, '', '?plan=' + planKey);
+  }
+
+  function retourPlans() {
+    document.getElementById('panelPeriode').style.display = 'none';
+    document.getElementById('panelPlans').style.display = 'block';
+    history.replaceState(null, '', location.pathname);
+  }
+
+  function choisirCycle(cycle) {
+    selectedCycle = cycle;
+    renderPeriode();
+  }
+
+  function renderPeriode() {
+    const plan = PLANS[selectedPlan];
+    document.getElementById('periodePlanName').textContent = plan.name;
+    document.getElementById('periodePlanSub').textContent = plan.sub;
+    document.querySelectorAll('.cycle-pill').forEach(btn => {
+      btn.classList.toggle('active', btn.dataset.cycle === selectedCycle);
+    });
+    const amount = plan.prices[selectedCycle];
+    document.getElementById('periodeAmount').textContent = amount.toLocaleString('fr-FR') + ' FCFA';
+    document.getElementById('periodeUnit').textContent = '/ ' + CYCLE_LABELS[selectedCycle].toLowerCase();
+    document.getElementById('periodeFeatures').innerHTML = plan.features.map(f => `<li>${f}</li>`).join('');
+    document.getElementById('statusMsg').textContent = '';
+    document.getElementById('statusMsg').className = 'status-msg';
+    document.getElementById('btnPayer').disabled = false;
+  }
+
   async function init() {
     const { data: { session } } = await supabaseClient.auth.getSession();
     if (!session) { window.location.href = 'login.html'; return; }
     currentSession = session;
 
+    const planFromUrl = new URLSearchParams(location.search).get('plan');
     const { data: profile } = await supabaseClient.from('profiles').select('*').eq('id', session.user.id).single();
     if (profile && profile.university) {
       const { data: uni } = await supabaseClient.from('universities').select('status, trial_ends_at').eq('name', profile.university).maybeSingle();
-      if (uni && uni.status === 'Actif') {
-        // Abonnement déjà actif (payé entretemps, ou faux positif) — retour au tableau de bord.
+      if (uni && uni.status === 'Actif' && !planFromUrl) {
+        // Abonnement déjà actif (payé entretemps, ou faux positif) et aucune
+        // intention explicite de changer de plan (?plan=) — retour au
+        // tableau de bord. Avec ?plan=, on est dans un flux d'upgrade
+        // volontaire depuis une page gatée (gateByPlan) : laisser passer.
         window.location.href = 'dashboard.html';
         return;
       }
@@ -100,15 +202,20 @@
         alertEl.textContent = `⏳ Votre essai de 14 jours s'est terminé le ${new Date(uni.trial_ends_at).toLocaleDateString('fr-FR')}.`;
       }
     }
+
+    renderPlanGrid();
+    if (planFromUrl && PLANS[planFromUrl]) {
+      choisirPlan(planFromUrl);
+    }
     document.documentElement.style.visibility = 'visible';
   }
 
-  async function payer(plan) {
+  async function payer() {
     const statusEl = document.getElementById('statusMsg');
+    const btn = document.getElementById('btnPayer');
     statusEl.className = 'status-msg';
     statusEl.textContent = '⏳ Préparation du paiement…';
-    document.getElementById('btn-starter').disabled = true;
-    document.getElementById('btn-pro').disabled = true;
+    btn.disabled = true;
 
     try {
       const resp = await fetch(`${SUPABASE_URL}/functions/v1/initier-paiement-abonnement`, {
@@ -117,14 +224,13 @@
           'Content-Type': 'application/json',
           'Authorization': `Bearer ${currentSession.access_token}`,
         },
-        body: JSON.stringify({ plan }),
+        body: JSON.stringify({ plan: selectedPlan, cycle: selectedCycle }),
       });
       const data = await resp.json();
       if (!resp.ok || data.erreur) {
         statusEl.className = 'status-msg error';
         statusEl.textContent = '⚠️ ' + (data.erreur || data.error || 'Erreur inconnue');
-        document.getElementById('btn-starter').disabled = false;
-        document.getElementById('btn-pro').disabled = false;
+        btn.disabled = false;
         return;
       }
       if (data.mode === 'sandbox') {
@@ -134,8 +240,7 @@
     } catch (e) {
       statusEl.className = 'status-msg error';
       statusEl.textContent = '⚠️ Impossible de contacter le service de paiement.';
-      document.getElementById('btn-starter').disabled = false;
-      document.getElementById('btn-pro').disabled = false;
+      btn.disabled = false;
     }
   }
 

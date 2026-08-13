@@ -191,7 +191,7 @@
 
   window.authReady.then(async user => {
     if (!user) return;
-    const acces = await gateByPlan('.main .content', ['Pro', 'Enterprise'], 'Rapports & Analytics');
+    const acces = await gateByPlan('.main .content', ['Pro', 'Max'], 'Rapports & Analytics');
     if (!acces) return;
     document.getElementById('topbarSub').textContent = `${user.university || ''} · ${new Date().getFullYear()}`;
 

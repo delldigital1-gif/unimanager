@@ -432,7 +432,7 @@
     </div>
     <div class="nav-item" onclick="window.location.href='diplomes.html'">
       <span class="nav-icon">🎓</span> Diplômes
-      <span class="nav-plan-tag" id="tag-diplomes" style="display:none">ENTERPRISE</span>
+      <span class="nav-plan-tag" id="tag-diplomes" style="display:none">MAX</span>
     </div>
     <div class="nav-item" onclick="window.location.href='rapports.html'">
       <span class="nav-icon">📊</span> Rapports
@@ -1685,9 +1685,9 @@
       const el = document.getElementById(id);
       if (el) el.style.display = required.includes(plan) ? 'none' : 'inline-block';
     };
-    show('tag-diplomes', ['Enterprise']);
-    show('tag-rapports', ['Pro', 'Enterprise']);
-    show('tag-notifications', ['Pro', 'Enterprise']);
+    show('tag-diplomes', ['Max']);
+    show('tag-rapports', ['Pro', 'Max']);
+    show('tag-notifications', ['Pro', 'Max']);
   }
 
   // ── Gating UI selon la matrice de permissions réelle (role_permissions,
@@ -1805,7 +1805,7 @@
   // Plafond repris tel quel de la page de prix (5 / 20 / illimité selon le
   // plan) — la personne s'inscrit elle-même via onboarding.html?invite=TOKEN,
   // je ne crée jamais de compte/mot de passe à sa place.
-  const ADMIN_CAP = { Starter: 5, Pro: 20, Enterprise: Infinity };
+  const ADMIN_CAP = { Starter: 5, Pro: 20, Max: Infinity };
 
   async function loadInvitesAdmin(user) {
     if (user.role === 'superadmin') return;

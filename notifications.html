@@ -285,7 +285,7 @@
 
   window.authReady.then(async user => {
     if (!user) return;
-    const acces = await gateByPlan('.main .content', ['Pro', 'Enterprise'], 'Notifications SMS/Email');
+    const acces = await gateByPlan('.main .content', ['Pro', 'Max'], 'Notifications SMS/Email');
     if (!acces) return;
     document.getElementById('topbarSub').textContent = `${user.university || ''} · Notifications par email`;
 

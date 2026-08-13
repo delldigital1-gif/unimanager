@@ -252,7 +252,7 @@
 
   window.authReady.then(async user => {
     if (!user) return;
-    const acces = await gateByPlan('.main .content', ['Enterprise'], 'Diplômes & Certificats');
+    const acces = await gateByPlan('.main .content', ['Max'], 'Diplômes & Certificats');
     if (!acces) return;
     document.getElementById('topbarSub').textContent = `${user.university || ''} · ${new Date().getFullYear()}`;
     const [{ data: studs }, { data: dips }] = await Promise.all([

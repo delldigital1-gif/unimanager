@@ -286,10 +286,10 @@
         <thead><tr><th>Université</th><th>Plan</th><th>Prix / mois</th><th>Prochain renouvellement</th><th>Statut</th></tr></thead>
         <tbody>
           <tr><td><div style="font-weight:600;color:white">Université de Lomé</div></td><td><span class="badge badge-blue">Pro</span></td><td>75 000 FCFA</td><td>05 fév. 2025</td><td><span class="badge badge-success">Actif</span></td></tr>
-          <tr><td><div style="font-weight:600;color:white">UCAO Abidjan</div></td><td><span class="badge badge-purple">Enterprise</span></td><td>Sur devis</td><td>18 fév. 2025</td><td><span class="badge badge-success">Actif</span></td></tr>
+          <tr><td><div style="font-weight:600;color:white">UCAO Abidjan</div></td><td><span class="badge badge-purple">Max</span></td><td>150 000 FCFA</td><td>18 fév. 2025</td><td><span class="badge badge-success">Actif</span></td></tr>
           <tr><td><div style="font-weight:600;color:white">UGB Saint-Louis</div></td><td><span class="badge badge-blue">Pro</span></td><td>75 000 FCFA</td><td>22 fév. 2025</td><td><span class="badge badge-success">Actif</span></td></tr>
           <tr><td><div style="font-weight:600;color:white">IAM Cotonou</div></td><td><span class="badge badge-gray">Starter</span></td><td>25 000 FCFA</td><td>26 jan. 2025</td><td><span class="badge badge-gold">Trial — 3j restants</span></td></tr>
-          <tr><td><div style="font-weight:600;color:white">ESSEC Douala</div></td><td><span class="badge badge-purple">Enterprise</span></td><td>Sur devis</td><td>02 mars 2025</td><td><span class="badge badge-success">Actif</span></td></tr>
+          <tr><td><div style="font-weight:600;color:white">ESSEC Douala</div></td><td><span class="badge badge-purple">Max</span></td><td>150 000 FCFA</td><td>02 mars 2025</td><td><span class="badge badge-success">Actif</span></td></tr>
           <tr><td><div style="font-weight:600;color:white">ISIG Lomé</div></td><td><span class="badge badge-gray">Starter</span></td><td>25 000 FCFA</td><td>12 jan. 2025</td><td><span class="badge badge-danger">Expiré</span></td></tr>
           <tr><td><div style="font-weight:600;color:white">UAC Cotonou</div></td><td><span class="badge badge-gray">Starter</span></td><td>25 000 FCFA</td><td>08 jan. 2025</td><td><span class="badge badge-danger">Expiré</span></td></tr>
           <tr><td><div style="font-weight:600;color:white">Université de Ouagadougou</div></td><td><span class="badge badge-blue">Pro</span></td><td>75 000 FCFA</td><td>30 déc. 2024</td><td><span class="badge badge-danger">Expiré</span></td></tr>
@@ -363,9 +363,9 @@
       <div class="card">
         <div class="card-header"><div class="card-title">Tarification des plans</div></div>
         <div class="card-body">
-          <div class="form-group"><label>Starter (FCFA / mois)</label><input class="form-input" type="text" value="25 000"/></div>
-          <div class="form-group"><label>Pro (FCFA / mois)</label><input class="form-input" type="text" value="75 000"/></div>
-          <div class="form-group"><label>Enterprise</label><input class="form-input" type="text" value="Sur devis" readonly/></div>
+          <div class="form-group"><label>Starter (FCFA / mois, indicatif)</label><input class="form-input" type="text" value="125 000"/></div>
+          <div class="form-group"><label>Pro (FCFA / mois, indicatif)</label><input class="form-input" type="text" value="100 000"/></div>
+          <div class="form-group"><label>Max (FCFA / mois, indicatif)</label><input class="form-input" type="text" value="150 000"/></div>
         </div>
       </div>
     </div>
@@ -385,7 +385,7 @@
     </div>
     <div class="form-group"><label>Email du directeur *</label><input class="form-input" placeholder="directeur@universite.tg"/></div>
     <div style="display:grid;grid-template-columns:1fr 1fr;gap:1rem">
-      <div class="form-group"><label>Plan *</label><select class="form-input"><option>Starter — 25 000 FCFA</option><option>Pro — 75 000 FCFA</option><option>Enterprise — Sur devis</option></select></div>
+      <div class="form-group"><label>Plan *</label><select class="form-input"><option>Starter — à partir de 125 000 FCFA/mois</option><option>Pro — à partir de 100 000 FCFA/mois</option><option>Max — à partir de 150 000 FCFA/mois</option></select></div>
       <div class="form-group"><label>Sous-domaine *</label><input class="form-input" placeholder="univ-nom"/></div>
     </div>
     <button class="btn-submit" onclick="showToast('✅ Université créée ! Email d\'invitation envoyé.');closeModal()">Créer l'espace université →</button>
@@ -434,9 +434,9 @@
   // chiffres codés en dur (52 universités, 47.8M FCFA, etc.) qui étaient identiques
   // pour tout le monde. Pas de table "activité"/"uptime" dédiée dans le schéma :
   // l'activité est dérivée des inscriptions d'universités + paiements confirmés.
-  const PLAN_BADGE = { Starter: 'badge-gray', Pro: 'badge-blue', Enterprise: 'badge-purple' };
+  const PLAN_BADGE = { Starter: 'badge-gray', Pro: 'badge-blue', Max: 'badge-purple' };
   const STATUS_BADGE = { 'Actif': 'badge-success', 'En attente': 'badge-gold', 'Suspendu': 'badge-danger' };
-  const PLAN_LOGO = { Starter: 'linear-gradient(135deg,#64748B,#475569)', Pro: 'linear-gradient(135deg,var(--blue),var(--sky))', Enterprise: 'linear-gradient(135deg,var(--purple),#7c3aed)' };
+  const PLAN_LOGO = { Starter: 'linear-gradient(135deg,#64748B,#475569)', Pro: 'linear-gradient(135deg,var(--blue),var(--sky))', Max: 'linear-gradient(135deg,var(--purple),#7c3aed)' };
 
   async function loadSuperadminData() {
     const [univRes, studsRes, teachsRes, paysRes, incidentsRes] = await Promise.all([

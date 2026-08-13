@@ -406,7 +406,7 @@
         <div class="step-num" id="sn3">3</div>
         <div class="step-text">
           <div class="step-name">Plan & abonnement</div>
-          <div class="step-desc">Starter, Pro ou Enterprise</div>
+          <div class="step-desc">Starter, Pro ou Max</div>
         </div>
       </div>
       <div class="step-item" id="si4">
@@ -702,7 +702,7 @@
         <div class="plan-card" id="plan-starter" onclick="selectPlan('starter')">
           <div class="plan-name">Starter</div>
           <div style="font-size:.75rem;color:var(--gray)">Petits établissements</div>
-          <div class="plan-price">25 000 <small>FCFA/mois</small></div>
+          <div class="plan-price">125 000 <small>FCFA/mois*</small></div>
           <div class="plan-limit">Jusqu'à 300 étudiants</div>
           <ul class="plan-features">
             <li>Administration scolaire</li>
@@ -719,40 +719,40 @@
           <div class="plan-popular">⭐ Populaire</div>
           <div class="plan-name" style="color:var(--blue)">Pro</div>
           <div style="font-size:.75rem;color:var(--gray)">Universités en croissance</div>
-          <div class="plan-price" style="color:var(--blue)">75 000 <small>FCFA/mois</small></div>
+          <div class="plan-price" style="color:var(--blue)">100 000 <small>FCFA/mois*</small></div>
           <div class="plan-limit">Jusqu'à 1 500 étudiants</div>
           <ul class="plan-features">
             <li>Tout le plan Starter</li>
             <li>Comptabilité complète</li>
             <li>Wave & Orange Money</li>
-            <li>Analytics avancés</li>
+            <li>Rapports & Notifications</li>
             <li>Sous-domaine personnalisé</li>
             <li>20 administrateurs</li>
             <li>Support prioritaire</li>
           </ul>
           <div class="plan-radio" id="pr-pro" style="background:var(--blue);border-color:var(--blue)"><div style="width:8px;height:8px;border-radius:50%;background:white"></div></div>
         </div>
-        <!-- Enterprise -->
-        <div class="plan-card" id="plan-enterprise" onclick="selectPlan('enterprise')">
-          <div class="plan-name" style="color:var(--purple)">Enterprise</div>
+        <!-- Max -->
+        <div class="plan-card" id="plan-max" onclick="selectPlan('max')">
+          <div class="plan-name" style="color:var(--purple)">Max</div>
           <div style="font-size:.75rem;color:var(--gray)">Grands établissements</div>
-          <div class="plan-price" style="color:var(--purple)">Sur devis</div>
+          <div class="plan-price" style="color:var(--purple)">150 000 <small>FCFA/mois*</small></div>
           <div class="plan-limit">Étudiants illimités</div>
           <ul class="plan-features">
             <li>Tout le plan Pro</li>
-            <li>API REST complète</li>
-            <li>Personnalisation totale</li>
+            <li>Diplômes & Certificats</li>
+            <li>Intégrations sur mesure</li>
             <li>Admins illimités</li>
             <li>Account manager dédié</li>
             <li>SLA 99.9% garanti</li>
           </ul>
-          <div class="plan-radio" id="pr-enterprise"></div>
+          <div class="plan-radio" id="pr-max"></div>
         </div>
       </div>
 
       <div style="margin-top:1.25rem;padding:1rem;background:rgba(26,86,219,0.06);border-radius:10px;border:1px solid rgba(26,86,219,0.15);font-size:.83rem;color:var(--navy);display:flex;align-items:center;gap:.75rem">
         <span style="font-size:1.1rem">💳</span>
-        <span><strong>Souscription directe</strong> — Le paiement du plan choisi est requis juste après la création du compte pour activer votre espace.</span>
+        <span><strong>Souscription directe</strong> — * Prix indicatif (équivalent mensuel) : la périodicité exacte (trimestrielle, semestrielle ou annuelle) se choisit juste après la création du compte, pour activer votre espace.</span>
       </div>
 
       <div class="form-nav">
@@ -1025,7 +1025,7 @@
           </div>
         </div>
 
-        <button class="btn-go-dashboard" onclick="window.location.href='paiement-requis.html'">
+        <button class="btn-go-dashboard" onclick="window.location.href='paiement-requis.html?plan='+selectedPlan">
           💳 Choisir mon plan et payer →
         </button>
       </div>
@@ -1043,7 +1043,7 @@
   let selectedPlan = 'pro';
   const totalSteps = 6;
 
-  const PLAN_PRICES_FCFA = { starter: 25000, pro: 75000, enterprise: null }; // enterprise = sur devis
+  const PLAN_PRICES_FCFA = { starter: 125000, pro: 100000, max: 150000 }; // équivalent mensuel indicatif — prix réel fixé par cycle sur paiement-requis.html
   const REF_AFFILIE_STORAGE_KEY = 'dd_ref_affilie';
   // Au cas où un lien d'affilié pointe directement ici plutôt que sur index.html.
   (function () {
@@ -1247,7 +1247,7 @@
   // ── Plan selection ──
   function selectPlan(plan) {
     selectedPlan = plan;
-    ['starter','pro','enterprise'].forEach(p => {
+    ['starter','pro','max'].forEach(p => {
       const c = document.getElementById('plan-'+p);
       const r = document.getElementById('pr-'+p);
       c.classList.remove('selected','gold','purple');
@@ -1258,7 +1258,7 @@
     const card = document.getElementById('plan-'+plan);
     const radio = document.getElementById('pr-'+plan);
     card.classList.add('selected');
-    if(plan==='enterprise'){card.classList.add('purple');radio.style.background='var(--purple)';radio.style.borderColor='var(--purple)';}
+    if(plan==='max'){card.classList.add('purple');radio.style.background='var(--purple)';radio.style.borderColor='var(--purple)';}
     else if(plan==='starter'){radio.style.background='var(--blue)';radio.style.borderColor='var(--blue)';}
     else{radio.style.background='var(--blue)';radio.style.borderColor='var(--blue)';}
     radio.innerHTML = '<div style="width:8px;height:8px;border-radius:50%;background:white"></div>';
@@ -1318,7 +1318,7 @@
     const lnom = document.getElementById('f_lnom').value || '—';
     const titre = document.getElementById('f_titre').value || '';
     const sub = document.getElementById('f_subdomain').value || '—';
-    const planLabels = {starter:'Starter — 25 000 FCFA/mois',pro:'Pro — 75 000 FCFA/mois',enterprise:'Enterprise — Sur devis'};
+    const planLabels = {starter:'Starter — à partir de 125 000 FCFA/mois',pro:'Pro — à partir de 100 000 FCFA/mois',max:'Max — à partir de 150 000 FCFA/mois'};
 
     document.getElementById('r_nom').textContent = nom;
     document.getElementById('r_type').textContent = type;
