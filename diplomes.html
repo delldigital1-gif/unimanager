@@ -252,6 +252,8 @@
 
   window.authReady.then(async user => {
     if (!user) return;
+    const acces = await gateByPlan('.main .content', ['Enterprise'], 'Diplômes & Certificats');
+    if (!acces) return;
     document.getElementById('topbarSub').textContent = `${user.university || ''} · ${new Date().getFullYear()}`;
     const [{ data: studs }, { data: dips }] = await Promise.all([
       supabaseClient.from('students').select('id, full_name, matricule, department, level').eq('university', user.university).order('full_name'),

@@ -72,6 +72,11 @@
       font-size:.65rem; font-weight:700; padding:.15rem .45rem;
       border-radius:100px; min-width:18px; text-align:center;
     }
+    .nav-plan-tag {
+      margin-left:auto; background:rgba(245,158,11,0.18); color:var(--gold);
+      font-size:.6rem; font-weight:700; padding:.12rem .4rem;
+      border-radius:100px; letter-spacing:.03em;
+    }
     .sidebar-footer {
       padding:1rem 1.25rem;
       border-top:1px solid rgba(255,255,255,0.08);
@@ -427,9 +432,11 @@
     </div>
     <div class="nav-item" onclick="window.location.href='diplomes.html'">
       <span class="nav-icon">🎓</span> Diplômes
+      <span class="nav-plan-tag" id="tag-diplomes" style="display:none">ENTERPRISE</span>
     </div>
     <div class="nav-item" onclick="window.location.href='rapports.html'">
       <span class="nav-icon">📊</span> Rapports
+      <span class="nav-plan-tag" id="tag-rapports" style="display:none">PRO</span>
     </div>
 
     <div class="nav-group-label">Finance</div>
@@ -447,6 +454,7 @@
     </div>
     <div class="nav-item" onclick="window.location.href='notifications.html'">
       <span class="nav-icon">🔔</span> Notifications
+      <span class="nav-plan-tag" id="tag-notifications" style="display:none">PRO</span>
     </div>
 
     <div class="nav-group-label">Système</div>
@@ -1664,7 +1672,23 @@
     loadEnseignants();
   }
 
-  window.authReady.then(user => { if (user) { loadEtudiants(); loadEnseignants(); loadPaymentsData(); loadEmploiSetup(); loadUtilisateursKpis(user); loadUniversiteSettings(user); loadExamensEtDepartements(user); loadEquipeAdmin(user); loadInvitesAdmin(user); loadPermissionsMatrix(); applyPermissionGating(user); } });
+  window.authReady.then(user => { if (user) { loadEtudiants(); loadEnseignants(); loadPaymentsData(); loadEmploiSetup(); loadUtilisateursKpis(user); loadUniversiteSettings(user); loadExamensEtDepartements(user); loadEquipeAdmin(user); loadInvitesAdmin(user); loadPermissionsMatrix(); applyPermissionGating(user); applyPlanNavTags(user); } });
+
+  // Affiche un badge PRO/ENTERPRISE sur les modules du plan supérieur quand
+  // l'université n'y a pas encore accès (répartition stratégique décidée le
+  // 2026-08-13 — cf. gateByPlan() dans auth-guard.js pour l'application réelle
+  // du blocage sur les pages elles-mêmes).
+  async function applyPlanNavTags(user) {
+    const { data: uni } = await supabaseClient.from('universities').select('plan').eq('name', user.university).maybeSingle();
+    const plan = uni?.plan || 'Starter';
+    const show = (id, required) => {
+      const el = document.getElementById(id);
+      if (el) el.style.display = required.includes(plan) ? 'none' : 'inline-block';
+    };
+    show('tag-diplomes', ['Enterprise']);
+    show('tag-rapports', ['Pro', 'Enterprise']);
+    show('tag-notifications', ['Pro', 'Enterprise']);
+  }
 
   // ── Gating UI selon la matrice de permissions réelle (role_permissions,
   // appliquée côté base — voir migration enforce_permission_matrix). Masque
