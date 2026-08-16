@@ -461,6 +461,9 @@
     <div class="nav-item" data-module="parametres" onclick="showPage('parametres')">
       <span class="nav-icon">⚙️</span> Paramètres
     </div>
+    <div class="nav-item" data-module="parametres" style="padding-left:2.75rem;font-size:.8rem" onclick="showPage('facturation')">
+      <span class="nav-icon">💳</span> Facturation
+    </div>
     <div class="nav-item" onclick="showPage('utilisateurs')">
       <span class="nav-icon">👥</span> Utilisateurs
     </div>
@@ -1106,27 +1109,32 @@
       </div>
     </div>
 
-    <!-- Facturation -->
-    <div class="card" style="margin-top:1.5rem">
-      <div class="card-header"><div class="card-title">💳 Facturation & Abonnement</div></div>
-      <div class="card-body">
-        <div class="kpi-grid" style="grid-template-columns:repeat(4,1fr);margin-bottom:1.25rem">
-          <div class="kpi-card"><div class="kpi-icon" style="background:rgba(26,86,219,0.1)">📦</div><div class="kpi-body"><div class="kpi-value" style="color:var(--blue)" id="fact-plan">—</div><div class="kpi-label">Plan actuel</div></div></div>
-          <div class="kpi-card"><div class="kpi-icon" style="background:rgba(139,92,246,0.1)">🔁</div><div class="kpi-body"><div class="kpi-value" style="color:#8b5cf6" id="fact-cycle">—</div><div class="kpi-label">Cycle en cours</div></div></div>
-          <div class="kpi-card"><div class="kpi-icon" style="background:rgba(16,185,129,0.1)">📅</div><div class="kpi-body"><div class="kpi-value" style="color:var(--success)" id="fact-debut">—</div><div class="kpi-label">Période en cours depuis</div></div></div>
-          <div class="kpi-card"><div class="kpi-icon" style="background:rgba(245,158,11,0.1)">⏳</div><div class="kpi-body"><div class="kpi-value" style="color:var(--gold)" id="fact-renouvellement">—</div><div class="kpi-label">Prochain renouvellement</div></div></div>
-        </div>
-        <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:.75rem">
-          <div style="font-size:.85rem;font-weight:700">Historique des paiements</div>
-          <a href="paiement-requis.html" class="card-action" style="text-decoration:none">Changer de plan / renouveler →</a>
-        </div>
-        <table class="data-table">
-          <thead><tr><th>Date</th><th>Plan</th><th>Cycle</th><th>Montant</th><th>Statut</th></tr></thead>
-          <tbody id="fact-historique">
-            <tr><td colspan="5" style="text-align:center;color:var(--gray);padding:1.5rem">Chargement…</td></tr>
-          </tbody>
-        </table>
+  </div>
+
+  <!-- ══════════════════════════════
+       PAGE : FACTURATION
+  ══════════════════════════════ -->
+  <div class="page" id="page-facturation">
+    <div class="page-header"><div><h2>Facturation & Abonnement</h2><div style="font-size:.85rem;color:var(--gray);margin-top:.2rem">Suivi de votre abonnement UniManage</div></div></div>
+
+    <div class="kpi-grid" style="grid-template-columns:repeat(4,1fr);margin-bottom:1.5rem">
+      <div class="kpi-card"><div class="kpi-icon" style="background:rgba(26,86,219,0.1)">📦</div><div class="kpi-body"><div class="kpi-value" style="color:var(--blue)" id="fact-plan">—</div><div class="kpi-label">Plan actuel</div></div></div>
+      <div class="kpi-card"><div class="kpi-icon" style="background:rgba(139,92,246,0.1)">🔁</div><div class="kpi-body"><div class="kpi-value" style="color:#8b5cf6" id="fact-cycle">—</div><div class="kpi-label">Cycle en cours</div></div></div>
+      <div class="kpi-card"><div class="kpi-icon" style="background:rgba(16,185,129,0.1)">📅</div><div class="kpi-body"><div class="kpi-value" style="color:var(--success)" id="fact-debut">—</div><div class="kpi-label">Période en cours depuis</div></div></div>
+      <div class="kpi-card"><div class="kpi-icon" style="background:rgba(245,158,11,0.1)">⏳</div><div class="kpi-body"><div class="kpi-value" style="color:var(--gold)" id="fact-renouvellement">—</div><div class="kpi-label">Prochain renouvellement</div></div></div>
+    </div>
+
+    <div class="card">
+      <div class="card-header">
+        <div class="card-title">Historique des paiements</div>
+        <a href="paiement-requis.html?changer=1" class="card-action" style="text-decoration:none">Changer de plan / renouveler →</a>
       </div>
+      <table class="data-table">
+        <thead><tr><th>Date</th><th>Plan</th><th>Cycle</th><th>Montant</th><th>Statut</th></tr></thead>
+        <tbody id="fact-historique">
+          <tr><td colspan="5" style="text-align:center;color:var(--gray);padding:1.5rem">Chargement…</td></tr>
+        </tbody>
+      </table>
     </div>
   </div>
 
@@ -2373,11 +2381,11 @@
   }
 
   // ── Navigation ──
-  const pages = ['dashboard','etudiants','enseignants','emploi-temps','departements','examens','comptabilite','paiements','parametres','utilisateurs'];
+  const pages = ['dashboard','etudiants','enseignants','emploi-temps','departements','examens','comptabilite','paiements','parametres','facturation','utilisateurs'];
   const titles = {
     'dashboard':'Tableau de bord','etudiants':'Étudiants','enseignants':'Enseignants',
     'emploi-temps':'Emploi du temps','departements':'Départements','examens':'Examens & Résultats',
-    'comptabilite':'Comptabilité','paiements':'Paiements','parametres':'Paramètres','utilisateurs':'Utilisateurs'
+    'comptabilite':'Comptabilité','paiements':'Paiements','parametres':'Paramètres','facturation':'Facturation','utilisateurs':'Utilisateurs'
   };
 
   function showPage(id) {

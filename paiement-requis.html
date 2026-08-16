@@ -185,14 +185,15 @@
     currentSession = session;
 
     const planFromUrl = new URLSearchParams(location.search).get('plan');
+    const changerVolontaire = new URLSearchParams(location.search).has('changer');
     const { data: profile } = await supabaseClient.from('profiles').select('*').eq('id', session.user.id).single();
     if (profile && profile.university) {
       const { data: uni } = await supabaseClient.from('universities').select('status, trial_ends_at').eq('name', profile.university).maybeSingle();
-      if (uni && uni.status === 'Actif' && !planFromUrl) {
+      if (uni && uni.status === 'Actif' && !planFromUrl && !changerVolontaire) {
         // Abonnement déjà actif (payé entretemps, ou faux positif) et aucune
-        // intention explicite de changer de plan (?plan=) — retour au
-        // tableau de bord. Avec ?plan=, on est dans un flux d'upgrade
-        // volontaire depuis une page gatée (gateByPlan) : laisser passer.
+        // intention explicite de venir ici (?plan= depuis une page gatée, ou
+        // ?changer=1 depuis "Changer de plan" en Facturation) — retour au
+        // tableau de bord. Sinon, laisser passer : c'est un flux volontaire.
         window.location.href = 'dashboard.html';
         return;
       }
