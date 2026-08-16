@@ -1092,7 +1092,8 @@
         </div>
         <div>
           <div style="font-size:.8rem;font-weight:600;margin-bottom:.6rem">Logo université</div>
-          <div style="border:2px dashed var(--border);border-radius:10px;padding:1rem;text-align:center;cursor:pointer;font-size:.8rem;color:var(--gray)" onclick="showToast('📁 Sélecteur de fichier ouvert')">
+          <input type="file" id="logoFileInput" accept="image/png,image/jpeg" style="display:none" onchange="uploadLogo(this.files[0])"/>
+          <div id="logoDropzone" style="border:2px dashed var(--border);border-radius:10px;padding:1rem;text-align:center;cursor:pointer;font-size:.8rem;color:var(--gray)" onclick="document.getElementById('logoFileInput').click()">
             📁 Cliquer pour uploader<br/><span style="font-size:.72rem">PNG, JPG — max 2MB</span>
           </div>
         </div>
@@ -1102,6 +1103,29 @@
           <div style="font-size:.8rem;font-weight:600;margin-top:1rem;margin-bottom:.6rem">Fuseau horaire</div>
           <select class="filter-select" style="width:100%"><option selected>Africa/Abidjan (GMT+0)</option><option>Africa/Lagos (GMT+1)</option></select>
         </div>
+      </div>
+    </div>
+
+    <!-- Facturation -->
+    <div class="card" style="margin-top:1.5rem">
+      <div class="card-header"><div class="card-title">💳 Facturation & Abonnement</div></div>
+      <div class="card-body">
+        <div class="kpi-grid" style="grid-template-columns:repeat(4,1fr);margin-bottom:1.25rem">
+          <div class="kpi-card"><div class="kpi-icon" style="background:rgba(26,86,219,0.1)">📦</div><div class="kpi-body"><div class="kpi-value" style="color:var(--blue)" id="fact-plan">—</div><div class="kpi-label">Plan actuel</div></div></div>
+          <div class="kpi-card"><div class="kpi-icon" style="background:rgba(139,92,246,0.1)">🔁</div><div class="kpi-body"><div class="kpi-value" style="color:#8b5cf6" id="fact-cycle">—</div><div class="kpi-label">Cycle en cours</div></div></div>
+          <div class="kpi-card"><div class="kpi-icon" style="background:rgba(16,185,129,0.1)">📅</div><div class="kpi-body"><div class="kpi-value" style="color:var(--success)" id="fact-debut">—</div><div class="kpi-label">Période en cours depuis</div></div></div>
+          <div class="kpi-card"><div class="kpi-icon" style="background:rgba(245,158,11,0.1)">⏳</div><div class="kpi-body"><div class="kpi-value" style="color:var(--gold)" id="fact-renouvellement">—</div><div class="kpi-label">Prochain renouvellement</div></div></div>
+        </div>
+        <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:.75rem">
+          <div style="font-size:.85rem;font-weight:700">Historique des paiements</div>
+          <a href="paiement-requis.html" class="card-action" style="text-decoration:none">Changer de plan / renouveler →</a>
+        </div>
+        <table class="data-table">
+          <thead><tr><th>Date</th><th>Plan</th><th>Cycle</th><th>Montant</th><th>Statut</th></tr></thead>
+          <tbody id="fact-historique">
+            <tr><td colspan="5" style="text-align:center;color:var(--gray);padding:1.5rem">Chargement…</td></tr>
+          </tbody>
+        </table>
       </div>
     </div>
   </div>
@@ -2088,7 +2112,7 @@
   // toutes les données déjà créées.
   async function loadUniversiteSettings(user) {
     const { data, error } = await supabaseClient
-      .from('universities').select('name, country, city, email, phone')
+      .from('universities').select('id, name, country, city, email, phone, logo_url, plan, subscription_renews_at')
       .eq('name', user.university).maybeSingle();
     if (error) { console.error(error); return; }
     if (!data) return;
@@ -2102,6 +2126,83 @@
     if (emailEl) emailEl.value = data.email || '';
     const telEl = document.getElementById('param-univ-tel');
     if (telEl) telEl.value = data.phone || '';
+    renderLogoDropzone(data.logo_url);
+    loadFacturation(data);
+  }
+
+  // ── Logo université (remplace le faux bouton "Cliquer pour uploader" qui
+  // ne faisait qu'un toast) ──
+  function renderLogoDropzone(logoUrl) {
+    const el = document.getElementById('logoDropzone');
+    if (!el) return;
+    el.innerHTML = logoUrl
+      ? `<img src="${logoUrl}" style="max-width:100%;max-height:60px;border-radius:6px;margin-bottom:.4rem"/><br/><span style="font-size:.72rem">Cliquer pour changer</span>`
+      : `📁 Cliquer pour uploader<br/><span style="font-size:.72rem">PNG, JPG — max 2MB</span>`;
+  }
+
+  async function uploadLogo(file) {
+    if (!file) return;
+    const statusEl = document.getElementById('paramsStatus');
+    const showStatus = (msg, ok) => {
+      if (!statusEl) return;
+      statusEl.style.display = 'block';
+      statusEl.style.background = ok ? 'rgba(16,185,129,0.08)' : 'rgba(239,68,68,0.08)';
+      statusEl.style.color = ok ? 'var(--success)' : 'var(--danger)';
+      statusEl.textContent = msg;
+    };
+    if (!['image/png', 'image/jpeg'].includes(file.type)) {
+      showStatus('⚠️ Format non supporté — PNG ou JPG uniquement.', false);
+      return;
+    }
+    if (file.size > 2 * 1024 * 1024) {
+      showStatus('⚠️ Fichier trop volumineux — 2MB maximum.', false);
+      return;
+    }
+    const user = window.currentUser;
+    const { data: uni } = await supabaseClient.from('universities').select('id').eq('name', user.university).maybeSingle();
+    if (!uni) return;
+    const ext = file.type === 'image/png' ? 'png' : 'jpg';
+    const path = `${uni.id}/logo.${ext}`;
+    const { error: upErr } = await supabaseClient.storage.from('university-logos').upload(path, file, { upsert: true, contentType: file.type });
+    if (upErr) { showStatus("⚠️ Échec de l'upload : " + upErr.message, false); return; }
+    const { data: pub } = supabaseClient.storage.from('university-logos').getPublicUrl(path);
+    const logoUrl = pub.publicUrl + '?t=' + Date.now();
+    await supabaseClient.from('universities').update({ logo_url: logoUrl }).eq('id', uni.id);
+    renderLogoDropzone(logoUrl);
+    showStatus('✅ Logo mis à jour.', true);
+  }
+
+  // ── Facturation (remplace l'absence totale de suivi d'abonnement dans
+  // Paramètres) : plan/cycle en cours + prochain renouvellement à partir de
+  // universities, historique réel depuis subscription_payments. ──
+  const CYCLE_LABELS_FACT = { trimestriel: 'Trimestriel', semestriel: 'Semestriel', annuel: 'Annuel' };
+
+  async function loadFacturation(uni) {
+    document.getElementById('fact-plan').textContent = uni.plan || '—';
+    document.getElementById('fact-renouvellement').textContent = uni.subscription_renews_at ? fmtDate(uni.subscription_renews_at) : '—';
+
+    const { data: payments, error } = await supabaseClient
+      .from('subscription_payments').select('*').eq('university_id', uni.id).order('created_at', { ascending: false });
+    if (error) { console.error(error); return; }
+
+    const derniereConfirmee = (payments || []).find(p => p.statut === 'Confirmé');
+    document.getElementById('fact-cycle').textContent = derniereConfirmee?.billing_cycle ? (CYCLE_LABELS_FACT[derniereConfirmee.billing_cycle] || derniereConfirmee.billing_cycle) : '—';
+    document.getElementById('fact-debut').textContent = derniereConfirmee?.paid_at ? fmtDate(derniereConfirmee.paid_at) : '—';
+
+    const tbody = document.getElementById('fact-historique');
+    if (!payments || payments.length === 0) {
+      tbody.innerHTML = '<tr><td colspan="5" style="text-align:center;color:var(--gray);padding:1.5rem">Aucun paiement enregistré.</td></tr>';
+      return;
+    }
+    const statutBadge = { 'Confirmé': 'badge-success', 'En attente': 'badge-gold', 'Annulé': 'badge-danger' };
+    tbody.innerHTML = payments.map(p => `
+      <tr>
+        <td>${fmtDate(p.paid_at || p.created_at)}</td>
+        <td>${p.plan ? p.plan.charAt(0).toUpperCase() + p.plan.slice(1) : '—'}</td>
+        <td>${p.billing_cycle ? (CYCLE_LABELS_FACT[p.billing_cycle] || p.billing_cycle) : '—'}</td>
+        <td>${fmtFCFA(p.amount_fcfa)} FCFA</td>
+        <td><span class="badge ${statutBadge[p.statut] || 'badge-gray'}">${p.statut}</span></td>
+      </tr>`).join('');
   }
 
   async function saveUniversiteSettings() {
