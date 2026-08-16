@@ -488,11 +488,11 @@
   </div>
   <div class="topbar-right">
     <div class="year-badge">📆 2024–2025</div>
-    <div class="topbar-btn" onclick="showToast('📬 Vous avez 5 nouveaux messages')">
-      💬
+    <div class="topbar-btn" onclick="window.location.href='messagerie.html'">
+      💬 <div class="notif-dot" id="topbar-msg-dot" style="display:none"></div>
     </div>
-    <div class="topbar-btn" onclick="showToast('🔔 3 nouvelles notifications')">
-      🔔 <div class="notif-dot"></div>
+    <div class="topbar-btn" onclick="window.location.href='notifications.html'">
+      🔔
     </div>
   </div>
 </header>
@@ -1677,7 +1677,27 @@
     loadEnseignants();
   }
 
-  window.authReady.then(user => { if (user) { loadEtudiants(); loadEnseignants(); loadPaymentsData(); loadEmploiSetup(); loadUtilisateursKpis(user); loadUniversiteSettings(user); loadExamensEtDepartements(user); loadEquipeAdmin(user); loadInvitesAdmin(user); loadPermissionsMatrix(); applyPermissionGating(user); applyPlanNavTags(user); } });
+  window.authReady.then(user => { if (user) { loadEtudiants(); loadEnseignants(); loadPaymentsData(); loadEmploiSetup(); loadUtilisateursKpis(user); loadUniversiteSettings(user); loadExamensEtDepartements(user); loadEquipeAdmin(user); loadInvitesAdmin(user); loadPermissionsMatrix(); applyPermissionGating(user); applyPlanNavTags(user); loadTopbarMsgDot(user); } });
+
+  // Point rouge sur l'icône messagerie de la topbar — reprend exactement la
+  // logique "non lu" de messagerie.html (dernier message d'une conversation
+  // plus récent que conversation_participants.last_read_at) au lieu du point
+  // rouge fixe précédent, affiché en permanence même sans message.
+  async function loadTopbarMsgDot(user) {
+    const dot = document.getElementById('topbar-msg-dot');
+    if (!dot) return;
+    const { data: myParts } = await supabaseClient
+      .from('conversation_participants').select('conversation_id, last_read_at').eq('profile_id', user.id);
+    if (!myParts || myParts.length === 0) { dot.style.display = 'none'; return; }
+    const convIds = myParts.map(p => p.conversation_id);
+    const myReadMap = {}; myParts.forEach(p => myReadMap[p.conversation_id] = p.last_read_at);
+    const { data: msgs } = await supabaseClient
+      .from('messages').select('conversation_id, created_at').in('conversation_id', convIds).order('created_at', { ascending: false });
+    const lastMsgByConv = {};
+    (msgs || []).forEach(m => { if (!lastMsgByConv[m.conversation_id]) lastMsgByConv[m.conversation_id] = m.created_at; });
+    const hasUnread = convIds.some(id => lastMsgByConv[id] && new Date(lastMsgByConv[id]) > new Date(myReadMap[id]));
+    dot.style.display = hasUnread ? 'block' : 'none';
+  }
 
   // Affiche un badge PRO/ENTERPRISE sur les modules du plan supérieur quand
   // l'université n'y a pas encore accès (répartition stratégique décidée le
