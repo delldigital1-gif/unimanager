@@ -37,7 +37,10 @@
     .plan-features li{font-size:.8rem;color:var(--gray);padding:.3rem 0;padding-left:1.3rem;position:relative;}
     .plan-features li::before{content:"✓";position:absolute;left:0;color:var(--success);font-weight:700;}
     .plan-note{text-align:center;color:var(--gray);font-size:.78rem;margin-top:1.5rem;}
-    .periode-card{max-width:460px;margin:0 auto;background:white;border:1.5px solid var(--border);border-radius:16px;padding:2rem;}
+    .periode-overlay{position:fixed;inset:0;background:rgba(13,27,42,.55);backdrop-filter:blur(3px);display:none;align-items:center;justify-content:center;padding:1.5rem;z-index:1000;}
+    .periode-card{position:relative;max-width:460px;width:100%;max-height:90vh;overflow-y:auto;margin:0 auto;background:white;border:1.5px solid var(--border);border-radius:16px;padding:2rem;}
+    .periode-close{position:absolute;top:1rem;right:1rem;background:none;border:none;font-size:1.4rem;line-height:1;color:var(--gray);cursor:pointer;padding:.2rem .4rem;}
+    .periode-close:hover{color:var(--navy);}
     .periode-head{text-align:center;margin-bottom:1.5rem;}
     .periode-head h2{font-family:'Playfair Display',serif;font-weight:800;font-size:1.4rem;}
     .periode-head p{color:var(--gray);font-size:.85rem;margin-top:.15rem;}
@@ -77,9 +80,10 @@
     <p class="plan-note">Prix affiché à titre indicatif (équivalent mensuel) — la facturation se fait par cycle trimestriel, semestriel ou annuel, à choisir à l'étape suivante.</p>
   </div>
 
-  <!-- ═══ Étape 2 : choix de la périodicité ═══ -->
-  <div id="panelPeriode" style="display:none">
+  <!-- ═══ Étape 2 : choix de la périodicité (superposée) ═══ -->
+  <div id="panelPeriode" class="periode-overlay" onclick="if(event.target===this)retourPlans()">
     <div class="periode-card">
+      <button type="button" class="periode-close" onclick="retourPlans()" aria-label="Fermer">&times;</button>
       <div class="periode-head">
         <h2 id="periodePlanName">—</h2>
         <p id="periodePlanSub"></p>
@@ -151,16 +155,18 @@
     selectedPlan = planKey;
     selectedCycle = 'annuel';
     renderPeriode();
-    document.getElementById('panelPlans').style.display = 'none';
-    document.getElementById('panelPeriode').style.display = 'block';
+    document.getElementById('panelPeriode').style.display = 'flex';
     history.replaceState(null, '', '?plan=' + planKey);
   }
 
   function retourPlans() {
     document.getElementById('panelPeriode').style.display = 'none';
-    document.getElementById('panelPlans').style.display = 'block';
     history.replaceState(null, '', location.pathname);
   }
+
+  document.addEventListener('keydown', (e) => {
+    if (e.key === 'Escape' && document.getElementById('panelPeriode').style.display === 'flex') retourPlans();
+  });
 
   function choisirCycle(cycle) {
     selectedCycle = cycle;
