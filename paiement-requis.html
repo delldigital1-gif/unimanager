@@ -43,10 +43,17 @@
     .periode-head p{color:var(--gray);font-size:.85rem;margin-top:.15rem;}
     .link-btn{background:none;border:none;color:var(--gray);font-size:.78rem;text-decoration:underline;cursor:pointer;margin-top:.4rem;}
     .link-btn:hover{color:var(--blue);}
-    .cycle-pills{display:flex;flex-wrap:wrap;gap:.5rem;justify-content:center;margin-bottom:1.5rem;}
-    .cycle-pill{padding:.55rem 1.1rem;border-radius:8px;border:1.5px solid var(--border);background:white;color:var(--gray);font-size:.85rem;font-weight:600;cursor:pointer;transition:all .15s;}
-    .cycle-pill:hover{color:var(--navy);}
-    .cycle-pill.active{border-color:var(--blue);background:var(--blue);color:white;}
+    .cycle-rows{display:flex;flex-direction:column;gap:.6rem;margin-bottom:1.5rem;}
+    .cycle-row{display:flex;align-items:center;justify-content:space-between;border:1.5px solid var(--border);border-radius:10px;padding:.85rem 1.1rem;cursor:pointer;transition:all .15s;background:white;}
+    .cycle-row:hover{border-color:var(--blue);}
+    .cycle-row.sel{border-color:var(--blue);background:rgba(26,86,219,.06);}
+    .cycle-row-left{display:flex;align-items:center;gap:.65rem;}
+    .cycle-radio{width:18px;height:18px;border-radius:50%;border:2px solid var(--border);display:inline-block;position:relative;flex-shrink:0;}
+    .cycle-row.sel .cycle-radio{border-color:var(--blue);}
+    .cycle-row.sel .cycle-radio::after{content:'';position:absolute;inset:3px;border-radius:50%;background:var(--blue);}
+    .cycle-row-title{font-weight:700;font-size:.9rem;color:var(--navy);}
+    .cycle-row-price{font-weight:700;font-size:.95rem;color:var(--navy);}
+    .cycle-row-price span{font-weight:400;font-size:.78rem;color:var(--gray);}
     .periode-price{text-align:center;font-family:'Playfair Display',serif;font-weight:800;font-size:1.7rem;margin-bottom:.25rem;}
     .periode-unit{font-size:.85rem;font-weight:400;color:var(--gray);}
   </style>
@@ -78,11 +85,7 @@
         <p id="periodePlanSub"></p>
         <button type="button" class="link-btn" onclick="retourPlans()">← Changer de plan</button>
       </div>
-      <div class="cycle-pills" id="cyclePills">
-        <button type="button" class="cycle-pill" data-cycle="trimestriel" onclick="choisirCycle('trimestriel')">Trimestriel</button>
-        <button type="button" class="cycle-pill" data-cycle="semestriel" onclick="choisirCycle('semestriel')">Semestriel</button>
-        <button type="button" class="cycle-pill" data-cycle="annuel" onclick="choisirCycle('annuel')">Annuel</button>
-      </div>
+      <div class="cycle-rows" id="cyclePills"></div>
       <div class="periode-price"><span id="periodeAmount">—</span> <span class="periode-unit" id="periodeUnit"></span></div>
       <ul class="plan-features" id="periodeFeatures"></ul>
       <button type="button" class="btn-plan btn-plan-fill" id="btnPayer" onclick="payer()">Payer maintenant</button>
@@ -124,6 +127,7 @@
   };
   const CYCLE_LABELS = { trimestriel: 'Trimestriel', semestriel: 'Semestriel', annuel: 'Annuel' };
   const CYCLE_MONTHS = { trimestriel: 3, semestriel: 6, annuel: 12 };
+  const CYCLE_ORDER = ['annuel', 'semestriel', 'trimestriel'];
 
   let selectedPlan = null;
   let selectedCycle = 'trimestriel';
@@ -145,7 +149,7 @@
 
   function choisirPlan(planKey) {
     selectedPlan = planKey;
-    selectedCycle = 'trimestriel';
+    selectedCycle = 'annuel';
     renderPeriode();
     document.getElementById('panelPlans').style.display = 'none';
     document.getElementById('panelPeriode').style.display = 'block';
@@ -167,9 +171,13 @@
     const plan = PLANS[selectedPlan];
     document.getElementById('periodePlanName').textContent = plan.name;
     document.getElementById('periodePlanSub').textContent = plan.sub;
-    document.querySelectorAll('.cycle-pill').forEach(btn => {
-      btn.classList.toggle('active', btn.dataset.cycle === selectedCycle);
-    });
+    document.getElementById('cyclePills').innerHTML = CYCLE_ORDER.map(key => {
+      const perMonth = Math.round(plan.prices[key] / CYCLE_MONTHS[key]);
+      return `<div class="cycle-row${key === selectedCycle ? ' sel' : ''}" onclick="choisirCycle('${key}')">
+        <div class="cycle-row-left"><span class="cycle-radio"></span><span class="cycle-row-title">${CYCLE_LABELS[key]}</span></div>
+        <div class="cycle-row-price">${perMonth.toLocaleString('fr-FR')} FCFA<span>/mois</span></div>
+      </div>`;
+    }).join('');
     const amount = plan.prices[selectedCycle];
     document.getElementById('periodeAmount').textContent = amount.toLocaleString('fr-FR') + ' FCFA';
     document.getElementById('periodeUnit').textContent = '/ ' + CYCLE_LABELS[selectedCycle].toLowerCase();
