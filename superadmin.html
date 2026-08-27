@@ -422,6 +422,26 @@
     }
     loadSuperadminData();
   }
+  async function envoyerDevis(requestId) {
+    const input = document.getElementById('devisInput-' + requestId);
+    const montant = parseFloat(input.value);
+    if (!montant || montant < 500000 || montant > 1500000) {
+      showToast('⚠️ Le montant doit être entre 500 000 et 1 500 000 FCFA.');
+      return;
+    }
+    const btn = document.getElementById('devisBtn-' + requestId);
+    btn.disabled = true; btn.textContent = 'Envoi…';
+    const { data, error } = await supabaseClient.functions.invoke('send-devis-configuration', {
+      body: { request_id: requestId, montant }
+    });
+    if (error) {
+      showToast('⚠️ Erreur : ' + error.message);
+      btn.disabled = false; btn.textContent = 'Envoyer le devis';
+      return;
+    }
+    showToast(data?.email_sent ? '✅ Devis envoyé par email.' : '✅ Devis enregistré (email non envoyé — vérifier la config Resend/email de l\'université).');
+    loadSuperadminData();
+  }
   function openModal(){document.getElementById('addModal').classList.add('active');document.body.style.overflow='hidden';}
   function closeModal(){document.getElementById('addModal').classList.remove('active');document.body.style.overflow='';}
   let tt;
@@ -539,19 +559,27 @@
     // Page Configurations
     const pendingConfig = configRequests.filter(c => c.statut !== 'prete');
     document.getElementById('config-sub').textContent = `${pendingConfig.length} demande${pendingConfig.length > 1 ? 's' : ''} en attente sur ${configRequests.length} au total`;
-    const CONFIG_STATUS_BADGE = { nouvelle: 'badge-gold', en_cours: 'badge-blue', prete: 'badge-success' };
-    const CONFIG_STATUS_LABEL = { nouvelle: 'Nouvelle', en_cours: 'En cours', prete: 'Prête' };
+    const CONFIG_STATUS_BADGE = { nouvelle: 'badge-gold', devis_envoye: 'badge-blue', prete: 'badge-success' };
+    const CONFIG_STATUS_LABEL = { nouvelle: 'Nouvelle', devis_envoye: 'Devis envoyé', prete: 'Prête' };
     const configList = document.getElementById('config-list');
     configList.innerHTML = configRequests.length === 0
       ? '<div style="color:rgba(255,255,255,0.4);padding:2rem">Aucune demande de configuration.</div>'
       : configRequests.map(c => {
           const uniName = univNameById[c.university_id] || '—';
           const when = c.created_at ? relativeTime(new Date(c.created_at)) : '—';
-          const actions = c.statut === 'prete' ? '' : `
+          let actions = '';
+          if (c.statut === 'nouvelle') {
+            actions = `
+            <div style="display:flex;gap:.6rem;margin-top:1rem;flex-wrap:wrap">
+              <input type="number" id="devisInput-${c.id}" min="500000" max="1500000" step="10000" placeholder="Montant du devis (500 000 – 1 500 000 FCFA)" style="flex:1;min-width:220px;padding:.55rem .75rem;border-radius:8px;background:rgba(255,255,255,0.06);border:1px solid rgba(255,255,255,0.15);color:white;font-size:.8rem">
+              <button id="devisBtn-${c.id}" onclick="envoyerDevis('${c.id}')" style="padding:.55rem 1rem;border-radius:8px;background:var(--blue,#1A56DB);color:white;font-size:.8rem;font-weight:600;cursor:pointer;border:none;white-space:nowrap">📄 Envoyer le devis</button>
+            </div>`;
+          } else if (c.statut === 'devis_envoye') {
+            actions = `
             <div style="display:flex;gap:.6rem;margin-top:1rem">
-              ${c.statut === 'nouvelle' ? `<button onclick="marquerConfigStatut('${c.id}','en_cours')" style="padding:.55rem 1rem;border-radius:8px;background:rgba(255,255,255,0.08);color:white;font-size:.8rem;font-weight:600;cursor:pointer;border:none">Prendre en charge</button>` : ''}
               <button onclick="marquerConfigStatut('${c.id}','prete','${c.university_id}')" style="padding:.55rem 1rem;border-radius:8px;background:var(--success);color:white;font-size:.8rem;font-weight:600;cursor:pointer;border:none">✓ Configuration terminée — débloquer le paiement</button>
             </div>`;
+          }
           return `<div class="card" style="margin-bottom:1rem">
             <div style="display:flex;justify-content:space-between;align-items:flex-start;gap:1rem">
               <div>
@@ -564,6 +592,7 @@
               <div><strong style="color:white">Effectif estimé :</strong> ${c.effectif_estime ?? '—'} étudiants</div>
               <div><strong style="color:white">Structure :</strong> ${c.structure_description || '—'}</div>
               <div><strong style="color:white">Données existantes à migrer :</strong> ${c.a_des_donnees_existantes ? 'Oui' : 'Non'}${c.a_des_donnees_existantes && c.details_migration ? ' — ' + c.details_migration : ''}</div>
+              ${c.devis_montant ? `<div><strong style="color:white">Devis envoyé :</strong> ${fmtFCFA(c.devis_montant)} FCFA${c.devis_envoye_le ? ' — ' + new Date(c.devis_envoye_le).toLocaleDateString('fr-FR') : ''}</div>` : ''}
             </div>
             ${actions}
           </div>`;

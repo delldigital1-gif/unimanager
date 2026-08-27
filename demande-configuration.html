@@ -62,6 +62,10 @@
   let currentProfile = null;
   let currentUniId = null;
 
+  function fmtFCFA(n) {
+    return Math.round(n).toLocaleString('fr-FR').replace(/ /g, ' ') + ' FCFA';
+  }
+
   function renderNonAdmin() {
     document.getElementById('content').innerHTML = `
       <div class="card">
@@ -103,12 +107,25 @@
     document.getElementById('configForm').addEventListener('submit', submitRequest);
   }
 
-  function renderWaiting() {
+  function renderWaiting(request) {
+    if (request && request.statut === 'devis_envoye' && request.devis_montant) {
+      document.getElementById('content').innerHTML = `
+        <div class="card">
+          <div class="waiting-icon">📄</div>
+          <div class="waiting-title">Votre devis de configuration est prêt</div>
+          <div class="waiting-sub">Notre équipe a envoyé le devis pour la configuration de votre espace à l'adresse email de votre établissement. Merci de le consulter et de confirmer votre accord en répondant à cet email pour que nous puissions démarrer la configuration.</div>
+          <div class="recap">
+            <div><strong>Montant du devis :</strong> ${fmtFCFA(request.devis_montant)}</div>
+            <div><strong>Envoyé le :</strong> ${request.devis_envoye_le ? new Date(request.devis_envoye_le).toLocaleDateString('fr-FR') : ''}</div>
+          </div>
+        </div>`;
+      return;
+    }
     document.getElementById('content').innerHTML = `
       <div class="card">
         <div class="waiting-icon">⏳</div>
         <div class="waiting-title">Votre demande est en cours de traitement</div>
-        <div class="waiting-sub">Notre équipe configure votre espace UniManage. Vous serez contacté(e) très prochainement pour finaliser cette étape — vous pourrez ensuite choisir votre plan et activer votre abonnement.</div>
+        <div class="waiting-sub">Notre équipe étudie votre demande et vous enverra un devis de configuration par email très prochainement. Une fois le devis validé, nous configurons votre espace — vous pourrez ensuite choisir votre plan et activer votre abonnement.</div>
       </div>`;
   }
 
@@ -141,7 +158,10 @@
         .update({ onboarding_status: 'demande_envoyee' })
         .eq('id', currentUniId);
       if (updErr) throw updErr;
-      renderWaiting();
+      supabaseClient.functions.invoke('notify-new-configuration-request', {
+        body: { university_id: currentUniId }
+      }).catch(() => {});
+      renderWaiting(null);
     } catch (err) {
       statusEl.className = 'status-msg error';
       statusEl.textContent = '⚠️ ' + (err.message || 'Erreur lors de l\'envoi.');
@@ -168,7 +188,16 @@
       return;
     }
     if (profile.role !== 'admin') { renderNonAdmin(); return; }
-    if (uni.onboarding_status === 'demande_envoyee') { renderWaiting(); return; }
+    if (uni.onboarding_status === 'demande_envoyee') {
+      const { data: reqRow } = await supabaseClient.from('configuration_requests')
+        .select('statut, devis_montant, devis_envoye_le')
+        .eq('university_id', currentUniId)
+        .order('created_at', { ascending: false })
+        .limit(1)
+        .maybeSingle();
+      renderWaiting(reqRow);
+      return;
+    }
     renderForm();
   }
 
