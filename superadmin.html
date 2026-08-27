@@ -42,6 +42,8 @@
     @keyframes pulse{0%,100%{opacity:1}50%{opacity:.3}}
     .topbar-btn{width:36px;height:36px;border-radius:9px;border:1px solid rgba(255,255,255,0.1);background:rgba(255,255,255,0.04);display:flex;align-items:center;justify-content:center;cursor:pointer;font-size:1rem;transition:all .2s;}
     .topbar-btn:hover{background:rgba(255,255,255,0.08);}
+    .topbar-add-btn{height:36px;padding:0 1rem;border-radius:9px;border:1px solid rgba(255,255,255,0.1);background:var(--blue);color:white;display:flex;align-items:center;gap:.4rem;justify-content:center;cursor:pointer;font-size:.85rem;font-weight:600;white-space:nowrap;transition:all .2s;}
+    .topbar-add-btn:hover{background:#1344b8;}
 
     /* MAIN */
     .main{margin-left:var(--sidebar-w);padding-top:var(--topbar-h);flex:1;}
@@ -186,7 +188,7 @@
   <div class="topbar-right">
     <div class="live-badge"><div class="live-dot"></div> Système opérationnel</div>
     <div class="topbar-btn" onclick="showToast('🔔 2 alertes système actives')">🔔</div>
-    <div class="topbar-btn" onclick="openModal()">+ Université</div>
+    <div class="topbar-add-btn" onclick="openModal()">+ Université</div>
   </div>
 </header>
 
