@@ -1334,6 +1334,7 @@
     const university = document.getElementById('f_nom').value || 'Mon Université';
     const pays = document.getElementById('f_pays').value || 'Togo';
     const ville = document.getElementById('f_ville').value || '';
+    const emailUniv = document.getElementById('f_email_univ').value.trim();
     const email = document.getElementById('f_email_admin').value.trim();
     const fname = document.getElementById('f_prenom').value;
     const lname = document.getElementById('f_lnom').value;
@@ -1360,6 +1361,7 @@
           onboarding_plan: selectedPlan,
           onboarding_price_monthly: PLAN_PRICES_FCFA[selectedPlan],
           onboarding_ref_affilie: refAffilie,
+          onboarding_email: emailUniv,
         }
       }
     });
