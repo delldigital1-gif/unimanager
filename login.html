@@ -451,7 +451,7 @@
     </button>
 
     <!-- Comptes démo -->
-    <div class="demo-hint">
+    <div class="demo-hint" id="demoHint">
       <strong>🧪 Comptes de démonstration</strong>
       <div class="demo-accounts" id="demoAccounts"></div>
     </div>
@@ -517,8 +517,7 @@
       selClass: 'purple-sel', focusClass: 'purple-focus',
       title: 'Accès Super Admin',
       sub: 'Plateforme UniManage · Accès restreint',
-      redirect: 'superadmin.html',
-      demo: { email: 'superadmin@unimanage.app', pass: 'super1234', label: 'Super Admin Plateforme' }
+      redirect: 'superadmin.html'
     },
     parent: {
       label: '👨‍👩‍👧 Parent',
@@ -583,13 +582,14 @@
       if(r.focusClass) el.classList.add(r.focusClass);
     });
 
-    // Démo accounts
+    // Démo accounts (aucun compte de démo pour le Super Admin — accès restreint, identifiants réels non exposés côté client)
     const demoDiv = document.getElementById('demoAccounts');
-    demoDiv.innerHTML = `
+    document.getElementById('demoHint').style.display = r.demo ? '' : 'none';
+    demoDiv.innerHTML = r.demo ? `
       <div class="demo-account" onclick="fillDemo()">
         <span style="font-size:.78rem">${r.demo.label}</span>
         <span style="font-size:.75rem">Remplir →</span>
-      </div>`;
+      </div>` : '';
 
     // Transition
     showStep('step2');
