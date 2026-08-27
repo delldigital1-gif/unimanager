@@ -714,6 +714,22 @@
       else if(document.getElementById('step2').classList.contains('active')) handleLogin();
     }
   });
+
+  // ── Lien personnalisé par université (?u=slug) ──
+  // Pas un vrai sous-domaine DNS (pas de certificat SSL wildcard configuré,
+  // voir mémoire projet) : un lien sur ce même domaine qui saute directement
+  // à l'écran de connexion Administrateur, personnalisé au nom de l'université.
+  (async function initSubdomainLink() {
+    const slug = new URLSearchParams(window.location.search).get('u');
+    if (!slug) return;
+    try {
+      const { data, error } = await supabaseClient.functions.invoke('resolve-university-subdomain', { body: { subdomain: slug } });
+      if (error || !data?.name) return; // lien invalide/expiré → écran normal, pas d'erreur bloquante
+      selectRole('admin');
+      goStep2();
+      document.getElementById('step2Sub').textContent = 'Connexion — ' + data.name;
+    } catch (e) { /* silencieux : repli sur l'écran normal */ }
+  })();
 </script>
 </body>
 </html>

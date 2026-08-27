@@ -389,12 +389,17 @@
     <div style="font-family:'Playfair Display',serif;font-weight:800;font-size:1.2rem;color:white;margin-bottom:.25rem">Ajouter une université</div>
     <p style="font-size:.83rem;color:rgba(255,255,255,0.4);margin-bottom:1.5rem">Créer un nouvel espace université sur la plateforme</p>
     <div style="display:grid;grid-template-columns:1fr 1fr;gap:1rem">
-      <div class="form-group"><label>Nom de l'université *</label><input class="form-input" id="am_nom" placeholder="Ex: Université de Lomé"/></div>
+      <div class="form-group"><label>Nom de l'université *</label><input class="form-input" id="am_nom" placeholder="Ex: Université de Lomé" oninput="am_onNomInput()"/></div>
       <div class="form-group"><label>Pays *</label><select class="form-input" id="am_pays"><option>Togo</option><option>Côte d'Ivoire</option><option>Sénégal</option><option>Cameroun</option><option>Bénin</option><option>Autre</option></select></div>
     </div>
     <div class="form-group"><label>Ville</label><input class="form-input" id="am_ville" placeholder="Ex: Lomé"/></div>
     <div class="form-group"><label>Email du directeur *</label><input class="form-input" id="am_email" type="email" placeholder="directeur@universite.tg"/></div>
     <div class="form-group"><label>Plan *</label><select class="form-input" id="am_plan"><option value="Starter">Starter — 125 000 FCFA/mois</option><option value="Pro">Pro — 135 000 FCFA/mois</option><option value="Max">Max — 150 000 FCFA/mois</option></select></div>
+    <div class="form-group">
+      <label>Sous-domaine (lien de connexion) *</label>
+      <input class="form-input" id="am_subdomain" placeholder="ex: univ-lome" oninput="am_onSubdomainInput()"/>
+      <div class="hint" style="font-size:.75rem;color:rgba(255,255,255,0.35);margin-top:.35rem" id="am_subdomainPreview">→ unimanagerdell.com/login.html?u=univ-lome</div>
+    </div>
     <div id="am_status" style="font-size:.82rem;color:rgba(255,255,255,0.5);min-height:1.2rem;margin-bottom:.5rem"></div>
     <button class="btn-submit" id="am_submitBtn" onclick="creerUniversiteAdmin()">Créer l'espace université →</button>
   </div>
@@ -443,11 +448,34 @@
     showToast(data?.email_sent ? '✅ Devis envoyé par email.' : '✅ Devis enregistré (email non envoyé — vérifier la config Resend/email de l\'université).');
     loadSuperadminData();
   }
+  function copierLienUniversite(subdomain) {
+    const url = 'https://unimanagerdell.com/login.html?u=' + subdomain;
+    navigator.clipboard.writeText(url).then(
+      () => showToast('🔗 Lien copié : ' + url),
+      () => showToast('⚠️ Impossible de copier — ' + url)
+    );
+  }
   function openModal(){document.getElementById('addModal').classList.add('active');document.body.style.overflow='hidden';}
   function closeModal(){
     document.getElementById('addModal').classList.remove('active');document.body.style.overflow='';
-    ['am_nom','am_ville','am_email'].forEach(id => document.getElementById(id).value = '');
+    ['am_nom','am_ville','am_email','am_subdomain'].forEach(id => document.getElementById(id).value = '');
     document.getElementById('am_status').textContent = '';
+    document.getElementById('am_subdomainPreview').textContent = '→ unimanagerdell.com/login.html?u=…';
+    am_subdomainTouched = false;
+  }
+  function slugify(s) {
+    return (s || '').toLowerCase().normalize('NFD').replace(new RegExp('[̀-ͯ]', 'g'), '')
+      .replace(/[^a-z0-9]+/g, '-').replace(/^-+|-+$/g, '');
+  }
+  let am_subdomainTouched = false;
+  function am_onSubdomainInput() { am_subdomainTouched = true; am_updateSubdomainPreview(); }
+  function am_onNomInput() {
+    if (!am_subdomainTouched) document.getElementById('am_subdomain').value = slugify(document.getElementById('am_nom').value);
+    am_updateSubdomainPreview();
+  }
+  function am_updateSubdomainPreview() {
+    const s = slugify(document.getElementById('am_subdomain').value);
+    document.getElementById('am_subdomainPreview').textContent = '→ unimanagerdell.com/login.html?u=' + (s || '…');
   }
   async function creerUniversiteAdmin() {
     const nom = document.getElementById('am_nom').value.trim();
@@ -455,10 +483,11 @@
     const ville = document.getElementById('am_ville').value.trim();
     const email = document.getElementById('am_email').value.trim();
     const plan = document.getElementById('am_plan').value;
+    const subdomain = slugify(document.getElementById('am_subdomain').value);
     const statusEl = document.getElementById('am_status');
-    if (!nom || !email) {
+    if (!nom || !email || !subdomain) {
       statusEl.style.color = 'var(--danger)';
-      statusEl.textContent = '⚠️ Nom de l\'université et email du directeur requis.';
+      statusEl.textContent = '⚠️ Nom, email du directeur et sous-domaine requis.';
       return;
     }
     const btn = document.getElementById('am_submitBtn');
@@ -466,7 +495,7 @@
     statusEl.style.color = 'rgba(255,255,255,0.5)';
     statusEl.textContent = 'Création en cours…';
     const { data, error } = await supabaseClient.functions.invoke('invite-university-admin', {
-      body: { name: nom, country: pays, city: ville || null, plan, email }
+      body: { name: nom, country: pays, city: ville || null, plan, email, subdomain }
     });
     btn.disabled = false;
     if (error || data?.error) {
@@ -474,7 +503,7 @@
       statusEl.textContent = '⚠️ ' + (data?.error || error.message);
       return;
     }
-    showToast(data.email_sent ? '✅ Université créée ! Email d\'invitation envoyé.' : '✅ Université créée (email non envoyé — vérifier la config Resend).');
+    showToast((data.email_sent ? '✅ Université créée ! Email d\'invitation envoyé. ' : '✅ Université créée (email non envoyé). ') + 'Lien : unimanagerdell.com/login.html?u=' + subdomain);
     closeModal();
     loadSuperadminData();
   }
@@ -513,7 +542,7 @@
 
   async function loadSuperadminData() {
     const [univRes, studsRes, teachsRes, paysRes, incidentsRes, configRes] = await Promise.all([
-      supabaseClient.from('universities').select('id, name, country, city, plan, price_monthly, status, onboarding_status, created_at').order('created_at', { ascending: false }),
+      supabaseClient.from('universities').select('id, name, country, city, plan, price_monthly, status, onboarding_status, created_at, subdomain').order('created_at', { ascending: false }),
       supabaseClient.from('students').select('id, university'),
       supabaseClient.from('teachers').select('id, university'),
       supabaseClient.from('payments').select('amount, paid_at, university').eq('statut', 'Confirmé'),
@@ -586,6 +615,7 @@
             <div style="display:flex;align-items:center;gap:.75rem;margin-bottom:.75rem"><div class="univ-logo" style="background:${PLAN_LOGO[u.plan] || PLAN_LOGO.Pro}">${initials || '?'}</div><div><div class="univ-name">${u.name}</div><div class="univ-meta">${u.city ? u.city + ', ' : ''}${u.country || '—'} · ${u.plan || '—'} · Depuis ${since}</div></div></div>
             <div class="univ-stats"><div class="univ-stat"><div class="univ-stat-val">${studsByUniv[u.name] || 0}</div><div class="univ-stat-label">Étudiants</div></div><div class="univ-stat"><div class="univ-stat-val">${teachsByUniv[u.name] || 0}</div><div class="univ-stat-label">Enseignants</div></div></div>
             <div style="display:flex;justify-content:space-between;align-items:center"><span class="badge ${STATUS_BADGE[u.status] || 'badge-gray'}">● ${u.status || '—'}</span><span style="font-size:.75rem;color:rgba(255,255,255,0.4)">${u.price_monthly ? fmtFCFA(u.price_monthly) + ' FCFA/mois' : 'Sur devis'}</span></div>
+            ${u.subdomain ? `<button onclick="event.stopPropagation();copierLienUniversite('${u.subdomain}')" style="margin-top:.75rem;width:100%;padding:.5rem;border-radius:8px;background:rgba(255,255,255,0.06);border:1px solid rgba(255,255,255,0.1);color:rgba(255,255,255,0.65);font-size:.75rem;cursor:pointer">🔗 Copier le lien de connexion</button>` : ''}
           </div>`;
         }).join('')
     ) + '<div class="univ-card" style="border:2px dashed rgba(255,255,255,0.1);display:flex;align-items:center;justify-content:center;cursor:pointer;min-height:160px" onclick="openModal()"><div style="text-align:center;color:rgba(255,255,255,0.3)"><div style="font-size:2rem;margin-bottom:.5rem">+</div><div style="font-size:.85rem;font-weight:600">Ajouter une université</div></div></div>';
