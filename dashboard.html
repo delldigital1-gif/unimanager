@@ -2649,19 +2649,38 @@
   }
 
   // ── Assistant IA — Recouvrement (premier assistant IA d'UniManage, 2026-08-27) ──
+  // Historique de conversation maintenu côté client (multi-tour depuis
+  // l'évolution du même jour) — envoyé en entier à chaque question pour que
+  // l'IA comprenne les questions de suivi ("rédige un message pour lui").
   let aiChatBusy = false;
+  let aiConversationHistory = [];
   function appendAiChatMessage(role, text) {
     const log = document.getElementById('ai-chat-log');
+    const wrap = document.createElement('div');
+    wrap.style.cssText = role === 'user' ? 'align-self:flex-end;max-width:80%' : 'align-self:flex-start;max-width:90%';
     const bubble = document.createElement('div');
     if (role === 'user') {
-      bubble.style.cssText = 'align-self:flex-end;background:var(--blue);color:white;border-radius:12px;padding:.8rem 1rem;font-size:.88rem;max-width:80%;white-space:pre-wrap';
+      bubble.style.cssText = 'background:var(--blue);color:white;border-radius:12px;padding:.8rem 1rem;font-size:.88rem;white-space:pre-wrap';
     } else {
-      bubble.style.cssText = 'background:var(--light);color:var(--navy);border-radius:12px;padding:.8rem 1rem;font-size:.88rem;max-width:90%;white-space:pre-wrap;line-height:1.6';
+      bubble.style.cssText = 'background:var(--light);color:var(--navy);border-radius:12px;padding:.8rem 1rem;font-size:.88rem;white-space:pre-wrap;line-height:1.6';
     }
     bubble.textContent = text;
-    log.appendChild(bubble);
+    wrap.appendChild(bubble);
+    log.appendChild(wrap);
     log.scrollTop = log.scrollHeight;
-    return bubble;
+    return { wrap, bubble };
+  }
+  function addCopyButton(wrap, bubble) {
+    const btn = document.createElement('button');
+    btn.textContent = '📋 Copier';
+    btn.style.cssText = 'margin-top:.3rem;background:none;border:none;color:var(--gray);font-size:.72rem;cursor:pointer;padding:0';
+    btn.onclick = () => {
+      navigator.clipboard.writeText(bubble.textContent).then(() => {
+        btn.textContent = '✓ Copié';
+        setTimeout(() => { btn.textContent = '📋 Copier'; }, 1500);
+      });
+    };
+    wrap.appendChild(btn);
   }
   async function askAssistantRecouvrement(question) {
     if (aiChatBusy || !question || !question.trim()) return;
@@ -2669,13 +2688,17 @@
     const sendBtn = document.getElementById('ai-chat-send');
     sendBtn.disabled = true;
     appendAiChatMessage('user', question);
-    const loadingBubble = appendAiChatMessage('assistant', 'Analyse en cours…');
-    const { data, error } = await supabaseClient.functions.invoke('assistant-recouvrement', { body: { question } });
+    aiConversationHistory.push({ role: 'user', content: question });
+    const { wrap, bubble } = appendAiChatMessage('assistant', 'Analyse en cours…');
+    const { data, error } = await supabaseClient.functions.invoke('assistant-recouvrement', { body: { messages: aiConversationHistory } });
     if (error || data?.error) {
-      loadingBubble.textContent = '⚠️ ' + (data?.error || error.message);
-      loadingBubble.style.color = 'var(--danger)';
+      bubble.textContent = '⚠️ ' + (data?.error || error.message);
+      bubble.style.color = 'var(--danger)';
+      aiConversationHistory.pop(); // ne garde pas un tour raté dans l'historique envoyé à l'IA
     } else {
-      loadingBubble.textContent = data.answer;
+      bubble.textContent = data.answer;
+      aiConversationHistory.push({ role: 'assistant', content: data.answer });
+      addCopyButton(wrap, bubble);
     }
     sendBtn.disabled = false;
     aiChatBusy = false;
