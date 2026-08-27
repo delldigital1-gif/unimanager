@@ -1021,9 +1021,14 @@
   ══════════════════════════════ -->
   <div class="page" id="page-assistant-ia">
     <div class="page-header">
-      <div><h2>🤖 Assistant IA — Recouvrement</h2><div style="font-size:.85rem;color:var(--gray);margin-top:.2rem">Posez vos questions sur les impayés de votre université, en langage naturel.</div></div>
+      <div><h2>🤖 Assistant IA</h2><div style="font-size:.85rem;color:var(--gray);margin-top:.2rem">Posez vos questions en langage naturel — chaque onglet est spécialisé sur un aspect de votre université.</div></div>
     </div>
-    <div style="background:white;border:1.5px solid var(--border);border-radius:16px;padding:1.5rem;max-width:820px">
+    <div style="display:flex;gap:.5rem;margin-bottom:1rem;max-width:820px">
+      <button id="ai-tab-recouvrement" class="ai-tab-btn ai-tab-active" onclick="switchAiTab('recouvrement')" style="flex:1;padding:.7rem;border-radius:10px;border:1.5px solid var(--border);background:var(--light);font-weight:600;font-size:.88rem;cursor:pointer">💰 Recouvrement</button>
+      <button id="ai-tab-direction" class="ai-tab-btn" onclick="switchAiTab('direction')" style="flex:1;padding:.7rem;border-radius:10px;border:1.5px solid var(--border);background:white;font-weight:600;font-size:.88rem;cursor:pointer">🧭 Copilote Direction</button>
+    </div>
+
+    <div id="ai-panel-recouvrement" style="background:white;border:1.5px solid var(--border);border-radius:16px;padding:1.5rem;max-width:820px">
       <div id="ai-chat-log" style="display:flex;flex-direction:column;gap:1rem;min-height:200px;max-height:50vh;overflow-y:auto;margin-bottom:1rem">
         <div style="background:var(--light);border-radius:12px;padding:1rem;font-size:.88rem;color:var(--navy);line-height:1.6">
           👋 Bonjour ! Je peux analyser les impayés de scolarité de votre université. Essayez par exemple :
@@ -1039,6 +1044,24 @@
         <button class="btn-add" id="ai-chat-send" onclick="sendAssistantRecouvrement()">Envoyer</button>
       </div>
       <div style="font-size:.72rem;color:var(--gray);margin-top:.6rem">L'assistant analyse uniquement les données de votre université et ne peut pas envoyer de message aux étudiants — il vous propose des pistes, la décision reste la vôtre.</div>
+    </div>
+
+    <div id="ai-panel-direction" style="display:none;background:white;border:1.5px solid var(--border);border-radius:16px;padding:1.5rem;max-width:820px">
+      <div id="ai-chat-log-direction" style="display:flex;flex-direction:column;gap:1rem;min-height:200px;max-height:50vh;overflow-y:auto;margin-bottom:1rem">
+        <div style="background:var(--light);border-radius:12px;padding:1rem;font-size:.88rem;color:var(--navy);line-height:1.6">
+          👋 Bonjour ! Je peux vous donner une vue d'ensemble de votre université (effectifs, présence, résultats, impayés, charge enseignants). Essayez par exemple :
+          <div style="margin-top:.6rem;display:flex;flex-direction:column;gap:.4rem">
+            <a href="#" onclick="askCopiloteDirection('Combien d\'étudiants sont actuellement inscrits, par filière ?');return false;" style="color:var(--blue);font-size:.85rem">→ Combien d'étudiants sont actuellement inscrits, par filière ?</a>
+            <a href="#" onclick="askCopiloteDirection('Quels sont les étudiants qui présentent un risque d\'abandon ?');return false;" style="color:var(--blue);font-size:.85rem">→ Quels sont les étudiants qui présentent un risque d'abandon ?</a>
+            <a href="#" onclick="askCopiloteDirection('Fais-moi une synthèse générale de la situation de l\'université.');return false;" style="color:var(--blue);font-size:.85rem">→ Fais-moi une synthèse générale de la situation.</a>
+          </div>
+        </div>
+      </div>
+      <div style="display:flex;gap:.6rem">
+        <input id="ai-chat-input-direction" type="text" class="search-input" style="flex:1" placeholder="Ex: Quelle filière a le taux de présence le plus bas ?" onkeydown="if(event.key==='Enter')sendCopiloteDirection()"/>
+        <button class="btn-add" id="ai-chat-send-direction" onclick="sendCopiloteDirection()">Envoyer</button>
+      </div>
+      <div style="font-size:.72rem;color:var(--gray);margin-top:.6rem">Aucune donnée historique (année précédente) n'est encore disponible — l'assistant ne répond que sur la situation actuelle. Pour préparer et envoyer une relance à un étudiant précis, utilisez l'onglet Recouvrement.</div>
     </div>
   </div>
 
@@ -2654,8 +2677,8 @@
   // l'IA comprenne les questions de suivi ("rédige un message pour lui").
   let aiChatBusy = false;
   let aiConversationHistory = [];
-  function appendAiChatMessage(role, text) {
-    const log = document.getElementById('ai-chat-log');
+  function appendAiChatMessage(role, text, logId) {
+    const log = document.getElementById(logId || 'ai-chat-log');
     const wrap = document.createElement('div');
     wrap.style.cssText = role === 'user' ? 'align-self:flex-end;max-width:80%' : 'align-self:flex-start;max-width:90%';
     const bubble = document.createElement('div');
@@ -2769,6 +2792,46 @@
     if (!question) return;
     input.value = '';
     askAssistantRecouvrement(question);
+  }
+
+  // ── Assistant IA — Copilote Direction (2e assistant IA d'UniManage, même jour) ──
+  function switchAiTab(tab) {
+    document.getElementById('ai-tab-recouvrement').classList.toggle('ai-tab-active', tab === 'recouvrement');
+    document.getElementById('ai-tab-direction').classList.toggle('ai-tab-active', tab === 'direction');
+    document.getElementById('ai-tab-recouvrement').style.background = tab === 'recouvrement' ? 'var(--light)' : 'white';
+    document.getElementById('ai-tab-direction').style.background = tab === 'direction' ? 'var(--light)' : 'white';
+    document.getElementById('ai-panel-recouvrement').style.display = tab === 'recouvrement' ? '' : 'none';
+    document.getElementById('ai-panel-direction').style.display = tab === 'direction' ? '' : 'none';
+  }
+  let aiChatBusyDirection = false;
+  let aiConversationHistoryDirection = [];
+  async function askCopiloteDirection(question) {
+    if (aiChatBusyDirection || !question || !question.trim()) return;
+    aiChatBusyDirection = true;
+    const sendBtn = document.getElementById('ai-chat-send-direction');
+    sendBtn.disabled = true;
+    appendAiChatMessage('user', question, 'ai-chat-log-direction');
+    aiConversationHistoryDirection.push({ role: 'user', content: question });
+    const { wrap, bubble } = appendAiChatMessage('assistant', 'Analyse en cours…', 'ai-chat-log-direction');
+    const { data, error } = await supabaseClient.functions.invoke('copilote-direction', { body: { messages: aiConversationHistoryDirection } });
+    if (error || data?.error) {
+      bubble.textContent = '⚠️ ' + (data?.error || error.message);
+      bubble.style.color = 'var(--danger)';
+      aiConversationHistoryDirection.pop();
+    } else {
+      bubble.textContent = data.answer;
+      aiConversationHistoryDirection.push({ role: 'assistant', content: data.answer });
+      addCopyButton(wrap, bubble);
+    }
+    sendBtn.disabled = false;
+    aiChatBusyDirection = false;
+  }
+  function sendCopiloteDirection() {
+    const input = document.getElementById('ai-chat-input-direction');
+    const question = input.value.trim();
+    if (!question) return;
+    input.value = '';
+    askCopiloteDirection(question);
   }
 
   // ── Génération PDF (reçu de paiement, admin) ──
