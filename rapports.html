@@ -123,6 +123,7 @@
   <nav class="sidebar-nav">
     <div class="nav-group">Rapports</div>
     <div class="nav-it active" onclick="showPage('overview')">📊 Vue générale</div>
+    <div class="nav-it" onclick="showPage('synthese')">🤖 Synthèse IA</div>
     <div class="nav-it" onclick="showPage('exports')">⬇️ Exports (CSV)</div>
   </nav>
   <div class="sidebar-footer">
@@ -168,6 +169,22 @@
     </div>
   </div>
 
+  <!-- ══ SYNTHÈSE IA ══ -->
+  <div class="page" id="page-synthese">
+    <div style="margin-bottom:1.5rem;display:flex;justify-content:space-between;align-items:flex-start;flex-wrap:wrap;gap:1rem">
+      <div><h2 style="font-family:'Playfair Display',serif;font-weight:800;font-size:1.3rem">🤖 Synthèse IA</h2><div style="font-size:.85rem;color:var(--gray);margin-top:.2rem">Rapport de situation généré à partir des données réelles de votre université — effectifs, finances, résultats, présence.</div></div>
+      <button class="btn-primary" id="btn-generer-synthese" onclick="genererSyntheseIA()">✨ Générer le rapport</button>
+    </div>
+    <div class="card">
+      <div class="card-body" id="synthese-body" style="white-space:pre-wrap;font-size:.9rem;line-height:1.7;color:var(--navy)">
+        <div style="text-align:center;color:var(--gray);padding:2rem">Cliquez sur "Générer le rapport" pour obtenir une synthèse rédigée par l'IA à partir de vos données actuelles.</div>
+      </div>
+    </div>
+    <div id="synthese-actions" style="display:none;margin-top:1rem">
+      <button class="btn-outline" onclick="copierSynthese()">📋 Copier le texte</button>
+    </div>
+  </div>
+
   <!-- ══ EXPORTS ══ -->
   <div class="page" id="page-exports">
     <div style="margin-bottom:1.5rem"><h2 style="font-family:'Playfair Display',serif;font-weight:800;font-size:1.3rem">⬇️ Exports (CSV)</h2><div style="font-size:.85rem;color:var(--gray);margin-top:.2rem">Fichiers générés à partir des données réelles de votre université, ouvrables dans Excel/Google Sheets</div></div>
@@ -182,8 +199,8 @@
 </div></main>
 <div class="toast" id="toast"></div>
 <script>
-  const pages=['overview','exports'];
-  const titles={'overview':'Vue générale','exports':'Exports (CSV)'};
+  const pages=['overview','synthese','exports'];
+  const titles={'overview':'Vue générale','synthese':'Synthèse IA','exports':'Exports (CSV)'};
   function showPage(id){pages.forEach(p=>{document.getElementById('page-'+p)?.classList.remove('active');document.querySelectorAll('.nav-it').forEach(n=>{if(n.getAttribute('onclick')?.includes("'"+p+"'"))n.classList.remove('active');});});document.getElementById('page-'+id)?.classList.add('active');document.querySelectorAll('.nav-it').forEach(n=>{if(n.getAttribute('onclick')?.includes("'"+id+"'"))n.classList.add('active');});document.getElementById('pageTitle').textContent=titles[id]||id;}
   let tt;function showToast(msg){const t=document.getElementById('toast');t.textContent=msg;t.classList.add('show');clearTimeout(tt);tt=setTimeout(()=>t.classList.remove('show'),3000);}
 
@@ -302,6 +319,34 @@
     downloadCSV('notes.csv', ['Étudiant', 'Matricule', 'Département', 'Niveau', 'Matière', 'Enseignant', 'Note CC', 'Note Examen', 'Moyenne'],
       rNotes.map(n => [n.students?.full_name, n.students?.matricule, n.students?.department, n.students?.level, n.matiere, n.enseignant_nom, n.note_cc, n.note_exam, (n.note_cc != null && n.note_exam != null) ? (n.note_cc * 0.3 + n.note_exam * 0.7).toFixed(1) : '']));
     showToast('✅ Export téléchargé');
+  }
+
+  // ── Synthèse IA (rapport administratif auto-généré, 2026-08-28) ──
+  // Réutilise la même Edge Function agent-plateforme que l'Assistant IA du
+  // tableau de bord (même agrégation de données côté serveur) — un seul
+  // message avec une consigne de rapport plutôt qu'une vraie conversation,
+  // pas besoin d'historique ici.
+  let syntheseTexte = '';
+  async function genererSyntheseIA() {
+    const btn = document.getElementById('btn-generer-synthese');
+    const body = document.getElementById('synthese-body');
+    btn.disabled = true;
+    body.innerHTML = '<div style="text-align:center;color:var(--gray);padding:2rem">Génération en cours…</div>';
+    document.getElementById('synthese-actions').style.display = 'none';
+    const consigne = "Rédige un rapport de synthèse structuré pour la direction, avec ces sections : Résumé exécutif (3-4 phrases), Effectifs, Situation financière (impayés), Résultats académiques, Présence, Ressources enseignantes, Points d'attention, Recommandations. IMPORTANT : ce texte sera affiché tel quel en texte brut, pas en HTML ni en markdown rendu — n'utilise AUCUN symbole markdown (pas de #, pas de **, pas de tableaux avec des |). Pour les titres de section, écris-les en MAJUSCULES suivis de deux-points sur leur propre ligne. Pour les listes, utilise des tirets simples (-).";
+    const { data, error } = await supabaseClient.functions.invoke('agent-plateforme', { body: { messages: [{ role: 'user', content: consigne }] } });
+    btn.disabled = false;
+    if (error || data?.error) {
+      body.innerHTML = `<div style="text-align:center;color:var(--danger);padding:2rem">⚠️ ${data?.error || error.message}</div>`;
+      return;
+    }
+    syntheseTexte = data.answer || '';
+    body.textContent = syntheseTexte;
+    document.getElementById('synthese-actions').style.display = 'block';
+  }
+  function copierSynthese() {
+    if (!syntheseTexte) return;
+    navigator.clipboard.writeText(syntheseTexte).then(() => showToast('✅ Texte copié'));
   }
 </script>
 </body>
