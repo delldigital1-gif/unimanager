@@ -259,7 +259,7 @@
   <div class="page" id="page-universites">
     <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:1.5rem">
       <div><h2 style="font-family:'Playfair Display',serif;font-weight:800;font-size:1.3rem;color:white">Universités</h2><div style="font-size:.85rem;color:rgba(255,255,255,0.4);margin-top:.2rem" id="univ-sub">Chargement...</div></div>
-      <button onclick="showToast('➕ Ajout d\'université — à connecter à un vrai formulaire')" style="padding:.65rem 1.2rem;border-radius:9px;background:var(--purple);color:white;font-size:.875rem;font-weight:600;cursor:pointer;border:none">+ Ajouter université</button>
+      <button onclick="openModal()" style="padding:.65rem 1.2rem;border-radius:9px;background:var(--purple);color:white;font-size:.875rem;font-weight:600;cursor:pointer;border:none">+ Ajouter université</button>
     </div>
     <div class="univ-grid" id="univ-grid"><div style="color:rgba(255,255,255,0.4);padding:2rem">Chargement...</div></div>
   </div>
@@ -389,15 +389,14 @@
     <div style="font-family:'Playfair Display',serif;font-weight:800;font-size:1.2rem;color:white;margin-bottom:.25rem">Ajouter une université</div>
     <p style="font-size:.83rem;color:rgba(255,255,255,0.4);margin-bottom:1.5rem">Créer un nouvel espace université sur la plateforme</p>
     <div style="display:grid;grid-template-columns:1fr 1fr;gap:1rem">
-      <div class="form-group"><label>Nom de l'université *</label><input class="form-input" placeholder="Ex: Université de Lomé"/></div>
-      <div class="form-group"><label>Pays *</label><select class="form-input"><option>Togo</option><option>Côte d'Ivoire</option><option>Sénégal</option><option>Cameroun</option><option>Bénin</option><option>Autre</option></select></div>
+      <div class="form-group"><label>Nom de l'université *</label><input class="form-input" id="am_nom" placeholder="Ex: Université de Lomé"/></div>
+      <div class="form-group"><label>Pays *</label><select class="form-input" id="am_pays"><option>Togo</option><option>Côte d'Ivoire</option><option>Sénégal</option><option>Cameroun</option><option>Bénin</option><option>Autre</option></select></div>
     </div>
-    <div class="form-group"><label>Email du directeur *</label><input class="form-input" placeholder="directeur@universite.tg"/></div>
-    <div style="display:grid;grid-template-columns:1fr 1fr;gap:1rem">
-      <div class="form-group"><label>Plan *</label><select class="form-input"><option>Starter — à partir de 125 000 FCFA/mois</option><option>Pro — à partir de 135 000 FCFA/mois</option><option>Max — à partir de 150 000 FCFA/mois</option></select></div>
-      <div class="form-group"><label>Sous-domaine *</label><input class="form-input" placeholder="univ-nom"/></div>
-    </div>
-    <button class="btn-submit" onclick="showToast('✅ Université créée ! Email d\'invitation envoyé.');closeModal()">Créer l'espace université →</button>
+    <div class="form-group"><label>Ville</label><input class="form-input" id="am_ville" placeholder="Ex: Lomé"/></div>
+    <div class="form-group"><label>Email du directeur *</label><input class="form-input" id="am_email" type="email" placeholder="directeur@universite.tg"/></div>
+    <div class="form-group"><label>Plan *</label><select class="form-input" id="am_plan"><option value="Starter">Starter — 125 000 FCFA/mois</option><option value="Pro">Pro — 135 000 FCFA/mois</option><option value="Max">Max — 150 000 FCFA/mois</option></select></div>
+    <div id="am_status" style="font-size:.82rem;color:rgba(255,255,255,0.5);min-height:1.2rem;margin-bottom:.5rem"></div>
+    <button class="btn-submit" id="am_submitBtn" onclick="creerUniversiteAdmin()">Créer l'espace université →</button>
   </div>
 </div>
 
@@ -445,7 +444,40 @@
     loadSuperadminData();
   }
   function openModal(){document.getElementById('addModal').classList.add('active');document.body.style.overflow='hidden';}
-  function closeModal(){document.getElementById('addModal').classList.remove('active');document.body.style.overflow='';}
+  function closeModal(){
+    document.getElementById('addModal').classList.remove('active');document.body.style.overflow='';
+    ['am_nom','am_ville','am_email'].forEach(id => document.getElementById(id).value = '');
+    document.getElementById('am_status').textContent = '';
+  }
+  async function creerUniversiteAdmin() {
+    const nom = document.getElementById('am_nom').value.trim();
+    const pays = document.getElementById('am_pays').value;
+    const ville = document.getElementById('am_ville').value.trim();
+    const email = document.getElementById('am_email').value.trim();
+    const plan = document.getElementById('am_plan').value;
+    const statusEl = document.getElementById('am_status');
+    if (!nom || !email) {
+      statusEl.style.color = 'var(--danger)';
+      statusEl.textContent = '⚠️ Nom de l\'université et email du directeur requis.';
+      return;
+    }
+    const btn = document.getElementById('am_submitBtn');
+    btn.disabled = true;
+    statusEl.style.color = 'rgba(255,255,255,0.5)';
+    statusEl.textContent = 'Création en cours…';
+    const { data, error } = await supabaseClient.functions.invoke('invite-university-admin', {
+      body: { name: nom, country: pays, city: ville || null, plan, email }
+    });
+    btn.disabled = false;
+    if (error || data?.error) {
+      statusEl.style.color = 'var(--danger)';
+      statusEl.textContent = '⚠️ ' + (data?.error || error.message);
+      return;
+    }
+    showToast(data.email_sent ? '✅ Université créée ! Email d\'invitation envoyé.' : '✅ Université créée (email non envoyé — vérifier la config Resend).');
+    closeModal();
+    loadSuperadminData();
+  }
   let tt;
   function showToast(msg){const t=document.getElementById('toast');t.textContent=msg;t.classList.add('show');clearTimeout(tt);tt=setTimeout(()=>t.classList.remove('show'),3000);}
   document.addEventListener('keydown',e=>{if(e.key==='Escape')closeModal();});
