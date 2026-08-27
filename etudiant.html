@@ -124,6 +124,7 @@
   <nav class="sidebar-nav">
     <div class="nav-group-label">Mon espace</div>
     <div class="nav-item active" onclick="showPage('accueil')"><span class="nav-icon">🏠</span> Tableau de bord</div>
+    <div class="nav-item" onclick="showPage('assistant')"><span class="nav-icon">🤖</span> Assistant IA</div>
     <div class="nav-item" onclick="showPage('notes')"><span class="nav-icon">📊</span> Mes notes</div>
     <div class="nav-item" onclick="showPage('emploidutemps')"><span class="nav-icon">📅</span> Emploi du temps</div>
     <div class="nav-item" onclick="showPage('cours')"><span class="nav-icon">📚</span> Mes cours</div>
@@ -196,6 +197,28 @@
           <div style="padding:.85rem;background:rgba(26,86,219,0.06);border-radius:10px;border-left:3px solid var(--blue)"><div style="font-size:.85rem;font-weight:600;color:var(--navy)">📚 Nouveaux supports de cours disponibles</div><div style="font-size:.78rem;color:var(--gray);margin-top:.3rem">Dr. Mensah a déposé les TD 4 & 5 d'Algorithmique sur la plateforme.</div><div style="font-size:.7rem;color:var(--blue);margin-top:.3rem;font-weight:600">Hier</div></div>
           <div style="padding:.85rem;background:rgba(16,185,129,0.06);border-radius:10px;border-left:3px solid var(--success)"><div style="font-size:.85rem;font-weight:600;color:var(--navy)">✅ Résultats Semestre 1 publiés</div><div style="font-size:.78rem;color:var(--gray);margin-top:.3rem">Vos résultats du semestre 1 sont disponibles. Téléchargez votre relevé de notes.</div><div style="font-size:.7rem;color:var(--success);margin-top:.3rem;font-weight:600">20 Jan 2025</div></div>
         </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- PAGE ASSISTANT IA -->
+  <div class="page" id="page-assistant">
+    <div style="margin-bottom:1.5rem"><h2 style="font-family:'Playfair Display',serif;font-weight:800;font-size:1.3rem">🤖 Assistant IA</h2><div style="font-size:.85rem;color:var(--gray);margin-top:.2rem">Votre assistant personnel — notes, examens, solde de scolarité, documents. Il ne voit que vos propres données.</div></div>
+    <div class="card" style="display:flex;flex-direction:column;height:60vh">
+      <div id="ai-etu-log" style="flex:1;overflow-y:auto;padding:1.25rem;display:flex;flex-direction:column;gap:.9rem">
+        <div style="display:flex;flex-direction:column;gap:.5rem">
+          <div style="align-self:flex-start;max-width:80%;background:var(--light);border-radius:12px 12px 12px 2px;padding:.75rem 1rem;font-size:.85rem;line-height:1.5">Bonjour 👋 Je suis votre assistant personnel. Posez-moi une question sur vos notes, vos examens, votre solde de scolarité ou vos documents.</div>
+          <div style="display:flex;flex-wrap:wrap;gap:.5rem;margin-top:.25rem">
+            <button class="ai-etu-suggest" onclick="askAssistantEtudiant('Quel est mon solde de scolarité ?')" style="padding:.4rem .8rem;border-radius:100px;border:1px solid var(--border);background:white;font-size:.75rem;cursor:pointer">💳 Mon solde de scolarité</button>
+            <button class="ai-etu-suggest" onclick="askAssistantEtudiant('Quelle est ma moyenne générale actuelle ?')" style="padding:.4rem .8rem;border-radius:100px;border:1px solid var(--border);background:white;font-size:.75rem;cursor:pointer">📊 Ma moyenne générale</button>
+            <button class="ai-etu-suggest" onclick="askAssistantEtudiant('Quand sont mes prochains examens ?')" style="padding:.4rem .8rem;border-radius:100px;border:1px solid var(--border);background:white;font-size:.75rem;cursor:pointer">📝 Mes prochains examens</button>
+            <button class="ai-etu-suggest" onclick="askAssistantEtudiant('Comment obtenir mon attestation de scolarité ?')" style="padding:.4rem .8rem;border-radius:100px;border:1px solid var(--border);background:white;font-size:.75rem;cursor:pointer">📄 Obtenir mon attestation</button>
+          </div>
+        </div>
+      </div>
+      <div style="display:flex;gap:.6rem;padding:1rem 1.25rem;border-top:1px solid var(--border)">
+        <input id="ai-etu-input" class="form-input" style="flex:1" placeholder="Posez votre question…" onkeydown="if(event.key==='Enter')sendAssistantEtudiant()"/>
+        <button id="ai-etu-send" class="btn-submit" style="width:auto;padding:.65rem 1.4rem;margin:0" onclick="sendAssistantEtudiant()">Envoyer</button>
       </div>
     </div>
   </div>
@@ -366,8 +389,8 @@
 <div class="toast" id="toast"></div>
 
 <script>
-  const pages=['accueil','notes','emploidutemps','cours','examens','paiements','documents','profil'];
-  const titles={'accueil':'Tableau de bord','notes':'Mes notes','emploidutemps':'Emploi du temps','cours':'Mes cours','examens':'Mes examens','paiements':'Mes paiements','documents':'Mes documents','profil':'Mon profil'};
+  const pages=['accueil','assistant','notes','emploidutemps','cours','examens','paiements','documents','profil'];
+  const titles={'accueil':'Tableau de bord','assistant':'Assistant IA','notes':'Mes notes','emploidutemps':'Emploi du temps','cours':'Mes cours','examens':'Mes examens','paiements':'Mes paiements','documents':'Mes documents','profil':'Mon profil'};
   function showPage(id){
     pages.forEach(p=>{
       document.getElementById('page-'+p)?.classList.remove('active');
@@ -899,6 +922,62 @@
             ${docsList.length > 0 ? `<div style="display:flex;flex-direction:column;gap:.3rem;border-top:1px solid var(--border);padding-top:.6rem">${docsList.map(d => `<a href="${supabaseClient.storage.from('course-documents').getPublicUrl(d.file_path).data.publicUrl}" target="_blank" style="font-size:.78rem;color:var(--blue);text-decoration:none">📄 ${d.title}</a>`).join('')}</div>` : ''}
           </div></div>`;
         }).join('');
+  }
+
+  // ── Assistant IA étudiant (agent-plateforme est réservé aux admins ; ici
+  // Edge Function dédiée assistant-etudiant, scopée aux données perso) ──
+  let aiEtuHistory = [];
+  function appendAiEtuMessage(role, text) {
+    const log = document.getElementById('ai-etu-log');
+    const wrap = document.createElement('div');
+    wrap.style.cssText = 'display:flex;flex-direction:column;gap:.3rem';
+    const bubble = document.createElement('div');
+    bubble.style.cssText = role === 'user'
+      ? 'align-self:flex-end;max-width:80%;background:var(--blue);color:white;border-radius:12px 12px 2px 12px;padding:.75rem 1rem;font-size:.85rem;line-height:1.5;white-space:pre-wrap'
+      : 'align-self:flex-start;max-width:80%;background:var(--light);border-radius:12px 12px 12px 2px;padding:.75rem 1rem;font-size:.85rem;line-height:1.5;white-space:pre-wrap';
+    bubble.textContent = text;
+    wrap.appendChild(bubble);
+    if (role === 'assistant') {
+      const copyBtn = document.createElement('button');
+      copyBtn.textContent = '📋 Copier';
+      copyBtn.style.cssText = 'align-self:flex-start;background:none;border:none;color:var(--gray);font-size:.7rem;cursor:pointer;padding:0';
+      copyBtn.onclick = () => navigator.clipboard.writeText(text).then(() => showToast('✅ Copié'));
+      wrap.appendChild(copyBtn);
+    }
+    log.appendChild(wrap);
+    log.scrollTop = log.scrollHeight;
+    return bubble;
+  }
+
+  async function askAssistantEtudiant(question) {
+    document.getElementById('ai-etu-input').value = question;
+    await sendAssistantEtudiant();
+  }
+
+  async function sendAssistantEtudiant() {
+    const input = document.getElementById('ai-etu-input');
+    const question = input.value.trim();
+    if (!question) return;
+    const sendBtn = document.getElementById('ai-etu-send');
+    input.value = '';
+    input.disabled = true; sendBtn.disabled = true;
+
+    appendAiEtuMessage('user', question);
+    aiEtuHistory.push({ role: 'user', content: question });
+    const thinkingBubble = appendAiEtuMessage('assistant', '…');
+
+    const { data, error } = await supabaseClient.functions.invoke('assistant-etudiant', { body: { messages: aiEtuHistory } });
+
+    input.disabled = false; sendBtn.disabled = false;
+    input.focus();
+
+    if (error || data?.error) {
+      thinkingBubble.textContent = '⚠️ ' + (data?.error || error.message);
+      aiEtuHistory.pop();
+      return;
+    }
+    thinkingBubble.textContent = data.answer || '';
+    aiEtuHistory.push({ role: 'assistant', content: data.answer || '' });
   }
 
   window.authReady.then(async user => {
