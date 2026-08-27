@@ -202,7 +202,13 @@
     const changerVolontaire = new URLSearchParams(location.search).has('changer');
     const { data: profile } = await supabaseClient.from('profiles').select('*').eq('id', session.user.id).single();
     if (profile && profile.university) {
-      const { data: uni } = await supabaseClient.from('universities').select('status, trial_ends_at').eq('name', profile.university).maybeSingle();
+      const { data: uni } = await supabaseClient.from('universities').select('status, trial_ends_at, onboarding_status').eq('name', profile.university).maybeSingle();
+      if (uni && uni.onboarding_status !== 'prete') {
+        // Configuration pas encore validée par Dell Digital -- on ne laisse
+        // jamais payer avant, même en accès direct à cette URL.
+        window.location.href = 'demande-configuration.html';
+        return;
+      }
       if (uni && uni.status === 'Actif' && !planFromUrl && !changerVolontaire) {
         // Abonnement déjà actif (payé entretemps, ou faux positif) et aucune
         // intention explicite de venir ici (?plan= depuis une page gatée, ou

@@ -1,0 +1,178 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<style>html{visibility:hidden}</style>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>UniManage — Configuration de votre espace</title>
+  <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;600;700;800;900&family=Inter:wght@300;400;500;600&display=swap" rel="stylesheet"/>
+  <style>
+    :root{--navy:#0D1B2A;--blue:#1A56DB;--sky:#3B82F6;--gold:#F59E0B;--light:#F0F4FF;--gray:#64748B;--border:#E2E8F0;--success:#10B981;--danger:#EF4444;--purple:#8B5CF6;}
+    *{margin:0;padding:0;box-sizing:border-box;}
+    body{font-family:'Inter',sans-serif;background:#F8FAFC;color:var(--navy);min-height:100vh;}
+    .topbar{padding:1.25rem 5%;border-bottom:1px solid var(--border);background:white;display:flex;align-items:center;justify-content:space-between;}
+    .logo{font-family:'Playfair Display',serif;font-weight:800;font-size:1.3rem;color:var(--navy);}
+    .logo span{color:var(--blue);}
+    .wrap{max-width:680px;margin:0 auto;padding:3rem 1.5rem;}
+    .head{text-align:center;margin-bottom:2.5rem;}
+    .head h1{font-family:'Playfair Display',serif;font-weight:800;font-size:1.8rem;margin-bottom:.6rem;}
+    .head p{color:var(--gray);font-size:.95rem;}
+    .card{background:white;border:1.5px solid var(--border);border-radius:16px;padding:2rem;}
+    .field{margin-bottom:1.25rem;}
+    .field label{display:block;font-weight:600;font-size:.85rem;margin-bottom:.4rem;}
+    .field .hint{color:var(--gray);font-size:.78rem;margin-top:.3rem;}
+    .field input[type=text],.field input[type=number],.field textarea,.field select{width:100%;padding:.7rem .85rem;border:1.5px solid var(--border);border-radius:10px;font-family:inherit;font-size:.9rem;color:var(--navy);}
+    .field input:focus,.field textarea:focus,.field select:focus{outline:none;border-color:var(--blue);}
+    .field textarea{min-height:100px;resize:vertical;}
+    .checkbox-row{display:flex;align-items:center;gap:.6rem;}
+    .checkbox-row input{width:18px;height:18px;}
+    .checkbox-row label{margin:0;font-weight:600;font-size:.85rem;}
+    .btn-submit{display:block;width:100%;padding:.9rem;border-radius:10px;border:none;background:var(--blue);color:white;font-weight:700;font-size:.9rem;cursor:pointer;margin-top:.5rem;}
+    .btn-submit:hover{background:#1344b8;}
+    .btn-submit:disabled{opacity:.5;cursor:not-allowed;}
+    .status-msg{text-align:center;margin-top:1rem;font-size:.85rem;color:var(--gray);min-height:1.2rem;}
+    .status-msg.error{color:var(--danger);}
+    .waiting-icon{font-size:2.5rem;text-align:center;margin-bottom:1rem;}
+    .waiting-title{font-family:'Playfair Display',serif;font-weight:800;font-size:1.3rem;text-align:center;margin-bottom:.6rem;}
+    .waiting-sub{color:var(--gray);font-size:.9rem;text-align:center;line-height:1.6;}
+    .recap{background:var(--light);border-radius:12px;padding:1.25rem;margin-top:1.5rem;font-size:.85rem;}
+    .recap div{margin-bottom:.4rem;}
+    .recap strong{color:var(--navy);}
+  </style>
+</head>
+<body>
+<div class="topbar">
+  <div class="logo">Uni<span>Manage</span></div>
+  <a href="#" onclick="logout();return false;" style="color:var(--gray);font-size:.85rem;text-decoration:none;">Se déconnecter</a>
+</div>
+
+<div class="wrap">
+  <div class="head">
+    <h1 id="pageTitle">Configuration de votre espace</h1>
+    <p id="pageSub">Avant d'activer votre abonnement, notre équipe configure votre établissement avec vous.</p>
+  </div>
+
+  <div id="content"><div class="card"><p style="text-align:center;color:var(--gray);font-size:.9rem">Chargement…</p></div></div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script src="supabase-config.js"></script>
+<script src="auth-guard.js"></script>
+<script>
+  let currentProfile = null;
+  let currentUniId = null;
+
+  function renderNonAdmin() {
+    document.getElementById('content').innerHTML = `
+      <div class="card">
+        <div class="waiting-icon">🛠️</div>
+        <div class="waiting-title">Votre établissement est en cours de configuration</div>
+        <div class="waiting-sub">L'administrateur de votre établissement doit d'abord finaliser la configuration avec l'équipe Dell Digital avant que votre espace ne soit accessible. Contactez-le pour plus de détails.</div>
+      </div>`;
+  }
+
+  function renderForm() {
+    document.getElementById('content').innerHTML = `
+      <div class="card">
+        <form id="configForm">
+          <div class="field">
+            <label>Effectif estimé d'étudiants *</label>
+            <input type="number" id="f_effectif" min="1" placeholder="Ex: 450" required>
+          </div>
+          <div class="field">
+            <label>Structure de votre établissement *</label>
+            <textarea id="f_structure" placeholder="Facultés, départements, filières, niveaux… décrivez l'organisation de votre établissement." required></textarea>
+          </div>
+          <div class="field">
+            <div class="checkbox-row">
+              <input type="checkbox" id="f_donnees">
+              <label for="f_donnees">J'ai des données existantes à migrer (étudiants, notes, etc.)</label>
+            </div>
+          </div>
+          <div class="field" id="detailsWrap" style="display:none">
+            <label>Détails sur ces données</label>
+            <textarea id="f_details" placeholder="Format actuel (Excel, autre logiciel…), volume approximatif, urgence…"></textarea>
+          </div>
+          <button type="submit" class="btn-submit" id="btnSubmit">Envoyer ma demande →</button>
+          <div id="statusMsg" class="status-msg"></div>
+        </form>
+      </div>`;
+    document.getElementById('f_donnees').addEventListener('change', (e) => {
+      document.getElementById('detailsWrap').style.display = e.target.checked ? 'block' : 'none';
+    });
+    document.getElementById('configForm').addEventListener('submit', submitRequest);
+  }
+
+  function renderWaiting() {
+    document.getElementById('content').innerHTML = `
+      <div class="card">
+        <div class="waiting-icon">⏳</div>
+        <div class="waiting-title">Votre demande est en cours de traitement</div>
+        <div class="waiting-sub">Notre équipe configure votre espace UniManage. Vous serez contacté(e) très prochainement pour finaliser cette étape — vous pourrez ensuite choisir votre plan et activer votre abonnement.</div>
+      </div>`;
+  }
+
+  async function submitRequest(e) {
+    e.preventDefault();
+    const btn = document.getElementById('btnSubmit');
+    const statusEl = document.getElementById('statusMsg');
+    const effectif = document.getElementById('f_effectif').value;
+    const structure = document.getElementById('f_structure').value.trim();
+    const aDonnees = document.getElementById('f_donnees').checked;
+    const details = document.getElementById('f_details').value.trim();
+    if (!effectif || !structure) {
+      statusEl.className = 'status-msg error';
+      statusEl.textContent = 'Veuillez remplir les champs obligatoires.';
+      return;
+    }
+    btn.disabled = true;
+    statusEl.className = 'status-msg';
+    statusEl.textContent = 'Envoi en cours…';
+    try {
+      const { error: insErr } = await supabaseClient.from('configuration_requests').insert({
+        university_id: currentUniId,
+        effectif_estime: parseInt(effectif, 10),
+        structure_description: structure,
+        a_des_donnees_existantes: aDonnees,
+        details_migration: aDonnees ? details : null,
+      });
+      if (insErr) throw insErr;
+      const { error: updErr } = await supabaseClient.from('universities')
+        .update({ onboarding_status: 'demande_envoyee' })
+        .eq('id', currentUniId);
+      if (updErr) throw updErr;
+      renderWaiting();
+    } catch (err) {
+      statusEl.className = 'status-msg error';
+      statusEl.textContent = '⚠️ ' + (err.message || 'Erreur lors de l\'envoi.');
+      btn.disabled = false;
+    }
+  }
+
+  async function init() {
+    const { data: { session } } = await supabaseClient.auth.getSession();
+    if (!session) { window.location.href = 'login.html'; return; }
+    const { data: profile } = await supabaseClient.from('profiles').select('*').eq('id', session.user.id).single();
+    currentProfile = profile;
+    document.documentElement.style.visibility = 'visible';
+
+    if (!profile || !profile.university) { renderNonAdmin(); return; }
+
+    const { data: uni } = await supabaseClient.from('universities')
+      .select('id, onboarding_status').eq('name', profile.university).maybeSingle();
+    if (!uni) { renderNonAdmin(); return; }
+    currentUniId = uni.id;
+
+    if (uni.onboarding_status === 'prete') {
+      window.location.href = 'paiement-requis.html';
+      return;
+    }
+    if (profile.role !== 'admin') { renderNonAdmin(); return; }
+    if (uni.onboarding_status === 'demande_envoyee') { renderWaiting(); return; }
+    renderForm();
+  }
+
+  init();
+</script>
+</body>
+</html>

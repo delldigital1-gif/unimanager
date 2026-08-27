@@ -45,11 +45,20 @@ async function requireAuth(expectedRole) {
   if (!pageExempteDuGate && profile.role !== 'superadmin' && profile.university) {
     const { data: uni } = await supabaseClient
       .from('universities')
-      .select('status')
+      .select('status, onboarding_status')
       .eq('name', profile.university)
       .maybeSingle();
+    // Gate de configuration : avant même le paiement, une université doit
+    // avoir été configurée par Dell Digital (demande traitée). Décision du
+    // 2026-08-27 -- payer avant la configuration menait a un tableau de bord
+    // vide et inutilisable.
+    const pageExempteDeLaConfig = location.pathname.endsWith('demande-configuration.html');
+    if (!pageExempteDeLaConfig && uni && uni.onboarding_status !== 'prete') {
+      window.location.href = 'demande-configuration.html';
+      return null;
+    }
     const abonnementInactif = uni && uni.status !== 'Actif';
-    if (abonnementInactif) {
+    if (!pageExempteDeLaConfig && abonnementInactif) {
       window.location.href = 'paiement-requis.html';
       return null;
     }

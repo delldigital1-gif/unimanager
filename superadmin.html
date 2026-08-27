@@ -161,6 +161,7 @@
     <div class="nav-group-label">Plateforme</div>
     <div class="nav-item active" onclick="showPage('overview')"><span class="nav-icon">🌍</span> Vue globale</div>
     <div class="nav-item" onclick="showPage('universites')"><span class="nav-icon">🏛️</span> Universités <span class="nav-badge" id="nb-univ">—</span></div>
+    <div class="nav-item" onclick="showPage('configurations')"><span class="nav-icon">🛠️</span> Configurations <span class="nav-badge" id="nb-config">—</span></div>
     <div class="nav-item" onclick="showPage('revenus')"><span class="nav-icon">💰</span> Revenus</div>
     <div class="nav-item" onclick="showPage('abonnements')"><span class="nav-icon">📋</span> Abonnements</div>
     <div class="nav-group-label">Monitoring</div>
@@ -259,6 +260,12 @@
       <button onclick="showToast('➕ Ajout d\'université — à connecter à un vrai formulaire')" style="padding:.65rem 1.2rem;border-radius:9px;background:var(--purple);color:white;font-size:.875rem;font-weight:600;cursor:pointer;border:none">+ Ajouter université</button>
     </div>
     <div class="univ-grid" id="univ-grid"><div style="color:rgba(255,255,255,0.4);padding:2rem">Chargement...</div></div>
+  </div>
+
+  <!-- ══ PAGE : CONFIGURATIONS ══ -->
+  <div class="page" id="page-configurations">
+    <div style="margin-bottom:1.5rem"><h2 style="font-family:'Playfair Display',serif;font-weight:800;font-size:1.3rem;color:white">Demandes de configuration</h2><div style="font-size:.85rem;color:rgba(255,255,255,0.4);margin-top:.2rem" id="config-sub">Chargement...</div></div>
+    <div id="config-list"><div style="color:rgba(255,255,255,0.4);padding:2rem">Chargement...</div></div>
   </div>
 
   <!-- ══ PAGE : REVENUS ══ -->
@@ -395,13 +402,25 @@
 <div class="toast" id="toast"></div>
 
 <script>
-  const pages=['overview','universites','revenus','abonnements','activite','incidents','logs','admins','parametres'];
-  const titles={'overview':'Vue globale','universites':'Universités','revenus':'Revenus SaaS','abonnements':'Abonnements','activite':'Activité','incidents':'Incidents','logs':'Logs système','admins':'Admins','parametres':'Paramètres'};
+  const pages=['overview','universites','configurations','revenus','abonnements','activite','incidents','logs','admins','parametres'];
+  const titles={'overview':'Vue globale','universites':'Universités','configurations':'Demandes de configuration','revenus':'Revenus SaaS','abonnements':'Abonnements','activite':'Activité','incidents':'Incidents','logs':'Logs système','admins':'Admins','parametres':'Paramètres'};
   function showPage(id){
     pages.forEach(p=>{document.getElementById('page-'+p)?.classList.remove('active');document.querySelectorAll('.nav-item').forEach(n=>{if(n.getAttribute('onclick')?.includes("'"+p+"'"))n.classList.remove('active');});});
     document.getElementById('page-'+id)?.classList.add('active');
     document.querySelectorAll('.nav-item').forEach(n=>{if(n.getAttribute('onclick')?.includes("'"+id+"'"))n.classList.add('active');});
     document.getElementById('pageTitle').textContent=titles[id]||id;
+  }
+  async function marquerConfigStatut(requestId, statut, universityId) {
+    const { error } = await supabaseClient.from('configuration_requests').update({ statut, updated_at: new Date().toISOString() }).eq('id', requestId);
+    if (error) { showToast('⚠️ Erreur : ' + error.message); return; }
+    if (statut === 'prete' && universityId) {
+      const { error: uniErr } = await supabaseClient.from('universities').update({ onboarding_status: 'prete' }).eq('id', universityId);
+      if (uniErr) { showToast('⚠️ Erreur université : ' + uniErr.message); return; }
+      showToast('✅ Configuration marquée prête — l\'université peut maintenant s\'abonner.');
+    } else {
+      showToast('✅ Statut mis à jour.');
+    }
+    loadSuperadminData();
   }
   function openModal(){document.getElementById('addModal').classList.add('active');document.body.style.overflow='hidden';}
   function closeModal(){document.getElementById('addModal').classList.remove('active');document.body.style.overflow='';}
@@ -439,12 +458,13 @@
   const PLAN_LOGO = { Starter: 'linear-gradient(135deg,#64748B,#475569)', Pro: 'linear-gradient(135deg,var(--blue),var(--sky))', Max: 'linear-gradient(135deg,var(--purple),#7c3aed)' };
 
   async function loadSuperadminData() {
-    const [univRes, studsRes, teachsRes, paysRes, incidentsRes] = await Promise.all([
-      supabaseClient.from('universities').select('id, name, country, city, plan, price_monthly, status, created_at').order('created_at', { ascending: false }),
+    const [univRes, studsRes, teachsRes, paysRes, incidentsRes, configRes] = await Promise.all([
+      supabaseClient.from('universities').select('id, name, country, city, plan, price_monthly, status, onboarding_status, created_at').order('created_at', { ascending: false }),
       supabaseClient.from('students').select('id, university'),
       supabaseClient.from('teachers').select('id, university'),
       supabaseClient.from('payments').select('amount, paid_at, university').eq('statut', 'Confirmé'),
       supabaseClient.from('platform_incidents').select('id, title, priority, status, opened_at, resolved_at, university_id').order('opened_at', { ascending: false }),
+      supabaseClient.from('configuration_requests').select('*').order('created_at', { ascending: false }),
     ]);
 
     const univs = univRes.data || [];
@@ -452,6 +472,7 @@
     const teachs = teachsRes.data || [];
     const pays = paysRes.data || [];
     const incidents = incidentsRes.data || [];
+    const configRequests = configRes.data || [];
 
     const studsByUniv = {}; studs.forEach(s => { studsByUniv[s.university] = (studsByUniv[s.university] || 0) + 1; });
     const teachsByUniv = {}; teachs.forEach(t => { teachsByUniv[t.university] = (teachsByUniv[t.university] || 0) + 1; });
@@ -464,6 +485,7 @@
     // Sidebar
     document.getElementById('nb-univ').textContent = univs.length;
     document.getElementById('nb-incidents').textContent = openIncidents.length;
+    document.getElementById('nb-config').textContent = configRequests.filter(c => c.statut !== 'prete').length;
 
     // Vue globale — bannière + KPIs
     document.getElementById('ov-revenue').innerHTML = fmtFCFA(totalRevenue) + ' <span style="font-size:1.1rem;color:rgba(255,255,255,0.5)">FCFA</span>';
@@ -513,6 +535,39 @@
           </div>`;
         }).join('')
     ) + '<div class="univ-card" style="border:2px dashed rgba(255,255,255,0.1);display:flex;align-items:center;justify-content:center;cursor:pointer;min-height:160px" onclick="openModal()"><div style="text-align:center;color:rgba(255,255,255,0.3)"><div style="font-size:2rem;margin-bottom:.5rem">+</div><div style="font-size:.85rem;font-weight:600">Ajouter une université</div></div></div>';
+
+    // Page Configurations
+    const pendingConfig = configRequests.filter(c => c.statut !== 'prete');
+    document.getElementById('config-sub').textContent = `${pendingConfig.length} demande${pendingConfig.length > 1 ? 's' : ''} en attente sur ${configRequests.length} au total`;
+    const CONFIG_STATUS_BADGE = { nouvelle: 'badge-gold', en_cours: 'badge-blue', prete: 'badge-success' };
+    const CONFIG_STATUS_LABEL = { nouvelle: 'Nouvelle', en_cours: 'En cours', prete: 'Prête' };
+    const configList = document.getElementById('config-list');
+    configList.innerHTML = configRequests.length === 0
+      ? '<div style="color:rgba(255,255,255,0.4);padding:2rem">Aucune demande de configuration.</div>'
+      : configRequests.map(c => {
+          const uniName = univNameById[c.university_id] || '—';
+          const when = c.created_at ? relativeTime(new Date(c.created_at)) : '—';
+          const actions = c.statut === 'prete' ? '' : `
+            <div style="display:flex;gap:.6rem;margin-top:1rem">
+              ${c.statut === 'nouvelle' ? `<button onclick="marquerConfigStatut('${c.id}','en_cours')" style="padding:.55rem 1rem;border-radius:8px;background:rgba(255,255,255,0.08);color:white;font-size:.8rem;font-weight:600;cursor:pointer;border:none">Prendre en charge</button>` : ''}
+              <button onclick="marquerConfigStatut('${c.id}','prete','${c.university_id}')" style="padding:.55rem 1rem;border-radius:8px;background:var(--success);color:white;font-size:.8rem;font-weight:600;cursor:pointer;border:none">✓ Configuration terminée — débloquer le paiement</button>
+            </div>`;
+          return `<div class="card" style="margin-bottom:1rem">
+            <div style="display:flex;justify-content:space-between;align-items:flex-start;gap:1rem">
+              <div>
+                <div style="font-weight:700;color:white;font-size:1rem">${uniName}</div>
+                <div style="font-size:.78rem;color:rgba(255,255,255,0.4);margin-top:.15rem">Demande envoyée ${when}</div>
+              </div>
+              <span class="badge ${CONFIG_STATUS_BADGE[c.statut] || 'badge-gray'}">${CONFIG_STATUS_LABEL[c.statut] || c.statut}</span>
+            </div>
+            <div style="margin-top:.9rem;font-size:.85rem;color:rgba(255,255,255,0.75);display:grid;gap:.5rem">
+              <div><strong style="color:white">Effectif estimé :</strong> ${c.effectif_estime ?? '—'} étudiants</div>
+              <div><strong style="color:white">Structure :</strong> ${c.structure_description || '—'}</div>
+              <div><strong style="color:white">Données existantes à migrer :</strong> ${c.a_des_donnees_existantes ? 'Oui' : 'Non'}${c.a_des_donnees_existantes && c.details_migration ? ' — ' + c.details_migration : ''}</div>
+            </div>
+            ${actions}
+          </div>`;
+        }).join('');
 
     // Page Revenus
     document.getElementById('rev-total').textContent = fmtFCFA(totalRevenue);
