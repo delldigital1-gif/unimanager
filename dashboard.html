@@ -2789,7 +2789,9 @@
     const { wrap, bubble } = appendAiChatMessage('assistant', 'Analyse en cours…');
     const { data, error } = await supabaseClient.functions.invoke('agent-plateforme', { body: { messages: aiConversationHistory, filiere: currentAiFiliere || undefined } });
     if (error || data?.error) {
-      bubble.textContent = '⚠️ ' + (data?.error || error.message);
+      let msg = data?.error || error?.message || 'Erreur inconnue';
+      try { const body = await error?.context?.json?.(); if (body?.error) msg = body.error; } catch (e) {}
+      bubble.textContent = '⚠️ ' + msg;
       bubble.style.color = 'var(--danger)';
       aiConversationHistory.pop(); // ne garde pas un tour raté dans l'historique envoyé à l'IA
     } else if (data.type === 'email_draft') {

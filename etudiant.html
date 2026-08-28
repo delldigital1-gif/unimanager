@@ -972,7 +972,9 @@
     input.focus();
 
     if (error || data?.error) {
-      thinkingBubble.textContent = '⚠️ ' + (data?.error || error.message);
+      let msg = data?.error || error?.message || 'Erreur inconnue';
+      try { const body = await error?.context?.json?.(); if (body?.error) msg = body.error; } catch (e) {}
+      thinkingBubble.textContent = '⚠️ ' + msg;
       aiEtuHistory.pop();
       return;
     }
