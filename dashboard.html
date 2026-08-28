@@ -1033,11 +1033,11 @@
       </div>
       <div id="ai-chat-log" style="display:flex;flex-direction:column;gap:1rem;min-height:200px;max-height:55vh;overflow-y:auto;margin-bottom:1rem">
         <div style="background:var(--light);border-radius:12px;padding:1rem;font-size:.88rem;color:var(--navy);line-height:1.6">
-          👋 Bonjour ! Je peux analyser les impayés et vous donner une vue d'ensemble de votre université (effectifs, présence, résultats, charge enseignants). Essayez par exemple :
-          <div style="margin-top:.6rem;display:flex;flex-direction:column;gap:.4rem">
-            <a href="#" onclick="askAgentPlateforme('Quels sont les 5 étudiants avec le plus gros impayé ?');return false;" style="color:var(--blue);font-size:.85rem">→ Quels sont les 5 étudiants avec le plus gros impayé ?</a>
-            <a href="#" onclick="askAgentPlateforme('Quels sont les étudiants qui présentent un risque d\'abandon ?');return false;" style="color:var(--blue);font-size:.85rem">→ Quels sont les étudiants qui présentent un risque d'abandon ?</a>
-            <a href="#" onclick="askAgentPlateforme('Fais-moi une synthèse générale de la situation de l\'université.');return false;" style="color:var(--blue);font-size:.85rem">→ Fais-moi une synthèse générale de la situation.</a>
+          👋 Bonjour ! Je peux analyser les impayés et vous donner une vue d'ensemble de votre université (effectifs, présence, résultats, charge enseignants).
+          <div style="margin-top:.7rem;display:flex;flex-wrap:wrap;gap:.5rem">
+            <button class="ai-chat-suggest" onclick="askAgentPlateforme('Quels sont les 5 étudiants avec le plus gros impayé ?')" style="padding:.4rem .8rem;border-radius:100px;border:1px solid var(--border);background:white;font-size:.75rem;cursor:pointer;color:var(--navy)">💰 Top 5 des impayés</button>
+            <button class="ai-chat-suggest" onclick="askAgentPlateforme('Quels sont les étudiants qui présentent un risque d\'abandon ?')" style="padding:.4rem .8rem;border-radius:100px;border:1px solid var(--border);background:white;font-size:.75rem;cursor:pointer;color:var(--navy)">⚠️ Risque d'abandon</button>
+            <button class="ai-chat-suggest" onclick="askAgentPlateforme('Fais-moi une synthèse générale de la situation de l\'université.')" style="padding:.4rem .8rem;border-radius:100px;border:1px solid var(--border);background:white;font-size:.75rem;cursor:pointer;color:var(--navy)">📋 Synthèse générale</button>
           </div>
         </div>
       </div>
@@ -2769,9 +2769,14 @@
     currentAiFiliere = document.getElementById('ai-filiere-select').value;
     aiConversationHistory = [];
     const log = document.getElementById('ai-chat-log');
+    const chips = `<div style="margin-top:.7rem;display:flex;flex-wrap:wrap;gap:.5rem">
+            <button class="ai-chat-suggest" onclick="askAgentPlateforme('Quels sont les 5 étudiants avec le plus gros impayé ?')" style="padding:.4rem .8rem;border-radius:100px;border:1px solid var(--border);background:white;font-size:.75rem;cursor:pointer;color:var(--navy)">💰 Top 5 des impayés</button>
+            <button class="ai-chat-suggest" onclick="askAgentPlateforme('Quels sont les étudiants qui présentent un risque d\\'abandon ?')" style="padding:.4rem .8rem;border-radius:100px;border:1px solid var(--border);background:white;font-size:.75rem;cursor:pointer;color:var(--navy)">⚠️ Risque d'abandon</button>
+            <button class="ai-chat-suggest" onclick="askAgentPlateforme('Fais-moi une synthèse générale de la situation.')" style="padding:.4rem .8rem;border-radius:100px;border:1px solid var(--border);background:white;font-size:.75rem;cursor:pointer;color:var(--navy)">📋 Synthèse générale</button>
+          </div>`;
     log.innerHTML = currentAiFiliere
-      ? `<div style="background:var(--light);border-radius:12px;padding:1rem;font-size:.88rem;color:var(--navy);line-height:1.6">🎓 Vue restreinte à la filière <strong>${currentAiFiliere}</strong> — je ne réponds qu'avec les données de cette filière.</div>`
-      : `<div style="background:var(--light);border-radius:12px;padding:1rem;font-size:.88rem;color:var(--navy);line-height:1.6">👋 Bonjour ! Je peux analyser les impayés et vous donner une vue d'ensemble de votre université.</div>`;
+      ? `<div style="background:var(--light);border-radius:12px;padding:1rem;font-size:.88rem;color:var(--navy);line-height:1.6">🎓 Vue restreinte à la filière <strong>${currentAiFiliere}</strong> — je ne réponds qu'avec les données de cette filière.${chips}</div>`
+      : `<div style="background:var(--light);border-radius:12px;padding:1rem;font-size:.88rem;color:var(--navy);line-height:1.6">👋 Bonjour ! Je peux analyser les impayés et vous donner une vue d'ensemble de votre université.${chips}</div>`;
   }
 
   async function askAgentPlateforme(question) {
