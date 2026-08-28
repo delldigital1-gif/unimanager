@@ -1025,6 +1025,12 @@
     </div>
 
     <div style="background:white;border:1.5px solid var(--border);border-radius:16px;padding:1.5rem;max-width:820px">
+      <div style="display:flex;align-items:center;gap:.6rem;margin-bottom:1.1rem;padding-bottom:1.1rem;border-bottom:1px solid var(--border)">
+        <label for="ai-filiere-select" style="font-size:.82rem;font-weight:600;color:var(--navy)">🎓 Vue :</label>
+        <select id="ai-filiere-select" class="search-input" style="max-width:280px" onchange="onAiFiliereChange()">
+          <option value="">Toute l'université</option>
+        </select>
+      </div>
       <div id="ai-chat-log" style="display:flex;flex-direction:column;gap:1rem;min-height:200px;max-height:55vh;overflow-y:auto;margin-bottom:1rem">
         <div style="background:var(--light);border-radius:12px;padding:1rem;font-size:.88rem;color:var(--navy);line-height:1.6">
           👋 Bonjour ! Je peux analyser les impayés et vous donner une vue d'ensemble de votre université (effectifs, présence, résultats, charge enseignants). Essayez par exemple :
@@ -1739,7 +1745,7 @@
     loadEnseignants();
   }
 
-  window.authReady.then(user => { if (user) { loadEtudiants(); loadEnseignants(); loadPaymentsData(); loadEmploiSetup(); loadUtilisateursKpis(user); loadUniversiteSettings(user); loadExamensEtDepartements(user); loadEquipeAdmin(user); loadInvitesAdmin(user); loadPermissionsMatrix(); applyPermissionGating(user); applyPlanNavTags(user); loadTopbarMsgDot(user); } });
+  window.authReady.then(user => { if (user) { loadEtudiants(); loadEnseignants(); loadPaymentsData(); loadEmploiSetup(); loadUtilisateursKpis(user); loadUniversiteSettings(user); loadExamensEtDepartements(user); loadEquipeAdmin(user); loadInvitesAdmin(user); loadPermissionsMatrix(); applyPermissionGating(user); applyPlanNavTags(user); loadTopbarMsgDot(user); populateAiFiliereSelect(user); } });
 
   // Point rouge sur l'icône messagerie de la topbar — reprend exactement la
   // logique "non lu" de messagerie.html (dernier message d'une conversation
@@ -2745,6 +2751,29 @@
   // l'utilisateur : "souvent un seul assistant IA suffit... avec de
   // différentes compétences" — le modèle choisit lui-même quelles données/
   // outils utiliser selon la question, plutôt que deux panneaux séparés. ──
+  // Vue filière (2026-08-28) : pas de nouveau rôle "responsable de filière"
+  // (le schéma n'en a pas) — un admin peut restreindre l'Agent IA à un seul
+  // département via ce sélecteur, réutilisant la même liste réelle de
+  // départements que l'onglet Départements (students.department ∪
+  // teachers.department).
+  let currentAiFiliere = '';
+  async function populateAiFiliereSelect(user) {
+    const sel = document.getElementById('ai-filiere-select');
+    if (!sel) return;
+    const scoped = (q) => (user.role === 'superadmin' ? q : q.eq('university', user.university));
+    const { data: studs } = await scoped(supabaseClient.from('students').select('department'));
+    const depts = [...new Set((studs || []).map(s => s.department).filter(Boolean))].sort();
+    sel.innerHTML = '<option value="">Toute l\'université</option>' + depts.map(d => `<option value="${d}">${d}</option>`).join('');
+  }
+  function onAiFiliereChange() {
+    currentAiFiliere = document.getElementById('ai-filiere-select').value;
+    aiConversationHistory = [];
+    const log = document.getElementById('ai-chat-log');
+    log.innerHTML = currentAiFiliere
+      ? `<div style="background:var(--light);border-radius:12px;padding:1rem;font-size:.88rem;color:var(--navy);line-height:1.6">🎓 Vue restreinte à la filière <strong>${currentAiFiliere}</strong> — je ne réponds qu'avec les données de cette filière.</div>`
+      : `<div style="background:var(--light);border-radius:12px;padding:1rem;font-size:.88rem;color:var(--navy);line-height:1.6">👋 Bonjour ! Je peux analyser les impayés et vous donner une vue d'ensemble de votre université.</div>`;
+  }
+
   async function askAgentPlateforme(question) {
     if (aiChatBusy || !question || !question.trim()) return;
     aiChatBusy = true;
@@ -2753,7 +2782,7 @@
     appendAiChatMessage('user', question);
     aiConversationHistory.push({ role: 'user', content: question });
     const { wrap, bubble } = appendAiChatMessage('assistant', 'Analyse en cours…');
-    const { data, error } = await supabaseClient.functions.invoke('agent-plateforme', { body: { messages: aiConversationHistory } });
+    const { data, error } = await supabaseClient.functions.invoke('agent-plateforme', { body: { messages: aiConversationHistory, filiere: currentAiFiliere || undefined } });
     if (error || data?.error) {
       bubble.textContent = '⚠️ ' + (data?.error || error.message);
       bubble.style.color = 'var(--danger)';
