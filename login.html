@@ -17,7 +17,7 @@
 
     /* ── LEFT PANEL ── */
     .left-panel{
-      flex:1;display:flex;flex-direction:column;justify-content:center;
+      flex:1;display:flex;flex-direction:column;justify-content:flex-start;
       padding:3rem 4rem;position:relative;overflow:hidden;
       background:linear-gradient(135deg,#0d1520 0%,#0a1628 50%,#0d1a2e 100%);
     }
@@ -88,7 +88,7 @@
     .right-panel{
       width:480px;flex-shrink:0;
       background:white;display:flex;flex-direction:column;
-      justify-content:center;padding:3rem;
+      justify-content:flex-start;padding:3rem;
       position:relative;overflow-y:auto;max-height:100vh;
     }
     .right-panel::before{
@@ -112,6 +112,10 @@
       font-size:1.5rem;color:var(--navy);margin-bottom:.4rem;
     }
     .step-sub{font-size:.875rem;color:var(--gray);margin-bottom:1.75rem;line-height:1.6;}
+    /* Aligne les options de rôle (étape 1) sur les cartes du panneau
+       gauche, désormais que les deux panneaux sont ancrés en haut
+       plutôt que centrés (leurs hauteurs de contenu diffèrent). */
+    #step1{margin-top:131px;}
 
     .role-selector{display:flex;flex-direction:column;gap:.65rem;margin-bottom:1.5rem;}
     .role-option{
@@ -269,7 +273,8 @@
     /* Responsive */
     @media(max-width:900px){
       .left-panel{display:none;}
-      .right-panel{width:100%;padding:2rem 1.5rem;}
+      .right-panel{width:100%;padding:2rem 1.5rem;justify-content:center;}
+      #step1{margin-top:0;}
     }
   </style>
 </head>
