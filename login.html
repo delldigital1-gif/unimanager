@@ -112,10 +112,6 @@
       font-size:1.5rem;color:var(--navy);margin-bottom:.4rem;
     }
     .step-sub{font-size:.875rem;color:var(--gray);margin-bottom:1.75rem;line-height:1.6;}
-    /* Aligne les options de rôle (étape 1) sur les cartes du panneau
-       gauche, désormais que les deux panneaux sont ancrés en haut
-       plutôt que centrés (leurs hauteurs de contenu diffèrent). */
-    #step1{margin-top:131px;}
 
     .role-selector{display:flex;flex-direction:column;gap:.65rem;margin-bottom:1.5rem;}
     .role-option{
@@ -735,6 +731,26 @@
       document.getElementById('step2Sub').textContent = 'Connexion — ' + data.name;
     } catch (e) { /* silencieux : repli sur l'écran normal */ }
   })();
+
+  // ── Alignement dynamique étape 1 / panneau gauche ──
+  // Un décalage fixe en px est fragile : la hauteur réelle du bloc
+  // marketing de gauche (logo + titre + paragraphe) varie légèrement
+  // selon le rendu des polices, le zoom du navigateur ou l'OS. On mesure
+  // donc en direct l'écart avec la 1ère carte de gauche et on l'applique,
+  // recalculé à chaque chargement de police / redimensionnement.
+  function alignStep1WithLeftPanel() {
+    if (window.innerWidth <= 900) return; // panneau gauche masqué en mobile
+    const leftCard = document.getElementById('preview-admin');
+    const rightCard = document.getElementById('opt-admin');
+    const step1 = document.getElementById('step1');
+    if (!leftCard || !rightCard || !step1) return;
+    step1.style.marginTop = '0px';
+    const delta = leftCard.getBoundingClientRect().top - rightCard.getBoundingClientRect().top;
+    step1.style.marginTop = (delta > 0 ? delta : 0) + 'px';
+  }
+  window.addEventListener('load', alignStep1WithLeftPanel);
+  window.addEventListener('resize', alignStep1WithLeftPanel);
+  if (document.fonts && document.fonts.ready) document.fonts.ready.then(alignStep1WithLeftPanel);
 </script>
 </body>
 </html>
