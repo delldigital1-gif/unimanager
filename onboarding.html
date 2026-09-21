@@ -1070,7 +1070,7 @@
     const subEl = document.getElementById('inviteSub');
     const alertEl = document.getElementById('inviteAlert');
 
-    if (error || !invite || (invite.type !== 'admin' && invite.type !== 'parent')) {
+    if (error || !invite || !['admin', 'parent', 'enseignant'].includes(invite.type)) {
       titleEl.textContent = 'Lien d\'invitation invalide';
       alertEl.textContent = '⚠️ Ce lien n\'existe pas ou n\'est plus valide. Demandez un nouveau lien à votre administrateur.';
       alertEl.classList.add('error');
@@ -1093,6 +1093,8 @@
     titleEl.textContent = `Rejoindre ${invite.university}`;
     subEl.textContent = invite.type === 'parent'
       ? 'Créez votre compte parent pour suivre la scolarité de votre enfant.'
+      : invite.type === 'enseignant'
+      ? 'Créez votre compte enseignant pour accéder à votre espace (notes, présences, planning).'
       : 'Créez votre compte administrateur pour accéder à l\'espace de votre université.';
     document.getElementById('inv_email').value = invite.email;
     document.getElementById('inviteFormSection').style.display = 'block';
@@ -1140,6 +1142,22 @@
       btn.disabled = false;
       alertEl.textContent = '⚠️ ' + error.message;
       alertEl.classList.add('error');
+      return;
+    }
+
+    if (currentInvite.type === 'enseignant' && data.user) {
+      // accept_teacher_invite() est SECURITY DEFINER : un compte tout juste
+      // créé (rôle enseignant, pas encore admin) ne peut pas mettre à jour
+      // sa propre invitation via RLS (constaté en testant — seul un admin
+      // peut écrire sur `invites`). La fonction fait la vérification +
+      // liaison teachers.profile_id + marquage used_at en une transaction.
+      const { error: linkError } = await supabaseClient.rpc('accept_teacher_invite', { p_invite_id: currentInvite.id });
+      if (linkError) {
+        alertEl.textContent = '⚠️ ' + linkError.message;
+        alertEl.classList.add('error');
+        return;
+      }
+      window.location.href = 'enseignant.html';
       return;
     }
 

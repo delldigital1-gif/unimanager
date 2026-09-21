@@ -1004,6 +1004,7 @@
         <button class="btn-add" style="flex:1;justify-content:center" onclick="downloadFichePaieAdmin()">📄 Fiche de paie</button>
         <button class="btn-outline" style="flex:1;padding:.6rem;border-radius:9px;font-size:.875rem;font-weight:600;cursor:pointer;border:1.5px solid var(--border);color:var(--navy);background:white" onclick="showToast('✉️ Email envoyé à l\'enseignant');closeEnseignantModal()">✉️ Contacter</button>
       </div>
+      <button id="ens-invite-btn" class="btn-add" style="width:100%;justify-content:center;margin-top:.75rem;display:none;background:var(--purple)" onclick="inviterEnseignant()">✉️ Créer un accès de connexion</button>
     </div>
   </div>
 
@@ -1820,7 +1821,7 @@
         <td><span class="badge ${contratBadge[e.contrat_type]||''}">${e.contrat_type}</span></td>
         <td><strong>${e.heures_effectuees}h</strong> / ${e.heures_max}h</td><td>${tauxFmt}</td>
         <td><span class="badge ${statutBadge[e.status]||''}">${e.status}</span></td>
-        <td><button class="card-action" onclick="openEnseignantModal('${e.full_name.replace(/'/g,"\\'")}','${(e.specialite||'').replace(/'/g,"\\'")}','${e.department||''}','${e.contrat_type}','${e.heures_effectuees}','${e.heures_max}','${e.taux_horaire}','${e.status}','${initials}')">Voir fiche</button></td>
+        <td><button class="card-action" onclick="openEnseignantModal('${e.full_name.replace(/'/g,"\\'")}','${(e.specialite||'').replace(/'/g,"\\'")}','${e.department||''}','${e.contrat_type}','${e.heures_effectuees}','${e.heures_max}','${e.taux_horaire}','${e.status}','${initials}','${e.id}')">Voir fiche</button></td>
       </tr>`;
     }).join('');
   }
@@ -1977,13 +1978,13 @@
     const btn = document.getElementById('acc_submit');
     btn.disabled = true;
 
-    const { error: teacherError } = await supabaseClient.from('teachers').insert({
+    const { data: newTeacher, error: teacherError } = await supabaseClient.from('teachers').insert({
       full_name: `${candidatureCible.prenom} ${candidatureCible.nom}`,
       email: candidatureCible.email, specialite: candidatureCible.specialite,
       department, contrat_type, heures_max, taux_horaire,
       heures_effectuees: 0, status: 'Actif',
       university: window.currentUser.university
-    });
+    }).select('id').single();
     if (teacherError) {
       btn.disabled = false;
       errBox.textContent = '⚠️ ' + teacherError.message;
@@ -1994,9 +1995,22 @@
     const { error: appError } = await supabaseClient.from('teacher_applications').update({
       statut: 'acceptee', traitee_at: new Date().toISOString(), traitee_par: window.currentUser.id
     }).eq('id', candidatureCible.id);
+
+    // Crée directement un accès de connexion (jusqu'ici un enseignant n'avait
+    // jamais de compte auth, cf. mémoire projet) — copie le lien dans le
+    // presse-papier plutôt qu'un simple toast, pour pouvoir le transmettre.
+    const { data: invite, error: inviteError } = await supabaseClient.from('invites').insert({
+      type: 'enseignant', university: window.currentUser.university, email: candidatureCible.email,
+      teacher_id: newTeacher.id, created_by: window.currentUser.id,
+    }).select('token').single();
+
     btn.disabled = false;
     if (appError) { showToast('⚠️ Enseignant créé, mais erreur de mise à jour de la candidature : ' + appError.message); }
-    else showToast('✅ Candidature acceptée — compte enseignant créé.');
+    else if (inviteError || !invite) { showToast('✅ Compte enseignant créé (lien de connexion à générer manuellement depuis sa fiche).'); }
+    else {
+      const link = `${location.origin}${location.pathname.replace('dashboard.html', '')}onboarding.html?invite=${invite.token}`;
+      navigator.clipboard.writeText(link).then(() => showToast('✅ Candidature acceptée — lien de connexion copié.'));
+    }
 
     closeAccepterModal();
     loadCandidatures(window.currentUser);
@@ -3445,7 +3459,7 @@
 
   // ── Modal Fiche Enseignant ──
   let activeTeacherModal = null;
-  function openEnseignantModal(nom, spec, dept, contrat, heures, maxH, taux, statut, initiales) {
+  function openEnseignantModal(nom, spec, dept, contrat, heures, maxH, taux, statut, initiales, teacherId) {
     document.getElementById('ens-avatar').textContent = initiales;
     document.getElementById('ens-nom').textContent = nom;
     document.getElementById('ens-spec').textContent = spec;
@@ -3457,9 +3471,38 @@
     document.getElementById('ens-salaire').textContent = salaire.toLocaleString('fr') + ' FCFA';
     const badgeClass = statut === 'Actif' ? 'badge-success' : statut === 'En congé' ? 'badge-gold' : 'badge-danger';
     document.getElementById('ens-statut').innerHTML = '<span class="badge ' + badgeClass + '">' + statut + '</span>';
-    activeTeacherModal = { nom, spec, dept, contrat, heures: parseInt(heures)||0, maxH: parseInt(maxH)||0, taux: parseInt(taux)||0, statut };
+    activeTeacherModal = { nom, spec, dept, contrat, heures: parseInt(heures)||0, maxH: parseInt(maxH)||0, taux: parseInt(taux)||0, statut, teacherId };
+
+    const teacher = allEnseignants.find(e => e.id === teacherId);
+    const inviteBtn = document.getElementById('ens-invite-btn');
+    if (inviteBtn) {
+      if (teacher && !teacher.profile_id) { inviteBtn.style.display = ''; inviteBtn.disabled = false; inviteBtn.textContent = '✉️ Créer un accès de connexion'; }
+      else { inviteBtn.style.display = 'none'; }
+    }
+
     document.getElementById('enseignantModal').classList.add('active');
     document.body.style.overflow = 'hidden';
+  }
+
+  async function inviterEnseignant() {
+    if (!activeTeacherModal?.teacherId) return;
+    const teacher = allEnseignants.find(e => e.id === activeTeacherModal.teacherId);
+    if (!teacher) return;
+    if (!teacher.email) { showToast('⚠️ Cet enseignant n\'a pas d\'email renseigné — ajoutez-en un d\'abord.'); return; }
+
+    const btn = document.getElementById('ens-invite-btn');
+    btn.disabled = true; btn.textContent = 'Envoi…';
+    const { data, error } = await supabaseClient.from('invites').insert({
+      type: 'enseignant', university: window.currentUser.university, email: teacher.email,
+      teacher_id: teacher.id, created_by: window.currentUser.id,
+    }).select('token').single();
+    btn.disabled = false; btn.textContent = '✉️ Créer un accès de connexion';
+
+    if (error) { showToast('⚠️ ' + error.message); return; }
+    const link = `${location.origin}${location.pathname.replace('dashboard.html', '')}onboarding.html?invite=${data.token}`;
+    navigator.clipboard.writeText(link).then(() => {
+      showToast('✅ Lien de connexion copié — à transmettre à ' + teacher.full_name);
+    });
   }
   function closeEnseignantModal() {
     document.getElementById('enseignantModal').classList.remove('active');
