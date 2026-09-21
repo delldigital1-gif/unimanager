@@ -720,8 +720,26 @@
         <div class="form-group"><label>Enseignant</label><select id="cr_teacher" class="filter-select" style="width:100%"></select></div>
         <div class="form-group"><label>Type</label><select id="cr_type" class="filter-select" style="width:100%"><option>Cours</option><option>TD</option><option>TP</option><option>Examen</option></select></div>
       </div>
-      <div class="form-group"><label>Salle</label><input id="cr_salle" class="search-input" style="width:100%" placeholder="Ex: Salle A1"/></div>
+      <div class="form-group">
+        <label>Salle</label>
+        <div style="display:flex;gap:.5rem">
+          <select id="cr_salle" class="filter-select" style="width:100%"></select>
+          <button type="button" onclick="openSalleModal()" title="Ajouter une salle" style="flex-shrink:0;width:38px;border-radius:8px;border:1px solid var(--border);background:var(--light);cursor:pointer;font-weight:700">+</button>
+        </div>
+      </div>
       <button class="btn-submit" id="cr_submit" onclick="submitCreneau()">Ajouter le créneau →</button>
+    </div>
+  </div>
+
+  <!-- ══ MODAL AJOUTER SALLE ══ -->
+  <div class="modal-overlay" id="salleModal" onclick="if(event.target===this)closeSalleModal()">
+    <div class="modal" style="max-width:400px">
+      <button class="modal-close" onclick="closeSalleModal()">✕</button>
+      <div style="font-family:'Playfair Display',serif;font-weight:800;font-size:1.2rem;margin-bottom:1.25rem">+ Nouvelle salle</div>
+      <div id="salleError" style="display:none;background:rgba(239,68,68,0.08);color:var(--danger);border:1px solid rgba(239,68,68,0.2);padding:.6rem 1rem;border-radius:8px;font-size:.83rem;margin-bottom:1rem"></div>
+      <div class="form-group"><label>Nom de la salle</label><input id="sl_nom" class="search-input" style="width:100%" placeholder="Ex: Amphi A"/></div>
+      <div class="form-group"><label>Capacité (optionnel)</label><input id="sl_capacite" type="number" min="1" class="search-input" style="width:100%" placeholder="Ex: 60"/></div>
+      <button class="btn-submit" id="sl_submit" onclick="submitSalle()">Ajouter la salle →</button>
     </div>
   </div>
 
@@ -2325,6 +2343,7 @@
     const { data: teachs } = await teachQuery;
     allTeachersForEt = teachs || [];
     document.getElementById('cr_teacher').innerHTML = allTeachersForEt.map(t => `<option value="${t.id}">${t.full_name}</option>`).join('');
+    await loadSalles();
 
     const depts = Object.keys(deptLevels);
     document.getElementById('et_dept').innerHTML = depts.map(d => `<option value="${d}">${d}</option>`).join('');
@@ -2366,7 +2385,6 @@
 
   function openCreneauModal() {
     document.getElementById('cr_matiere').value = '';
-    document.getElementById('cr_salle').value = '';
     document.getElementById('creneauError').style.display = 'none';
     document.getElementById('creneauModal').classList.add('active');
     document.body.style.overflow = 'hidden';
@@ -2374,6 +2392,58 @@
   function closeCreneauModal() {
     document.getElementById('creneauModal').classList.remove('active');
     document.body.style.overflow = '';
+  }
+
+  function openSalleModal() {
+    document.getElementById('sl_nom').value = '';
+    document.getElementById('sl_capacite').value = '';
+    document.getElementById('salleError').style.display = 'none';
+    document.getElementById('salleModal').classList.add('active');
+    document.body.style.overflow = 'hidden';
+  }
+  function closeSalleModal() {
+    document.getElementById('salleModal').classList.remove('active');
+    document.body.style.overflow = '';
+  }
+
+  async function submitSalle() {
+    const errBox = document.getElementById('salleError');
+    errBox.style.display = 'none';
+    const user = window.currentUser;
+    const nom = document.getElementById('sl_nom').value.trim();
+    const capaciteRaw = document.getElementById('sl_capacite').value.trim();
+    if (!nom) {
+      errBox.textContent = '⚠️ Le nom de la salle est obligatoire.';
+      errBox.style.display = 'block';
+      return;
+    }
+    const btn = document.getElementById('sl_submit');
+    btn.disabled = true;
+    const { error } = await supabaseClient.from('salles').insert({
+      university: user.university, nom, capacite: capaciteRaw ? parseInt(capaciteRaw, 10) : null
+    });
+    btn.disabled = false;
+    if (error) {
+      errBox.textContent = error.message.includes('duplicate') ? '⚠️ Cette salle existe déjà.' : '⚠️ ' + error.message;
+      errBox.style.display = 'block';
+      return;
+    }
+    closeSalleModal();
+    showToast('✅ Salle ajoutée');
+    await loadSalles();
+    document.getElementById('cr_salle').value = nom;
+  }
+
+  let allSallesForEt = [];
+  async function loadSalles() {
+    const user = window.currentUser;
+    let q = supabaseClient.from('salles').select('id, nom, capacite').order('nom');
+    if (user.role !== 'superadmin') q = q.eq('university', user.university);
+    const { data } = await q;
+    allSallesForEt = data || [];
+    document.getElementById('cr_salle').innerHTML = allSallesForEt
+      .map(s => `<option value="${s.nom}">${s.nom}${s.capacite ? ' (' + s.capacite + ' places)' : ''}</option>`).join('')
+      || '<option value="">Aucune salle — cliquez sur +</option>';
   }
 
   async function submitCreneau() {
@@ -2399,6 +2469,35 @@
 
     const btn = document.getElementById('cr_submit');
     btn.disabled = true;
+
+    // Un enseignant ne peut pas être sur 2 créneaux en même temps, quelle que
+    // soit la filière/le niveau (la contrainte unique en base ne couvre que
+    // la cohorte département+niveau+jour+créneau, pas l'enseignant).
+    let scopeQuery = supabaseClient.from('schedule_slots').select('id, department, level')
+      .eq('teacher_id', teacher_id).eq('jour', jour).eq('creneau', creneau);
+    if (user.role !== 'superadmin') scopeQuery = scopeQuery.eq('university', user.university);
+    const { data: teacherConflicts } = await scopeQuery;
+    if (teacherConflicts && teacherConflicts.length > 0) {
+      btn.disabled = false;
+      errBox.textContent = `⚠️ ${teacher?.full_name || 'Cet enseignant'} a déjà un cours ${jour} ${creneau} (${teacherConflicts[0].department} ${teacherConflicts[0].level}).`;
+      errBox.style.display = 'block';
+      return;
+    }
+
+    // Une salle ne peut pas être réservée 2 fois sur le même créneau.
+    if (salle) {
+      let salleQuery = supabaseClient.from('schedule_slots').select('id, department, level')
+        .eq('salle', salle).eq('jour', jour).eq('creneau', creneau);
+      if (user.role !== 'superadmin') salleQuery = salleQuery.eq('university', user.university);
+      const { data: salleConflicts } = await salleQuery;
+      if (salleConflicts && salleConflicts.length > 0) {
+        btn.disabled = false;
+        errBox.textContent = `⚠️ La salle "${salle}" est déjà occupée ${jour} ${creneau} (${salleConflicts[0].department} ${salleConflicts[0].level}).`;
+        errBox.style.display = 'block';
+        return;
+      }
+    }
+
     const { error } = await supabaseClient.from('schedule_slots').insert({
       university: user.university, department, level, jour, creneau,
       matiere, teacher_id, enseignant_nom: teacher?.full_name, type, salle
