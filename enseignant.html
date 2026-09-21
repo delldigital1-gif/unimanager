@@ -612,7 +612,19 @@
       .upsert(rows, { onConflict: 'student_id,teacher_id,matiere,session_date' });
 
     if (error) { showToast('⚠️ ' + error.message); return; }
-    showToast('✅ Présences enregistrées !');
+
+    // Comptabilise les heures effectuées de l'enseignant pour cette séance
+    // (une seule fois par enseignant/matière/date — voir record_teacher_session,
+    // qui empêche le double comptage si les présences sont ressaisies/corrigées).
+    const { data: nouvellementComptee, error: rpcError } = await supabaseClient.rpc('record_teacher_session', {
+      p_teacher_id: monTeacherRecord.id, p_matiere: matiere, p_session_date: date
+    });
+    if (!rpcError && nouvellementComptee) {
+      const { data: refreshed } = await supabaseClient.from('teachers').select('heures_effectuees').eq('id', monTeacherRecord.id).maybeSingle();
+      if (refreshed) monTeacherRecord.heures_effectuees = refreshed.heures_effectuees;
+      renderSalaire(monTeacherRecord);
+    }
+    showToast(rpcError ? '✅ Présences enregistrées !' : (nouvellementComptee ? '✅ Présences enregistrées — heures comptabilisées !' : '✅ Présences mises à jour (déjà comptabilisées).'));
   }
 
   // ── Emploi du temps (Supabase) ──

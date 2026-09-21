@@ -1088,6 +1088,11 @@
           <div class="form-group"><label>Ville</label><input type="text" class="search-input" style="width:100%" id="param-univ-ville"/></div>
           <div class="form-group"><label>Email officiel</label><input type="email" class="search-input" style="width:100%" id="param-univ-email"/></div>
           <div class="form-group"><label>Téléphone</label><input type="text" class="search-input" style="width:100%" id="param-univ-tel"/></div>
+          <div class="form-group">
+            <label>Durée standard d'une séance (heures)</label>
+            <input type="number" step="0.5" min="0.5" class="search-input" style="width:100%" id="param-duree-seance"/>
+            <div style="font-size:.72rem;color:var(--gray);margin-top:.3rem">Utilisée pour calculer automatiquement les heures effectuées d'un enseignant à chaque validation de présence.</div>
+          </div>
         </div>
       </div>
 
@@ -2174,7 +2179,7 @@
   // toutes les données déjà créées.
   async function loadUniversiteSettings(user) {
     const { data, error } = await supabaseClient
-      .from('universities').select('id, name, country, city, email, phone, logo_url, plan, subscription_renews_at')
+      .from('universities').select('id, name, country, city, email, phone, logo_url, plan, subscription_renews_at, duree_seance_heures')
       .eq('name', user.university).maybeSingle();
     if (error) { console.error(error); return; }
     if (!data) return;
@@ -2188,6 +2193,8 @@
     if (emailEl) emailEl.value = data.email || '';
     const telEl = document.getElementById('param-univ-tel');
     if (telEl) telEl.value = data.phone || '';
+    const dureeEl = document.getElementById('param-duree-seance');
+    if (dureeEl) dureeEl.value = data.duree_seance_heures ?? 2;
     renderLogoDropzone(data.logo_url);
     loadFacturation(data);
   }
@@ -2276,9 +2283,11 @@
     const city = document.getElementById('param-univ-ville')?.value.trim() || null;
     const email = document.getElementById('param-univ-email')?.value.trim() || null;
     const phone = document.getElementById('param-univ-tel')?.value.trim() || null;
+    const dureeRaw = document.getElementById('param-duree-seance')?.value;
+    const duree_seance_heures = dureeRaw ? parseFloat(dureeRaw) : 2;
 
     const { error } = await supabaseClient
-      .from('universities').update({ country, city, email, phone })
+      .from('universities').update({ country, city, email, phone, duree_seance_heures })
       .eq('name', user.university);
 
     statusEl.style.display = 'block';
