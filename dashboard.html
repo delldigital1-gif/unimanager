@@ -421,6 +421,10 @@
     <div class="nav-item" data-module="enseignants" onclick="showPage('enseignants')">
       <span class="nav-icon">👨‍🏫</span> Enseignants
     </div>
+    <div class="nav-item" data-module="enseignants" onclick="showPage('recrutement')">
+      <span class="nav-icon">📋</span> Recrutement
+      <span class="nav-badge" id="nav-badge-recrutement" style="display:none">0</span>
+    </div>
     <div class="nav-item" data-module="emploi_temps" onclick="showPage('emploi-temps')">
       <span class="nav-icon">📅</span> Emploi du temps
     </div>
@@ -859,6 +863,47 @@
         <div class="progress-list" id="ens-volume-horaire">
           <div style="text-align:center;color:var(--gray);padding:1rem;font-size:.85rem">Chargement…</div>
         </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ══════════════════════════════
+       PAGE : RECRUTEMENT
+  ══════════════════════════════ -->
+  <div class="page" id="page-recrutement">
+    <div class="page-header">
+      <div><h2>Recrutement</h2><div style="font-size:.85rem;color:var(--gray);margin-top:.2rem" id="recrut-sub">Candidatures reçues via le lien public</div></div>
+      <button class="btn-add" onclick="copierLienCandidature()">🔗 Copier le lien de candidature</button>
+    </div>
+    <div class="card">
+      <table class="data-table">
+        <thead><tr><th>Candidat</th><th>Spécialité</th><th>Diplôme</th><th>Expérience</th><th>Reçue le</th><th>CV</th><th>Statut</th><th>Actions</th></tr></thead>
+        <tbody id="recrutement-tbody">
+          <tr><td colspan="8" style="text-align:center;color:var(--gray);padding:2rem">Chargement...</td></tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+  <!-- ══ MODAL : ACCEPTER CANDIDATURE ══ -->
+  <div class="modal-overlay" id="modalAccepterCandidature" onclick="if(event.target===this)closeAccepterModal()">
+    <div class="modal" style="max-width:480px">
+      <button class="modal-close" onclick="closeAccepterModal()">✕</button>
+      <div style="font-family:'Playfair Display',serif;font-weight:800;font-size:1.2rem;margin-bottom:.3rem">Accepter la candidature</div>
+      <div id="acc_candidatNom" style="font-size:.85rem;color:var(--gray);margin-bottom:1.25rem"></div>
+      <div id="accepterError" style="display:none;background:rgba(239,68,68,0.08);color:var(--danger);border:1px solid rgba(239,68,68,0.2);padding:.6rem 1rem;border-radius:8px;font-size:.83rem;margin-bottom:1rem"></div>
+      <div style="display:flex;flex-direction:column;gap:.85rem">
+        <div><label style="font-size:.8rem;font-weight:600;display:block;margin-bottom:.3rem">Département</label>
+          <select id="acc_dept" class="filter-select" style="width:100%"></select>
+        </div>
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:.75rem">
+          <div><label style="font-size:.8rem;font-weight:600;display:block;margin-bottom:.3rem">Contrat</label>
+            <select id="acc_contrat" class="filter-select" style="width:100%"><option>Permanent</option><option>Vacataire</option><option>Contractuel</option></select>
+          </div>
+          <div><label style="font-size:.8rem;font-weight:600;display:block;margin-bottom:.3rem">Heures max</label><input id="acc_heuresmax" type="number" class="search-input" style="width:100%" value="180"/></div>
+        </div>
+        <div><label style="font-size:.8rem;font-weight:600;display:block;margin-bottom:.3rem">Taux/h (FCFA)</label><input id="acc_taux" type="number" class="search-input" style="width:100%" value="8000"/></div>
+        <button class="btn-add" style="justify-content:center;margin-top:.5rem" id="acc_submit" onclick="submitAccepterCandidature()">✅ Créer le compte enseignant</button>
       </div>
     </div>
   </div>
@@ -1768,7 +1813,136 @@
     loadEnseignants();
   }
 
-  window.authReady.then(user => { if (user) { loadEtudiants(); loadEnseignants(); loadPaymentsData(); loadEmploiSetup(); loadUtilisateursKpis(user); loadUniversiteSettings(user); loadExamensEtDepartements(user); loadEquipeAdmin(user); loadInvitesAdmin(user); loadPermissionsMatrix(); applyPermissionGating(user); applyPlanNavTags(user); loadTopbarMsgDot(user); populateAiFiliereSelect(user); } });
+  // ── Recrutement enseignants (candidatures publiques, données réelles) ──
+  let candidatures = [];
+  let candidatureCible = null;
+
+  function copierLienCandidature() {
+    const user = window.currentUser;
+    const subdomain = (universiteSubdomainActuelle || '').trim();
+    const url = subdomain
+      ? `${location.origin}/candidature-enseignant.html?u=${subdomain}`
+      : `${location.origin}/candidature-enseignant.html`;
+    navigator.clipboard.writeText(url).then(() => showToast('🔗 Lien copié : ' + url));
+  }
+
+  async function loadCandidatures(user) {
+    let q = supabaseClient.from('teacher_applications').select('*').order('created_at', { ascending: false });
+    if (user.role !== 'superadmin') q = q.eq('university', user.university);
+    const { data, error } = await q;
+    if (error) { console.error(error); return; }
+    candidatures = data || [];
+    renderCandidatures();
+
+    const nouvelles = candidatures.filter(c => c.statut === 'nouvelle').length;
+    const badge = document.getElementById('nav-badge-recrutement');
+    if (badge) { badge.style.display = nouvelles > 0 ? 'inline-block' : 'none'; badge.textContent = nouvelles; }
+    document.getElementById('recrut-sub').textContent = `${candidatures.length} candidature(s) · ${nouvelles} nouvelle(s)`;
+  }
+
+  function renderCandidatures() {
+    const tbody = document.getElementById('recrutement-tbody');
+    if (!tbody) return;
+    if (candidatures.length === 0) {
+      tbody.innerHTML = '<tr><td colspan="8" style="text-align:center;color:var(--gray);padding:2rem">Aucune candidature reçue pour le moment.</td></tr>';
+      return;
+    }
+    const statutBadge = { nouvelle: 'badge-gold', acceptee: 'badge-success', rejetee: 'badge-danger' };
+    const statutLabel = { nouvelle: 'Nouvelle', acceptee: 'Acceptée', rejetee: 'Rejetée' };
+    tbody.innerHTML = candidatures.map(c => `
+      <tr>
+        <td><div style="font-weight:600">${c.prenom} ${c.nom}</div><div style="font-size:.78rem;color:var(--gray)">${c.email}</div></td>
+        <td>${c.specialite}</td>
+        <td>${c.diplome || '—'}</td>
+        <td>${c.annees_experience != null ? c.annees_experience + ' an(s)' : '—'}</td>
+        <td>${new Date(c.created_at).toLocaleDateString('fr-FR')}</td>
+        <td>${c.cv_path ? `<button class="card-action" onclick="voirCV('${c.cv_path}')">📄 Voir</button>` : '—'}</td>
+        <td><span class="badge ${statutBadge[c.statut]}">${statutLabel[c.statut]}</span></td>
+        <td>${c.statut === 'nouvelle'
+          ? `<div style="display:flex;gap:.4rem"><button class="card-action" onclick="openAccepterModal('${c.id}')">✅ Accepter</button><button class="card-action" onclick="rejeterCandidature('${c.id}')">✕ Rejeter</button></div>`
+          : '—'}</td>
+      </tr>`).join('');
+  }
+
+  async function voirCV(path) {
+    const { data, error } = await supabaseClient.storage.from('teacher-applications').createSignedUrl(path, 60);
+    if (error) { showToast('⚠️ ' + error.message); return; }
+    window.open(data.signedUrl, '_blank');
+  }
+
+  async function rejeterCandidature(id) {
+    if (!confirm('Rejeter cette candidature ?')) return;
+    const { error } = await supabaseClient.from('teacher_applications').update({
+      statut: 'rejetee', traitee_at: new Date().toISOString(), traitee_par: window.currentUser.id
+    }).eq('id', id);
+    if (error) { showToast('⚠️ ' + error.message); return; }
+    showToast('Candidature rejetée.');
+    loadCandidatures(window.currentUser);
+  }
+
+  function openAccepterModal(id) {
+    candidatureCible = candidatures.find(c => c.id === id);
+    if (!candidatureCible) return;
+    document.getElementById('acc_candidatNom').textContent = `${candidatureCible.prenom} ${candidatureCible.nom} — ${candidatureCible.specialite}`;
+    const depts = Object.keys(deptLevels).sort();
+    document.getElementById('acc_dept').innerHTML = depts.length > 0
+      ? depts.map(d => `<option value="${d}">${d}</option>`).join('')
+      : '<option value="">Aucun département — en créer un via une fiche étudiant</option>';
+    document.getElementById('acc_contrat').value = 'Vacataire';
+    document.getElementById('acc_heuresmax').value = 180;
+    document.getElementById('acc_taux').value = 8000;
+    document.getElementById('accepterError').style.display = 'none';
+    document.getElementById('modalAccepterCandidature').classList.add('active');
+  }
+  function closeAccepterModal() {
+    document.getElementById('modalAccepterCandidature').classList.remove('active');
+  }
+
+  async function submitAccepterCandidature() {
+    if (!candidatureCible) return;
+    const errBox = document.getElementById('accepterError');
+    errBox.style.display = 'none';
+
+    const department = document.getElementById('acc_dept').value;
+    const contrat_type = document.getElementById('acc_contrat').value;
+    const heures_max = parseInt(document.getElementById('acc_heuresmax').value) || 180;
+    const taux_horaire = parseInt(document.getElementById('acc_taux').value) || 0;
+    if (!department) {
+      errBox.textContent = '⚠️ Sélectionnez un département.';
+      errBox.style.display = 'block';
+      return;
+    }
+
+    const btn = document.getElementById('acc_submit');
+    btn.disabled = true;
+
+    const { error: teacherError } = await supabaseClient.from('teachers').insert({
+      full_name: `${candidatureCible.prenom} ${candidatureCible.nom}`,
+      email: candidatureCible.email, specialite: candidatureCible.specialite,
+      department, contrat_type, heures_max, taux_horaire,
+      heures_effectuees: 0, status: 'Actif',
+      university: window.currentUser.university
+    });
+    if (teacherError) {
+      btn.disabled = false;
+      errBox.textContent = '⚠️ ' + teacherError.message;
+      errBox.style.display = 'block';
+      return;
+    }
+
+    const { error: appError } = await supabaseClient.from('teacher_applications').update({
+      statut: 'acceptee', traitee_at: new Date().toISOString(), traitee_par: window.currentUser.id
+    }).eq('id', candidatureCible.id);
+    btn.disabled = false;
+    if (appError) { showToast('⚠️ Enseignant créé, mais erreur de mise à jour de la candidature : ' + appError.message); }
+    else showToast('✅ Candidature acceptée — compte enseignant créé.');
+
+    closeAccepterModal();
+    loadCandidatures(window.currentUser);
+    loadEnseignants();
+  }
+
+  window.authReady.then(user => { if (user) { loadEtudiants(); loadEnseignants(); loadCandidatures(user); loadPaymentsData(); loadEmploiSetup(); loadUtilisateursKpis(user); loadUniversiteSettings(user); loadExamensEtDepartements(user); loadEquipeAdmin(user); loadInvitesAdmin(user); loadPermissionsMatrix(); applyPermissionGating(user); applyPlanNavTags(user); loadTopbarMsgDot(user); populateAiFiliereSelect(user); } });
 
   // Point rouge sur l'icône messagerie de la topbar — reprend exactement la
   // logique "non lu" de messagerie.html (dernier message d'une conversation
@@ -2177,12 +2351,14 @@
   // teachers.university, payments.university, grades.university) — la
   // renommer via ce formulaire romprait silencieusement ce rattachement pour
   // toutes les données déjà créées.
+  let universiteSubdomainActuelle = '';
   async function loadUniversiteSettings(user) {
     const { data, error } = await supabaseClient
-      .from('universities').select('id, name, country, city, email, phone, logo_url, plan, subscription_renews_at, duree_seance_heures')
+      .from('universities').select('id, name, country, city, email, phone, logo_url, plan, subscription_renews_at, duree_seance_heures, subdomain')
       .eq('name', user.university).maybeSingle();
     if (error) { console.error(error); return; }
     if (!data) return;
+    universiteSubdomainActuelle = data.subdomain || '';
     const nomEl = document.getElementById('param-univ-nom');
     if (nomEl) nomEl.value = data.name || '';
     const paysEl = document.getElementById('param-univ-pays');
@@ -2525,9 +2701,9 @@
   }
 
   // ── Navigation ──
-  const pages = ['dashboard','etudiants','enseignants','emploi-temps','departements','examens','comptabilite','paiements','assistant-ia','parametres','facturation','utilisateurs'];
+  const pages = ['dashboard','etudiants','enseignants','recrutement','emploi-temps','departements','examens','comptabilite','paiements','assistant-ia','parametres','facturation','utilisateurs'];
   const titles = {
-    'dashboard':'Tableau de bord','etudiants':'Étudiants','enseignants':'Enseignants',
+    'dashboard':'Tableau de bord','etudiants':'Étudiants','enseignants':'Enseignants','recrutement':'Recrutement',
     'emploi-temps':'Emploi du temps','departements':'Départements','examens':'Examens & Résultats',
     'comptabilite':'Comptabilité','paiements':'Paiements','assistant-ia':'Assistant IA','parametres':'Paramètres','facturation':'Facturation','utilisateurs':'Utilisateurs'
   };
