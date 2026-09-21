@@ -1429,6 +1429,70 @@
     </div>
   </div>
 
+  <!-- ══ MODAL : PROFIL ÉTUDIANT ══ -->
+  <div class="modal-overlay" id="etudiantProfilModal" onclick="if(event.target===this)closeEtudiantProfilModal()">
+    <div class="modal" style="max-width:620px;max-height:85vh;overflow-y:auto">
+      <button class="modal-close" onclick="closeEtudiantProfilModal()">✕</button>
+      <div style="display:flex;align-items:center;gap:1rem;margin-bottom:1.5rem">
+        <div id="etp-avatar" class="user-avatar" style="width:56px;height:56px;font-size:1.2rem;border-radius:14px"></div>
+        <div>
+          <div id="etp-nom" style="font-family:'Playfair Display',serif;font-weight:800;font-size:1.1rem"></div>
+          <div id="etp-sub" style="font-size:.85rem;color:var(--gray);margin-top:.2rem"></div>
+        </div>
+      </div>
+      <div style="display:grid;grid-template-columns:1fr 1fr 1fr 1fr;gap:.75rem;margin-bottom:1.25rem">
+        <div style="background:var(--light);border-radius:10px;padding:.85rem">
+          <div style="font-size:.68rem;color:var(--gray);font-weight:600;text-transform:uppercase;letter-spacing:.05em">Département</div>
+          <div id="etp-dept" style="font-weight:600;margin-top:.25rem;font-size:.85rem"></div>
+        </div>
+        <div style="background:var(--light);border-radius:10px;padding:.85rem">
+          <div style="font-size:.68rem;color:var(--gray);font-weight:600;text-transform:uppercase;letter-spacing:.05em">Niveau</div>
+          <div id="etp-niveau" style="font-weight:600;margin-top:.25rem;font-size:.85rem"></div>
+        </div>
+        <div style="background:var(--light);border-radius:10px;padding:.85rem">
+          <div style="font-size:.68rem;color:var(--gray);font-weight:600;text-transform:uppercase;letter-spacing:.05em">Statut</div>
+          <div id="etp-statut" style="margin-top:.25rem"></div>
+        </div>
+        <div style="background:var(--light);border-radius:10px;padding:.85rem">
+          <div style="font-size:.68rem;color:var(--gray);font-weight:600;text-transform:uppercase;letter-spacing:.05em">Paiement</div>
+          <div id="etp-paiement" style="margin-top:.25rem"></div>
+        </div>
+      </div>
+      <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:.75rem;margin-bottom:1.5rem">
+        <div style="background:rgba(26,86,219,0.06);border-radius:10px;padding:.85rem;text-align:center">
+          <div style="font-size:.7rem;color:var(--gray)">Moyenne générale</div>
+          <div id="etp-moyenne" style="font-family:'Playfair Display',serif;font-weight:800;font-size:1.3rem;color:var(--blue);margin-top:.2rem"></div>
+        </div>
+        <div style="background:rgba(16,185,129,0.06);border-radius:10px;padding:.85rem;text-align:center">
+          <div style="font-size:.7rem;color:var(--gray)">Assiduité</div>
+          <div id="etp-assiduite" style="font-family:'Playfair Display',serif;font-weight:800;font-size:1.3rem;color:var(--success);margin-top:.2rem"></div>
+        </div>
+        <div style="background:rgba(245,158,11,0.06);border-radius:10px;padding:.85rem;text-align:center">
+          <div style="font-size:.7rem;color:var(--gray)">Crédits validés</div>
+          <div id="etp-credits" style="font-family:'Playfair Display',serif;font-weight:800;font-size:1.3rem;color:var(--gold);margin-top:.2rem"></div>
+        </div>
+      </div>
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:1.5rem;font-size:.82rem;color:var(--gray);margin-bottom:1.5rem">
+        <div><strong style="color:var(--navy)">Email :</strong> <span id="etp-email"></span></div>
+        <div><strong style="color:var(--navy)">Téléphone :</strong> <span id="etp-tel"></span></div>
+        <div><strong style="color:var(--navy)">Né(e) le :</strong> <span id="etp-naissance"></span></div>
+        <div><strong style="color:var(--navy)">Nationalité :</strong> <span id="etp-nationalite"></span></div>
+      </div>
+      <div style="margin-bottom:1.5rem">
+        <div style="font-size:.85rem;font-weight:700;margin-bottom:.6rem">Notes récentes</div>
+        <div id="etp-notes-list" style="display:flex;flex-direction:column;gap:.4rem"></div>
+      </div>
+      <div style="margin-bottom:1.5rem">
+        <div style="font-size:.85rem;font-weight:700;margin-bottom:.6rem">Paiements</div>
+        <div id="etp-payments-list" style="display:flex;flex-direction:column;gap:.4rem"></div>
+      </div>
+      <div>
+        <div style="font-size:.85rem;font-weight:700;margin-bottom:.6rem">Parent(s) lié(s)</div>
+        <div id="etp-parents-list" style="display:flex;flex-direction:column;gap:.4rem"></div>
+      </div>
+    </div>
+  </div>
+
 </div><!-- /content -->
 </main>
 
@@ -1660,9 +1724,94 @@
         <td>${e.level || '—'}</td>
         <td><span class="badge ${paiementBadge[e.payment_status]||''}">${e.payment_status}</span></td>
         <td><span class="badge ${statutBadge[e.status]||''}">${e.status}</span></td>
-        <td><div style="display:flex;gap:.5rem"><button class="card-action" onclick="showToast('👁️ Profil de ${e.full_name}')">Voir</button><button class="card-action" onclick="openInviteParentModal('${e.id}','${e.full_name.replace(/'/g, "\\'")}')">👨‍👩‍👧 Lier parent</button></div></td>
+        <td><div style="display:flex;gap:.5rem"><button class="card-action" onclick="voirEtudiant('${e.id}')">Voir</button><button class="card-action" onclick="openInviteParentModal('${e.id}','${e.full_name.replace(/'/g, "\\'")}')">👨‍👩‍👧 Lier parent</button></div></td>
       </tr>`;
     }).join('');
+  }
+
+  // ── Profil étudiant (modal "Voir") — agrège notes, présences, paiements et parents liés ──
+  async function voirEtudiant(studentId) {
+    const s = allEtudiants.find(x => x.id === studentId);
+    if (!s) return;
+
+    const initials = s.full_name.split(' ').filter(Boolean).map(x => x[0]).join('').slice(0, 2).toUpperCase();
+    document.getElementById('etp-avatar').textContent = initials;
+    document.getElementById('etp-nom').textContent = s.full_name;
+    document.getElementById('etp-sub').textContent = `${s.matricule} · ${s.email || 'Pas d\'email'}`;
+    document.getElementById('etp-dept').textContent = s.department || '—';
+    document.getElementById('etp-niveau').textContent = s.level || '—';
+    document.getElementById('etp-email').textContent = s.email || '—';
+    document.getElementById('etp-tel').textContent = s.phone || '—';
+    document.getElementById('etp-naissance').textContent = s.date_naissance ? new Date(s.date_naissance).toLocaleDateString('fr-FR') : '—';
+    document.getElementById('etp-nationalite').textContent = s.nationalite || '—';
+
+    const statutBadge = { 'Actif':'badge-success', 'En cours':'badge-blue', 'Incomplet':'badge-gold', 'Suspendu':'badge-danger' };
+    const paiementBadge = { 'Payé':'badge-success', 'Partiel':'badge-gold', 'Impayé':'badge-danger' };
+    document.getElementById('etp-statut').innerHTML = `<span class="badge ${statutBadge[s.status]||''}">${s.status||'—'}</span>`;
+    document.getElementById('etp-paiement').innerHTML = `<span class="badge ${paiementBadge[s.payment_status]||''}">${s.payment_status||'—'}</span>`;
+    document.getElementById('etp-credits').textContent = `— / ${s.credits_requis || 60}`;
+
+    document.getElementById('etp-notes-list').innerHTML = '<div style="color:var(--gray);font-size:.8rem">Chargement…</div>';
+    document.getElementById('etp-payments-list').innerHTML = '<div style="color:var(--gray);font-size:.8rem">Chargement…</div>';
+    document.getElementById('etp-parents-list').innerHTML = '<div style="color:var(--gray);font-size:.8rem">Chargement…</div>';
+    document.getElementById('etp-moyenne').textContent = '—';
+    document.getElementById('etp-assiduite').textContent = '—';
+    document.getElementById('etudiantProfilModal').classList.add('active');
+
+    const [gradesRes, paysRes, attRes, parentsRes, ueRes] = await Promise.all([
+      supabaseClient.from('grades').select('matiere, note_cc, note_exam, semestre, created_at').eq('student_id', studentId).order('created_at', { ascending: false }),
+      supabaseClient.from('payments').select('amount, type, statut, paid_at').eq('student_id', studentId).order('paid_at', { ascending: false }),
+      supabaseClient.from('attendance').select('statut').eq('student_id', studentId),
+      supabaseClient.from('parent_students').select('parent_profile_id, profiles(full_name, email)').eq('student_id', studentId),
+      supabaseClient.from('student_ue_validations').select('valide, unites_enseignement(credits_total)').eq('student_id', studentId),
+    ]);
+
+    const validations = ueRes.data || [];
+    const creditsValides = validations.filter(v => v.valide).reduce((sum, v) => sum + (v.unites_enseignement?.credits_total || 0), 0);
+    document.getElementById('etp-credits').textContent = `${creditsValides} / ${s.credits_requis || 60}`;
+
+    const grades = gradesRes.data || [];
+    const complete = grades.filter(g => g.note_cc != null && g.note_exam != null);
+    if (complete.length > 0) {
+      const moyGen = complete.reduce((sum, g) => sum + (Number(g.note_cc) * ponderationCC + Number(g.note_exam) * (1 - ponderationCC)), 0) / complete.length;
+      document.getElementById('etp-moyenne').textContent = moyGen.toFixed(2) + '/20';
+    } else {
+      document.getElementById('etp-moyenne').textContent = '—';
+    }
+    document.getElementById('etp-notes-list').innerHTML = grades.length === 0
+      ? '<div style="color:var(--gray);font-size:.8rem">Aucune note enregistrée.</div>'
+      : grades.slice(0, 8).map(g => {
+          const moy = (g.note_cc != null && g.note_exam != null) ? (Number(g.note_cc) * ponderationCC + Number(g.note_exam) * (1 - ponderationCC)).toFixed(2) : '—';
+          return `<div style="display:flex;justify-content:space-between;background:var(--light);border-radius:8px;padding:.5rem .75rem;font-size:.82rem">
+            <span>${g.matiere}${g.semestre ? ' · ' + g.semestre : ''}</span><span style="font-weight:700">${moy}${moy !== '—' ? '/20' : ''}</span>
+          </div>`;
+        }).join('');
+
+    const att = attRes.data || [];
+    if (att.length > 0) {
+      const presents = att.filter(a => a.statut === 'Présent').length;
+      document.getElementById('etp-assiduite').textContent = Math.round(presents / att.length * 100) + '%';
+    } else {
+      document.getElementById('etp-assiduite').textContent = '—';
+    }
+
+    const pays = paysRes.data || [];
+    document.getElementById('etp-payments-list').innerHTML = pays.length === 0
+      ? '<div style="color:var(--gray);font-size:.8rem">Aucun paiement enregistré.</div>'
+      : pays.slice(0, 6).map(p => `<div style="display:flex;justify-content:space-between;background:var(--light);border-radius:8px;padding:.5rem .75rem;font-size:.82rem">
+            <span>${p.type || 'Paiement'} — ${p.paid_at ? new Date(p.paid_at).toLocaleDateString('fr-FR') : ''}</span><span style="font-weight:700">${fmtFCFA(p.amount)} FCFA <span class="badge ${paiementBadge[p.statut]||''}" style="margin-left:.4rem">${p.statut||''}</span></span>
+          </div>`).join('');
+
+    const parents = parentsRes.data || [];
+    document.getElementById('etp-parents-list').innerHTML = parents.length === 0
+      ? '<div style="color:var(--gray);font-size:.8rem">Aucun parent lié.</div>'
+      : parents.map(l => `<div style="display:flex;justify-content:space-between;background:var(--light);border-radius:8px;padding:.5rem .75rem;font-size:.82rem">
+            <span>${l.profiles?.full_name || '—'}</span><span style="color:var(--gray)">${l.profiles?.email || ''}</span>
+          </div>`).join('');
+  }
+
+  function closeEtudiantProfilModal() {
+    document.getElementById('etudiantProfilModal').classList.remove('active');
   }
 
   // ── Invitation d'un parent (lié à un étudiant précis) — même mécanisme à
