@@ -236,6 +236,15 @@
       <div class="kpi-card"><div class="kpi-icon" style="background:rgba(245,158,11,0.1)">✅</div><div class="kpi-value" style="color:var(--gold)" id="kpi-credits">—</div><div class="kpi-label">Crédits validés</div></div>
       <div class="kpi-card"><div class="kpi-icon" style="background:rgba(139,92,246,0.1)">📋</div><div class="kpi-value" style="color:#8b5cf6" id="kpi-ue">—</div><div class="kpi-label">UE validées</div></div>
     </div>
+    <div class="card" style="margin-bottom:1.5rem">
+      <div class="card-header"><div class="card-title">Mes Unités d'Enseignement</div></div>
+      <table class="data-table">
+        <thead><tr><th>UE</th><th>Moyenne</th><th>Seuil</th><th>Crédits</th><th>Statut</th></tr></thead>
+        <tbody id="tbodyUE">
+          <tr><td colspan="5" style="text-align:center;color:var(--gray);padding:1.5rem">Chargement…</td></tr>
+        </tbody>
+      </table>
+    </div>
     <div class="card">
       <div class="card-header"><div class="card-title">Détail par matière — Semestre 1</div></div>
       <table class="data-table">
@@ -481,6 +490,7 @@
   }
 
   let mesNotes = [];
+  let ponderationCC = 0.3;
   async function loadNotes(studentRecord) {
     const { data: notes, error } = await supabaseClient
       .from('grades').select('*').eq('student_id', studentRecord.id).order('matiere');
@@ -490,42 +500,69 @@
     const tbody = document.getElementById('tbodyNotes');
     if (!notes || notes.length === 0) {
       tbody.innerHTML = '<tr><td colspan="7" style="text-align:center;color:var(--gray);padding:2rem">Aucune note saisie pour le moment.</td></tr>';
+    } else {
+      let totalPoints = 0, totalCoeff = 0;
+      tbody.innerHTML = notes.map(n => {
+        const moyenne = (n.note_cc != null && n.note_exam != null) ? (n.note_cc * ponderationCC + n.note_exam * (1 - ponderationCC)) : null;
+        if (moyenne != null) { totalPoints += moyenne * n.coefficient; totalCoeff += n.coefficient; }
+        const noteClass = moyenne == null ? '' : (moyenne >= 14 ? 'note-good' : moyenne >= 10 ? 'note-avg' : 'note-bad');
+        const statutBadge = moyenne == null ? 'badge-gray' : (moyenne >= 10 ? 'badge-success' : 'badge-danger');
+        const statutTxt = moyenne == null ? 'En attente' : (moyenne >= 10 ? 'Validé ✓' : 'Rattrapage');
+        return `<tr>
+          <td><strong>${n.matiere}</strong></td>
+          <td>${n.enseignant_nom || '—'}</td>
+          <td>${n.coefficient}</td>
+          <td>${n.credits}</td>
+          <td>${moyenne != null ? `<span class="note-cell ${noteClass}">${moyenne.toFixed(1)}</span>` : '—'}</td>
+          <td>${moyenne != null ? `<span class="badge ${mentionBadge(moyenne)}">${mention(moyenne)}</span>` : '—'}</td>
+          <td><span class="badge ${statutBadge}">${statutTxt}</span></td>
+        </tr>`;
+      }).join('');
+
+      const moyenneGenerale = totalCoeff > 0 ? (totalPoints / totalCoeff) : 0;
+      document.getElementById('kpi-moyenne').textContent = moyenneGenerale.toFixed(1);
+      document.getElementById('kpi-mention').textContent = mention(moyenneGenerale);
+      const pfMoyenne = document.getElementById('pf-moyenne');
+      if (pfMoyenne) pfMoyenne.textContent = totalCoeff > 0 ? moyenneGenerale.toFixed(1) + '/20' : 'Aucune note';
+    }
+
+    loadMesUE(studentRecord);
+  }
+
+  // ── Validation des UE (données réelles, persistées côté serveur — voir
+  // recompute_ue_validation()). Remplace le calcul "crédits validés" volatil
+  // qui recomptait naïvement par matière sans vraie notion d'UE.
+  async function loadMesUE(studentRecord) {
+    const { data: validations, error } = await supabaseClient
+      .from('student_ue_validations').select('*, unites_enseignement(intitule, credits_total, seuil_validation)')
+      .eq('student_id', studentRecord.id);
+    const tbody = document.getElementById('tbodyUE');
+    if (error || !validations || validations.length === 0) {
+      if (tbody) tbody.innerHTML = '<tr><td colspan="5" style="text-align:center;color:var(--gray);padding:1.5rem">Aucune UE évaluée pour le moment.</td></tr>';
+      document.getElementById('kpi-credits').textContent = `0/${studentRecord.credits_requis || 60}`;
+      document.getElementById('kpi-ue').textContent = '0/0';
+      const pfCredits = document.getElementById('pf-credits');
+      if (pfCredits) pfCredits.textContent = `0/${studentRecord.credits_requis || 60}`;
       return;
     }
 
-    let totalPoints = 0, totalCoeff = 0, creditsValides = 0, ueValidees = 0;
-    tbody.innerHTML = notes.map(n => {
-      const moyenne = (n.note_cc != null && n.note_exam != null) ? (n.note_cc * 0.3 + n.note_exam * 0.7) : null;
-      if (moyenne != null) {
-        totalPoints += moyenne * n.coefficient;
-        totalCoeff += n.coefficient;
-        if (moyenne >= 10) { creditsValides += n.credits; ueValidees++; }
-      }
-      const noteClass = moyenne == null ? '' : (moyenne >= 14 ? 'note-good' : moyenne >= 10 ? 'note-avg' : 'note-bad');
-      const statutBadge = moyenne == null ? 'badge-gray' : (moyenne >= 10 ? 'badge-success' : 'badge-danger');
-      const statutTxt = moyenne == null ? 'En attente' : (moyenne >= 10 ? 'Validé ✓' : 'Rattrapage');
+    if (tbody) tbody.innerHTML = validations.map(v => {
+      const ue = v.unites_enseignement;
       return `<tr>
-        <td><strong>${n.matiere}</strong></td>
-        <td>${n.enseignant_nom || '—'}</td>
-        <td>${n.coefficient}</td>
-        <td>${n.credits}</td>
-        <td>${moyenne != null ? `<span class="note-cell ${noteClass}">${moyenne.toFixed(1)}</span>` : '—'}</td>
-        <td>${moyenne != null ? `<span class="badge ${mentionBadge(moyenne)}">${mention(moyenne)}</span>` : '—'}</td>
-        <td><span class="badge ${statutBadge}">${statutTxt}</span></td>
+        <td><strong>${ue.intitule}</strong></td>
+        <td>${v.moyenne != null ? v.moyenne.toFixed(2) : '—'}</td>
+        <td>${ue.seuil_validation}/20</td>
+        <td>${ue.credits_total}</td>
+        <td><span class="badge ${v.valide ? 'badge-success' : 'badge-danger'}">${v.valide ? 'Validée ✓' : 'Non validée'}</span></td>
       </tr>`;
     }).join('');
 
-    const moyenneGenerale = totalCoeff > 0 ? (totalPoints / totalCoeff) : 0;
+    const creditsValides = validations.filter(v => v.valide).reduce((s, v) => s + v.unites_enseignement.credits_total, 0);
+    const ueValidees = validations.filter(v => v.valide).length;
     const creditsCible = studentRecord.credits_requis || 60;
-    document.getElementById('kpi-moyenne').textContent = moyenneGenerale.toFixed(1);
-    document.getElementById('kpi-mention').textContent = mention(moyenneGenerale);
     document.getElementById('kpi-credits').textContent = `${creditsValides}/${creditsCible}`;
-    document.getElementById('kpi-ue').textContent = `${ueValidees}/${notes.length}`;
-
-    // Reflété aussi dans l'onglet Profil (mêmes chiffres, pas de calcul dupliqué divergent).
-    const pfMoyenne = document.getElementById('pf-moyenne');
+    document.getElementById('kpi-ue').textContent = `${ueValidees}/${validations.length}`;
     const pfCredits = document.getElementById('pf-credits');
-    if (pfMoyenne) pfMoyenne.textContent = totalCoeff > 0 ? moyenneGenerale.toFixed(1) + '/20' : 'Aucune note';
     if (pfCredits) pfCredits.textContent = `${creditsValides}/${creditsCible}`;
   }
 
@@ -697,7 +734,7 @@
     let totalPoints = 0, totalCoeff = 0, creditsValides = 0;
     doc.setFont('helvetica', 'normal'); doc.setTextColor(13, 27, 42);
     mesNotes.forEach((n, i) => {
-      const moyenne = (n.note_cc != null && n.note_exam != null) ? (n.note_cc * 0.3 + n.note_exam * 0.7) : null;
+      const moyenne = (n.note_cc != null && n.note_exam != null) ? (n.note_cc * ponderationCC + n.note_exam * (1 - ponderationCC)) : null;
       if (moyenne != null) {
         totalPoints += moyenne * n.coefficient; totalCoeff += n.coefficient;
         if (moyenne >= 10) creditsValides += n.credits;
@@ -912,7 +949,7 @@
     grid.innerHTML = matieres.length === 0
       ? '<div style="text-align:center;color:var(--gray);padding:2rem;grid-column:1/-1">Aucune matière pour le moment.</div>'
       : matieres.map(n => {
-          const moyenne = (n.note_cc != null && n.note_exam != null) ? (n.note_cc * 0.3 + n.note_exam * 0.7) : null;
+          const moyenne = (n.note_cc != null && n.note_exam != null) ? (n.note_cc * ponderationCC + n.note_exam * (1 - ponderationCC)) : null;
           const badge = moyenne == null ? '<span class="badge badge-gray">En attente</span>' : `<span class="badge ${moyenne >= 10 ? 'badge-success' : 'badge-danger'}">${moyenne.toFixed(1)}/20</span>`;
           const docsList = docsByMatiere[n.matiere] || [];
           return `<div class="card"><div style="height:6px;background:linear-gradient(90deg,var(--blue),var(--sky))"></div><div class="card-body">
@@ -985,6 +1022,8 @@
   window.authReady.then(async user => {
     if (!user) return;
     loadMonDossier(user);
+    const { data: uni } = await supabaseClient.from('universities').select('ponderation_cc').eq('name', user.university).maybeSingle();
+    if (uni?.ponderation_cc != null) ponderationCC = uni.ponderation_cc;
     const { data: rec } = await supabaseClient.from('students').select('*').eq('profile_id', user.id).maybeSingle();
     if (rec) { loadNotes(rec); loadPaiements(rec); loadTauxPresence(rec); loadEmploiDuTemps(rec); loadMesExamens(rec); loadMesCoursEtudiant(rec); loadMesDiplomes(rec); }
   });

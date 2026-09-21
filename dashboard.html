@@ -431,6 +431,9 @@
     <div class="nav-item" data-module="examens" onclick="showPage('examens')">
       <span class="nav-icon">📝</span> Examens & Résultats
     </div>
+    <div class="nav-item" data-module="examens" onclick="showPage('programme')">
+      <span class="nav-icon">🧩</span> Programme académique
+    </div>
     <div class="nav-item" onclick="showPage('departements')">
       <span class="nav-icon">🏛️</span> Départements
     </div>
@@ -822,6 +825,59 @@
     </div>
   </div>
 
+  <!-- ══════════════════════════════
+       PAGE : PROGRAMME ACADÉMIQUE (UE / ECUE)
+  ══════════════════════════════ -->
+  <div class="page" id="page-programme">
+    <div class="page-header">
+      <div><h2>Programme académique</h2><div style="font-size:.85rem;color:var(--gray);margin-top:.2rem">Unités d'Enseignement (UE) et Éléments Constitutifs (ECUE)</div></div>
+      <button class="btn-add" id="btn-add-ue" onclick="openAddUeModal()">+ Nouvelle UE</button>
+    </div>
+    <div class="search-bar" style="margin-bottom:1.25rem">
+      <select class="filter-select" id="prog_dept" onchange="onProgDeptChange()"></select>
+      <select class="filter-select" id="prog_niveau" onchange="loadProgramme()"></select>
+      <select class="filter-select" id="prog_semestre" onchange="loadProgramme()"><option>Semestre 1</option><option>Semestre 2</option></select>
+    </div>
+    <div id="programme-list"><div style="text-align:center;color:var(--gray);padding:2rem">Sélectionnez une filière.</div></div>
+  </div>
+
+  <!-- ══ MODAL : NOUVELLE UE ══ -->
+  <div class="modal-overlay" id="modalAddUe" onclick="if(event.target===this)closeAddUeModal()">
+    <div class="modal" style="max-width:440px">
+      <button class="modal-close" onclick="closeAddUeModal()">✕</button>
+      <div style="font-family:'Playfair Display',serif;font-weight:800;font-size:1.2rem;margin-bottom:1.25rem">+ Nouvelle Unité d'Enseignement</div>
+      <div id="addUeError" style="display:none;background:rgba(239,68,68,0.08);color:var(--danger);border:1px solid rgba(239,68,68,0.2);padding:.6rem 1rem;border-radius:8px;font-size:.83rem;margin-bottom:1rem"></div>
+      <div style="display:flex;flex-direction:column;gap:.85rem">
+        <div><label style="font-size:.8rem;font-weight:600;display:block;margin-bottom:.3rem">Intitulé</label><input id="ue_intitule" class="search-input" style="width:100%" placeholder="Ex: Fondamentaux Informatiques"/></div>
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:.75rem">
+          <div><label style="font-size:.8rem;font-weight:600;display:block;margin-bottom:.3rem">Code (optionnel)</label><input id="ue_code" class="search-input" style="width:100%" placeholder="UE1"/></div>
+          <div><label style="font-size:.8rem;font-weight:600;display:block;margin-bottom:.3rem">Crédits totaux</label><input id="ue_credits" type="number" min="1" class="search-input" style="width:100%" value="6"/></div>
+        </div>
+        <div><label style="font-size:.8rem;font-weight:600;display:block;margin-bottom:.3rem">Seuil de validation (/20)</label><input id="ue_seuil" type="number" min="0" max="20" step="0.5" class="search-input" style="width:100%" value="10"/></div>
+        <button class="btn-add" style="justify-content:center;margin-top:.5rem" id="ue_submit" onclick="submitAddUe()">Créer l'UE</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ══ MODAL : NOUVEL ECUE ══ -->
+  <div class="modal-overlay" id="modalAddEcue" onclick="if(event.target===this)closeAddEcueModal()">
+    <div class="modal" style="max-width:440px">
+      <button class="modal-close" onclick="closeAddEcueModal()">✕</button>
+      <div style="font-family:'Playfair Display',serif;font-weight:800;font-size:1.2rem;margin-bottom:.3rem">+ Nouvel ECUE</div>
+      <div id="ecue_ueNom" style="font-size:.85rem;color:var(--gray);margin-bottom:1.25rem"></div>
+      <div id="addEcueError" style="display:none;background:rgba(239,68,68,0.08);color:var(--danger);border:1px solid rgba(239,68,68,0.2);padding:.6rem 1rem;border-radius:8px;font-size:.83rem;margin-bottom:1rem"></div>
+      <div style="display:flex;flex-direction:column;gap:.85rem">
+        <div><label style="font-size:.8rem;font-weight:600;display:block;margin-bottom:.3rem">Intitulé</label><input id="ecue_intitule" class="search-input" style="width:100%" placeholder="Ex: Algorithmique"/></div>
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:.75rem">
+          <div><label style="font-size:.8rem;font-weight:600;display:block;margin-bottom:.3rem">Coefficient</label><input id="ecue_coef" type="number" min="1" class="search-input" style="width:100%" value="1"/></div>
+          <div><label style="font-size:.8rem;font-weight:600;display:block;margin-bottom:.3rem">Crédits</label><input id="ecue_credits" type="number" min="1" class="search-input" style="width:100%" value="1"/></div>
+        </div>
+        <div><label style="font-size:.8rem;font-weight:600;display:block;margin-bottom:.3rem">Enseignant</label><select id="ecue_teacher" class="filter-select" style="width:100%"></select></div>
+        <button class="btn-add" style="justify-content:center;margin-top:.5rem" id="ecue_submit" onclick="submitAddEcue()">Créer l'ECUE</button>
+      </div>
+    </div>
+  </div>
+
   <div class="page" id="page-enseignants">
     <div class="page-header"><div><h2>Enseignants</h2><div style="font-size:.85rem;color:var(--gray)" id="enseignantsCount">Chargement...</div></div><button class="btn-add" id="btn-add-enseignant" onclick="openAddEnseignantModal()">+ Ajouter enseignant</button></div>
     <!-- KPIs enseignants -->
@@ -1138,6 +1194,11 @@
             <input type="number" step="0.5" min="0.5" class="search-input" style="width:100%" id="param-duree-seance"/>
             <div style="font-size:.72rem;color:var(--gray);margin-top:.3rem">Utilisée pour calculer automatiquement les heures effectuées d'un enseignant à chaque validation de présence.</div>
           </div>
+          <div class="form-group">
+            <label>Pondération Contrôle Continu (%)</label>
+            <input type="number" step="5" min="0" max="100" class="search-input" style="width:100%" id="param-ponderation-cc"/>
+            <div style="font-size:.72rem;color:var(--gray);margin-top:.3rem">Poids du CC dans la moyenne (le reste va à l'examen). Utilisée partout où une moyenne d'ECUE/UE est calculée.</div>
+          </div>
         </div>
       </div>
 
@@ -1411,7 +1472,7 @@
     document.getElementById('ov-kpi-enseignants').textContent = enseignantsActifs.toLocaleString('fr-FR');
 
     const notes = gr.filter(g => g.note_cc != null && g.note_exam != null)
-      .map(g => (Number(g.note_cc) + Number(g.note_exam)) / 2);
+      .map(g => Number(g.note_cc) * ponderationCC + Number(g.note_exam) * (1 - ponderationCC));
     const reussite = notes.length > 0 ? Math.round(notes.filter(n => n >= 10).length / notes.length * 100) : null;
     document.getElementById('ov-kpi-reussite').textContent = reussite !== null ? reussite + '%' : '—';
 
@@ -1942,6 +2003,167 @@
     loadEnseignants();
   }
 
+  // ── Programme académique (UE / ECUE, données réelles) ──
+  // Remplace la notion de "matière" en texte libre par une vraie hiérarchie
+  // UE → ECUE. Les grades existantes gardent leurs colonnes matiere/coefficient/
+  // credits pour compat (tous les autres écrans continuent de les lire tel
+  // quel) ; grades.ecue_id est la nouvelle source de vérité pour le calcul
+  // de validation (voir recompute_ue_validation() côté SQL).
+  let programmeUes = [];
+
+  function initProgrammeFilters() {
+    const depts = Object.keys(deptLevels).sort();
+    document.getElementById('prog_dept').innerHTML = depts.map(d => `<option value="${d}">${d}</option>`).join('');
+    onProgDeptChange();
+  }
+  function onProgDeptChange() {
+    const dept = document.getElementById('prog_dept').value;
+    const levels = [...(deptLevels[dept] || [])].sort();
+    document.getElementById('prog_niveau').innerHTML = levels.map(l => `<option value="${l}">${l}</option>`).join('');
+    loadProgramme();
+  }
+
+  async function loadProgramme() {
+    const user = window.currentUser;
+    const filiere = document.getElementById('prog_dept').value;
+    const niveau = document.getElementById('prog_niveau').value;
+    const semestre = document.getElementById('prog_semestre').value;
+    const listEl = document.getElementById('programme-list');
+    if (!filiere || !niveau) { listEl.innerHTML = '<div style="text-align:center;color:var(--gray);padding:2rem">Aucune filière/niveau — créez d\'abord un étudiant ou un créneau.</div>'; return; }
+    listEl.innerHTML = '<div style="text-align:center;color:var(--gray);padding:2rem">Chargement…</div>';
+
+    let ueQuery = supabaseClient.from('unites_enseignement').select('*, ecue(*, teachers(full_name))')
+      .eq('filiere', filiere).eq('niveau', niveau).eq('semestre', semestre);
+    if (user.role !== 'superadmin') ueQuery = ueQuery.eq('university', user.university);
+    const { data: ues, error } = await ueQuery.order('code');
+    if (error) { console.error(error); return; }
+    programmeUes = ues || [];
+    renderProgramme();
+  }
+
+  function renderProgramme() {
+    const listEl = document.getElementById('programme-list');
+    if (programmeUes.length === 0) {
+      listEl.innerHTML = '<div style="text-align:center;color:var(--gray);padding:2rem">Aucune UE pour cette sélection — cliquez sur "+ Nouvelle UE".</div>';
+      return;
+    }
+    listEl.innerHTML = programmeUes.map(ue => `
+      <div class="card" style="margin-bottom:1.25rem">
+        <div class="card-header">
+          <div class="card-title">${ue.code ? ue.code + ' — ' : ''}${ue.intitule} <span style="font-weight:400;color:var(--gray);font-size:.8rem">· ${ue.credits_total} crédits · seuil ${ue.seuil_validation}/20</span></div>
+          <button class="card-action" onclick="openAddEcueModal('${ue.id}','${ue.intitule.replace(/'/g,"\\'")}')">+ Ajouter ECUE</button>
+        </div>
+        <table class="data-table">
+          <thead><tr><th>ECUE</th><th>Coefficient</th><th>Crédits</th><th>Enseignant</th><th>Actions</th></tr></thead>
+          <tbody>
+            ${(ue.ecue || []).length === 0
+              ? '<tr><td colspan="5" style="text-align:center;color:var(--gray);padding:1.25rem">Aucun ECUE — ajoutez-en un.</td></tr>'
+              : ue.ecue.map(e => `
+                <tr>
+                  <td>${e.intitule}</td><td>${e.coefficient}</td><td>${e.credits}</td>
+                  <td>${e.teachers?.full_name || '—'}</td>
+                  <td><button class="card-action" onclick="inscrireCohorte('${e.id}','${e.intitule.replace(/'/g,"\\'")}')">👥 Inscrire la cohorte</button></td>
+                </tr>`).join('')}
+          </tbody>
+        </table>
+      </div>`).join('');
+  }
+
+  function openAddUeModal() {
+    document.getElementById('ue_intitule').value = '';
+    document.getElementById('ue_code').value = '';
+    document.getElementById('ue_credits').value = 6;
+    document.getElementById('ue_seuil').value = 10;
+    document.getElementById('addUeError').style.display = 'none';
+    document.getElementById('modalAddUe').classList.add('active');
+  }
+  function closeAddUeModal() { document.getElementById('modalAddUe').classList.remove('active'); }
+
+  async function submitAddUe() {
+    const errBox = document.getElementById('addUeError');
+    errBox.style.display = 'none';
+    const filiere = document.getElementById('prog_dept').value;
+    const niveau = document.getElementById('prog_niveau').value;
+    const semestre = document.getElementById('prog_semestre').value;
+    const intitule = document.getElementById('ue_intitule').value.trim();
+    const code = document.getElementById('ue_code').value.trim() || null;
+    const credits_total = parseInt(document.getElementById('ue_credits').value) || 1;
+    const seuil_validation = parseFloat(document.getElementById('ue_seuil').value) || 10;
+    if (!filiere || !niveau) { errBox.textContent = '⚠️ Sélectionnez une filière et un niveau.'; errBox.style.display = 'block'; return; }
+    if (!intitule) { errBox.textContent = '⚠️ L\'intitulé est obligatoire.'; errBox.style.display = 'block'; return; }
+
+    const btn = document.getElementById('ue_submit');
+    btn.disabled = true;
+    const { error } = await supabaseClient.from('unites_enseignement').insert({
+      university: window.currentUser.university, filiere, niveau, semestre, code, intitule, credits_total, seuil_validation
+    });
+    btn.disabled = false;
+    if (error) { errBox.textContent = '⚠️ ' + error.message; errBox.style.display = 'block'; return; }
+    closeAddUeModal();
+    showToast('✅ UE créée.');
+    loadProgramme();
+  }
+
+  let ecueUeCible = null;
+  function openAddEcueModal(ueId, ueNom) {
+    ecueUeCible = ueId;
+    document.getElementById('ecue_ueNom').textContent = 'Dans : ' + ueNom;
+    document.getElementById('ecue_intitule').value = '';
+    document.getElementById('ecue_coef').value = 1;
+    document.getElementById('ecue_credits').value = 1;
+    document.getElementById('ecue_teacher').innerHTML = allTeachersForEt.map(t => `<option value="${t.id}">${t.full_name}</option>`).join('');
+    document.getElementById('addEcueError').style.display = 'none';
+    document.getElementById('modalAddEcue').classList.add('active');
+  }
+  function closeAddEcueModal() { document.getElementById('modalAddEcue').classList.remove('active'); }
+
+  async function submitAddEcue() {
+    const errBox = document.getElementById('addEcueError');
+    errBox.style.display = 'none';
+    const intitule = document.getElementById('ecue_intitule').value.trim();
+    const coefficient = parseInt(document.getElementById('ecue_coef').value) || 1;
+    const credits = parseInt(document.getElementById('ecue_credits').value) || 1;
+    const teacher_id = document.getElementById('ecue_teacher').value || null;
+    if (!intitule) { errBox.textContent = '⚠️ L\'intitulé est obligatoire.'; errBox.style.display = 'block'; return; }
+
+    const btn = document.getElementById('ecue_submit');
+    btn.disabled = true;
+    const { error } = await supabaseClient.from('ecue').insert({ ue_id: ecueUeCible, intitule, coefficient, credits, teacher_id });
+    btn.disabled = false;
+    if (error) { errBox.textContent = '⚠️ ' + error.message; errBox.style.display = 'block'; return; }
+    closeAddEcueModal();
+    showToast('✅ ECUE créé.');
+    loadProgramme();
+  }
+
+  async function inscrireCohorte(ecueId, ecueNom) {
+    const filiere = document.getElementById('prog_dept').value;
+    const niveau = document.getElementById('prog_niveau').value;
+    const semestre = document.getElementById('prog_semestre').value;
+    const ue = programmeUes.find(u => (u.ecue || []).some(e => e.id === ecueId));
+    const ecue = ue?.ecue.find(e => e.id === ecueId);
+    if (!ue || !ecue) return;
+    if (!confirm(`Inscrire tous les étudiants de ${filiere} ${niveau} à "${ecueNom}" ?`)) return;
+
+    const { data: students, error: sErr } = await supabaseClient.from('students').select('id')
+      .eq('university', window.currentUser.university).eq('department', filiere).eq('level', niveau);
+    if (sErr) { showToast('⚠️ ' + sErr.message); return; }
+    if (!students || students.length === 0) { showToast('⚠️ Aucun étudiant dans cette cohorte.'); return; }
+
+    const { data: already } = await supabaseClient.from('grades').select('student_id').eq('ecue_id', ecueId);
+    const dejaInscrits = new Set((already || []).map(a => a.student_id));
+    const aInscrire = students.filter(s => !dejaInscrits.has(s.id));
+    if (aInscrire.length === 0) { showToast('ℹ️ Tous les étudiants de cette cohorte sont déjà inscrits.'); return; }
+
+    const { error } = await supabaseClient.from('grades').insert(aInscrire.map(s => ({
+      student_id: s.id, teacher_id: ecue.teacher_id, enseignant_nom: ecue.teachers?.full_name || null,
+      university: window.currentUser.university, matiere: ecue.intitule, coefficient: ecue.coefficient,
+      credits: ecue.credits, semestre, ecue_id: ecueId
+    })));
+    if (error) { showToast('⚠️ ' + error.message); return; }
+    showToast(`✅ ${aInscrire.length} étudiant(s) inscrit(s) à "${ecueNom}".`);
+  }
+
   window.authReady.then(user => { if (user) { loadEtudiants(); loadEnseignants(); loadCandidatures(user); loadPaymentsData(); loadEmploiSetup(); loadUtilisateursKpis(user); loadUniversiteSettings(user); loadExamensEtDepartements(user); loadEquipeAdmin(user); loadInvitesAdmin(user); loadPermissionsMatrix(); applyPermissionGating(user); applyPlanNavTags(user); loadTopbarMsgDot(user); populateAiFiliereSelect(user); } });
 
   // Point rouge sur l'icône messagerie de la topbar — reprend exactement la
@@ -2254,7 +2476,7 @@
     if (kpiProgEl) kpiProgEl.textContent = exams.length.toLocaleString('fr-FR');
 
     const notesCompletes = gr.filter(g => g.note_cc != null && g.note_exam != null)
-      .map(g => (Number(g.note_cc) + Number(g.note_exam)) / 2);
+      .map(g => Number(g.note_cc) * ponderationCC + Number(g.note_exam) * (1 - ponderationCC));
     const reussitePct = notesCompletes.length > 0 ? Math.round(notesCompletes.filter(n => n >= 10).length / notesCompletes.length * 100) : null;
     const kpiReussiteEl = document.getElementById('exm-kpi-reussite');
     if (kpiReussiteEl) kpiReussiteEl.textContent = reussitePct !== null ? reussitePct + '%' : '—';
@@ -2352,13 +2574,15 @@
   // renommer via ce formulaire romprait silencieusement ce rattachement pour
   // toutes les données déjà créées.
   let universiteSubdomainActuelle = '';
+  let ponderationCC = 0.3;
   async function loadUniversiteSettings(user) {
     const { data, error } = await supabaseClient
-      .from('universities').select('id, name, country, city, email, phone, logo_url, plan, subscription_renews_at, duree_seance_heures, subdomain')
+      .from('universities').select('id, name, country, city, email, phone, logo_url, plan, subscription_renews_at, duree_seance_heures, subdomain, ponderation_cc')
       .eq('name', user.university).maybeSingle();
     if (error) { console.error(error); return; }
     if (!data) return;
     universiteSubdomainActuelle = data.subdomain || '';
+    ponderationCC = data.ponderation_cc ?? 0.3;
     const nomEl = document.getElementById('param-univ-nom');
     if (nomEl) nomEl.value = data.name || '';
     const paysEl = document.getElementById('param-univ-pays');
@@ -2371,6 +2595,8 @@
     if (telEl) telEl.value = data.phone || '';
     const dureeEl = document.getElementById('param-duree-seance');
     if (dureeEl) dureeEl.value = data.duree_seance_heures ?? 2;
+    const ponderationEl = document.getElementById('param-ponderation-cc');
+    if (ponderationEl) ponderationEl.value = Math.round((data.ponderation_cc ?? 0.3) * 100);
     renderLogoDropzone(data.logo_url);
     loadFacturation(data);
   }
@@ -2461,9 +2687,11 @@
     const phone = document.getElementById('param-univ-tel')?.value.trim() || null;
     const dureeRaw = document.getElementById('param-duree-seance')?.value;
     const duree_seance_heures = dureeRaw ? parseFloat(dureeRaw) : 2;
+    const ponderationRaw = document.getElementById('param-ponderation-cc')?.value;
+    const ponderation_cc = ponderationRaw ? Math.min(1, Math.max(0, parseFloat(ponderationRaw) / 100)) : 0.3;
 
     const { error } = await supabaseClient
-      .from('universities').update({ country, city, email, phone, duree_seance_heures })
+      .from('universities').update({ country, city, email, phone, duree_seance_heures, ponderation_cc })
       .eq('name', user.university);
 
     statusEl.style.display = 'block';
@@ -2533,6 +2761,7 @@
     const depts = Object.keys(deptLevels);
     document.getElementById('et_dept').innerHTML = depts.map(d => `<option value="${d}">${d}</option>`).join('');
     onEtDeptChange();
+    initProgrammeFilters();
   }
 
   function onEtDeptChange() {
@@ -2701,10 +2930,10 @@
   }
 
   // ── Navigation ──
-  const pages = ['dashboard','etudiants','enseignants','recrutement','emploi-temps','departements','examens','comptabilite','paiements','assistant-ia','parametres','facturation','utilisateurs'];
+  const pages = ['dashboard','etudiants','enseignants','recrutement','emploi-temps','departements','examens','programme','comptabilite','paiements','assistant-ia','parametres','facturation','utilisateurs'];
   const titles = {
     'dashboard':'Tableau de bord','etudiants':'Étudiants','enseignants':'Enseignants','recrutement':'Recrutement',
-    'emploi-temps':'Emploi du temps','departements':'Départements','examens':'Examens & Résultats',
+    'emploi-temps':'Emploi du temps','departements':'Départements','examens':'Examens & Résultats','programme':'Programme académique',
     'comptabilite':'Comptabilité','paiements':'Paiements','assistant-ia':'Assistant IA','parametres':'Paramètres','facturation':'Facturation','utilisateurs':'Utilisateurs'
   };
 

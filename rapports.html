@@ -205,6 +205,7 @@
   let tt;function showToast(msg){const t=document.getElementById('toast');t.textContent=msg;t.classList.add('show');clearTimeout(tt);tt=setTimeout(()=>t.classList.remove('show'),3000);}
 
   let rEtudiants = [], rEnseignants = [], rPaiements = [], rNotes = [];
+  let ponderationCC = 0.3;
 
   window.authReady.then(async user => {
     if (!user) return;
@@ -212,12 +213,14 @@
     if (!acces) return;
     document.getElementById('topbarSub').textContent = `${user.university || ''} · ${new Date().getFullYear()}`;
 
-    const [{ data: studs }, { data: teachs }, { data: pays }, { data: grades }] = await Promise.all([
+    const [{ data: studs }, { data: teachs }, { data: pays }, { data: grades }, { data: uni }] = await Promise.all([
       supabaseClient.from('students').select('*').eq('university', user.university),
       supabaseClient.from('teachers').select('*').eq('university', user.university),
       supabaseClient.from('payments').select('*, students(full_name, matricule)').eq('statut', 'Confirmé').eq('university', user.university),
       supabaseClient.from('grades').select('*, students(full_name, matricule, department, level)').eq('students.university', user.university),
+      supabaseClient.from('universities').select('ponderation_cc').eq('name', user.university).maybeSingle(),
     ]);
+    if (uni?.ponderation_cc != null) ponderationCC = uni.ponderation_cc;
     rEtudiants = studs || []; rEnseignants = teachs || []; rPaiements = pays || []; rNotes = (grades || []).filter(g => g.students);
 
     // KPIs
@@ -225,7 +228,7 @@
     document.getElementById('m-enseignants').textContent = rEnseignants.filter(t => t.status === 'Actif').length;
     const totalEncaisse = rPaiements.reduce((s, p) => s + Number(p.amount), 0);
     document.getElementById('m-encaisse').textContent = totalEncaisse >= 1000000 ? (totalEncaisse / 1000000).toFixed(1) + 'M' : totalEncaisse.toLocaleString('fr-FR');
-    const notesAvecMoyenne = rNotes.filter(n => n.note_cc != null && n.note_exam != null).map(n => n.note_cc * 0.3 + n.note_exam * 0.7);
+    const notesAvecMoyenne = rNotes.filter(n => n.note_cc != null && n.note_exam != null).map(n => n.note_cc * ponderationCC + n.note_exam * (1 - ponderationCC));
     document.getElementById('m-reussite').textContent = notesAvecMoyenne.length > 0 ? Math.round(notesAvecMoyenne.filter(m => m >= 10).length / notesAvecMoyenne.length * 100) + '%' : '—';
 
     // Bar chart : inscriptions 6 derniers mois
@@ -263,7 +266,7 @@
     rNotes.forEach(n => {
       if (n.note_cc == null || n.note_exam == null) return;
       const dept = n.students?.department || 'Non renseigné';
-      const moyenne = n.note_cc * 0.3 + n.note_exam * 0.7;
+      const moyenne = n.note_cc * ponderationCC + n.note_exam * (1 - ponderationCC);
       if (!byDeptNotes[dept]) byDeptNotes[dept] = [];
       byDeptNotes[dept].push(moyenne);
     });
@@ -317,7 +320,7 @@
   function exportNotes() {
     if (rNotes.length === 0) { showToast('⚠️ Aucune note à exporter'); return; }
     downloadCSV('notes.csv', ['Étudiant', 'Matricule', 'Département', 'Niveau', 'Matière', 'Enseignant', 'Note CC', 'Note Examen', 'Moyenne'],
-      rNotes.map(n => [n.students?.full_name, n.students?.matricule, n.students?.department, n.students?.level, n.matiere, n.enseignant_nom, n.note_cc, n.note_exam, (n.note_cc != null && n.note_exam != null) ? (n.note_cc * 0.3 + n.note_exam * 0.7).toFixed(1) : '']));
+      rNotes.map(n => [n.students?.full_name, n.students?.matricule, n.students?.department, n.students?.level, n.matiere, n.enseignant_nom, n.note_cc, n.note_exam, (n.note_cc != null && n.note_exam != null) ? (n.note_cc * ponderationCC + n.note_exam * (1 - ponderationCC)).toFixed(1) : '']));
     showToast('✅ Export téléchargé');
   }
 

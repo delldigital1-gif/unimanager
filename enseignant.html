@@ -354,9 +354,10 @@
   let monTeacherId = null;
   let notesEnCache = [];
 
+  let ponderationCC = 0.3;
   function computeMoyenne(cc, exam) {
     if (cc === '' || exam === '' || cc == null || exam == null) return null;
-    return parseFloat(cc) * 0.3 + parseFloat(exam) * 0.7;
+    return parseFloat(cc) * ponderationCC + parseFloat(exam) * (1 - ponderationCC);
   }
 
   let monTeacherRecordNotes = null;
@@ -439,8 +440,23 @@
     const failed = results.filter(r => r.error);
     if (failed.length > 0) {
       showToast('⚠️ Erreur lors de l\'enregistrement de ' + failed.length + ' note(s)');
-    } else {
-      showToast('✅ Notes enregistrées avec succès !');
+      return;
+    }
+    showToast('✅ Notes enregistrées avec succès !');
+
+    // Recalcule la validation d'UE pour chaque étudiant concerné par un ECUE
+    // (voir recompute_ue_validation() côté SQL — idempotent, sans risque à
+    // rappeler plusieurs fois pour le même étudiant/UE).
+    const avecEcue = notesEnCache.filter(n => n.ecue_id && n.note_cc != null && n.note_exam != null);
+    if (avecEcue.length > 0) {
+      const ecueIds = [...new Set(avecEcue.map(n => n.ecue_id))];
+      const { data: ecueRows } = await supabaseClient.from('ecue').select('id, ue_id').in('id', ecueIds);
+      const ueParEcue = {}; (ecueRows || []).forEach(e => { ueParEcue[e.id] = e.ue_id; });
+      const paires = new Set(avecEcue.map(n => n.student_id + '|' + ueParEcue[n.ecue_id]).filter(k => !k.endsWith('|undefined')));
+      await Promise.all([...paires].map(k => {
+        const [student_id, ue_id] = k.split('|');
+        return supabaseClient.rpc('recompute_ue_validation', { p_student_id: student_id, p_ue_id: ue_id });
+      }));
     }
   }
 
@@ -916,6 +932,8 @@
   window.authReady.then(async user => {
     if (!user) return;
     loadMonProfilEnseignant(user);
+    const { data: uni } = await supabaseClient.from('universities').select('ponderation_cc').eq('name', user.university).maybeSingle();
+    if (uni?.ponderation_cc != null) ponderationCC = uni.ponderation_cc;
     const { data: rec } = await supabaseClient.from('teachers').select('*').eq('profile_id', user.id).maybeSingle();
     if (rec) { setupNotesMatiere(rec); setupPresences(rec); loadMonPlanning(rec); loadMesEtudiants(rec); loadMesExamens(rec); loadAccueilKpis(rec); loadMesCoursDocuments(rec); }
   });

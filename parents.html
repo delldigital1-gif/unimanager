@@ -374,6 +374,7 @@
 
   let mesEnfants = [];
   let enfantActifId = null;
+  let ponderationCC = 0.3;
   let notesEnfantActif = [];
 
   function showPage(id){
@@ -471,7 +472,7 @@
 
     let totalPoints = 0, totalCoeff = 0, creditsValides = 0;
     tbody.innerHTML = notes.map(n => {
-      const moyenne = (n.note_cc != null && n.note_exam != null) ? (n.note_cc * 0.3 + n.note_exam * 0.7) : null;
+      const moyenne = (n.note_cc != null && n.note_exam != null) ? (n.note_cc * ponderationCC + n.note_exam * (1 - ponderationCC)) : null;
       if (moyenne != null) {
         totalPoints += moyenne * n.coefficient;
         totalCoeff += n.coefficient;
@@ -666,7 +667,7 @@
     let totalPoints = 0, totalCoeff = 0, creditsValides = 0;
     doc.setFont('helvetica', 'normal'); doc.setTextColor(13, 27, 42);
     notesEnfantActif.forEach((n, i) => {
-      const moyenne = (n.note_cc != null && n.note_exam != null) ? (n.note_cc * 0.3 + n.note_exam * 0.7) : null;
+      const moyenne = (n.note_cc != null && n.note_exam != null) ? (n.note_cc * ponderationCC + n.note_exam * (1 - ponderationCC)) : null;
       if (moyenne != null) {
         totalPoints += moyenne * n.coefficient; totalCoeff += n.coefficient;
         if (moyenne >= 10) creditsValides += n.credits;
@@ -832,7 +833,7 @@
     const events = [];
     (grades || []).forEach(g => {
       if (g.note_cc != null && g.note_exam != null && g.created_at) {
-        const moyenne = g.note_cc * 0.3 + g.note_exam * 0.7;
+        const moyenne = g.note_cc * ponderationCC + g.note_exam * (1 - ponderationCC);
         events.push({ time: new Date(g.created_at), icon: '📊', bg: 'rgba(26,86,219,0.05)', border: 'var(--blue)', text: `Note publiée — ${g.matiere}`, sub: `Moyenne : ${moyenne.toFixed(1)}/20 · ${mention(moyenne)}` });
       }
     });
@@ -960,7 +961,12 @@
     }).join('');
   }
 
-  window.authReady.then(user => { if (user) loadMesEnfants(user); });
+  window.authReady.then(async user => {
+    if (!user) return;
+    const { data: uni } = await supabaseClient.from('universities').select('ponderation_cc').eq('name', user.university).maybeSingle();
+    if (uni?.ponderation_cc != null) ponderationCC = uni.ponderation_cc;
+    loadMesEnfants(user);
+  });
 
   let tt;
   function showToast(msg){const t=document.getElementById('toast');t.textContent=msg;t.classList.add('show');clearTimeout(tt);tt=setTimeout(()=>t.classList.remove('show'),3000);}
