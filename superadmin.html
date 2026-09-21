@@ -426,6 +426,64 @@
   </div>
 </div>
 
+<!-- MODAL DÉTAILS UNIVERSITÉ -->
+<div class="modal-overlay" id="universiteDetailModal" onclick="if(event.target===this)closeUniversiteDetailModal()">
+  <div class="modal" style="max-width:640px;max-height:85vh;overflow-y:auto">
+    <button class="modal-close" onclick="closeUniversiteDetailModal()">✕</button>
+    <div style="display:flex;align-items:center;gap:1rem;margin-bottom:1rem">
+      <div id="ud-logo" class="univ-logo" style="width:56px;height:56px;font-size:1.2rem;border-radius:14px;flex-shrink:0;margin-bottom:0"></div>
+      <div>
+        <div id="ud-nom" style="font-family:'Playfair Display',serif;font-weight:800;font-size:1.15rem;color:white"></div>
+        <div id="ud-meta" style="font-size:.83rem;color:rgba(255,255,255,0.45);margin-top:.15rem"></div>
+      </div>
+    </div>
+    <div id="ud-badges" style="display:flex;gap:.5rem;margin-bottom:1.5rem"></div>
+
+    <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:.6rem;margin-bottom:1.5rem">
+      <div style="background:rgba(255,255,255,0.04);border-radius:10px;padding:.75rem;text-align:center">
+        <div id="ud-kpi-etudiants" style="font-family:'Playfair Display',serif;font-weight:800;font-size:1.2rem;color:white"></div>
+        <div style="font-size:.65rem;color:rgba(255,255,255,0.4);margin-top:.15rem">ÉTUDIANTS</div>
+      </div>
+      <div style="background:rgba(255,255,255,0.04);border-radius:10px;padding:.75rem;text-align:center">
+        <div id="ud-kpi-enseignants" style="font-family:'Playfair Display',serif;font-weight:800;font-size:1.2rem;color:white"></div>
+        <div style="font-size:.65rem;color:rgba(255,255,255,0.4);margin-top:.15rem">ENSEIGNANTS</div>
+      </div>
+      <div style="background:rgba(139,92,246,0.1);border-radius:10px;padding:.75rem;text-align:center">
+        <div id="ud-kpi-revenu" style="font-family:'Playfair Display',serif;font-weight:800;font-size:1.05rem;color:#a78bfa"></div>
+        <div style="font-size:.65rem;color:rgba(255,255,255,0.4);margin-top:.15rem">REVENU TOTAL</div>
+      </div>
+      <div style="background:rgba(239,68,68,0.1);border-radius:10px;padding:.75rem;text-align:center">
+        <div id="ud-kpi-incidents" style="font-family:'Playfair Display',serif;font-weight:800;font-size:1.2rem;color:var(--danger)"></div>
+        <div style="font-size:.65rem;color:rgba(255,255,255,0.4);margin-top:.15rem">INCIDENTS OUVERTS</div>
+      </div>
+    </div>
+
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:.85rem 1.5rem;font-size:.82rem;color:rgba(255,255,255,0.7);margin-bottom:1.5rem">
+      <div><strong style="color:rgba(255,255,255,0.4)">Email :</strong> <span id="ud-email"></span></div>
+      <div><strong style="color:rgba(255,255,255,0.4)">Téléphone :</strong> <span id="ud-phone"></span></div>
+      <div><strong style="color:rgba(255,255,255,0.4)">Tarif mensuel :</strong> <span id="ud-prix"></span></div>
+      <div><strong style="color:rgba(255,255,255,0.4)">Renouvellement :</strong> <span id="ud-renew"></span></div>
+    </div>
+
+    <div id="ud-config-section" style="display:none;background:rgba(255,255,255,0.04);border-radius:10px;padding:.85rem 1rem;margin-bottom:1.5rem">
+      <div style="font-size:.78rem;font-weight:700;color:rgba(255,255,255,0.5);margin-bottom:.4rem">DEMANDE DE CONFIGURATION</div>
+      <div id="ud-config-content" style="font-size:.83rem;color:rgba(255,255,255,0.7)"></div>
+    </div>
+
+    <div style="margin-bottom:1.5rem">
+      <div style="font-size:.83rem;font-weight:700;color:white;margin-bottom:.6rem">Incidents récents</div>
+      <div id="ud-incidents-list" style="display:flex;flex-direction:column;gap:.4rem"></div>
+    </div>
+
+    <div style="margin-bottom:1.5rem">
+      <div style="font-size:.83rem;font-weight:700;color:white;margin-bottom:.6rem">Derniers paiements</div>
+      <div id="ud-payments-list" style="display:flex;flex-direction:column;gap:.4rem"></div>
+    </div>
+
+    <div id="ud-actions" style="display:flex;gap:.75rem"></div>
+  </div>
+</div>
+
 <div class="toast" id="toast"></div>
 
 <script>
@@ -479,6 +537,78 @@
       () => showToast('⚠️ Impossible de copier — ' + url)
     );
   }
+  // ── Modal "Détails université" (remplace le placeholder "vue détaillée à venir") ──
+  function voirUniversite(universityId) {
+    const u = allUniversitesData.find(x => x.id === universityId);
+    if (!u) return;
+
+    const initials = (u.name || '').split(' ').filter(Boolean).map(w => w[0]).join('').slice(0, 2).toUpperCase();
+    document.getElementById('ud-logo').style.background = PLAN_LOGO[u.plan] || PLAN_LOGO.Pro;
+    document.getElementById('ud-logo').textContent = initials || '?';
+    document.getElementById('ud-nom').textContent = u.name;
+    const since = u.created_at ? new Date(u.created_at).toLocaleDateString('fr-FR', { month: 'short', year: 'numeric' }) : '—';
+    document.getElementById('ud-meta').textContent = `${u.city ? u.city + ', ' : ''}${u.country || '—'} · Cliente depuis ${since}`;
+    document.getElementById('ud-badges').innerHTML = `
+      <span class="badge ${STATUS_BADGE[u.status] || 'badge-gray'}">● ${u.status || '—'}</span>
+      <span class="badge ${PLAN_BADGE[u.plan] || 'badge-gray'}">${u.plan || '—'}</span>
+      ${u.onboarding_status ? `<span class="badge badge-gray">Onboarding : ${u.onboarding_status}</span>` : ''}
+    `;
+
+    document.getElementById('ud-kpi-etudiants').textContent = studsByUnivGlobal[u.name] || 0;
+    document.getElementById('ud-kpi-enseignants').textContent = teachsByUnivGlobal[u.name] || 0;
+    const paiementsUniv = allPaymentsData.filter(p => p.university === u.name);
+    const revenuTotal = paiementsUniv.reduce((s, p) => s + Number(p.amount), 0);
+    document.getElementById('ud-kpi-revenu').textContent = revenuTotal > 0 ? fmtFCFA(revenuTotal) + ' F' : '0 F';
+    const incidentsUniv = allIncidentsData.filter(i => i.university_id === u.id);
+    document.getElementById('ud-kpi-incidents').textContent = incidentsUniv.filter(i => i.status !== 'Résolu').length;
+
+    document.getElementById('ud-email').textContent = u.email || '—';
+    document.getElementById('ud-phone').textContent = u.phone || '—';
+    document.getElementById('ud-prix').textContent = u.price_monthly ? fmtFCFA(u.price_monthly) + ' FCFA/mois' : 'Sur devis';
+    document.getElementById('ud-renew').textContent = u.subscription_renews_at ? new Date(u.subscription_renews_at).toLocaleDateString('fr-FR') : (u.trial_ends_at ? 'Essai jusqu\'au ' + new Date(u.trial_ends_at).toLocaleDateString('fr-FR') : '—');
+
+    const configSection = document.getElementById('ud-config-section');
+    const configUniv = allConfigRequestsData.find(c => c.university_id === u.id);
+    if (configUniv) {
+      configSection.style.display = 'block';
+      document.getElementById('ud-config-content').innerHTML = `
+        <span class="badge ${CONFIG_STATUT_BADGE[configUniv.statut] || 'badge-gray'}">${CONFIG_STATUT_LABEL[configUniv.statut] || configUniv.statut}</span>
+        ${configUniv.devis_montant ? ` · Devis : ${fmtFCFA(configUniv.devis_montant)} FCFA` : ''}
+        ${configUniv.effectif_estime ? ` · Effectif estimé : ${configUniv.effectif_estime}` : ''}
+      `;
+    } else {
+      configSection.style.display = 'none';
+    }
+
+    const incidentsRecents = incidentsUniv.slice(0, 5);
+    document.getElementById('ud-incidents-list').innerHTML = incidentsRecents.length === 0
+      ? '<div style="color:rgba(255,255,255,0.35);font-size:.8rem">Aucun incident enregistré.</div>'
+      : incidentsRecents.map(i => `<div style="display:flex;justify-content:space-between;align-items:center;background:rgba(255,255,255,0.04);border-radius:8px;padding:.5rem .75rem;font-size:.8rem">
+            <span style="color:rgba(255,255,255,0.8)">${i.title}</span>
+            <span style="display:flex;gap:.4rem"><span class="badge ${PRIORITY_BADGE[i.priority] || 'badge-gray'}">${i.priority || '—'}</span><span class="badge ${i.status === 'Résolu' ? 'badge-success' : 'badge-gold'}">${i.status || '—'}</span></span>
+          </div>`).join('');
+
+    const paiementsRecents = [...paiementsUniv].sort((a, b) => new Date(b.paid_at) - new Date(a.paid_at)).slice(0, 5);
+    document.getElementById('ud-payments-list').innerHTML = paiementsRecents.length === 0
+      ? '<div style="color:rgba(255,255,255,0.35);font-size:.8rem">Aucun paiement confirmé enregistré.</div>'
+      : paiementsRecents.map(p => `<div style="display:flex;justify-content:space-between;background:rgba(255,255,255,0.04);border-radius:8px;padding:.5rem .75rem;font-size:.8rem">
+            <span style="color:rgba(255,255,255,0.6)">${p.type || 'Paiement'}${p.method ? ' · ' + p.method : ''} — ${p.paid_at ? new Date(p.paid_at).toLocaleDateString('fr-FR') : ''}</span>
+            <span style="font-weight:700;color:white">${fmtFCFA(p.amount)} FCFA</span>
+          </div>`).join('');
+
+    document.getElementById('ud-actions').innerHTML = u.subdomain
+      ? `<button class="btn-submit" style="margin-top:0" onclick="copierLienUniversite('${u.subdomain}')">🔗 Copier le lien de connexion</button>`
+      : '';
+
+    document.getElementById('universiteDetailModal').classList.add('active');
+    document.body.style.overflow = 'hidden';
+  }
+
+  function closeUniversiteDetailModal() {
+    document.getElementById('universiteDetailModal').classList.remove('active');
+    document.body.style.overflow = '';
+  }
+
   function openModal(){document.getElementById('addModal').classList.add('active');document.body.style.overflow='hidden';}
   function closeModal(){
     document.getElementById('addModal').classList.remove('active');document.body.style.overflow='';
@@ -556,6 +686,14 @@
 
   window.authReady.then(user => { if (user) loadSuperadminData(); });
 
+  // ── État global pour le modal "Détails université" (alimenté par loadSuperadminData) ──
+  let allUniversitesData = [];
+  let allIncidentsData = [];
+  let allConfigRequestsData = [];
+  let allPaymentsData = [];
+  let studsByUnivGlobal = {};
+  let teachsByUnivGlobal = {};
+
   // ── Données réelles plateforme (toutes universités confondues) — remplace les
   // chiffres codés en dur (52 universités, 47.8M FCFA, etc.) qui étaient identiques
   // pour tout le monde. Pas de table "activité"/"uptime" dédiée dans le schéma :
@@ -563,13 +701,16 @@
   const PLAN_BADGE = { Starter: 'badge-gray', Pro: 'badge-blue', Max: 'badge-purple' };
   const STATUS_BADGE = { 'Actif': 'badge-success', 'En attente': 'badge-gold', 'Suspendu': 'badge-danger' };
   const PLAN_LOGO = { Starter: 'linear-gradient(135deg,#64748B,#475569)', Pro: 'linear-gradient(135deg,var(--blue),var(--sky))', Max: 'linear-gradient(135deg,var(--purple),#7c3aed)' };
+  const PRIORITY_BADGE = { Haute: 'badge-danger', Moyenne: 'badge-blue', Basse: 'badge-gray' };
+  const CONFIG_STATUT_LABEL = { nouvelle: 'Nouvelle demande', devis_envoye: 'Devis envoyé', prete: 'Configuration prête' };
+  const CONFIG_STATUT_BADGE = { nouvelle: 'badge-gold', devis_envoye: 'badge-blue', prete: 'badge-success' };
 
   async function loadSuperadminData() {
     const [univRes, studsRes, teachsRes, paysRes, incidentsRes, configRes] = await Promise.all([
-      supabaseClient.from('universities').select('id, name, country, city, plan, price_monthly, status, onboarding_status, created_at, subdomain').order('created_at', { ascending: false }),
+      supabaseClient.from('universities').select('id, name, country, city, plan, price_monthly, status, onboarding_status, created_at, subdomain, email, phone, logo_url, subscription_renews_at, trial_ends_at').order('created_at', { ascending: false }),
       supabaseClient.from('students').select('id, university'),
       supabaseClient.from('teachers').select('id, university'),
-      supabaseClient.from('payments').select('amount, paid_at, university').eq('statut', 'Confirmé'),
+      supabaseClient.from('payments').select('amount, paid_at, university, type, method').eq('statut', 'Confirmé'),
       supabaseClient.from('platform_incidents').select('id, title, priority, status, opened_at, resolved_at, university_id').order('opened_at', { ascending: false }),
       supabaseClient.from('configuration_requests').select('*').order('created_at', { ascending: false }),
     ]);
@@ -581,9 +722,17 @@
     const incidents = incidentsRes.data || [];
     const configRequests = configRes.data || [];
 
+    // Rendues accessibles hors de cette fonction pour le modal "Détails université"
+    allUniversitesData = univs;
+    allIncidentsData = incidents;
+    allConfigRequestsData = configRequests;
+    allPaymentsData = pays;
+
     const studsByUniv = {}; studs.forEach(s => { studsByUniv[s.university] = (studsByUniv[s.university] || 0) + 1; });
     const teachsByUniv = {}; teachs.forEach(t => { teachsByUniv[t.university] = (teachsByUniv[t.university] || 0) + 1; });
     const univNameById = {}; univs.forEach(u => { univNameById[u.id] = u.name; });
+    studsByUnivGlobal = studsByUniv;
+    teachsByUnivGlobal = teachsByUniv;
 
     const totalRevenue = pays.reduce((s, p) => s + Number(p.amount), 0);
     const activeUnivs = univs.filter(u => u.status === 'Actif');
@@ -635,7 +784,7 @@
       : univs.map(u => {
           const initials = (u.name || '').split(' ').filter(Boolean).map(w => w[0]).join('').slice(0, 2).toUpperCase();
           const since = u.created_at ? new Date(u.created_at).toLocaleDateString('fr-FR', { month: 'short', year: 'numeric' }) : '—';
-          return `<div class="univ-card" onclick="showToast('🏛️ ${u.name.replace(/'/g, "\\'")} — vue détaillée à venir')">
+          return `<div class="univ-card" onclick="voirUniversite('${u.id}')">
             <div style="display:flex;align-items:center;gap:.75rem;margin-bottom:.75rem"><div class="univ-logo" style="background:${PLAN_LOGO[u.plan] || PLAN_LOGO.Pro}">${initials || '?'}</div><div><div class="univ-name">${u.name}</div><div class="univ-meta">${u.city ? u.city + ', ' : ''}${u.country || '—'} · ${u.plan || '—'} · Depuis ${since}</div></div></div>
             <div class="univ-stats"><div class="univ-stat"><div class="univ-stat-val">${studsByUniv[u.name] || 0}</div><div class="univ-stat-label">Étudiants</div></div><div class="univ-stat"><div class="univ-stat-val">${teachsByUniv[u.name] || 0}</div><div class="univ-stat-label">Enseignants</div></div></div>
             <div style="display:flex;justify-content:space-between;align-items:center"><span class="badge ${STATUS_BADGE[u.status] || 'badge-gray'}">● ${u.status || '—'}</span><span style="font-size:.75rem;color:rgba(255,255,255,0.4)">${u.price_monthly ? fmtFCFA(u.price_monthly) + ' FCFA/mois' : 'Sur devis'}</span></div>
