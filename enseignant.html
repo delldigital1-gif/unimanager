@@ -411,12 +411,14 @@
       const color = moyenne == null ? 'var(--gray)' : moyenne >= 14 ? 'var(--success)' : moyenne >= 10 ? 'var(--blue)' : 'var(--danger)';
       const badge = moyenne == null ? '<span class="badge badge-gray">En attente</span>' : moyenne >= 10 ? '<span class="badge badge-success">Validé</span>' : '<span class="badge badge-danger">Rattrapage</span>';
       const num = String(i + 1).padStart(3, '0');
+      const verrouille = !!n.locked;
+      const dis = verrouille ? 'disabled title="Verrouillée — demandez à l\'administration de la déverrouiller pour corriger"' : '';
       return `<tr data-grade-id="${n.id}">
         <td style="color:var(--gray)">${num}</td>
-        <td><strong>${n.students?.full_name || '—'}</strong></td>
+        <td><strong>${n.students?.full_name || '—'}</strong>${verrouille ? ' 🔒' : ''}</td>
         <td style="color:var(--gray)">${n.students?.matricule || '—'}</td>
-        <td><input class="note-input" data-field="note_cc" value="${n.note_cc ?? ''}" onchange="onNoteChange(this)"/></td>
-        <td><input class="note-input" data-field="note_exam" value="${n.note_exam ?? ''}" onchange="onNoteChange(this)"/></td>
+        <td><input class="note-input" data-field="note_cc" value="${n.note_cc ?? ''}" onchange="onNoteChange(this)" ${dis}/></td>
+        <td><input class="note-input" data-field="note_exam" value="${n.note_exam ?? ''}" onchange="onNoteChange(this)" ${dis}/></td>
         <td><span class="grade-moyenne" style="font-family:'Playfair Display',serif;font-weight:800;color:${color}">${moyenne != null ? moyenne.toFixed(1) : '—'}</span></td>
         <td class="grade-statut">${badge}</td>
       </tr>`;
@@ -438,7 +440,9 @@
   }
 
   async function enregistrerNotes() {
-    const updates = notesEnCache.map(n =>
+    // Les notes verrouillées sont désactivées côté saisie (voir renderSaisieNotes)
+    // et seraient de toute façon rejetées par RLS — inutile de les renvoyer.
+    const updates = notesEnCache.filter(n => !n.locked).map(n =>
       supabaseClient.from('grades').update({ note_cc: n.note_cc, note_exam: n.note_exam }).eq('id', n.id)
     );
     const results = await Promise.all(updates);

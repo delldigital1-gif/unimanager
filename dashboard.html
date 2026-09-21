@@ -814,12 +814,23 @@
       <div class="kpi-card"><div class="kpi-icon" style="background:rgba(16,185,129,0.1)">✅</div><div class="kpi-body"><div class="kpi-value" style="color:var(--success)" id="exm-kpi-reussite">—</div><div class="kpi-label">Taux de réussite moyen</div></div></div>
       <div class="kpi-card"><div class="kpi-icon" style="background:rgba(245,158,11,0.1)">⏳</div><div class="kpi-body"><div class="kpi-value" style="color:var(--gold)" id="exm-kpi-attente">—</div><div class="kpi-label">Notes en attente de saisie</div></div></div>
     </div>
-    <div class="card">
+    <div class="card" style="margin-bottom:1.5rem">
       <div class="card-header"><div class="card-title">Examens programmés (créneaux "Examen" de l'emploi du temps)</div></div>
       <table class="data-table">
         <thead><tr><th>Matière</th><th>Département</th><th>Niveau</th><th>Jour</th><th>Créneau</th><th>Salle</th><th>Enseignant</th></tr></thead>
         <tbody id="exm-tbody">
           <tr><td colspan="7" style="text-align:center;color:var(--gray);padding:2rem">Chargement…</td></tr>
+        </tbody>
+      </table>
+    </div>
+
+    <div class="card">
+      <div class="card-header"><div class="card-title">🔒 Notes verrouillées</div></div>
+      <div style="padding:.85rem 1.25rem;font-size:.8rem;color:var(--gray);border-bottom:1px solid var(--border)">Une note se verrouille automatiquement dès que le CC et l'examen sont saisis — l'enseignant ne peut plus la modifier. Déverrouillez-la ici pour autoriser une correction (elle se reverrouillera à la prochaine sauvegarde complète).</div>
+      <table class="data-table">
+        <thead><tr><th>Étudiant</th><th>Matière</th><th>Note</th><th>Verrouillée le</th><th>Action</th></tr></thead>
+        <tbody id="notes-verrouillees-tbody">
+          <tr><td colspan="5" style="text-align:center;color:var(--gray);padding:2rem">Chargement…</td></tr>
         </tbody>
       </table>
     </div>
@@ -1397,6 +1408,10 @@
       <div style="font-family:'Playfair Display',serif;font-weight:800;font-size:1.2rem;margin-bottom:.3rem">Lier un parent</div>
       <div id="inviteParentIntro" style="font-size:.85rem;color:var(--gray);margin-bottom:1.25rem"></div>
       <div id="inviteParentError" style="display:none;background:rgba(239,68,68,0.08);color:var(--danger);border:1px solid rgba(239,68,68,0.2);padding:.6rem 1rem;border-radius:8px;font-size:.83rem;margin-bottom:1rem"></div>
+      <div id="linkedParentsSection" style="margin-bottom:1.25rem;display:none">
+        <div style="font-size:.78rem;font-weight:600;color:var(--gray);margin-bottom:.5rem">Parent(s) déjà lié(s)</div>
+        <div id="linkedParentsList" style="display:flex;flex-direction:column;gap:.5rem"></div>
+      </div>
       <div id="inviteParentForm">
         <div class="form-group" style="margin-bottom:1.25rem">
           <label style="display:block;font-size:.78rem;font-weight:600;color:var(--gray);margin-bottom:.4rem">Email du parent</label>
@@ -1654,7 +1669,7 @@
   // token que l'invitation admin, mais type='parent' + student_id. Le
   // parent s'inscrit lui-même via onboarding.html?invite=TOKEN.
   let inviteParentStudentId = null;
-  function openInviteParentModal(studentId, studentName) {
+  async function openInviteParentModal(studentId, studentName) {
     inviteParentStudentId = studentId;
     document.getElementById('inviteParentIntro').textContent = `Le parent recevra un lien pour créer son compte, déjà lié au dossier de ${studentName}.`;
     document.getElementById('inviteParentEmail').value = '';
@@ -1662,6 +1677,30 @@
     document.getElementById('inviteParentForm').style.display = 'block';
     document.getElementById('inviteParentResult').style.display = 'none';
     document.getElementById('modalInviteParent').classList.add('active');
+    await loadLinkedParents(studentId);
+  }
+
+  async function loadLinkedParents(studentId) {
+    const section = document.getElementById('linkedParentsSection');
+    const list = document.getElementById('linkedParentsList');
+    const { data, error } = await supabaseClient.from('parent_students')
+      .select('parent_profile_id, profiles(full_name, email)').eq('student_id', studentId);
+    if (error || !data || data.length === 0) { section.style.display = 'none'; return; }
+    section.style.display = 'block';
+    list.innerHTML = data.map(l => `
+      <div style="display:flex;align-items:center;justify-content:space-between;background:var(--light);border-radius:9px;padding:.6rem .85rem">
+        <div><div style="font-weight:600;font-size:.85rem">${l.profiles?.full_name || '—'}</div><div style="font-size:.75rem;color:var(--gray)">${l.profiles?.email || ''}</div></div>
+        <button class="btn-outline" style="padding:.4rem .8rem;border-radius:7px;font-size:.78rem;font-weight:600;cursor:pointer;border:1.5px solid var(--danger);color:var(--danger);background:white" onclick="revoquerParent('${l.parent_profile_id}','${studentId}','${(l.profiles?.full_name||'').replace(/'/g,"\\'")}')">Révoquer</button>
+      </div>`).join('');
+  }
+
+  async function revoquerParent(parentProfileId, studentId, parentNom) {
+    if (!confirm(`Révoquer l'accès de ${parentNom || 'ce parent'} au dossier de cet élève ? Il ne pourra plus consulter ses données.`)) return;
+    const { error } = await supabaseClient.from('parent_students')
+      .delete().eq('parent_profile_id', parentProfileId).eq('student_id', studentId);
+    if (error) { showToast('⚠️ ' + error.message); return; }
+    showToast('✅ Accès parent révoqué.');
+    loadLinkedParents(studentId);
   }
   function closeInviteParentModal() {
     document.getElementById('modalInviteParent').classList.remove('active');
@@ -2178,7 +2217,7 @@
     showToast(`✅ ${aInscrire.length} étudiant(s) inscrit(s) à "${ecueNom}".`);
   }
 
-  window.authReady.then(user => { if (user) { loadEtudiants(); loadEnseignants(); loadCandidatures(user); loadPaymentsData(); loadEmploiSetup(); loadUtilisateursKpis(user); loadUniversiteSettings(user); loadExamensEtDepartements(user); loadEquipeAdmin(user); loadInvitesAdmin(user); loadPermissionsMatrix(); applyPermissionGating(user); applyPlanNavTags(user); loadTopbarMsgDot(user); populateAiFiliereSelect(user); } });
+  window.authReady.then(user => { if (user) { loadEtudiants(); loadEnseignants(); loadCandidatures(user); loadPaymentsData(); loadEmploiSetup(); loadUtilisateursKpis(user); loadUniversiteSettings(user); loadExamensEtDepartements(user); loadNotesVerrouillees(user); loadEquipeAdmin(user); loadInvitesAdmin(user); loadPermissionsMatrix(); applyPermissionGating(user); applyPlanNavTags(user); loadTopbarMsgDot(user); populateAiFiliereSelect(user); } });
 
   // Point rouge sur l'icône messagerie de la topbar — reprend exactement la
   // logique "non lu" de messagerie.html (dernier message d'une conversation
@@ -2578,6 +2617,38 @@
     showPage('etudiants');
     const sel = document.getElementById('etudiantsFilterDept');
     if (sel) { sel.value = dept; renderEtudiants(); }
+  }
+
+  // ── Notes verrouillées (voir trigger lock_grade_on_completion côté SQL) ──
+  async function loadNotesVerrouillees(user) {
+    const tbody = document.getElementById('notes-verrouillees-tbody');
+    if (!tbody) return;
+    let q = supabaseClient.from('grades')
+      .select('id, matiere, note_cc, note_exam, locked_at, students(full_name)')
+      .eq('locked', true).order('locked_at', { ascending: false });
+    if (user.role !== 'superadmin') q = q.eq('university', user.university);
+    const { data, error } = await q;
+    if (error) { console.error(error); return; }
+    if (!data || data.length === 0) {
+      tbody.innerHTML = '<tr><td colspan="5" style="text-align:center;color:var(--gray);padding:2rem">Aucune note verrouillée pour le moment.</td></tr>';
+      return;
+    }
+    tbody.innerHTML = data.map(g => `
+      <tr>
+        <td>${g.students?.full_name || '—'}</td>
+        <td>${g.matiere}</td>
+        <td>${g.note_cc}/CC · ${g.note_exam}/Exam</td>
+        <td>${g.locked_at ? new Date(g.locked_at).toLocaleDateString('fr-FR') : '—'}</td>
+        <td><button class="card-action" onclick="deverrouillerNote('${g.id}')">🔓 Déverrouiller</button></td>
+      </tr>`).join('');
+  }
+
+  async function deverrouillerNote(gradeId) {
+    if (!confirm('Déverrouiller cette note pour permettre à l\'enseignant de la corriger ?')) return;
+    const { error } = await supabaseClient.from('grades').update({ locked: false }).eq('id', gradeId);
+    if (error) { showToast('⚠️ ' + error.message); return; }
+    showToast('🔓 Note déverrouillée — l\'enseignant peut la corriger.');
+    loadNotesVerrouillees(window.currentUser);
   }
 
   // ── Paramètres > Informations université (données réelles Supabase) ──
