@@ -172,47 +172,26 @@
   <!-- ══ ACCUEIL ══ -->
   <div class="page active" id="page-accueil">
     <div class="kpi-grid">
-      <div class="kpi-card"><div class="kpi-icon" style="background:rgba(26,86,219,0.1)">📊</div><div class="kpi-value" style="color:var(--blue)" id="kpi-moy">13.8</div><div class="kpi-label">Moyenne générale /20</div></div>
-      <div class="kpi-card"><div class="kpi-icon" style="background:rgba(16,185,129,0.1)">✅</div><div class="kpi-value" style="color:var(--success)" id="kpi-pres">94%</div><div class="kpi-label">Taux de présence</div></div>
-      <div class="kpi-card"><div class="kpi-icon" style="background:rgba(239,68,68,0.1)">💳</div><div class="kpi-value" style="color:var(--success)" id="kpi-pay">Payé</div><div class="kpi-label">Scolarité 2024–2025</div></div>
-      <div class="kpi-card"><div class="kpi-icon" style="background:rgba(245,158,11,0.1)">🏅</div><div class="kpi-value" style="color:var(--gold)" id="kpi-rang">2ème</div><div class="kpi-label">Rang dans la classe</div></div>
+      <div class="kpi-card"><div class="kpi-icon" style="background:rgba(26,86,219,0.1)">📊</div><div class="kpi-value" style="color:var(--blue)" id="kpi-moy">—</div><div class="kpi-label">Moyenne générale /20</div></div>
+      <div class="kpi-card"><div class="kpi-icon" style="background:rgba(16,185,129,0.1)">✅</div><div class="kpi-value" style="color:var(--success)" id="kpi-pres">—</div><div class="kpi-label">Taux de présence</div></div>
+      <div class="kpi-card"><div class="kpi-icon" style="background:rgba(239,68,68,0.1)">💳</div><div class="kpi-value" style="color:var(--success)" id="kpi-pay">—</div><div class="kpi-label">Scolarité 2024–2025</div></div>
+      <div class="kpi-card"><div class="kpi-icon" style="background:rgba(245,158,11,0.1)">🏅</div><div class="kpi-value" style="color:var(--gold)" id="kpi-rang">—</div><div class="kpi-label">Rang dans la classe</div></div>
     </div>
     <div class="dash-grid">
       <!-- Activité récente -->
       <div class="card">
         <div class="card-header"><div class="card-title">🔔 Activité récente</div></div>
         <div class="card-body" id="recentActivity">
-          <div class="activity-item"><div class="activity-dot" style="background:rgba(16,185,129,0.1)">✅</div><div><div class="activity-text"><strong>Résultats publiés</strong> — Semestre 1 · Moyenne : 13.8/20</div><div class="activity-time">Aujourd'hui 09h32</div></div></div>
-          <div class="activity-item"><div class="activity-dot" style="background:rgba(26,86,219,0.1)">📝</div><div><div class="activity-text">Examen <strong>Algorithmique</strong> programmé le 03 Fév 2025</div><div class="activity-time">Hier 14h00</div></div></div>
-          <div class="activity-item"><div class="activity-dot" style="background:rgba(16,185,129,0.1)">💳</div><div><div class="activity-text">Paiement de <strong>83 334 FCFA</strong> confirmé — Tranche 3/3</div><div class="activity-time">20 Jan 2025</div></div></div>
-          <div class="activity-item"><div class="activity-dot" style="background:rgba(245,158,11,0.1)">⚠️</div><div><div class="activity-text"><strong>1 absence</strong> signalée — Cours Réseaux du 15 Jan</div><div class="activity-time">15 Jan 2025</div></div></div>
-          <div class="activity-item"><div class="activity-dot" style="background:rgba(139,92,246,0.1)">📢</div><div><div class="activity-text">Annonce : <strong>Examen Réseaux reporté</strong> au 04 Fév 2025</div><div class="activity-time">13 Jan 2025</div></div></div>
+          <div style="text-align:center;color:var(--gray);padding:1.5rem;font-size:.85rem">Chargement…</div>
         </div>
       </div>
       <!-- Progression matières -->
       <div class="card">
         <div class="card-header"><div class="card-title">📈 Progression par matière</div><button class="card-action" onclick="showPage('notes')">Voir tout →</button></div>
         <div class="card-body" id="progressMatieres">
-          <div style="display:flex;flex-direction:column;gap:.85rem">
-            <div><div style="display:flex;justify-content:space-between;font-size:.83rem;margin-bottom:.3rem"><span>Algorithmique</span><span class="note-good">16/20</span></div><div class="progress-bar"><div class="progress-fill" style="width:80%;background:var(--success)"></div></div></div>
-            <div><div style="display:flex;justify-content:space-between;font-size:.83rem;margin-bottom:.3rem"><span>POO Java</span><span class="note-good">15/20</span></div><div class="progress-bar"><div class="progress-fill" style="width:75%;background:var(--success)"></div></div></div>
-            <div><div style="display:flex;justify-content:space-between;font-size:.83rem;margin-bottom:.3rem"><span>Bases de données</span><span class="note-good">14.5/20</span></div><div class="progress-bar"><div class="progress-fill" style="width:72%;background:var(--blue)"></div></div></div>
-            <div><div style="display:flex;justify-content:space-between;font-size:.83rem;margin-bottom:.3rem"><span>Réseaux</span><span class="note-avg">12/20</span></div><div class="progress-bar"><div class="progress-fill" style="width:60%;background:var(--gold)"></div></div></div>
-            <div><div style="display:flex;justify-content:space-between;font-size:.83rem;margin-bottom:.3rem"><span>Sécurité Informatique</span><span class="note-bad">8/20</span></div><div class="progress-bar"><div class="progress-fill" style="width:40%;background:var(--danger)"></div></div></div>
-          </div>
-          <div style="margin-top:1rem;padding:.75rem;background:rgba(239,68,68,0.07);border-radius:9px;border:1px solid rgba(239,68,68,0.15);font-size:.82rem;color:var(--danger)">
-            ⚠️ <strong>Sécurité Informatique</strong> : note insuffisante. Rattrapage prévu le 10 Fév 2025.
-          </div>
+          <div style="text-align:center;color:var(--gray);padding:1.5rem;font-size:.85rem">Chargement…</div>
         </div>
       </div>
-    </div>
-    <!-- Message urgent -->
-    <div style="background:linear-gradient(135deg,rgba(139,92,246,0.08),rgba(26,86,219,0.05));border:1px solid rgba(139,92,246,0.2);border-radius:14px;padding:1.25rem;display:flex;align-items:center;justify-content:space-between;gap:1rem;flex-wrap:wrap">
-      <div style="display:flex;align-items:center;gap:1rem">
-        <div style="font-size:2rem">📢</div>
-        <div><div style="font-weight:700;font-size:.92rem">Message de l'université</div><div style="font-size:.83rem;color:var(--gray);margin-top:.2rem">L'examen de Réseaux Informatiques du 28 Jan est reporté au 04 Fév 2025 · 08h00 · Amphithéâtre A.</div></div>
-      </div>
-      <button class="btn-primary" style="white-space:nowrap" onclick="showToast('✅ Message lu et confirmé')">Accusé réception</button>
     </div>
   </div>
 
@@ -404,11 +383,28 @@
   }
 
   // ── Charger mes enfants (Supabase) ──
+  // Affiche un état honnête quand aucun enfant n'est (ou n'est plus) lié au
+  // compte — avant, dans ce cas, la page d'accueil gardait simplement son
+  // contenu HTML statique (fictif) sans jamais le remplacer.
+  function showAucunEnfantState(user) {
+    document.getElementById('pc-avatar').textContent = initials(user.full_name || 'P');
+    document.getElementById('pc-nom').textContent = user.full_name || user.email;
+    document.getElementById('childrenList').innerHTML = '<div style="padding:1rem;font-size:.82rem;color:var(--gray)">Aucun enfant lié à votre compte. Contactez l\'administration de l\'université.</div>';
+    document.getElementById('childTabs').innerHTML = '';
+    document.getElementById('childName').textContent = 'Aucun enfant lié';
+    ['kpi-moy', 'kpi-pres', 'kpi-pay', 'kpi-rang'].forEach(id => { const el = document.getElementById(id); if (el) el.textContent = '—'; });
+    renderActivityEvents([], 'recentActivity');
+    renderProgressMatieres([]);
+    const payBtn = document.getElementById('pp-payer-btn');
+    if (payBtn) payBtn.style.display = 'none';
+  }
+
   async function loadMesEnfants(user) {
     const { data: links, error } = await supabaseClient
       .from('parent_students').select('student_id, students(*)').eq('parent_profile_id', user.id);
     if (error || !links || links.length === 0) {
       console.warn('Aucun enfant lié à ce compte parent.');
+      showAucunEnfantState(user);
       return;
     }
     mesEnfants = links.map(l => l.students);
@@ -467,6 +463,7 @@
       document.getElementById('n-moy').textContent = '—';
       document.getElementById('n-mention').textContent = '—';
       document.getElementById('n-credits').textContent = '—';
+      renderProgressMatieres([]);
       return;
     }
 
@@ -493,6 +490,7 @@
     document.getElementById('n-moy').textContent = moyGen.toFixed(1)+'/20';
     document.getElementById('n-mention').textContent = mention(moyGen);
     document.getElementById('n-credits').textContent = `${creditsValides}/${child.credits_requis || 60}`;
+    renderProgressMatieres(notesEnfantActif);
   }
 
   // ── Charger les vrais paiements de l'enfant sélectionné (Supabase) ──
@@ -821,9 +819,13 @@
   // l'enfant actif — pas de table "notifications" dédiée dans le schéma,
   // donc on reconstruit un fil d'activité à partir des vraies données au
   // lieu d'inventer des événements. ──
-  async function loadNotificationsEnfant(child) {
-    const listEl = document.getElementById('notif-list');
-    const subEl = document.getElementById('notif-sub');
+  // Construit le fil d'activité réel (notes, absences/retards, paiements) —
+  // partagé entre la page Notifications (liste complète) et le tableau de
+  // bord (aperçu des 5 derniers événements). Avant, seul l'onglet
+  // Notifications l'utilisait ; l'accueil affichait 5 événements fictifs
+  // codés en dur qui ne changeaient jamais, y compris quand aucun enfant
+  // n'était lié au compte.
+  async function buildActivityEvents(child) {
     const [{ data: grades }, { data: attendance }, { data: payments }] = await Promise.all([
       supabaseClient.from('grades').select('matiere, note_cc, note_exam, created_at').eq('student_id', child.id),
       supabaseClient.from('attendance').select('matiere, statut, session_date').eq('student_id', child.id).neq('statut', 'Présent'),
@@ -844,12 +846,42 @@
       if (p.paid_at) events.push({ time: new Date(p.paid_at), icon: '💳', bg: 'rgba(16,185,129,0.05)', border: 'var(--success)', text: `Paiement confirmé — ${Number(p.amount).toLocaleString('fr-FR')} FCFA`, sub: p.method ? `Reçu via ${p.method}` : 'Paiement enregistré' });
     });
     events.sort((a, b) => b.time - a.time);
-    const top = events.slice(0, 15);
+    return events;
+  }
 
-    subEl.textContent = `${child.full_name} · ${events.length} événement(s)`;
-    listEl.innerHTML = top.length === 0
+  function renderActivityEvents(events, containerId) {
+    const el = document.getElementById(containerId);
+    if (!el) return;
+    el.innerHTML = events.length === 0
       ? '<div style="text-align:center;color:var(--gray);padding:1.5rem;font-size:.85rem">Aucune activité pour le moment.</div>'
-      : top.map(e => `<div style="display:flex;gap:.85rem;padding:.85rem;background:${e.bg};border-radius:10px;border-left:3px solid ${e.border}"><div style="font-size:1.3rem">${e.icon}</div><div style="flex:1"><div style="font-size:.85rem;font-weight:600">${e.text}</div><div style="font-size:.78rem;color:var(--gray);margin-top:.2rem">${e.sub}</div><div style="font-size:.7rem;color:${e.border};margin-top:.3rem;font-weight:600">${e.time.toLocaleDateString('fr-FR')}</div></div></div>`).join('');
+      : events.map(e => `<div style="display:flex;gap:.85rem;padding:.85rem;background:${e.bg};border-radius:10px;border-left:3px solid ${e.border}"><div style="font-size:1.3rem">${e.icon}</div><div style="flex:1"><div style="font-size:.85rem;font-weight:600">${e.text}</div><div style="font-size:.78rem;color:var(--gray);margin-top:.2rem">${e.sub}</div><div style="font-size:.7rem;color:${e.border};margin-top:.3rem;font-weight:600">${e.time.toLocaleDateString('fr-FR')}</div></div></div>`).join('');
+  }
+
+  async function loadNotificationsEnfant(child) {
+    const events = await buildActivityEvents(child);
+    document.getElementById('notif-sub').textContent = `${child.full_name} · ${events.length} événement(s)`;
+    renderActivityEvents(events.slice(0, 15), 'notif-list');
+    renderActivityEvents(events.slice(0, 5), 'recentActivity');
+  }
+
+  // ── Progression par matière (accueil) — mêmes notes que l'onglet Notes,
+  // juste un aperçu condensé avec barre de progression. ──
+  function renderProgressMatieres(notes) {
+    const el = document.getElementById('progressMatieres');
+    if (!el) return;
+    const avecMoyenne = notes
+      .map(n => ({ matiere: n.matiere, moyenne: (n.note_cc != null && n.note_exam != null) ? (n.note_cc * ponderationCC + n.note_exam * (1 - ponderationCC)) : null }))
+      .filter(n => n.moyenne != null);
+    if (avecMoyenne.length === 0) {
+      el.innerHTML = '<div style="text-align:center;color:var(--gray);padding:1.5rem;font-size:.85rem">Aucune note saisie pour le moment.</div>';
+      return;
+    }
+    const alerte = avecMoyenne.find(n => n.moyenne < 10);
+    el.innerHTML = `<div style="display:flex;flex-direction:column;gap:.85rem">${avecMoyenne.map(n => {
+      const cls = n.moyenne >= 14 ? 'note-good' : n.moyenne >= 10 ? 'note-avg' : 'note-bad';
+      const color = n.moyenne >= 14 ? 'var(--success)' : n.moyenne >= 10 ? 'var(--blue)' : 'var(--danger)';
+      return `<div><div style="display:flex;justify-content:space-between;font-size:.83rem;margin-bottom:.3rem"><span>${n.matiere}</span><span class="${cls}">${n.moyenne.toFixed(1)}/20</span></div><div class="progress-bar"><div class="progress-fill" style="width:${Math.round(n.moyenne / 20 * 100)}%;background:${color}"></div></div></div>`;
+    }).join('')}</div>${alerte ? `<div style="margin-top:1rem;padding:.75rem;background:rgba(239,68,68,0.07);border-radius:9px;border:1px solid rgba(239,68,68,0.15);font-size:.82rem;color:var(--danger)">⚠️ <strong>${alerte.matiere}</strong> : note insuffisante.</div>` : ''}`;
   }
 
   // ── Charger les vraies présences (Supabase) ──
@@ -872,6 +904,7 @@
       detailBody.innerHTML = '<tr><td colspan="5" style="text-align:center;color:var(--gray);padding:2rem">Aucune présence enregistrée pour le moment.</td></tr>';
       calendar.innerHTML = '<div class="abs-day header">L</div><div class="abs-day header">M</div><div class="abs-day header">M</div><div class="abs-day header">J</div><div class="abs-day header">V</div><div class="abs-day header weekend">S</div><div class="abs-day header weekend">D</div>';
       sub.textContent = 'Semestre 1';
+      document.getElementById('kpi-pres').textContent = '—';
       return;
     }
 
@@ -879,6 +912,7 @@
     const absents = records.filter(r => r.statut === 'Absent');
     const retards = records.filter(r => r.statut === 'Retard');
     kpiTaux.textContent = Math.round(present / records.length * 100) + '%';
+    document.getElementById('kpi-pres').textContent = kpiTaux.textContent;
     kpiAbs.textContent = absents.length;
     kpiRet.textContent = retards.length;
 
