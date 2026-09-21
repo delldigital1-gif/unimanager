@@ -2765,7 +2765,7 @@
       deptLevels[s.department].add(s.level);
     });
 
-    let teachQuery = supabaseClient.from('teachers').select('id, full_name');
+    let teachQuery = supabaseClient.from('teachers').select('id, full_name, email');
     if (user.role !== 'superadmin') teachQuery = teachQuery.eq('university', user.university);
     const { data: teachs } = await teachQuery;
     allTeachersForEt = teachs || [];
@@ -2941,6 +2941,19 @@
     closeCreneauModal();
     showToast('✅ Créneau ajouté avec succès');
     loadEmploiDuTemps();
+
+    // Notifie l'enseignant assigné (best-effort — un échec d'email ne doit
+    // jamais bloquer la création du créneau, déjà réussie à ce stade).
+    if (teacher?.email) {
+      supabaseClient.functions.invoke('send-targeted-notification', {
+        body: {
+          recipient_type: 'creneau_assignation',
+          recipients: [{ email: teacher.email, full_name: teacher.full_name }],
+          subject: `Nouveau créneau — ${matiere}`,
+          message: `Un nouveau créneau vous a été assigné :\n${jour} ${creneau} — ${matiere} (${type})\n${department} ${level}${salle ? '\nSalle : ' + salle : ''}`,
+        }
+      }).catch(() => {});
+    }
   }
 
   // ── Navigation ──

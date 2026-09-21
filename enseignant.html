@@ -353,6 +353,7 @@
   // ── Saisie des notes (Supabase) ──
   let monTeacherId = null;
   let notesEnCache = [];
+  let notesOriginales = new Map();
 
   let ponderationCC = 0.3;
   function computeMoyenne(cc, exam) {
@@ -379,11 +380,15 @@
     monTeacherId = teacherRecord.id;
     document.getElementById('notes-sub').textContent = matiere;
     const { data: notes, error } = await supabaseClient
-      .from('grades').select('*, students(full_name, matricule, department, level)')
+      .from('grades').select('*, students(full_name, matricule, department, level, email)')
       .eq('teacher_id', teacherRecord.id).eq('matiere', matiere)
       .order('created_at');
     if (error) { console.error(error); return; }
     notesEnCache = notes || [];
+    // Snapshot des valeurs chargées — sert à ne notifier que les notes
+    // réellement modifiées lors de l'enregistrement (pas un simple re-clic
+    // sur "Enregistrer" sans rien avoir changé).
+    notesOriginales = new Map(notesEnCache.map(n => [n.id, { cc: n.note_cc, exam: n.note_exam }]));
     renderSaisieNotes();
   }
 
@@ -457,6 +462,48 @@
         const [student_id, ue_id] = k.split('|');
         return supabaseClient.rpc('recompute_ue_validation', { p_student_id: student_id, p_ue_id: ue_id });
       }));
+    }
+
+    // Notifie l'étudiant et ses parents liés, mais seulement pour les notes
+    // réellement modifiées depuis le dernier chargement (pas un simple
+    // re-clic sur "Enregistrer" sans rien changer) — best-effort, un échec
+    // d'email ne remet pas en cause la note déjà enregistrée. Une note par
+    // note plutôt qu'un envoi groupé : le message (moyenne) diffère par
+    // étudiant.
+    const noteVal = v => (v === null || v === undefined || v === '') ? null : Number(v);
+    const notesModifiees = notesEnCache.filter(n => {
+      const original = notesOriginales.get(n.id) || {};
+      return noteVal(n.note_cc) !== noteVal(original.cc) || noteVal(n.note_exam) !== noteVal(original.exam);
+    });
+    const notesCompletes = notesModifiees.filter(n => n.note_cc != null && n.note_exam != null);
+    notesEnCache.forEach(n => notesOriginales.set(n.id, { cc: n.note_cc, exam: n.note_exam }));
+    if (notesCompletes.length > 0) {
+      const studentIds = [...new Set(notesCompletes.map(n => n.student_id))];
+      const { data: parentLinks } = await supabaseClient.from('parent_students')
+        .select('student_id, profiles(email, full_name)').in('student_id', studentIds);
+      const parentsByStudent = {};
+      (parentLinks || []).forEach(pl => {
+        if (!pl.profiles?.email) return;
+        if (!parentsByStudent[pl.student_id]) parentsByStudent[pl.student_id] = [];
+        parentsByStudent[pl.student_id].push(pl.profiles);
+      });
+
+      notesCompletes.forEach(n => {
+        const moyenne = computeMoyenne(n.note_cc, n.note_exam);
+        if (moyenne == null) return;
+        const recipients = [];
+        if (n.students?.email) recipients.push({ email: n.students.email, full_name: n.students.full_name });
+        (parentsByStudent[n.student_id] || []).forEach(p => recipients.push({ email: p.email, full_name: p.full_name }));
+        if (recipients.length === 0) return;
+        supabaseClient.functions.invoke('send-targeted-notification', {
+          body: {
+            recipient_type: 'note_publiee',
+            recipients,
+            subject: `Nouvelle note publiée — ${n.matiere}`,
+            message: `Une note vient d'être publiée pour ${n.students?.full_name || "l'étudiant"} :\n${n.matiere} — Moyenne : ${moyenne.toFixed(1)}/20`,
+          }
+        }).catch(() => {});
+      });
     }
   }
 
