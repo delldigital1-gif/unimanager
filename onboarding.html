@@ -1161,20 +1161,27 @@
       return;
     }
 
-    // Marque l'invitation comme utilisée d'abord — la policy RLS qui permet
-    // au parent de créer lui-même sa ligne parent_students exige que
-    // l'invitation soit déjà marquée utilisée (cf. migration). Best-effort :
-    // le compte est déjà créé à ce stade, une erreur ici ne bloque pas la
-    // redirection.
-    await supabaseClient.from('invites').update({ used_at: new Date().toISOString() }).eq('id', currentInvite.id);
-
     if (currentInvite.type === 'parent' && data.user) {
-      await supabaseClient.from('parent_students').insert({
-        parent_profile_id: data.user.id, student_id: currentInvite.student_id,
-      });
+      // accept_parent_invite() est SECURITY DEFINER, pour la même raison que
+      // accept_teacher_invite() : un compte tout juste créé avec role='parent'
+      // ne peut pas mettre à jour sa propre invitation via RLS (seul un admin
+      // le peut) -- ce qui bloquait silencieusement le lien
+      // parents_can_link_self_via_valid_invite (qui exige used_at déjà posé).
+      // Constaté en corrigeant le même bug côté enseignant.
+      const { error: linkError } = await supabaseClient.rpc('accept_parent_invite', { p_invite_id: currentInvite.id });
+      if (linkError) {
+        alertEl.textContent = '⚠️ ' + linkError.message;
+        alertEl.classList.add('error');
+        return;
+      }
       window.location.href = 'parents.html';
       return;
     }
+
+    // Marque l'invitation comme utilisée -- fonctionne ici car le compte
+    // vient d'être créé avec role='admin', qui a le droit d'écrire sur ses
+    // propres invites (policy admins_update_own_university_invites).
+    await supabaseClient.from('invites').update({ used_at: new Date().toISOString() }).eq('id', currentInvite.id);
     window.location.href = 'dashboard.html';
   }
 
