@@ -1,0 +1,86 @@
+<!doctype html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Démo — Savoir+</title>
+<meta name="description" content="Explorez Savoir+ avec une école fictive : choisissez un type d'établissement et un rôle.">
+<meta name="robots" content="noindex, nofollow">
+<meta property="og:type" content="website">
+<meta property="og:site_name" content="Savoir+">
+<meta property="og:title" content="Démo — Savoir+">
+<meta property="og:description" content="Explorez Savoir+ avec une école fictive : choisissez un type d'établissement et un rôle.">
+<meta property="og:image" content="https://savoirplus.vercel.app/assets/apercu.jpg">
+<meta property="og:image:width" content="1200">
+<meta property="og:image:height" content="630">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="theme-color" content="#1d3a8a">
+<link rel="icon" href="/assets/favicon.svg" type="image/svg+xml">
+<link rel="stylesheet" href="/assets/style.css">
+</head>
+<body>
+<a class="lien-evitement" href="#contenu">Aller au contenu</a>
+
+<header class="entete">
+  <div class="conteneur entete-ligne">
+    <a class="marque" href="/" aria-label="Savoir+, accueil"><svg viewBox="0 0 48 48" aria-hidden="true"><rect width="48" height="48" rx="12" fill="#1d3a8a"/><path d="M10 14.5c4-1.6 9-1.4 14 1.3v19c-5-2.7-10-2.9-14-1.3v-19z" fill="#fff"/><path d="M38 14.5c-4-1.6-9-1.4-14 1.3v19c5-2.7 10-2.9 14-1.3v-19z" fill="#dbe6ff"/><circle cx="36" cy="12" r="8" fill="#f59e0b"/><path d="M36 8v8M32 12h8" stroke="#0f172a" stroke-width="2.4" stroke-linecap="round"/></svg><span>Savoir<span class="plus">+</span></span></a>
+    <button class="burger" type="button" aria-expanded="false" aria-controls="menu" aria-label="Ouvrir le menu">☰</button>
+    <nav class="menu" id="menu" aria-label="Navigation principale">
+      <a href="/#fonctionnalites">Fonctionnalités</a><a href="/tarifs.html">Tarifs</a><a href="/faq.html">FAQ</a><a href="/contact.html">Contact</a>
+      <a href="/demo.html">Essayer la démo</a>
+      <a class="bouton bouton-petit" href="/connexion.html">Se connecter</a>
+    </nav>
+  </div>
+</header>
+<main id="contenu">
+
+<section class="section">
+  <div class="etroit">
+    <div class="centre">
+      <p class="surtitre">Démo</p>
+      <h1 style="font-size:clamp(1.9rem,4.6vw,3rem)">Découvrez Savoir+ de l'intérieur</h1>
+      <p class="intro">Choisissez le type d'école, puis un rôle, pour explorer un établissement fictif. Sans inscription ni mot de passe.</p>
+    </div>
+    <h2 style="margin-top:2rem;font-size:1.3rem">1. Le type d'établissement</h2>
+    <div class="choix" id="choix-types">
+      <button class="choix-carte" type="button" data-type="maternelle" aria-pressed="false"><strong>École maternelle</strong><span>3 niveaux, de la pré-maternelle à la grande section.</span></button><button class="choix-carte" type="button" data-type="maternelle_primaire" aria-pressed="false"><strong>Maternelle et primaire</strong><span>9 niveaux, de la pré-maternelle au CM2.</span></button><button class="choix-carte" type="button" data-type="primaire" aria-pressed="false"><strong>École primaire</strong><span>6 niveaux, du CP1 au CM2.</span></button><button class="choix-carte" type="button" data-type="primaire_college" aria-pressed="false"><strong>Primaire et collège</strong><span>10 niveaux, du CP1 au CM2 puis de la 6e à la 3e.</span></button><button class="choix-carte" type="button" data-type="college" aria-pressed="false"><strong>Collège</strong><span>4 niveaux, de la 6e à la 3e.</span></button><button class="choix-carte" type="button" data-type="college_lycee" aria-pressed="false"><strong>Collège et lycée</strong><span>7 niveaux, de la 6e à la terminale.</span></button><button class="choix-carte" type="button" data-type="lycee" aria-pressed="false"><strong>Lycée</strong><span>3 niveaux, de la seconde à la terminale, avec séries.</span></button><button class="choix-carte" type="button" data-type="complexe" aria-pressed="true"><strong>Complexe scolaire complet</strong><span>13 niveaux, du CP1 à la terminale.</span></button>
+    </div>
+    <h2 style="margin-top:2rem;font-size:1.3rem">2. Votre rôle</h2>
+    <div class="roles-grille" id="roles">
+      <a class="role" href="/demo-app.html?role=directeur&amp;type=complexe" data-role="directeur"><strong>Directeur</strong><span>Tableau de bord de l'école, élèves, classes, notes, bulletins et paramètres.</span></a><a class="role" href="/demo-app.html?role=secretaire&amp;type=complexe" data-role="secretaire"><strong>Secrétaire</strong><span>Demandes d'admission à faire valider, dossiers des élèves et des parents.</span></a><a class="role" href="/demo-app.html?role=comptable&amp;type=complexe" data-role="comptable"><strong>Comptable</strong><span>Frais de scolarité, encaissements en espèces ou par chèque, reçus et impayés.</span></a><a class="role" href="/demo-app.html?role=enseignant&amp;type=complexe" data-role="enseignant"><strong>Enseignant</strong><span>Saisie des notes, appel, emploi du temps et cahier de textes.</span></a><a class="role" href="/demo-app.html?role=surveillant&amp;type=complexe" data-role="surveillant"><strong>Surveillant</strong><span>Vie scolaire : absences, retards et suivi des élèves.</span></a><a class="role" href="/demo-app.html?role=parent&amp;type=complexe" data-role="parent"><strong>Parent</strong><span>Suivi de l'enfant, bulletins, absences et paiement en ligne (simulé).</span></a><a class="role" href="/demo-app.html?role=eleve&amp;type=complexe" data-role="eleve"><strong>Élève</strong><span>Notes, devoirs, emploi du temps et tuteur IA.</span></a>
+    </div>
+    <p class="note-tarifs">Toutes les données de la démo sont fictives. Aucun e-mail n'est envoyé et aucun paiement n'est réellement encaissé. <strong>La démo est un aperçu : certaines rubriques arrivent progressivement.</strong></p>
+  </div>
+</section>
+</main>
+<footer class="pied">
+  <div class="conteneur">
+    <div class="pied-grille">
+      <div>
+        <a class="marque" href="/"><svg viewBox="0 0 48 48" aria-hidden="true"><rect width="48" height="48" rx="12" fill="#1d3a8a"/><path d="M10 14.5c4-1.6 9-1.4 14 1.3v19c-5-2.7-10-2.9-14-1.3v-19z" fill="#fff"/><path d="M38 14.5c-4-1.6-9-1.4-14 1.3v19c5-2.7 10-2.9 14-1.3v-19z" fill="#dbe6ff"/><circle cx="36" cy="12" r="8" fill="#f59e0b"/><path d="M36 8v8M32 12h8" stroke="#0f172a" stroke-width="2.4" stroke-linecap="round"/></svg><span>Savoir<span class="plus">+</span></span></a>
+        <p style="margin-top:12px">La plateforme de gestion pour les écoles d'Afrique francophone : notes, bulletins, absences, frais de scolarité et suivi des élèves.</p>
+      </div>
+      <div>
+        <h3>Le site</h3>
+        <ul>
+          <li><a href="/#fonctionnalites">Fonctionnalités</a></li>
+          <li><a href="/tarifs.html">Tarifs</a></li>
+          <li><a href="/faq.html">Questions fréquentes</a></li>
+          <li><a href="/demo.html">Essayer la démo</a></li>
+        </ul>
+      </div>
+      <div>
+        <h3>Nous joindre</h3>
+        <ul>
+          <li><a href="/contact.html">Demander une démo</a></li>
+          <li>Lomé, Togo</li>
+          <li><a href="/connexion.html">Se connecter</a></li>
+        </ul>
+      </div>
+    </div>
+    <div class="pied-bas">© 2026 Savoir+ · Une solution développée par Dell Digital, Lomé (Togo).</div>
+  </div>
+</footer>
+<script src="/assets/app.js" defer></script>
+</body>
+</html>
