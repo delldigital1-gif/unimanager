@@ -13,7 +13,7 @@
   }
 
   // ---- Formulaire de contact : prépare un message WhatsApp (rien n'est enregistré)
-  var NUMERO_WHATSAPP = ""; // à renseigner (chiffres seulement, avec l'indicatif) : tant qu'il est vide, le message est affiché à copier.
+  var NUMERO_WHATSAPP = "22898069111"; // WhatsApp de Dell Digital (chiffres seulement, avec l'indicatif).
   var form = document.getElementById("formulaire-contact");
   if (form) {
     var params = new URLSearchParams(location.search);

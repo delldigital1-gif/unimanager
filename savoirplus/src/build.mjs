@@ -6,10 +6,11 @@ import path from "node:path";
 const SORTIE = path.resolve(import.meta.dirname, "..", "public");
 const NOM = "Savoir+";
 const URL_SITE = "https://savoirplus-xi.vercel.app";
+// Coordonnées publiques de Dell Digital (déjà affichées sur ses sites) : Savoir+ est un produit Dell Digital.
 const CONTACT = {
-  whatsapp: "[À COMPLÉTER : numéro WhatsApp]",
-  telephone: "[À COMPLÉTER : téléphone]",
-  email: "[À COMPLÉTER : e-mail]",
+  whatsapp: "22898069111",
+  telephone: "+228 98 06 91 11",
+  email: "contact@delldigital-africa.com",
   adresse: "Lomé, Togo",
 };
 const esc = (s) => String(s).replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;").replace(/"/g, "&quot;");
@@ -82,6 +83,8 @@ ${corps}
         <h3>Nous joindre</h3>
         <ul>
           <li><a href="/contact.html">Demander une démo</a></li>
+          <li><a href="mailto:${CONTACT.email}">${CONTACT.email}</a></li>
+          <li><a href="tel:+${CONTACT.whatsapp}">${CONTACT.telephone}</a></li>
           <li>${esc(CONTACT.adresse)}</li>
           <li><a href="/connexion.html">Se connecter</a></li>
         </ul>
@@ -424,14 +427,14 @@ const contact = `
           <select id="offre" name="offre"><option value="">Je ne sais pas encore</option><option>Essentiel</option><option>Standard</option><option>Premium</option><option>Sur-mesure</option></select></div>
         <div><label for="message">Votre message</label><textarea id="message" name="message" rows="4"></textarea></div>
         <button class="bouton" type="submit">Envoyer sur WhatsApp</button>
-        <p class="sous" style="margin:0;font-size:0.88rem">Le bouton ouvre WhatsApp avec votre message déjà rédigé ; rien n'est enregistré sur le site.</p>
+        <p class="sous" style="margin:0;font-size:0.88rem">Le bouton ouvre WhatsApp avec votre message déjà rédigé ; rien n'est enregistré sur le site. Vous pouvez aussi nous écrire à ${CONTACT.email}.</p>
       </form>
       <div class="carte">
         <h3>Coordonnées</h3>
         <ul class="coches" style="--x:0">
-          <li>WhatsApp : <span class="a-completer">${CONTACT.whatsapp}</span></li>
-          <li>Téléphone : <span class="a-completer">${CONTACT.telephone}</span></li>
-          <li>E-mail : <span class="a-completer">${CONTACT.email}</span></li>
+          <li>WhatsApp : <a href="https://wa.me/${CONTACT.whatsapp}">${CONTACT.telephone}</a></li>
+          <li>Téléphone : <a href="tel:+${CONTACT.whatsapp}">${CONTACT.telephone}</a></li>
+          <li>E-mail : <a href="mailto:${CONTACT.email}">${CONTACT.email}</a></li>
           <li>${esc(CONTACT.adresse)}</li>
         </ul>
         <p class="sous">Nous répondons sous 24 heures ouvrées.</p>
