@@ -5,7 +5,7 @@ import path from "node:path";
 
 const SORTIE = path.resolve(import.meta.dirname, "..", "public");
 const NOM = "Savoir+";
-const URL_SITE = "https://savoirplus.vercel.app";
+const URL_SITE = "https://savoirplus-xi.vercel.app";
 const CONTACT = {
   whatsapp: "[À COMPLÉTER : numéro WhatsApp]",
   telephone: "[À COMPLÉTER : téléphone]",
@@ -108,7 +108,7 @@ const accueil = `
         <a class="bouton" href="/demo.html">Essayer la démo</a>
         <a class="bouton bouton-clair" href="/tarifs.html">Voir les tarifs</a>
       </div>
-      <ul class="badges"><li>Sans installation</li><li>Mobile money</li><li>Français et anglais</li></ul>
+      <ul class="badges"><li>Sans installation</li><li>Mobile money</li><li>Sur mobile et ordinateur</li></ul>
     </div>
     <div class="maquette" aria-label="Exemple de bulletin, données fictives">
       <div class="maquette-ecole">École démo</div>
